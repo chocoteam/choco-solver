@@ -12,6 +12,7 @@ package org.chocosolver.solver.constraints;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.reification.*;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.SearchState;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -112,7 +113,7 @@ public interface IReificationFactory extends ISelf<Model> {
             else {
                 ref().arithm(ifVar, "<=", thenCstr.reify()).post();
             }
-        }else{
+        } else {
             thenCstr.ignore();
         }
     }
@@ -180,7 +181,7 @@ public interface IReificationFactory extends ISelf<Model> {
                 return;
             }
         }
-        ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXeqCReif(X, C, B)));
+        reifXrelYC(X, "=", ref().intVar(C), 0, B);
     }
 
     /**
@@ -206,15 +207,15 @@ public interface IReificationFactory extends ISelf<Model> {
      */
     @SuppressWarnings("SuspiciousNameCombination")
     default void reifyXeqY(IntVar X, IntVar Y, BoolVar B) {
-        if(X == Y){
+        if (X == Y) {
             ref().arithm(B, "=", 1).post();
-        }else if (X.isAConstant()) {
+        } else if (X.isAConstant()) {
             reifyXeqC(Y, X.getValue(), B);
         } else if (Y.isAConstant()) {
             reifyXeqC(X, Y.getValue(), B);
         } else {
             // no check to allow addition during resolution
-            ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXeqYCReif(X, Y, 0, B)));
+            reifyXeqYC(X, Y, 0, B);
         }
     }
 
@@ -249,15 +250,15 @@ public interface IReificationFactory extends ISelf<Model> {
      */
     @SuppressWarnings("SuspiciousNameCombination")
     default void reifyXeqYC(IntVar X, IntVar Y, int C, BoolVar B) {
-        if(C == 0){
-            reifyXeqY(X, Y, B);
-        }else if (X.isAConstant()) {
+//        if (C == 0) {
+//            reifyXeqY(X, Y, B);
+//        } else
+        if (X.isAConstant()) {
             reifyXeqC(Y, X.getValue() - C, B);
         } else if (Y.isAConstant()) {
             reifyXeqC(X, Y.getValue() + C, B);
         } else {
-            // no check to allow addition during resolution
-            ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXeqYCReif(X, Y, C, B)));
+            reifXrelYC(X, "=", Y, C, B);
         }
     }
 
@@ -301,7 +302,7 @@ public interface IReificationFactory extends ISelf<Model> {
                 return;
             }
         }
-        ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXltCReif(X, C, B)));
+        reifXrelYC(X, "<", ref().intVar(C), 0, B);
     }
 
     /**
@@ -387,18 +388,18 @@ public interface IReificationFactory extends ISelf<Model> {
     @SuppressWarnings("SuspiciousNameCombination")
     default void reifyXltYC(IntVar X, IntVar Y, int C, BoolVar B) {
         // no check to allow addition during resolution
-        if(X == Y){
-            if(C > 0){
+        if (X == Y) {
+            if (C > 0) {
                 ref().arithm(B, "=", 1).post();
-            }else{
+            } else {
                 ref().arithm(B, "=", 0).post();
             }
-        }else if (X.isAConstant()) {
+        } else if (X.isAConstant()) {
             reifyXgtC(Y, X.getValue() - C, B);
         } else if (Y.isAConstant()) {
             reifyXltC(X, Y.getValue() + C, B);
         } else {
-            ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXltYCReif(X, Y, C, B)));
+            reifXrelYC(X, "<", Y, C, B);
         }
     }
 
@@ -426,7 +427,10 @@ public interface IReificationFactory extends ISelf<Model> {
      */
     default void reifyXinS(IntVar X, IntIterableRangeSet S, BoolVar B) {
         // no check to allow addition during resolution
-        ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXinSReif(X, S, B)));
+        IntIterableRangeSet nS = S.duplicate().flip(X.getLB() - 1, X.getUB() + 1);
+        ref().post(new Constraint(ConstraintsName.BASIC_REI,
+                new PropXinSHalfReif(X, S, B),
+                new PropXinSHalfReif(X, nS, B.not())));
     }
 
     /**
@@ -439,7 +443,97 @@ public interface IReificationFactory extends ISelf<Model> {
      */
     default void reifyXnotinS(IntVar X, IntIterableRangeSet S, BoolVar B) {
         // no check to allow addition during resolution
-        ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXinSReif(X, S, B.not())));
+        IntIterableRangeSet nS = S.duplicate().flip(X.getLB() - 1, X.getUB() + 1);
+        ref().post(new Constraint(ConstraintsName.BASIC_REI,
+                new PropXinSHalfReif(X, S, B.not()),
+                new PropXinSHalfReif(X, nS, B)));
+    }
+
+
+    /**
+     * Posts one constraint that expresses : (X op Y + C) &hArr; B.
+     *
+     * @param X  an integer variable
+     * @param op an operator (allowed: =, !=, <, <=, >, >=)
+     * @param Y  an integer variable
+     * @param C  an int
+     * @param B  a boolean variable
+     */
+    default void reifXrelYC(IntVar X, String op, IntVar Y, int C, BoolVar B) {
+        switch (Operator.get(op)) {
+            case EQ:
+                new Constraint(ConstraintsName.BASIC_REI,
+                        new PropXleYHalfReif(X, ref().intView(1, Y, C), B),
+                        new PropXleYHalfReif(Y, ref().intView(1, X, -C), B),
+                        new PropXneYHalfReif(X, ref().intView(1, Y, C), B.not())
+                ).post();
+                break;
+            case NQ:
+                reifXrelYC(X, "=", Y, C, B.not());
+                break;
+            case LT:
+                // x < y + c <-> r <=> x <= y + c - 1 <-> r
+                reifXrelYC(X, "<=", Y, C - 1, B);
+                break;
+            case LE:
+                // x <= y + c <-> r <=> x <= y + c <- r /\ y <= x - c - 1 <- !r
+                new Constraint(ConstraintsName.BASIC_REI,
+                        new PropXleYHalfReif(X, ref().intView(1, Y, C), B),
+                        new PropXleYHalfReif(Y, ref().intView(1, X, -C - 1), B.not())
+                ).post();
+                break;
+            case GT:
+                // x > y + c <-> r <=> y <= x - c - 1 <-> r
+                reifXrelYC(Y, "<=", X, -C - 1, B);
+                break;
+            case GE:
+                // x >= y + c <-> r <=> y <= x - c <-> r
+                reifXrelYC(Y, "<=", X, -C, B);
+                break;
+            default:
+                throw new SolverException("Unexpected operator: " + op);
+        }
+    }
+
+    /**
+     * Posts one constraint that expresses : (X op Y + C) &lArr; B.
+     *
+     * @param X  an integer variable
+     * @param op an operator (allowed: =, !=, <, <=, >, >=)
+     * @param Y  an integer variable
+     * @param C  an int
+     * @param B  a boolean variable
+     */
+    default void impXrelYC(IntVar X, String op, IntVar Y, int C, BoolVar B) {
+        switch (Operator.get(op)) {
+            case EQ:
+                ref().post(new Constraint(ConstraintsName.BASIC_REI,
+                        new PropXleYHalfReif(X, ref().intView(1, Y, C), B),
+                        new PropXleYHalfReif(Y, ref().intView(1, X, -C), B)
+                ));
+                break;
+            case NQ:
+                ref().post(new Constraint(ConstraintsName.BASIC_REI,
+                        new PropXneYHalfReif(X, ref().intView(1, Y, C), B)
+                ));
+                break;
+            case LT:
+                impXrelYC(X, "<=", Y, C - 1, B);
+                break;
+            case LE:
+                ref().post(new Constraint(ConstraintsName.BASIC_REI,
+                        new PropXleYHalfReif(X, ref().intView(1, Y, C), B)
+                ));
+                break;
+            case GT:
+                impXrelYC(Y, "<=", X, -C - 1, B);
+                break;
+            case GE:
+                impXrelYC(Y, "<=", X, -C, B);
+                break;
+            default:
+                throw new SolverException("Unexpected operator: " + op);
+        }
     }
 
 

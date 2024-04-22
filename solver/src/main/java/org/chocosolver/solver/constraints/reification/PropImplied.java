@@ -9,10 +9,8 @@
  */
 package org.chocosolver.solver.constraints.reification;
 
-import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ImpliedConstraint;
-import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.*;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.Variable;
@@ -26,6 +24,7 @@ import org.chocosolver.util.ESat;
  * @author Jean-Guillaume Fages
  * @since 02/2013
  */
+@Explained
 public class PropImplied extends Propagator<Variable> {
 
     //***********************************************************************************
@@ -44,7 +43,7 @@ public class PropImplied extends Propagator<Variable> {
     //***********************************************************************************
 
     public PropImplied(Variable[] allVars, Constraint consIfBoolTrue) {
-        super(allVars, computePrority(consIfBoolTrue), false);
+        super(allVars, computePriority(consIfBoolTrue), false);
         this.bVar = (BoolVar) vars[0];
         this.trueCons = consIfBoolTrue;
     }
@@ -54,7 +53,7 @@ public class PropImplied extends Propagator<Variable> {
         this.reifCons = reifCons;
     }
 
-    private static PropagatorPriority computePrority(Constraint consIfBoolTrue) {
+    private static PropagatorPriority computePriority(Constraint consIfBoolTrue) {
         int p = consIfBoolTrue.computeMaxPriority().priority;
         return PropagatorPriority.get(Math.max(p, PropagatorPriority.TERNARY.priority));
     }
@@ -73,7 +72,7 @@ public class PropImplied extends Propagator<Variable> {
         } else {
             ESat sat = trueCons.isSatisfied();
             if (sat == ESat.FALSE) {
-                bVar.setToFalse(this);
+                bVar.setToFalse(this, lcg() ? Propagator.reason(bVar, vars) : Reason.undef());
                 setPassive();
             }
         }
