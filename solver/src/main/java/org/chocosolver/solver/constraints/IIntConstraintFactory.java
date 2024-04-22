@@ -1473,6 +1473,15 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 ConstraintsName.DIFFN,
                 new PropDiffN(X, Y, width, height)
         );
+        if (ref().getSolver().isLCG()) {
+            if (addCumulativeReasoning) {
+                if (ref().getSettings().warnUser()) {
+                    ref().getSolver().log().white().println(
+                            "Warning: disable cumulative reasoning for diffN constraint n(due to LCG).");
+                }
+                addCumulativeReasoning = false;
+            }
+        }
         if (addCumulativeReasoning) {
             IntVar[] EX = new IntVar[X.length];
             IntVar[] EY = new IntVar[X.length];
