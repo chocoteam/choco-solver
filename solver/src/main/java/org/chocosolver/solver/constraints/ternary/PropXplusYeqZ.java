@@ -90,11 +90,11 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
         int lb = vars[v1].getLB() + vars[v2].getLB();
         int ub = vars[v1].getUB() + vars[v2].getUB();
         boolean change = vars[vr].updateLowerBound(lb, this,
-                !getModel().getSolver().isLCG() ? Reason.undef() : Reason.r(vars[v1].getMinLit(), vars[v2].getMinLit()));
+                lcg() ? Reason.r(vars[v1].getMinLit(), vars[v2].getMinLit()) : Reason.undef());
         change |= vars[vr].updateUpperBound(ub, this,
-                !getModel().getSolver().isLCG() ? Reason.undef() : Reason.r(vars[v1].getMaxLit(), vars[v2].getMaxLit()));
-        if ((long) vars[v1].getDomainSize() * vars[v2].getDomainSize() > THRESHOLD || getModel().getSolver().isLCG()) return change;
+                lcg() ? Reason.r(vars[v1].getMaxLit(), vars[v2].getMaxLit()) : Reason.undef());
         if (!allbounded) {
+            if ((long) vars[v1].getDomainSize() * vars[v2].getDomainSize() > THRESHOLD || lcg()) return change;
             set.clear();
             int ub1 = vars[v1].getUB();
             int ub2 = vars[v2].getUB();
@@ -111,7 +111,7 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
                 l1 = vars[v1].nextValue(u1);
                 u1 = vars[v1].nextValueOut(l1) - 1;
             }
-            change |= vars[vr].removeAllValuesBut(set, this); // todo explain
+            vars[vr].removeAllValuesBut(set, this); // todo explain
         }
         return change;
     }
@@ -129,11 +129,11 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
         int lb = vars[v1].getLB() - vars[v2].getUB();
         int ub = vars[v1].getUB() - vars[v2].getLB();
         boolean change = vars[vr].updateLowerBound(lb, this,
-                !getModel().getSolver().isLCG() ? Reason.undef() : Reason.r(vars[v1].getMinLit(), vars[v2].getMaxLit()));
+                lcg() ? Reason.r(vars[v1].getMinLit(), vars[v2].getMaxLit()) : Reason.undef());
         change |= vars[vr].updateUpperBound(ub, this,
-                !getModel().getSolver().isLCG() ? Reason.undef() : Reason.r(vars[v1].getMaxLit(), vars[v2].getMinLit()));
-        if ((long) vars[v1].getDomainSize() * vars[v2].getDomainSize() > THRESHOLD || getModel().getSolver().isLCG()) return change;
+                lcg() ? Reason.r(vars[v1].getMaxLit(), vars[v2].getMinLit()) : Reason.undef());
         if (!allbounded) {
+            if ((long) vars[v1].getDomainSize() * vars[v2].getDomainSize() > THRESHOLD || lcg()) return change;
             set.clear();
             int ub1 = vars[v1].getUB();
             int ub2 = vars[v2].getUB();
@@ -150,7 +150,7 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
                 l1 = vars[v1].nextValue(u1);
                 u1 = vars[v1].nextValueOut(l1) - 1;
             }
-            change |= vars[vr].removeAllValuesBut(set, this); // todo explain
+            vars[vr].removeAllValuesBut(set, this); // todo explain
         }
         return change;
     }
