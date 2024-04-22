@@ -11,6 +11,8 @@ package org.chocosolver.solver.constraints.nary.lex;
 
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.UpdatablePropagator;
@@ -31,6 +33,7 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 03/05/2016
  */
+@Explained(partial = true, comment = "Not tested yet")
 public class PropLexInt extends Propagator<IntVar> implements UpdatablePropagator<int[]> {
 
     private final int n;            // size of both vectors
@@ -55,12 +58,13 @@ public class PropLexInt extends Propagator<IntVar> implements UpdatablePropagato
 
     /**
      * update this propagator with a new int vector <i>newY</i>
+     *
      * @param newY new int vector
      */
     @Override
     public void update(int[] newY, boolean thenForcePropagate) {
         System.arraycopy(newY, 0, y, 0, newY.length);
-        if(thenForcePropagate)forcePropagationOnBacktrack();
+        if (thenForcePropagate) forcePropagationOnBacktrack();
     }
 
     @Override
@@ -217,9 +221,9 @@ public class PropLexInt extends Propagator<IntVar> implements UpdatablePropagato
         }
         //Part B
         if (i == a && (i + 1) == b) {
-            x[i].updateUpperBound(y[i] - 1, this);
-            if(y[i] < x[i].getLB() + 1){
-                fails();
+            x[i].updateUpperBound(y[i] - 1, this, reason(i));
+            if (y[i] < x[i].getLB() + 1) {
+                fails(lcg() ? Reason.r(x[i].getMinLit()) : Reason.undef());
             }
             if (checkLex(i)) {
                 entailed = true;
@@ -229,9 +233,9 @@ public class PropLexInt extends Propagator<IntVar> implements UpdatablePropagato
         }
         //Part C
         if (i == a && (i + 1) < b) {
-            x[i].updateUpperBound(y[i], this);
-            if(y[i] < x[i].getLB()){
-                fails();
+            x[i].updateUpperBound(y[i], this, reason(i));
+            if (y[i] < x[i].getLB()) {
+                fails(lcg() ? Reason.r(x[i].getMinLit()) : Reason.undef());
             }
             if (checkLex(i)) {
                 entailed = true;
@@ -247,6 +251,19 @@ public class PropLexInt extends Propagator<IntVar> implements UpdatablePropagato
             if ((i == (b - 1) && x[i].getLB() == y[i]) || x[i].getLB() > y[i]) {
                 updateBeta(i - 1);
             }
+        }
+    }
+
+    private Reason reason(int i) {
+        if (lcg()) {
+            int[] ps = new int[n + 1];
+            int m = 1;
+            for (int j = 0; j < n; j++) {
+                ps[m++] = i == j ? 0 : x[j].getMinLit();
+            }
+            return Reason.r(ps);
+        } else {
+            return Reason.undef();
         }
     }
 

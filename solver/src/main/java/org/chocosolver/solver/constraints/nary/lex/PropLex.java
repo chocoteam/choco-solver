@@ -11,6 +11,8 @@ package org.chocosolver.solver.constraints.nary.lex;
 
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -30,10 +32,15 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 10/08/11
  */
+@Explained
 public class PropLex extends Propagator<IntVar> {
 
     private final int n;            // size of both vectors
+
+    // αlpha points to the index such that all variables above it are ground and equal
     private final IStateInt alpha;  // size of both vectors
+    // beta points either to the most significant index starting from which
+    // the sub-vectors are lexicographically ordered the wrong way
     private final IStateInt beta;
     private boolean entailed;
     private final IntVar[] x;
@@ -114,11 +121,11 @@ public class PropLex extends Propagator<IntVar> {
 
     private void updateAlpha(int i) throws ContradictionException {
         if (i == beta.get()) {
-            fails();
+            fails(reason(-1));
         }
         if (i == n) {
             if (strict) {
-                fails();
+                fails(reason(-1));
             } else {
                 entailed = true;
                 setPassive();
@@ -135,7 +142,7 @@ public class PropLex extends Propagator<IntVar> {
 
     private void updateBeta(int i) throws ContradictionException {
         if ((i + 1) == alpha.get()) {
-            fails();
+            fails(reason(-1));
         }
         if (x[i].getLB() < y[i].getUB()) {
             beta.set(i + 1);
@@ -164,7 +171,7 @@ public class PropLex extends Propagator<IntVar> {
                 entailed = true;
                 setPassive();
             } else {
-                fails();
+                fails(reason(-1));
             }
         } else {
             a = i;
@@ -191,7 +198,7 @@ public class PropLex extends Propagator<IntVar> {
                 b = i;
             }
             if (a >= b) {
-                fails();
+                fails(reason(-1));
             }
             alpha.set(a);
             beta.set(b);
@@ -208,8 +215,8 @@ public class PropLex extends Propagator<IntVar> {
         }
         //Part B
         if (i == a && (i + 1) == b) {
-            x[i].updateUpperBound(y[i].getUB() - 1, this);
-            y[i].updateLowerBound(x[i].getLB() + 1, this);
+            x[i].updateUpperBound(y[i].getUB() - 1, this, reason(i));
+            y[i].updateLowerBound(x[i].getLB() + 1, this, reason(i + n));
             if (checkLex(i)) {
                 entailed = true;
                 setPassive();
@@ -218,8 +225,8 @@ public class PropLex extends Propagator<IntVar> {
         }
         //Part C
         if (i == a && (i + 1) < b) {
-            x[i].updateUpperBound(y[i].getUB(), this);
-            y[i].updateLowerBound(x[i].getLB(), this);
+            x[i].updateUpperBound(y[i].getUB(), this, reason(i));
+            y[i].updateLowerBound(x[i].getLB(), this, reason(i + n));
             if (checkLex(i)) {
                 entailed = true;
                 setPassive();
@@ -234,6 +241,20 @@ public class PropLex extends Propagator<IntVar> {
             if ((i == (b - 1) && x[i].getLB() == y[i].getUB()) || x[i].getLB() > y[i].getUB()) {
                 updateBeta(i - 1);
             }
+        }
+    }
+
+    private Reason reason(int i) {
+        if (lcg()) {
+            int[] ps = new int[2 * n + 1];
+            int m = 1;
+            for (int j = 0; j < n; j++) {
+                ps[m++] = i == j ? 0 : x[j].getMinLit();
+                ps[m++] = i == (j + n) ? 0 : y[j].getMaxLit();
+            }
+            return Reason.r(ps);
+        } else {
+            return Reason.undef();
         }
     }
 

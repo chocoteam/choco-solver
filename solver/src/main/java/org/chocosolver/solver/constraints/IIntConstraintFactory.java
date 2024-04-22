@@ -1854,6 +1854,16 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             throw new IllegalArgumentException("The array of variables cannot be null or empty");
         }
         if (vars.length == 1) return ref().trueConstraint();
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: lexChainLess constraint is turned a conjunction of lexLess constraints.");
+            }
+            for (int i = 0; i < vars.length - 1; i++) {
+                ref().lexLess(vars[i], vars[i + 1]).post();
+            }
+            return ref().voidConstraint();
+        }
         return new Constraint(ConstraintsName.LEXCHAIN, new PropLexChain(vars, true));
     }
 
@@ -1870,6 +1880,16 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             throw new IllegalArgumentException("The array of variables cannot be null or empty");
         }
         if (vars.length == 1) return ref().trueConstraint();
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: lexChainLessEq constraint is turned a conjunction of lexLessEq constraints.");
+            }
+            for (int i = 0; i < vars.length - 1; i++) {
+                ref().lexLessEq(vars[i], vars[i + 1]).post();
+            }
+            return ref().voidConstraint();
+        }
         return new Constraint(ConstraintsName.LEXCHAIN, new PropLexChain(vars, false));
     }
 
