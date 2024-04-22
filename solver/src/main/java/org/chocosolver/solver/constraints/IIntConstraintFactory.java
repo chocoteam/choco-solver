@@ -327,6 +327,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint distance(IntVar var1, IntVar var2, String op, int cste) {
         assert var1.getModel() == var2.getModel();
+        if (ref().getSolver().isLCG()) {
+            throw new SolverException("Distance constraint is not supported in LCG mode");
+        }
         Operator operator = Operator.get(op);
         if (operator != Operator.EQ && operator != Operator.GT && operator != Operator.LT && operator != Operator.NQ) {
             throw new SolverException("Unexpected operator for distance");
@@ -346,8 +349,17 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         if (ref().getSolver().isLCG()) {
             if (ref().getSettings().warnUser()) {
                 ref().getSolver().log().white().println(
-                        "Warning: element constraint is turned into clauses.");
+                        "Warning: element constraint is turned into clauses (due to LCG).");
             }
+            if (index.isInstantiated()) {
+                return ref().arithm(value, "=", table[index.getValue() - offset]);
+            }
+            if (!value.hasEnumeratedDomain()) {
+                IntVar v = ref().intVar(table);
+                v.eq(value).post();
+                value = v;
+            }
+
             ref().addElement(value, table, index, offset);
             return ref().voidConstraint();
         }
@@ -382,6 +394,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         } else if (TuplesFactory.canBeTupled(X, Y)) {
             return table(X, Y, TuplesFactory.modulo(X, mod, Y));
         } else {
+            if (ref().getSolver().isLCG()) {
+                throw new SolverException("Modulo constraint is not supported in LCG mode");
+            }
             return new Constraint((X.getName() + " MOD " + mod + " = " + Y.getName()), new PropModXY(X, mod, Y));
         }
     }
@@ -434,7 +449,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         if (ref().getSolver().isLCG()) {
             if (ref().getSettings().warnUser()) {
                 ref().getSolver().log().white().println(
-                        "Warning: table constraint is turned into clauses.");
+                        "Warning: table constraint is turned into clauses (due to LCG).");
             }
             ref().addTable(new IntVar[]{var1, var2}, tuples);
             return ref().voidConstraint();
@@ -513,6 +528,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         if (exponent == 1) {
             return arithm(result, "=", base);
         }
+        if (ref().getSolver().isLCG()) {
+            throw new SolverException("Power constraint is not supported in LCG mode");
+        }
         if ((exponent % 2) == 0) {
             return new Constraint(ConstraintsName.POWER, new PropPowEven(result, base, exponent));
         } else {
@@ -542,7 +560,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 }
             }
         }
-        return base.getModel().table(new IntVar[]{base, exponent, result}, tuples);
+        return ref().table(new IntVar[]{base, exponent, result}, tuples);
     }
 
     //##################################################################################################################
@@ -633,6 +651,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param var3 resulting variable
      */
     default Constraint distance(IntVar var1, IntVar var2, String op, IntVar var3) {
+        if (ref().getSolver().isLCG()) {
+            throw new SolverException("Distance constraint is not supported in LCG mode");
+        }
         switch (Operator.get(op)) {
             case EQ:
                 return new Constraint(ConstraintsName.DISTANCE, new PropEQDistanceXYZ(ArrayUtils.toArray(var1, var2, var3)));
@@ -650,7 +671,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     /**
-     * Creates an euclidean division constraint.
+     * Creates a Euclidean division constraint.
      * Ensures dividend / divisor = result, rounding towards 0
      * Also ensures divisor != 0
      *
@@ -659,6 +680,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param result   result
      */
     default Constraint div(IntVar dividend, IntVar divisor, IntVar result) {
+        if (ref().getSolver().isLCG()) {
+            throw new SolverException("Division constraint is not supported in LCG mode");
+        }
         return new Constraint(ConstraintsName.DIVISION, new PropDivXYZ(dividend, divisor, result));
     }
 
@@ -713,6 +737,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         } else if (TuplesFactory.canBeTupled(X, Y, Z)) {
             return table(new IntVar[]{X, Y, Z}, TuplesFactory.modulo(X, Y, Z));
         } else {
+            if (ref().getSolver().isLCG()) {
+                throw new SolverException("Modulo constraint is not supported in LCG mode");
+            }
             return new Constraint(X.getName() + " MOD " + Y.getName() + " = " + Z.getName(), new PropModXYZ(X, Y, Z));
         }
     }
@@ -739,6 +766,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             long min = Math.min(Math.min(a * c, a * d), Math.min(b * c, b * d));
             long max = Math.max(Math.max(a * c, a * d), Math.max(b * c, b * d));
             if ((int) min != min || (int) max != max) {
+                if (ref().getSolver().isLCG()) {
+                    throw new SolverException("Multiplication constraint is not supported in LCG mode");
+                }
                 return new Constraint(ConstraintsName.TIMES, new PropTimesNaiveWithLong(X, Y, Z));
             } else {
                 return new Constraint(ConstraintsName.TIMES, new PropTimesNaive(X, Y, Z));
@@ -822,6 +852,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      *                        Uses BC plus a probabilistic AC_ZHANG propagator to get a compromise between BC and AC_ZHANG
      */
     default Constraint allDifferentUnderCondition(IntVar[] vars, Condition condition, boolean singleCondition, String consistency) {
+        if (ref().getSolver().isLCG()) {
+            throw new SolverException("Conditional AllDifferent constraint is not supported in LCG mode");
+        }
         return new CondAllDifferent(vars, condition, consistency, singleCondition);
     }
 
@@ -865,6 +898,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param filter       the name of the filtering scheme
      */
     default Constraint allDiffPrec(IntVar[] variables, int[][] predecessors, int[][] successors, String filter) {
+        if (ref().getSolver().isLCG()) {
+            throw new SolverException("AllDiffPrec constraint is not supported in LCG mode");
+        }
         return new Constraint(
                 ConstraintsName.ALLDIFFPREC,
                 new PropAllDiffPrec(variables, predecessors, successors, filter)
@@ -896,6 +932,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param filter     the name of the filtering scheme
      */
     default Constraint allDiffPrec(IntVar[] variables, boolean[][] precedence, String filter) {
+        if (ref().getSolver().isLCG()) {
+            throw new SolverException("AllDiffPrec constraint is not supported in LCG mode");
+        }
         return new Constraint(
                 ConstraintsName.ALLDIFFPREC,
                 new PropAllDiffPrec(variables, precedence, filter)
@@ -926,6 +965,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             throw new IllegalArgumentException("The array of variables cannot be null or empty");
         }
         if (vars.length == 1) return ref().trueConstraint();
+        if (ref().getSolver().isLCG()) {
+            return atMostNValues(vars, ref().intVar(1), false);
+        }
         return new Constraint(ConstraintsName.ATMOSTNVALUES,
                 new PropAtMostNValues_BC(vars, ref().intVar(1)));
     }
@@ -1023,6 +1065,23 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param AC      additional filtering algorithm, domain filtering algorithm derivated from (Soft)AllDifferent
      */
     default Constraint atLeastNValues(IntVar[] vars, IntVar nValues, boolean AC) {
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: atMostNValues constraint is decomposed (due to LCG).");
+            }
+            int[] vals = getDomainUnion(vars);
+            BoolVar[] vs = ref().boolVarArray(vals.length);
+            int k = 0;
+            for (int v : vals) {
+                BoolVar[] bs = new BoolVar[vars.length];
+                for (int i = 0; i < vars.length; i++) {
+                    bs[i] = ref().isEq(vars[i], v);
+                }
+                ref().addClausesBoolOrArrayEqVar(bs, vs[k++]);
+            }
+            return ref().sum(vs, "<=", nValues);
+        }
         if (AC) {
             return new Constraint(ConstraintsName.ATLEASTNVALUES, new PropAtLeastNValues(vars, nValues),
                     new PropAtLeastNValues_AC(vars, nValues));
@@ -1048,6 +1107,22 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint atMostNValues(IntVar[] vars, IntVar nValues, boolean STRONG) {
         int[] vals = getDomainUnion(vars);
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: atMostNValues constraint is decomposed (due to LCG).");
+            }
+            BoolVar[] vs = ref().boolVarArray(vals.length);
+            int k = 0;
+            for (int v : vals) {
+                BoolVar[] bs = new BoolVar[vars.length];
+                for (int i = 0; i < vars.length; i++) {
+                    bs[i] = ref().isEq(vars[i], v);
+                }
+                ref().addClausesBoolOrArrayEqVar(bs, vs[k++]);
+            }
+            return ref().sum(vs, "<=", nValues);
+        }
         if (STRONG) {
             Gci gci = new Gci(vars);
             R[] rules = new R[]{new R1(), new R3(vars.length, nValues.getModel())};
@@ -1075,7 +1150,6 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         if (itemBin.length != itemSize.length) {
             throw new SolverException("itemBin and itemSize arrays should have same size");
         }
-        Model model = itemBin[0].getModel();
         // redundant filtering
         int sum = 0;
         for (int i = 0; i < itemSize.length; i++) {
@@ -1093,12 +1167,27 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 list.add(itemBin[i]);
             }
         }
-
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: binPacking constraint is decomposed (due to LCG).");
+            }
+            for (int i = 0; i < binLoad.length; i++) {
+                IntVar[] loads = new IntVar[itemSize.length];
+                for (int j = 0; j < itemSize.length; j++) {
+                    loads[j] = ref().intView(itemSize[j], ref().isEq(itemBin[j], i + offset), 0);
+                }
+                ref().sum(loads, "=", binLoad[i]).post();
+            }
+            ref().sum(binLoad, "=", sum).post();
+            if (!list.isEmpty()) ref().allDifferent(list.toArray(new IntVar[0])).post();
+            return ref().voidConstraint();
+        }
         return Constraint.merge(
                 ConstraintsName.BINPACKING,
                 new Constraint(ConstraintsName.BINPACKING, new PropBinPacking(itemBin, itemSize, binLoad, offset)),
-                model.sum(binLoad, "=", sum),
-                list.size() > 0 ? model.allDifferent(list.toArray(new IntVar[0])) : null
+                ref().sum(binLoad, "=", sum),
+                !list.isEmpty() ? ref().allDifferent(list.toArray(new IntVar[0])) : null
         );
     }
 
@@ -1125,7 +1214,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     /**
-     * Creates an channeling constraint between an integer variable and a set of bit variables.
+     * Creates a channeling constraint between an integer variable and a set of bit variables.
      * Ensures that var = 2<sup>0</sup>*BIT_1 + 2<sup>1</sup>*BIT_2 + ... 2<sup>n-1</sup>*BIT_n.
      * <br/>
      * BIT_1 is related to the first bit of OCTET (2^0),
@@ -1168,6 +1257,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param lVars array of LQ boolean variables
      */
     default Constraint clausesIntChanneling(IntVar var, BoolVar[] eVars, BoolVar[] lVars) {
+        if (ref().getSolver().isLCG()) {
+            throw new SolverException("ClausesIntChanneling constraint is not supported in LCG mode");
+        }
         return new Constraint(ConstraintsName.CLAUSESINTCHANNELING, new PropClauseChanneling(var, eVars, lVars));
     }
 
@@ -1228,6 +1320,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @return a circuit constraint
      */
     default Constraint circuit(IntVar[] vars, int offset, CircuitConf conf) {
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: circuit constraint restricted to LIGHT filtering options.");
+            }
+            conf = CircuitConf.LIGHT;
+        }
         Propagator<?>[] props;
         if (conf == CircuitConf.LIGHT) {
             props = new Propagator[]{new PropNoSubtour(vars, offset)};
@@ -1257,12 +1356,15 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      *                      Can be built with method CostAutomaton.makeSingleResource(...)
      */
     default Constraint costRegular(IntVar[] vars, IntVar cost, ICostAutomaton costAutomaton) {
+        if (ref().getSolver().isLCG()) {
+            throw new SolverException("costRegular constraint is not supported in LCG mode");
+        }
         return new CostRegular(vars, cost, costAutomaton);
     }
 
     /**
      * Creates a count constraint.
-     * Let N be the number of variables of the vars collection assigned to value value;
+     * Let N be the number of variables of the vars collection assigned to the value <i>value</i>;
      * Enforce condition N = limit to hold.
      * <p>
      *
@@ -1287,7 +1389,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 
     /**
      * Creates a count constraint.
-     * Let N be the number of variables of the vars collection assigned to value value;
+     * Let N be the number of variables of the vars collection assigned to the value `value`;
      * Enforce condition N = limit to hold.
      * <p>
      *
@@ -1298,7 +1400,19 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     default Constraint count(IntVar value, IntVar[] vars, IntVar limit) {
         if (value.isInstantiated()) {
             return count(value.getValue(), vars, limit);
-        } else if (value.hasEnumeratedDomain()) {
+        }
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: count constraint is decomposed (due to LCG).");
+            }
+            BoolVar[] bs = ref().boolVarArray(vars.length);
+            for (int i = 0; i < vars.length; i++) {
+                ref().reifXrelYC(vars[i], "=", value, 0, bs[i]);
+            }
+            return ref().sum(bs, "=", limit);
+        }
+        if (value.hasEnumeratedDomain()) {
             return new Constraint(ConstraintsName.COUNT, new PropCountVar(vars, value, limit));
         } else {
             Model model = value.getModel();
@@ -1379,6 +1493,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @return a cumulative constraint
      */
     default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean incremental, CumulFilter... filters) {
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: cumulative constraint is decomposed (due to LCG).");
+            }
+            ref().cumulativeDec(tasks, heights, capacity);
+            return ref().voidConstraint();
+        }
         if (tasks.length != heights.length) {
             throw new SolverException("Tasks and heights arrays should have same size");
         }
@@ -1422,6 +1544,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param capacity  resource capacity
      */
     default void cumulative(IntVar[] starts, int[] durations, int[] heights, int capacity) {
+        if (ref().getSolver().isLCG()) {
+            throw new SolverException("cumulative constraint is not supported in LCG mode");
+        }
         int n = starts.length;
         final IntVar[] d = new IntVar[n];
         final IntVar[] h = new IntVar[n];
@@ -1573,6 +1698,21 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param closed      restricts domains of vars to values if set to true
      */
     default Constraint globalCardinality(IntVar[] vars, int[] values, IntVar[] occurrences, boolean closed) {
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: globalCardinality constraint is decomposed (due to LCG).");
+            }
+            for (int i = 0; i < values.length; i++) {
+                ref().count(values[i], vars, occurrences[i]).post();
+            }
+            if (closed) {
+                for (int i = 0; i < vars.length; i++) {
+                    ref().member(vars[i], values).post();
+                }
+            }
+            return ref().voidConstraint();
+        }
         assert values.length == occurrences.length;
         if (closed) {
             TIntArrayList toAdd = new TIntArrayList();
@@ -1591,7 +1731,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                     }
                 }
             }
-            if (toAdd.size() > 0) {
+            if (!toAdd.isEmpty()) {
                 int n2 = values.length + toAdd.size();
                 int[] v2 = new int[n2];
                 IntVar[] cards = new IntVar[n2];
@@ -1716,6 +1856,21 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param T another value
      */
     default Constraint intValuePrecedeChain(IntVar[] X, int S, int T) {
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: intValuePrecedeChain constraint is decomposed (due to LCG).");
+            }
+            BoolVar[] bs = ref().boolVarArray(X.length + 1);
+            bs[0].eq(0).post();
+            for (int i = 0; i < X.length; i++) {
+                BoolVar xis = ref().isEq(X[i], S);
+                ref().addClausesBoolLe(xis, bs[i + 1]);
+                ref().impXrelYC(bs[i], "=", bs[i + 1], 0, xis.not());
+                ref().impXrelYC(X[i], "=", ref().intVar(T), 0, xis.not());
+            }
+            return ref().voidConstraint();
+        }
         return new Constraint(ConstraintsName.INT_VALUE_PRECEDE, new PropIntValuePrecedeChain(X, S, T));
     }
 
@@ -1730,6 +1885,16 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint intValuePrecedeChain(IntVar[] X, int[] V) {
         if (V.length > 1) {
+            if (ref().getSolver().isLCG()) {
+                if (ref().getSettings().warnUser()) {
+                    ref().getSolver().log().white().println(
+                            "Warning: intValuePrecedeChain constraint is decomposed (due to LCG).");
+                }
+                for (int i = 1; i < V.length; i++) {
+                    ref().intValuePrecedeChain(X, V[i - 1], V[i]).post();
+                }
+                return ref().voidConstraint();
+            }
             TIntHashSet values = new TIntHashSet();
             PropIntValuePrecedeChain[] ps = new PropIntValuePrecedeChain[V.length - 1];
             values.add(V[0]);
@@ -1800,7 +1965,15 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 //ref().sum(doms, "=", occurrences[i]).post();
             }
         }
-
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: knapsack constraint is decomposed into sum constraints (due to LCG).");
+            }
+            return new Constraint(ConstraintsName.KNAPSACK, ArrayUtils.append(
+                    scalar1.propagators,
+                    scalar2.propagators));
+        }
         return new Constraint(ConstraintsName.KNAPSACK, ArrayUtils.append(
                 scalar1.propagators,
                 scalar2.propagators,
@@ -1833,6 +2006,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @implNote an {@link #allDifferent(IntVar...)} constraint is declared on <i>PERMvars</i>
      */
     default Constraint keySort(IntVar[][] vars, IntVar[] PERMvars, IntVar[][] SORTEDvars, int K) {
+        if (ref().getSolver().isLCG()) {
+            throw new SolverException("keySort constraint is not supported in LCG mode");
+        }
         if (PERMvars == null) {
             int n = vars.length;
             PERMvars = new IntVar[n];
@@ -1960,7 +2136,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param vars   a vector of variables, of size > 0
      * @implNote This introduces {@link org.chocosolver.solver.variables.view.integer.IntAffineView}[]
      * and returns an {@link #argmax(IntVar, int, IntVar[])} constraint
-     * on this views.
+     * on these views.
      */
     default Constraint argmin(IntVar z, int offset, IntVar[] vars) {
         Object[] args = variableUniqueness(Arrays.stream(vars).map(v -> ref().neg(v)).toArray(IntVar[]::new),
@@ -2016,6 +2192,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param MDD  the multi-valued decision diagram encoding solutions
      */
     default Constraint mddc(IntVar[] vars, MultivaluedDecisionDiagram MDD) {
+        if (ref().getSolver().isLCG()) {
+            throw new SolverException("mddc constraint is not supported in LCG mode");
+        }
         return new Constraint(ConstraintsName.MDDC, new PropLargeMDDC(MDD, vars));
     }
 
@@ -2089,6 +2268,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint multiCostRegular(IntVar[] vars, IntVar[] costVars,
                                         ICostAutomaton costAutomaton, double precision) {
+        if (ref().getSolver().isLCG()) {
+            throw new SolverException("multiCostRegular constraint is not supported in LCG mode");
+        }
         return new Constraint(ConstraintsName.MULTICOSTREGULAR,
                 new PropMultiCostRegular(vars, costVars, costAutomaton, precision));
     }
@@ -2111,6 +2293,24 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         Object[] args = variableUniqueness(vars, new IntVar[]{nValues});
         vars = (IntVar[]) args[0];
         nValues = ((IntVar[]) args[1])[0];
+        if (ref().getSolver().isLCG()) {
+            /*return new Constraint(
+                    ConstraintsName.NVALUES,
+                    new PropNValue(vars, nValues)
+            );*/
+            IntIterableRangeSet set = VariableUtils.union(vars);
+            BoolVar[] vs = ref().boolVarArray(set.size());
+            int k = 0;
+            for (int v : set) {
+                BoolVar[] bs = new BoolVar[vars.length];
+                for (int i = 0; i < vars.length; i++) {
+                    bs[i] = ref().isEq(vars[i], v);
+                }
+                ref().addClausesBoolOrArrayEqVar(bs, vs[k++]);
+            }
+            ref().sum(vs, "=", nValues).post();
+            return ref().voidConstraint();
+        }
         Gci gci = new Gci(vars);
         R[] rules = new R[]{new R1(), new R3(vars.length, nValues.getModel())};
         return new Constraint(
@@ -2220,6 +2420,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param automaton a deterministic finite automaton defining the regular language
      */
     default Constraint regular(IntVar[] vars, IAutomaton automaton) {
+        if (ref().getSolver().isLCG()) {
+            throw new SolverException("regular constraint is not supported in LCG mode");
+        }
         return new Constraint(ConstraintsName.REGULAR, new PropRegular(vars, automaton));
     }
 
@@ -2331,6 +2534,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @return a subCircuit constraint
      */
     default Constraint subCircuit(IntVar[] vars, int offset, IntVar subCircuitLength) {
+        if (ref().getSolver().isLCG()) {
+            throw new SolverException("subCircuit constraint is not supported in LCG mode");
+        }
         int n = vars.length;
         Model model = vars[0].getModel();
         IntVar nbLoops = model.intVar("nLoops", 0, n, true);
@@ -2697,6 +2903,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @return a tree constraint
      */
     default Constraint tree(IntVar[] succs, IntVar nbTrees, int offset) {
+        if (ref().getSolver().isLCG()) {
+            throw new SolverException("tree constraint is not supported in LCG mode");
+        }
         return new Constraint(ConstraintsName.TREE,
                 new PropAntiArborescences(succs, offset, false),
                 new PropKLoops(succs, offset, nbTrees)
