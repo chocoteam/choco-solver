@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints.nary.sum;
 
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
@@ -28,6 +29,7 @@ import static org.chocosolver.util.tools.ArrayUtils.concat;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
+@Explained
 public class PropSumBool extends PropSum {
 
     /**
@@ -121,7 +123,7 @@ public class PropSumBool extends PropSum {
     protected void filterOnEq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
-        if (!model.getSolver().isLCG() && (F < 0 || E < 0)) {
+        if (!lcg() && (F < 0 || E < 0)) {
             fails();
         }
         int lb, ub, i = 0;
@@ -141,11 +143,11 @@ public class PropSumBool extends PropSum {
             // positive coefficients first
             while (i < pos) {
                 lb = vars[i].getLB();
-                if (F <= 0 && vars[i].updateUpperBound(F + lb, this, explainMax(i))) {
+                if (F <= 0 && vars[i].updateUpperBound(F + lb, this, explainByMin(i))) {
                     E++;
                 }
                 ub = vars[i].getUB();
-                if (E <= 0 && vars[i].updateLowerBound(ub - E, this, explainMin(i))) {
+                if (E <= 0 && vars[i].updateLowerBound(ub - E, this, explainByMax(i))) {
                     F++;
                 }
                 i++;
@@ -153,11 +155,11 @@ public class PropSumBool extends PropSum {
             // then negative ones
             while (i < l - 1) {
                 lb = vars[i].getUB();
-                if (F <= 0 && vars[i].updateLowerBound(-F + lb, this, explainMax(i))) {
+                if (F <= 0 && vars[i].updateLowerBound(-F + lb, this, explainByMin(i))) {
                     E--;
                 }
                 ub = vars[i].getLB();
-                if (E <= 0 && vars[i].updateUpperBound(ub + E, this, explainMin(i))) {
+                if (E <= 0 && vars[i].updateUpperBound(ub + E, this, explainByMax(i))) {
                     F--;
                 }
                 i++;
@@ -170,7 +172,7 @@ public class PropSumBool extends PropSum {
     protected void filterOnLeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
-        if (!model.getSolver().isLCG() && F < 0) {
+        if (!lcg() && F < 0) {
             fails();
         }
         int lb, ub, i = 0;
@@ -185,7 +187,7 @@ public class PropSumBool extends PropSum {
             // positive coefficients first
             while (i < pos) {
                 lb = vars[i].getLB();
-                if (vars[i].updateUpperBound(F + lb, this, explainMax(i))) {
+                if (vars[i].updateUpperBound(F + lb, this, explainByMin(i))) {
                     E++;
                 }
                 i++;
@@ -193,7 +195,7 @@ public class PropSumBool extends PropSum {
             // then negative ones
             while (i < l - 1) {
                 lb = vars[i].getUB();
-                if (vars[i].updateLowerBound(-F + lb, this, explainMax(i))) {
+                if (vars[i].updateLowerBound(-F + lb, this, explainByMin(i))) {
                     E--;
                 }
                 i++;
@@ -208,7 +210,7 @@ public class PropSumBool extends PropSum {
     protected void filterOnGeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
-        if (!model.getSolver().isLCG() && E < 0) {
+        if (!lcg() && E < 0) {
             fails();
         }
         int lb, ub, i = 0;
@@ -223,7 +225,7 @@ public class PropSumBool extends PropSum {
             // positive coefficients first
             while (i < pos) {
                 ub = vars[i].getUB();
-                if (vars[i].updateLowerBound(ub - E, this, explainMin(i))) {
+                if (vars[i].updateLowerBound(ub - E, this, explainByMax(i))) {
                     F++;
                 }
                 i++;
@@ -231,7 +233,7 @@ public class PropSumBool extends PropSum {
             // then negative ones
             while (i < l - 1) {
                 ub = vars[i].getLB();
-                if (vars[i].updateUpperBound(ub + E, this, explainMin(i))) {
+                if (vars[i].updateUpperBound(ub + E, this, explainByMax(i))) {
                     F--;
                 }
                 i++;
