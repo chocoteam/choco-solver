@@ -45,7 +45,7 @@ import org.chocosolver.solver.constraints.nary.count.PropCountVar;
 import org.chocosolver.solver.constraints.nary.count.PropCount_AC;
 import org.chocosolver.solver.constraints.nary.cumulative.CumulFilter;
 import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
-import org.chocosolver.solver.constraints.nary.element.PropElementV_fast;
+import org.chocosolver.solver.constraints.nary.element.PropElementV2;
 import org.chocosolver.solver.constraints.nary.globalcardinality.GlobalCardinality;
 import org.chocosolver.solver.constraints.nary.knapsack.PropKnapsack;
 import org.chocosolver.solver.constraints.nary.knapsack.PropKnapsackKatriel01;
@@ -1502,7 +1502,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             // uses two propagator to perform a fix point
             return new Constraint(
                     ConstraintsName.ELEMENT,
-                    new PropElementV_fast(value, table, index, offset));
+//                    new PropElementV_fast(value, table, index, offset)
+                    new PropElementV2(value, table, index, offset)
+            );
         }
     }
 
