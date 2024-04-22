@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints.nary.alldifferent;
 
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -16,12 +17,13 @@ import java.util.Random;
 
 /**
  * Probabilistic Propagator for AllDifferent AC constraint for integer variables introduced
- * to avoid loosing too much time in AC propagation when BC is sufficientss
+ * to avoid loosing too much time in AC propagation when BC is sufficient.
  * The more this propagator triggers filtering and failure, the more likely it will be called
  * If it does not bring improvement, this propagator will be called less during search
  *
  * @author Jean-Guillaume Fages
  */
+@Explained(partial = true)
 public class PropAllDiffAdaptative extends PropAllDiffAC {
 
     //***********************************************************************************
@@ -42,7 +44,7 @@ public class PropAllDiffAdaptative extends PropAllDiffAC {
      * @param variables array of integer variables
      */
     public PropAllDiffAdaptative(IntVar[] variables) {
-        super(variables, true);
+        super(variables, !variables[0].getModel().getSolver().isLCG());
         rd = new Random(vars[0].getModel().getSeed());
         calls = success = 1;
     }
