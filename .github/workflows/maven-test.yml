@@ -16,7 +16,7 @@ jobs:
     strategy:
       #fail-fast: false
       matrix:
-        group: [ "1s", "10s", "checker", "ibex" ]
+        group: [ "1s", "10s", "checker", "ibex", "lcg" ]
 
     # The different steps
     steps:
