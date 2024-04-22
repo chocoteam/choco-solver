@@ -101,25 +101,24 @@ public class Constraint {
      * @param propagators set of propagators defining the constraint
      */
     public Constraint(String name, Propagator<?>... propagators) {
-        if (propagators == null || propagators.length == 0) {
-            throw new UnsupportedOperationException("cannot create a constraint without propagators ");
-        }
         this.name = name;
-        this.propagators = propagators;
+        this.propagators = propagators == null ? new Propagator[0] : propagators;
         this.mStatus = Status.FREE;
         this.cidx = -1;
-        for (Propagator<?> propagator : propagators) {
+        for (Propagator<?> propagator : this.propagators) {
             propagator.defineIn(this);
         }
-        Model model = propagators[0].getModel();
-        if (model.getSettings().checkDeclaredConstraints()) {
-            @SuppressWarnings("unchecked")
-            Set<Constraint> instances = (Set<Constraint>) model.getHook("cinstances");
-            if (instances == null) {
-                instances = new HashSet<>();
-                model.addHook("cinstances", instances);
+        if (propagators.length > 0) {
+            Model model = propagators[0].getModel();
+            if (model.getSettings().checkDeclaredConstraints()) {
+                @SuppressWarnings("unchecked")
+                Set<Constraint> instances = (Set<Constraint>) model.getHook("cinstances");
+                if (instances == null) {
+                    instances = new HashSet<>();
+                    model.addHook("cinstances", instances);
+                }
+                instances.add(this);
             }
-            instances.add(this);
         }
     }
 
@@ -206,7 +205,7 @@ public class Constraint {
                         && bool.getModel().getSolver().getSearchState() == SearchState.NEW) {
                     if (boolReif.getValue() == 1) {
                         this.post();
-                    } else{
+                    } else {
                         this.opposite.post();
                     }
                     return;
@@ -284,7 +283,9 @@ public class Constraint {
      * This should not be reified.
      */
     public final void post() {
-        propagators[0].getModel().post(this);
+        if (propagators.length > 0) {
+            propagators[0].getModel().post(this);
+        }
     }
 
     /**
@@ -294,15 +295,17 @@ public class Constraint {
      */
     public final void ignore() {
         assert mStatus == Status.FREE : "Cannot ignore a posted or reified constraint";
-        Model model = propagators[0].getModel();
-        if (model.getSettings().checkDeclaredConstraints()) {
-            @SuppressWarnings("unchecked")
-            Set<Constraint> instances = (Set<Constraint>) model.getHook("cinstances");
-            if (instances == null) {
-                instances = new HashSet<>();
-                model.addHook("cinstances", instances);
+        if (propagators.length > 0) {
+            Model model = propagators[0].getModel();
+            if (model.getSettings().checkDeclaredConstraints()) {
+                @SuppressWarnings("unchecked")
+                Set<Constraint> instances = (Set<Constraint>) model.getHook("cinstances");
+                if (instances == null) {
+                    instances = new HashSet<>();
+                    model.addHook("cinstances", instances);
+                }
+                instances.remove(this);
             }
-            instances.remove(this);
         }
     }
 
@@ -318,18 +321,20 @@ public class Constraint {
         checkNewStatus(aStatus);
         mStatus = aStatus;
         cidx = idx;
-        Model model = propagators[0].getModel();
-        if (model.getSettings().checkDeclaredConstraints()) {
-            @SuppressWarnings("unchecked")
-            Set<Constraint> instances = (Set<Constraint>) model.getHook("cinstances");
-            if (instances == null) {
-                instances = new HashSet<>();
-                model.addHook("cinstances", instances);
-            }
-            if (mStatus != Status.FREE) {
-                instances.remove(this);
-            } else {
-                instances.add(this);
+        if (propagators.length > 0) {
+            Model model = propagators[0].getModel();
+            if (model.getSettings().checkDeclaredConstraints()) {
+                @SuppressWarnings("unchecked")
+                Set<Constraint> instances = (Set<Constraint>) model.getHook("cinstances");
+                if (instances == null) {
+                    instances = new HashSet<>();
+                    model.addHook("cinstances", instances);
+                }
+                if (mStatus != Status.FREE) {
+                    instances.remove(this);
+                } else {
+                    instances.add(this);
+                }
             }
         }
     }
@@ -445,7 +450,7 @@ public class Constraint {
         return PropagatorPriority.get(priority);
     }
 
-    private static void addPropagators(Constraint c, ArrayList<Propagator> in){
+    private static void addPropagators(Constraint c, ArrayList<Propagator> in) {
         if (c != null) {
             c.ignore();
             Collections.addAll(in, c.getPropagators());
@@ -458,7 +463,7 @@ public class Constraint {
      * Some constraints can be null but at least one propagator must be present.
      *
      * @param name     name of the new constraint
-     * @param toMerges  a set of constraints to merge in this (null are accepted)
+     * @param toMerges a set of constraints to merge in this (null are accepted)
      * @return a new constraint with all propagators of toMerge
      * @throws IllegalArgumentException when no propagator can be extracted
      */
