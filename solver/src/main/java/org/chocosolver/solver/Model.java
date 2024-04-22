@@ -604,6 +604,20 @@ public final class Model implements IModel {
         return new BooleanConstraint(this, false);
     }
 
+    /**
+     * Create a VOID constraint that cannot be reified --  for LCG mainly
+     * @return a void constraint
+     * todo: find a more elegant way to do that
+     */
+    public Constraint voidConstraint() {
+        return new Constraint("void") {
+            @Override
+            public void reifyWith(BoolVar bool) {
+                throw new SolverException("Cannot reify a void constraint");
+            }
+        };
+    }
+
 
     /**
      * Returns the unique constraint embedding a minisat model.
