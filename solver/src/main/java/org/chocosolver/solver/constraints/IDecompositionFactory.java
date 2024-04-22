@@ -20,6 +20,7 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.Task;
 import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.ArrayList;
@@ -109,6 +110,82 @@ public interface IDecompositionFactory extends ISelf<Model> {
             ).post();
         }
     }
+
+    /**
+     * Creates and <b>posts</b> a decomposition of a cumulative constraint: associates a boolean
+     * variable to each task and each point of time sich that the scalar product of boolean
+     * variables per heights for each time never exceed capacity.
+     *
+     * @param tasks    set of tasks
+     * @param heights  resource consumption of each task
+     * @param capacity resource capacity
+     * @see org.chocosolver.solver.constraints.IIntConstraintFactory#cumulative(IntVar[], int[],
+     * int[], int)
+     */
+    default void cumulativeDec(Task[] tasks, IntVar[] heights, IntVar capacity) {
+        cumulativeDec(
+                Arrays.stream(tasks).map(Task::getStart).toArray(IntVar[]::new),
+                Arrays.stream(tasks).map(Task::getDuration).toArray(IntVar[]::new),
+                heights,
+                capacity);
+    }
+
+    /**
+     * Creates and <b>posts</b> a decomposition of a cumulative constraint: associates a boolean
+     * variable to each task and each point of time sich that the scalar product of boolean
+     * variables per heights for each time never exceed capacity.
+     *
+     * @param starts    starting time of each task
+     * @param durations processing time of each task
+     * @param heights   resource consumption of each task
+     * @param capacity  resource capacity
+     * @see org.chocosolver.solver.constraints.IIntConstraintFactory#cumulative(IntVar[], int[],
+     * int[], int)
+     */
+    default void cumulativeDec(IntVar[] starts, IntVar[] durations, IntVar[] heights, IntVar capacity) {
+        int n = starts.length;
+        // 1. find range of 't' parameters while creating variables
+        int min_t = MAX_VALUE, max_t = MIN_VALUE;
+        for (int i = 0; i < n; i++) {
+            min_t = min(min_t, starts[i].getLB());
+            max_t = max(max_t, starts[i].getUB() + durations[i].getUB());
+            if (max_t - min_t > 5000) {
+                break;
+            }
+        }
+        if (max_t - min_t > 5000) {
+            for (int j = 0; j < n; j++) {
+                BoolVar[] bit = ref().boolVarArray(format("b_%s_", j), n);
+                IntVar[] hs = new IntVar[n];
+                for (int i = 0; i < n; i++) {
+                    BoolVar b1 = ref().boolVar(String.format("%s ≤ %s", starts[i].getName(), starts[j].getName()));
+                    ref().reifyXleY(starts[i], starts[j], b1);
+                    BoolVar b2 = ref().boolVar(String.format("%s < %s + %s",
+                            starts[j].getName(), starts[i].getName(), durations[i].getName()));
+                    ref().scalar(new IntVar[]{starts[j], starts[i]}, new int[]{1, -1}, "<", durations[i]).reifyWith(b2);
+                    ref().addClausesBoolAndArrayEqVar(new BoolVar[]{b1, b2}, bit[i]);
+                    hs[i] = ref().intVar("nH" + i + "_" + j, 0, heights[i].getUB());
+                    ref().times(bit[i], heights[i], hs[i]).post();
+                }
+                ref().sum(hs, "<=", capacity).post();
+            }
+        } else {
+            for (int t = min_t; t <= max_t; t++) {
+                BoolVar[] bit = ref().boolVarArray(format("b_%s_", t), n);
+                IntVar[] hs = new IntVar[n];
+                for (int i = 0; i < n; i++) {
+                    BoolVar b1 = ref().isLeq(starts[i], t);
+                    BoolVar b2 = ref().boolVar(String.format("(%d < %s + %s)", t, starts[i].getName(), durations[i].getName()));
+                    ref().reifyXgtYC(starts[i], ref().intView(-1, durations[i], t), 0, b2);
+                    ref().addClausesBoolAndArrayEqVar(new BoolVar[]{b1, b2}, bit[i]);
+                    hs[i] = ref().intVar("nH" + i + "_" + t, 0, heights[i].getUB());
+                    ref().times(bit[i], heights[i], hs[i]).post();
+                }
+                ref().sum(hs, "<=", capacity).post();
+            }
+        }
+    }
+
 
     /**
      * Creates an element constraint: value = matrix[rowIndex-offset][colIndex-colOffset]
