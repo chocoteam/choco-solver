@@ -9,12 +9,12 @@
  */
 package org.chocosolver.solver.variables;
 
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.view.integer.IntAffineView;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -55,7 +55,7 @@ public class Task {
     public Task(Model model, int est, int lst, int d, int ect, int lct) {
         start = model.intVar(est, lst);
         duration = model.intVar(d);
-        if(ect == est+d && lct == lst+d) {
+        if (ect == est + d && lct == lst + d) {
             end = start.getModel().offset(start, d);
         } else {
             end = model.intVar(ect, lct);
@@ -111,7 +111,7 @@ public class Task {
     }
 
     private static boolean isOffsetView(IntVar s, int d, IntVar e) {
-        if(e instanceof IntAffineView) {
+        if (e instanceof IntAffineView) {
             IntAffineView<?> intOffsetView = (IntAffineView<?>) e;
             return intOffsetView.equals(s, 1, d);
         }
@@ -192,14 +192,24 @@ public class Task {
 
         @Override
         public void onUpdate(IntVar var, IEventType evt) throws ContradictionException {
+            boolean lcg = var.getModel().getSolver().isLCG();
             boolean fixpoint;
             do {
                 // start
-                fixpoint = S.updateBounds(E.getLB() - D.getUB(), E.getUB() - D.getLB(), this);
+                fixpoint = S.updateLowerBound(E.getLB() - D.getUB(), this,
+                        lcg ? Reason.r(E.getMinLit(), D.getMaxLit()) : Reason.undef());
+                fixpoint |= S.updateUpperBound(E.getUB() - D.getLB(), this,
+                        lcg ? Reason.r(E.getMaxLit(), D.getMinLit()) : Reason.undef());
                 // end
-                fixpoint |= E.updateBounds(S.getLB() + D.getLB(), S.getUB() + D.getUB(), this);
+                fixpoint |= E.updateLowerBound(S.getLB() + D.getLB(), this,
+                        lcg ? Reason.r(S.getMinLit(), D.getMinLit()) : Reason.undef());
+                fixpoint |= E.updateUpperBound(S.getUB() + D.getUB(), this,
+                        lcg ? Reason.r(S.getMaxLit(), D.getMaxLit()) : Reason.undef());
                 // duration
-                fixpoint |= D.updateBounds(E.getLB() - S.getUB(), E.getUB() - S.getLB(), this);
+                fixpoint |= D.updateLowerBound(E.getLB() - S.getUB(), this,
+                        lcg ? Reason.r(E.getMinLit(), S.getMaxLit()) : Reason.undef());
+                fixpoint |= D.updateUpperBound(E.getUB() - S.getLB(), this,
+                        lcg ? Reason.r(E.getMaxLit(), S.getMinLit()) : Reason.undef());
             } while (fixpoint && isEnum);
         }
 
