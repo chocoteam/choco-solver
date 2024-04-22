@@ -1452,7 +1452,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     default Constraint decreasing(IntVar[] vars, int delta) {
         IntVar[] rvars = vars.clone();
         ArrayUtils.reverse(rvars);
-        return new Constraint(ConstraintsName.INCREASING, new PropIncreasing(rvars, delta));
+        return increasing(vars, delta);
     }
 
     /**
@@ -1589,6 +1589,16 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @return a decresing constraint
      */
     default Constraint increasing(IntVar[] vars, int delta) {
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: increasing constraint is decomposed (due to LCG).");
+            }
+            for (int i = 0; i < vars.length - 1; i++) {
+                ref().arithm(vars[i], "<=", vars[i + 1], "+", delta).post();
+            }
+            return ref().voidConstraint();
+        }
         return new Constraint(ConstraintsName.INCREASING, new PropIncreasing(vars, delta));
     }
 
