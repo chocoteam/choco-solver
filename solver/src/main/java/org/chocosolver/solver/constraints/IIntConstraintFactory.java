@@ -1938,6 +1938,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         } else if (vars.length == 2) {
             return max(max, vars[0], vars[1]);
         } else {
+            if (ref().getSolver().isLCG() || ref().getSettings().enableSAT()) {
+                ref().addClausesBoolOrArrayEqVar(vars, max);
+                return ref().voidConstraint();
+            }
             return new Constraint(ConstraintsName.MAX, new PropBoolMax(vars, max));
         }
     }
@@ -1983,6 +1987,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         } else if (vars.length == 2) {
             return min(min, vars[0], vars[1]);
         } else {
+            if (ref().getSolver().isLCG() || ref().getSettings().enableSAT()) {
+                ref().addClausesBoolAndArrayEqVar(vars, min);
+                return ref().voidConstraint();
+            }
             return new Constraint(ConstraintsName.MIN, new PropBoolMin(vars, min));
         }
     }
