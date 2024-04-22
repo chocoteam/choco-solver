@@ -112,7 +112,7 @@ public class PropSat extends Propagator<Variable> {
      */
     public void initialize() {
         if (!initialized) {
-            if (add_var.size() > 0) {
+            if (!add_var.isEmpty()) {
                 addVariable(add_var.toArray(new Variable[0]));
             }
             add_var.clear();
@@ -184,14 +184,6 @@ public class PropSat extends Propagator<Variable> {
 
     protected ESat value(int svar) {
         return sat_.value(svar);
-    }
-
-    public void beforeAddingClauses() {
-        sat_.synchro();
-    }
-
-    public void afterAddingClauses() {
-        sat_.storeEarlyDeductions();
     }
 
     /**
