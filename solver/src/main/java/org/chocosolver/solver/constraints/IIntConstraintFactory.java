@@ -1271,6 +1271,17 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param limit a variable
      */
     default Constraint count(int value, IntVar[] vars, IntVar limit) {
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: count constraint is decomposed (due to LCG).");
+            }
+            BoolVar[] bs = new BoolVar[vars.length];
+            for (int i = 0; i < vars.length; i++) {
+                bs[i] = ref().isEq(vars[i], value);
+            }
+            return ref().sum(bs, "=", limit);
+        }
         return new Constraint(ConstraintsName.COUNT, new PropCount_AC(vars, value, limit));
     }
 
