@@ -961,7 +961,19 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint among(IntVar nbVar, IntVar[] vars, int[] values) {
         int[] vls = new TIntHashSet(values).toArray(); // remove double occurrences
-        Arrays.sort(vls);                              // sort
+        Arrays.sort(vls);
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: among constraint is decomposed (due to LCG).");
+            }
+            IntVar[] cs = ref().intVarArray(vls.length, 0, vars.length);
+            for (int i = 0; i < vls.length; i++) {
+                ref().count(vls[i], vars, cs[i]).post();
+            }
+            return ref().sum(cs, "=", nbVar);
+        }
+        // sort
         return new Constraint(ConstraintsName.AMONG, new PropAmongGAC(ArrayUtils.concat(vars, nbVar), vls));
     }
 
