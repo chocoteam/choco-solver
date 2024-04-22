@@ -12,6 +12,7 @@ package org.chocosolver.solver.constraints.nary.among;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -37,6 +38,7 @@ import java.util.Arrays;
  * @author Jean-Guillaume Fages
  * @since 8/02/14
  */
+@Explained(ignored = true, comment = "Decomposed into count constraints and a sum")
 public class PropAmongGAC extends Propagator<IntVar> {
 
     //***********************************************************************************
