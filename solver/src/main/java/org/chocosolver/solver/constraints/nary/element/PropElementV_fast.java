@@ -9,6 +9,9 @@
  */
 package org.chocosolver.solver.constraints.nary.element;
 
+import org.chocosolver.sat.MiniSat;
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -30,6 +33,7 @@ import static java.lang.Math.min;
  * @author Charles Prud'homme
  * @since 05/2013
  */
+@Explained(ignored = true, comment = "Replaced by PropElement2")
 public class PropElementV_fast extends Propagator<IntVar> {
 
     private static final int THRESHOLD = 100;
@@ -67,6 +71,8 @@ public class PropElementV_fast extends Propagator<IntVar> {
         //if((calls % 1_000)==0) System.out.printf("%d\t%d\t%.3f%n", success, calls, p);
         rem = false; // is modified in filter
         try {
+            index.updateLowerBound(offset, this, Reason.undef());
+            index.updateUpperBound(vars.length + offset - 3, this, Reason.undef());
             filter();
         } finally {
             calls++;
@@ -79,30 +85,29 @@ public class PropElementV_fast extends Propagator<IntVar> {
     private void filter() throws ContradictionException {
         boolean filter;
         do {
-            filter = index.updateBounds(offset, vars.length + offset - 3, this);
+            filter = false;
             int lb = index.getLB();
             int ub = index.getUB();
             int min = MAX_VALUE / 2;
             int max = MIN_VALUE / 2;
-            // 1. bottom up loop
-            for (int i = lb; i <= ub; i = index.nextValue(i)) {
+            // 1. bottom-up and top-down loops for bounded domains
+            for (int i = lb, j = ub; i <= j; i = index.nextValue(i), j = index.previousValue(j)) {
                 if (disjoint(var, vars[2 + i - offset])) {
-                    filter |= index.removeValue(i, this);
+                    filter |= index.removeValue(i, this, reason(i));
+                } else {
+                    min = min(min, vars[2 + i - offset].getLB());
+                    max = max(max, vars[2 + i - offset].getUB());
                 }
-                min = min(min, vars[2 + i - offset].getLB());
-                max = max(max, vars[2 + i - offset].getUB());
-            }
-            // 2. top-down loop for bounded domains
-            if (!index.hasEnumeratedDomain()) {
-                if (index.getUB() < ub) {
-                    for (int i = ub - 1; i >= lb; i = index.previousValue(i)) {
-                        if (disjoint(var, vars[2 + i - offset])) {
-                            filter |= index.removeValue(i, this);
-                        } else break;
-                    }
+                if(i==j)break;
+                if (disjoint(var, vars[2 + j - offset])) {
+                    filter |= index.removeValue(j, this, reason(j));
+                } else {
+                    min = min(min, vars[2 + j - offset].getLB());
+                    max = max(max, vars[2 + j - offset].getUB());
                 }
             }
-            filter |= var.updateBounds(min, max, this);
+            filter |= var.updateLowerBound(min, this, reason(true));
+            filter |= var.updateUpperBound(max, this, reason(false));
             if (index.isInstantiated()) {
                 filter |= propagateEquality(var, vars[2 + index.getValue() - offset]);
             }
@@ -115,10 +120,43 @@ public class PropElementV_fast extends Propagator<IntVar> {
         }
     }
 
+    private Reason reason(int v) {
+        if (lcg()) {
+            int[] ps = new int[index.getRange() + 3];
+            ps[1] = index.getMinLit();
+            ps[2] = index.getMaxLit();
+            int lb = index.getLB();
+            for (int j = lb, m = 3; j <= index.getUB(); j++, m++) {
+                if (index.contains(j)) {
+                    ps[m] = MiniSat.neg(vars[2 + j - offset].getLit(v, IntVar.LR_NE));
+                } else {
+                    ps[m] = MiniSat.neg(index.getLit(j + offset, IntVar.LR_NE));
+                }
+            }
+            return Reason.r(ps);
+        } else return Reason.undef();
+    }
+
+    private Reason reason(boolean min) {
+        if (lcg()) {
+            int[] ps = new int[vars.length - 2 + 1];
+            for (int j = 0, m = 1; j < vars.length - 2; j++, m++) {
+                if (index.contains(j)) {
+                    ps[m] = min ? vars[j - offset].getMinLit() : vars[j - offset].getMaxLit();
+                } else {
+                    ps[m] = index.getLit(j + offset, IntVar.LR_EQ);
+                }
+            }
+            return Reason.r(ps);
+        } else return Reason.undef();
+    }
+
     private boolean propagateEquality(IntVar a, IntVar b) throws ContradictionException {
         int s = a.getDomainSize() + b.getDomainSize();
-        boolean filter = a.updateBounds(b.getLB(), b.getUB(), this);
-        filter |= b.updateBounds(a.getLB(), a.getUB(), this);
+        boolean filter = a.updateLowerBound(b.getLB(), this, lcg() ? Reason.r(index.getValLit(), b.getMinLit()) : Reason.undef());
+        filter |= a.updateUpperBound(b.getUB(), this, lcg() ? Reason.r(index.getValLit(), b.getMaxLit()) : Reason.undef());
+        filter |= b.updateLowerBound(a.getLB(), this, lcg() ? Reason.r(index.getValLit(), a.getMinLit()) : Reason.undef());
+        filter |= b.updateUpperBound(a.getUB(), this, lcg() ? Reason.r(index.getValLit(), a.getMaxLit()) : Reason.undef());
         if (!fast || (a.getDomainSize() + b.getDomainSize() <= THRESHOLD)) {
             rem |= filterFrom(a, b);
             rem |= filterFrom(b, a);
@@ -136,7 +174,8 @@ public class PropElementV_fast extends Propagator<IntVar> {
             int ub = a.getUB();
             for (int i = lb; i <= ub; i = a.nextValue(i)) {
                 if (!b.contains(i)) {
-                    filter |= a.removeValue(i, this);
+                    filter |= a.removeValue(i, this,
+                            lcg() ? Reason.r(index.getValLit(), b.getLit(i, IntVar.LR_NE)) : Reason.undef());
                 }
             }
         }
@@ -167,7 +206,7 @@ public class PropElementV_fast extends Propagator<IntVar> {
     private boolean intersect(IntVar v1, int l1, int u1, IntVar v2, int l2, int u2) {
         int low = Math.max(l1, l2);
         int upp = Math.min(u1, u2);
-        for (int i = v1.nextValue(low -1); i <= upp; i = v1.nextValue(i)) {
+        for (int i = v1.nextValue(low - 1); i <= upp; i = v1.nextValue(i)) {
             if (v2.contains(i)) {
                 return true;
             }
