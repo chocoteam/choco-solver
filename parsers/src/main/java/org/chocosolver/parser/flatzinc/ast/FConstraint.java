@@ -441,6 +441,22 @@ public enum FConstraint {
                         new Constraint("BoolSumLeq0Reif", new PropBoolSumEq0Reif(bbs)).post();
                         return;
                     }
+                    if (c.isInstantiated()) {
+                        if (bs.length == 2) {
+                            if (as[0] == -1 && as[1] == 1) {
+                                model.reifyXeqYC(bs[1], bs[0], c.getValue(), r);
+                                return;
+                            }
+                            if (as[0] == 1 && as[1] == -1) {
+                                model.reifyXeqYC(bs[0], bs[1], c.getValue(), r);
+                                return;
+                            }
+                            if (as[0] == 1 && as[1] == 1) {
+                                model.reifyXeqYC(bs[0], model.intView(-1, bs[1], 0), c.getValue(), r);
+                                return;
+                            }
+                        }
+                    }
                 }
             }
             model.scalar(bs, as, "=", c).reifyWith(r);
@@ -480,7 +496,8 @@ public enum FConstraint {
                     new Constraint("BoolSumEq0Reif", new PropBoolSumEq0Reif(bbs)).post();
                     return;
                 }
-            } else if (c.isInstantiated()) {
+            }
+            if (c.isInstantiated()) {
                 if (bs.length == 1) {
                     if (as[0] == -1) {
                         model.reifyXgtC(bs[0], -(c.getValue() + 1), r);
@@ -493,7 +510,7 @@ public enum FConstraint {
                 }
                 if (bs.length == 2) {
                     if (as[0] == -1 && as[1] == 1) {
-                        model.arithm(bs[1], "<=", bs[0], "+", c.getValue()).reifyWith(r);
+                        model.reifyXltYC(bs[1], bs[0], c.getValue() + 1, r);
                         return;
                     }
                     if (as[0] == 1 && as[1] == -1) {
@@ -536,13 +553,13 @@ public enum FConstraint {
                     return;
                 }
             }
-            if (bs.length == 2 && c.isInstantiatedTo(0)) {
+            if (bs.length == 2 && c.isInstantiated()) {
                 if (as[0] == 1 && as[1] == -1) {
-                    model.reifyXneY(bs[0], bs[1], r);
+                    model.reifyXneYC(bs[0], bs[1], c.getValue(), r);
                     return;
                 }
                 if (as[0] == -1 && as[1] == 1) {
-                    model.reifyXneY(bs[0], bs[1], r);
+                    model.reifyXneYC(bs[0], bs[1], -c.getValue(), r);
                     return;
                 }
             }
@@ -2242,13 +2259,21 @@ public enum FConstraint {
             int_lin_ne_imp.build(model, datas, id, exps, annotations);
         }
     },
+    bool_sum_eq {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar[] as = exps.get(0).toBoolVarArray(model);
+            IntVar c = exps.get(1).intVarValue(model);
+            model.sum(as, "=", c).post();
+        }
+    },
     int_eq_imp {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
             IntVar a = exps.get(0).intVarValue(model);
             IntVar b = exps.get(1).intVarValue(model);
             BoolVar r = exps.get(2).boolVarValue(model);
-            a.eq(b).decompose().impliedBy(r);
+            model.impXrelYC(a, "=", b, 0, r);
         }
     },
     int_ge_imp {
@@ -2257,7 +2282,7 @@ public enum FConstraint {
             IntVar a = exps.get(0).intVarValue(model);
             IntVar b = exps.get(1).intVarValue(model);
             BoolVar r = exps.get(2).boolVarValue(model);
-            a.ge(b).decompose().impliedBy(r);
+            model.impXrelYC(a, ">=", b, 0, r);
         }
     },
     int_gt_imp {
@@ -2266,7 +2291,7 @@ public enum FConstraint {
             IntVar a = exps.get(0).intVarValue(model);
             IntVar b = exps.get(1).intVarValue(model);
             BoolVar r = exps.get(2).boolVarValue(model);
-            a.gt(b).decompose().impliedBy(r);
+            model.impXrelYC(a, ">", b, 0, r);
         }
     },
     int_le_imp {
@@ -2275,7 +2300,7 @@ public enum FConstraint {
             IntVar a = exps.get(0).intVarValue(model);
             IntVar b = exps.get(1).intVarValue(model);
             BoolVar r = exps.get(2).boolVarValue(model);
-            a.le(b).decompose().impliedBy(r);
+            model.impXrelYC(a, "<=", b, 0, r);
         }
     },
     int_lt_imp {
@@ -2284,7 +2309,7 @@ public enum FConstraint {
             IntVar a = exps.get(0).intVarValue(model);
             IntVar b = exps.get(1).intVarValue(model);
             BoolVar r = exps.get(2).boolVarValue(model);
-            a.lt(b).decompose().impliedBy(r);
+            model.impXrelYC(a, "<", b, 0, r);
         }
     },
     int_ne_imp {
@@ -2293,7 +2318,7 @@ public enum FConstraint {
             IntVar a = exps.get(0).intVarValue(model);
             IntVar b = exps.get(1).intVarValue(model);
             BoolVar r = exps.get(2).boolVarValue(model);
-            a.ne(b).decompose().impliedBy(r);
+            model.impXrelYC(a, "!=", b, 0, r);
         }
     },
     int_lin_eq_imp {
@@ -2303,6 +2328,16 @@ public enum FConstraint {
             IntVar[] bs = exps.get(1).toIntVarArray(model);
             int c = exps.get(2).intValue();
             BoolVar r = exps.get(3).boolVarValue(model);
+            if (bs.length == 2) {
+                if (as[0] == 1 && as[1] == -1) {
+                    model.impXrelYC(bs[0], "=", bs[1], c, r);
+                    return;
+                }
+                if (as[0] == -1 && as[1] == 1) {
+                    model.impXrelYC(bs[1], "=", bs[0], c, r);
+                    return;
+                }
+            }
             model.scalar(bs, as, "=", c, as.length + 1).impliedBy(r);
         }
     },
@@ -2313,6 +2348,17 @@ public enum FConstraint {
             IntVar[] bs = exps.get(1).toIntVarArray(model);
             int c = exps.get(2).intValue();
             BoolVar r = exps.get(3).boolVarValue(model);
+            if (bs.length == 2) {
+                if (as[0] == 1 && as[1] == -1) {
+                    model.impXrelYC(bs[0], ">=", bs[1], c, r);
+                    return;
+                }
+                if (as[0] == -1 && as[1] == 1) {
+                    model.impXrelYC(bs[1], ">=", bs[0], c, r);
+                    return;
+                }
+            }
+
             model.scalar(bs, as, ">=", c, as.length + 1).impliedBy(r);
         }
     },
@@ -2323,6 +2369,16 @@ public enum FConstraint {
             IntVar[] bs = exps.get(1).toIntVarArray(model);
             int c = exps.get(2).intValue();
             BoolVar r = exps.get(3).boolVarValue(model);
+            if (bs.length == 2) {
+                if (as[0] == 1 && as[1] == -1) {
+                    model.impXrelYC(bs[0], ">", bs[1], c, r);
+                    return;
+                }
+                if (as[0] == -1 && as[1] == 1) {
+                    model.impXrelYC(bs[1], ">", bs[0], c, r);
+                    return;
+                }
+            }
             model.scalar(bs, as, ">", c, as.length + 1).impliedBy(r);
         }
     },
@@ -2333,6 +2389,16 @@ public enum FConstraint {
             IntVar[] bs = exps.get(1).toIntVarArray(model);
             int c = exps.get(2).intValue();
             BoolVar r = exps.get(3).boolVarValue(model);
+            if (bs.length == 2) {
+                if (as[0] == 1 && as[1] == -1) {
+                    model.impXrelYC(bs[0], "<=", bs[1], c, r);
+                    return;
+                }
+                if (as[0] == -1 && as[1] == 1) {
+                    model.impXrelYC(bs[1], "<=", bs[0], c, r);
+                    return;
+                }
+            }
             model.scalar(bs, as, "<=", c, as.length + 1).impliedBy(r);
         }
     },
@@ -2343,6 +2409,16 @@ public enum FConstraint {
             IntVar[] bs = exps.get(1).toIntVarArray(model);
             int c = exps.get(2).intValue();
             BoolVar r = exps.get(3).boolVarValue(model);
+            if (bs.length == 2) {
+                if (as[0] == 1 && as[1] == -1) {
+                    model.impXrelYC(bs[0], "<", bs[1], c, r);
+                    return;
+                }
+                if (as[0] == -1 && as[1] == 1) {
+                    model.impXrelYC(bs[1], "<", bs[0], c, r);
+                    return;
+                }
+            }
             model.scalar(bs, as, "<", c, as.length + 1).impliedBy(r);
         }
     },
@@ -2353,6 +2429,16 @@ public enum FConstraint {
             IntVar[] bs = exps.get(1).toIntVarArray(model);
             int c = exps.get(2).intValue();
             BoolVar r = exps.get(3).boolVarValue(model);
+            if (bs.length == 2) {
+                if (as[0] == 1 && as[1] == -1) {
+                    model.impXrelYC(bs[0], "!=", bs[1], c, r);
+                    return;
+                }
+                if (as[0] == -1 && as[1] == 1) {
+                    model.impXrelYC(bs[1], "!=", bs[0], c, r);
+                    return;
+                }
+            }
             model.scalar(bs, as, "!=", c, as.length + 1).impliedBy(r);
         }
     },
@@ -2388,7 +2474,7 @@ public enum FConstraint {
             for (int i = 0; i < NL; i++) {
                 LITS[i + PL] = bs[i].not();
             }
-            model.sum(LITS, ">", 0).reifyWith(r);
+            model.addClausesBoolOrArrayEqVar(LITS, r);
         }
     },
 
