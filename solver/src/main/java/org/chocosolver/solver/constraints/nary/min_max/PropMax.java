@@ -9,6 +9,8 @@
  */
 package org.chocosolver.solver.constraints.nary.min_max;
 
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -24,6 +26,7 @@ import static org.chocosolver.util.tools.ArrayUtils.concat;
  * @author Jean-Guillaume Fages
  * @since 15/12/2013
  */
+@Explained
 public class PropMax extends Propagator<IntVar> {
 
     private final int n;
@@ -49,16 +52,19 @@ public class PropMax extends Propagator<IntVar> {
             int max = vars[n].getUB();
             // update max
             for (int i = 0; i < n; i++) {
-                filter |= vars[i].updateUpperBound(max, this);
+                filter |= vars[i].updateUpperBound(max, this,
+                        lcg() ? Reason.r(vars[n].getMaxLit()) : Reason.undef());
                 lb = Math.max(lb, vars[i].getLB());
                 ub = Math.max(ub, vars[i].getUB());
             }
-            filter |= vars[n].updateLowerBound(lb, this);
-            filter |= vars[n].updateUpperBound(ub, this);
+            filter |= vars[n].updateLowerBound(lb, this,
+                    lcg() ? Propagator.lbounds(vars[n], vars) : Reason.undef());
+            filter |= vars[n].updateUpperBound(ub, this,
+                    lcg() ? Propagator.ubounds(vars[n], vars) : Reason.undef());
             lb = Math.max(lb, vars[n].getLB());
             // back-propagation
             int c = 0, idx = -1;
-            for (int i = 0; i < n; i++) {
+            for (int i = 0; i < n && c >= i - 1; i++) {
                 if (vars[i].getUB() < lb) {
                     c++;
                 } else {
@@ -66,17 +72,19 @@ public class PropMax extends Propagator<IntVar> {
                 }
             }
             if (c == vars.length - 2) {
-                filter = false;
-                vars[idx].updateBounds(vars[n].getLB(), vars[n].getUB(), this);
-                if (vars[n].isInstantiated()) {
-                    setPassive();
-                } else if (vars[idx].hasEnumeratedDomain()) {
-                    // for enumerated variables only
-                    while (vars[n].getLB() != vars[idx].getLB()
-                            || vars[n].getUB() != vars[idx].getUB()) {
-                        vars[n].updateBounds(vars[idx].getLB(), vars[idx].getUB(), this);
-                        vars[idx].updateBounds(vars[n].getLB(), vars[n].getUB(), this);
+                Reason r = Reason.undef();
+                if (lcg()) {
+                    int[] ps = new int[n + 1];
+                    for (int i = 0, m = 1; i < n; i++, m++) {
+                        ps[m] = vars[i].getMaxLit();
                     }
+                    ps[idx + 1] = vars[n].getMinLit();
+                    r = Reason.r(ps);
+                }
+                filter = vars[idx].updateLowerBound(vars[n].getLB(), this, r);
+                if (vars[n].isInstantiated() && vars[idx].isInstantiatedTo(vars[n].getValue())) {
+                    setPassive();
+                    return;
                 }
             }
         } while (filter);
@@ -109,7 +117,7 @@ public class PropMax extends Propagator<IntVar> {
         }
         return ESat.UNDEFINED;
     }
-    
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
