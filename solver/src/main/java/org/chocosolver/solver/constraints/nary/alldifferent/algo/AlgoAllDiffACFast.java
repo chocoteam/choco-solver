@@ -9,13 +9,14 @@
  */
 package org.chocosolver.solver.constraints.nary.alldifferent.algo;
 
-import java.util.BitSet;
-import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
+
+import java.util.BitSet;
 
 /**
  * Algorithm of Alldifferent with AC
@@ -41,7 +42,7 @@ public class AlgoAllDiffACFast extends AlgoAllDiffAC{
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public AlgoAllDiffACFast(IntVar[] variables, ICause cause) {
+    public AlgoAllDiffACFast(IntVar[] variables, Propagator<IntVar> cause) {
         super(variables, cause);
         n = vars.length;
         distinction = new BitSet(n2);
@@ -109,14 +110,7 @@ public class AlgoAllDiffACFast extends AlgoAllDiffAC{
                         filter |= v.removeValue(k, aCause);
                         digraph.removeEdge(i, j);
                     } else { // Remove type 2 redundant edges between Xc-Γ(A) and Dc-A.
-                        if (nodeSCC[i] != nodeSCC[j]) {
-                            if (matching[i] == j) {
-                                filter |= v.instantiateTo(k, aCause);
-                            } else {
-                                filter |= v.removeValue(k, aCause);
-                                digraph.removeEdge(i, j);
-                            }
-                        }
+                        filter |= filterVar(i, j, v,  k);
                     }
                 }
             }

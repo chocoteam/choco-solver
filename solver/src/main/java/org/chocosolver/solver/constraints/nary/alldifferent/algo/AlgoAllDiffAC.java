@@ -10,26 +10,33 @@
 package org.chocosolver.solver.constraints.nary.alldifferent.algo;
 
 import gnu.trove.map.hash.TIntIntHashMap;
-import org.chocosolver.solver.ICause;
+import org.chocosolver.sat.MiniSat;
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.graphOperations.connectivity.StrongConnectivityFinder;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+import org.chocosolver.util.sort.ArraySort;
+import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.BitSet;
 
+import static org.chocosolver.solver.variables.IntVar.*;
+
 /**
  * Algorithm of Alldifferent with AC
- *
+ * <p>
  * Uses Regin algorithm
  * Runs in O(m.n) worst case time for the initial propagation
  * but has a good average behavior in practice
  * <p/>
  * Keeps track of previous matching for further calls
  * <p/>
- * 
+ *
  * @author Jean-Guillaume Fages
  */
 public class AlgoAllDiffAC {
@@ -49,22 +56,29 @@ public class AlgoAllDiffAC {
     private final BitSet in;
     TIntIntHashMap map;
     int[] fifo;
+    // for LCG
+    TIntIntHashMap rmap;
+    IntIterableRangeSet set;
+    // input
     protected IntVar[] vars;
-    ICause aCause;
+    Propagator<IntVar> aCause;
+    int[] order;
+    ArraySort<?> sorter;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public AlgoAllDiffAC(IntVar[] variables, ICause cause) {
+    public AlgoAllDiffAC(IntVar[] variables, Propagator<IntVar> cause) {
         this.vars = variables;
-		aCause = cause;
+        aCause = cause;
         n = vars.length;
         matching = new int[n];
         for (int i = 0; i < n; i++) {
             matching[i] = -1;
         }
         map = new TIntIntHashMap();
+        rmap = new TIntIntHashMap();
         IntVar v;
         int ub;
         int idx = n;
@@ -74,6 +88,7 @@ public class AlgoAllDiffAC {
             for (int j = v.getLB(); j <= ub; j = v.nextValue(j)) {
                 if (!map.containsKey(j)) {
                     map.put(j, idx);
+                    rmap.put(idx, j);
                     idx++;
                 }
             }
@@ -85,9 +100,14 @@ public class AlgoAllDiffAC {
         father = new int[n2];
         in = new BitSet(n2);
         SCCfinder = new StrongConnectivityFinder(digraph);
+        order = ArrayUtils.array(0, n - 1);
+        if (aCause.getModel().getSolver().isLCG()) {
+            set = new IntIterableRangeSet();
+            sorter = new ArraySort<>(n, false, true);
+        }
     }
 
-    protected void makeDigraph(){
+    protected void makeDigraph() {
         digraph = new DirectedGraph(n2 + 1, SetType.BITSET, false);
     }
 
@@ -132,7 +152,7 @@ public class AlgoAllDiffAC {
             tryToMatch(i);
         }
         for (int i = 0; i < n; i++) {
-            matching[i] = digraph.getPredecessorsOf(i).isEmpty()?-1:digraph.getPredecessorsOf(i).iterator().next();
+            matching[i] = digraph.getPredecessorsOf(i).isEmpty() ? -1 : digraph.getPredecessorsOf(i).iterator().next();
         }
     }
 
@@ -148,7 +168,33 @@ public class AlgoAllDiffAC {
                 tmp = father[tmp];
             }
         } else {
-            vars[0].instantiateTo(vars[0].getLB()-1,aCause);
+            Reason reason = Reason.undef();
+            if (aCause.lcg()) {
+                // check last cut
+                set.clear();
+                in.set(i);
+                int nvars = 0;
+                for (int l = in.nextSetBit(0); l > -1; l = in.nextSetBit(l + 1)) {
+                    if (l < n) {
+                        nvars++;
+                    } else {
+                        set.add(rmap.get(l));
+                    }
+                }
+                int[] ps = new int[1 + nvars * (2 + (set.max() + 1 - set.min()) - set.size())];
+                int m = 1;
+                for (int l = in.nextSetBit(0); l > -1 && l < n; l = in.nextSetBit(l + 1)) {
+                    ps[m++] = MiniSat.neg(vars[l].getLit(set.min(), LR_GE));
+                    for (int w = set.nextValueOut(set.min()); w < set.max(); w = set.nextValueOut(w)) {
+                        ps[m++] = MiniSat.neg(vars[l].getLit(w, LR_NE));
+                    }
+                    ps[m++] = MiniSat.neg(vars[l].getLit(set.max(), LR_LE));
+                }
+                assert m == ps.length;
+                reason = Reason.r(ps);
+
+            }
+            aCause.fails(reason);
         }
     }
 
@@ -202,35 +248,88 @@ public class AlgoAllDiffAC {
     }
 
     boolean filterVar(int i) throws ContradictionException {
-        boolean filter =false;
+        boolean filter = false;
         IntVar v = vars[i];
         int ub = v.getUB();
         for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
             int j = map.get(k);
-            if (nodeSCC[i] != nodeSCC[j]) {
-                if (matching[i] == j) {
-                    filter |= v.instantiateTo(k, aCause);
-                } else {
-                    filter |= v.removeValue(k, aCause);
-                    digraph.removeEdge(i, j);
-                }
-            }
+            filter |= filterVar(i, j, v, k);
         }
         return filter;
     }
 
+    boolean filterVar(int i, int j, IntVar v, int k) throws ContradictionException {
+        if (nodeSCC[i] != nodeSCC[j]) {
+            if (matching[i] == j) { // fail fast
+                if (!v.getModel().getSolver().isLCG()) {
+                    return v.instantiateTo(k, aCause);
+                }// else: ignore and let the loop empties the domain
+            } else {
+                Reason reason = Reason.undef();
+                if (v.getModel().getSolver().isLCG()) {
+                    int nvars = 0;
+                    int val;
+                    set.clear();
+                    set.add(rmap.get(j));
+                    for (int l = SCCfinder.getSCCFirstNode(nodeSCC[j]); l > -1; l = SCCfinder.getNextNode(l)) {
+                        if (l < n) {
+                            nvars++;
+                        } else {
+                            val = rmap.get(l);
+                            set.add(val);
+                        }
+                    }
+                    if (set.size() == 1) {
+                        int vidx = digraph.getSuccessorsOf(j).min();
+                        if (vars[vidx].isInstantiated()) {
+                            assert vars[vidx].isInstantiatedTo(k);
+                            reason = Reason.r(vars[vidx].getValLit());
+                        } else {
+                            // todo: While the component variable has not yet been determined,
+                            //  but will be shortly, the chronology of events has not been respected.
+                            return false;
+                        }
+                    } else {
+                        int[] ps = new int[1 + nvars * (2 + (set.max() + 1 - set.min()) - set.size())];
+                        int m = 1;
+                        for (int l = SCCfinder.getSCCFirstNode(nodeSCC[j]); l > -1; l = SCCfinder.getNextNode(l)) {
+                            if (l < n) {
+                                ps[m++] = MiniSat.neg(vars[l].getLit(set.min(), LR_GE));
+                                for (int w = set.nextValueOut(set.min()); w < set.max(); w = set.nextValueOut(w)) {
+                                    ps[m++] = MiniSat.neg(vars[l].getLit(w, LR_NE));
+                                }
+                                ps[m++] = MiniSat.neg(vars[l].getLit(set.max(), LR_LE));
+                            }
+                        }
+                        assert m == ps.length;
+                        reason = Reason.r(ps);
+                    }
+                }
+                if (v.removeValue(k, aCause, reason)) {
+                    digraph.removeEdge(i, j);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private boolean filter() throws ContradictionException {
-        boolean filter =false;
+        boolean filter = false;
         distinguish();
         buildSCC();
         int j, ub;
         IntVar v;
+        if (aCause.getModel().getSolver().isLCG()) {
+            sorter.sort(order, n, (k, l) -> nodeSCC[k] - nodeSCC[l]); // todo extract
+        }
         for (int i = 0; i < n; i++) {
-            filter|=filterVar(i);
+            filter |= filterVar(order[i]);
         }
         for (int i = 0; i < n; i++) {
             v = vars[i];
             if (!v.hasEnumeratedDomain()) {
+                assert !v.getModel().getSolver().isLCG() : "not implemented yet for LCG";
                 ub = v.getUB();
                 for (int k = v.getLB(); k <= ub; k++) {
                     j = map.get(k);
