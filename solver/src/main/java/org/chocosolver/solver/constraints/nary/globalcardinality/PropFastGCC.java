@@ -14,6 +14,7 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
@@ -59,7 +60,7 @@ public class PropFastGCC extends Propagator<IntVar> {
     public PropFastGCC(IntVar[] decvars, int[] restrictedValues, TIntIntHashMap map, IntVar[] valueCardinalities) {
         super(ArrayUtils.append(decvars, valueCardinalities), PropagatorPriority.LINEAR, false);
         if (restrictedValues.length != valueCardinalities.length) {
-            throw new UnsupportedOperationException();
+            throw new SolverException("restricted values array and cardinalities array have different length");
         }
         this.values = restrictedValues;
         this.n = decvars.length;
