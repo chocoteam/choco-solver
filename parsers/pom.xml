@@ -84,6 +84,18 @@
                             </transformers>
                             <filters>
                                 <filter>
+                                    <artifact>org.choco-solver:choco-solver</artifact>
+                                    <includes>
+                                        <include>**</include>
+                                    </includes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.choco-solver:choco-parsers</artifact>
+                                    <includes>
+                                        <include>**</include>
+                                    </includes>
+                                </filter>
+                                <filter>
                                     <artifact>com.ibm.icu:icu4j</artifact>
                                     <excludes>
                                         <exclude>com/ibm/icu/impl/data/**</exclude>
