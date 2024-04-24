@@ -72,7 +72,7 @@ public class PropCount_AC extends Propagator<IntVar> {
         for (; i < Math.min(4, vars.length-1); i++) {
             st.append(vars[i].getName()).append(", ");
         }
-        if (i < vars.length - 2) {
+        if (i < vars.length - 1) {
             st.append("..., ");
         }
         st.append("limit=").append(vars[vars.length - 1].getName());
