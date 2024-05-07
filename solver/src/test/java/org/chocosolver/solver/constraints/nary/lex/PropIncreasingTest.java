@@ -13,6 +13,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.strategy.FullyRandom;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -113,6 +114,54 @@ public class PropIncreasingTest {
         s.setSearch(Search.inputOrderLBSearch(z, y, x));
         s.findAllSolutions();
         Assert.assertEquals(s.getSolutionCount(), 1);
+    }
+
+    @Test(groups = "1s")
+    public void test040() {
+        Model m = new Model();
+        IntVar x = m.intVar("x", 1, 3);
+        IntVar y = m.intVar("y", 1, 3);
+        BoolVar b = m.increasing(new IntVar[]{x, y}, 0).reify();
+        m.arithm(b, "=", 1).post();
+        Solver s = m.getSolver();
+        s.findAllSolutions();
+        Assert.assertEquals(s.getSolutionCount(), 6);
+    }
+
+    @Test(groups = "1s")
+     public void test041() {
+         Model m = new Model();
+         IntVar x = m.intVar("x", 1, 3);
+         IntVar y = m.intVar("y", 1, 3);
+         BoolVar b = m.increasing(new IntVar[]{x, y}, 1).reify();
+         m.arithm(b, "=", 1).post();
+         Solver s = m.getSolver();
+         s.findAllSolutions();
+         Assert.assertEquals(s.getSolutionCount(), 3);
+     }
+
+     @Test(groups = "1s")
+     public void test050() {
+         Model m = new Model();
+         IntVar x = m.intVar("x", 1, 3);
+         IntVar y = m.intVar("y", 1, 3);
+         BoolVar b = m.increasing(new IntVar[]{x, y}, 0).reify();
+         m.arithm(b, "=", 0).post();
+         Solver s = m.getSolver();
+         s.findAllSolutions();
+         Assert.assertEquals(s.getSolutionCount(), 3);
+     }
+
+    @Test(groups = "1s")
+    public void test051() {
+        Model m = new Model();
+        IntVar x = m.intVar("x", 1, 3);
+        IntVar y = m.intVar("y", 1, 3);
+        BoolVar b = m.increasing(new IntVar[]{x, y}, 1).reify();
+        m.arithm(b, "=", 0).post();
+        Solver s = m.getSolver();
+        s.findAllSolutions();
+        Assert.assertEquals(s.getSolutionCount(), 6);
     }
 
 }
