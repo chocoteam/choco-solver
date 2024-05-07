@@ -127,12 +127,17 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
         for (int i = 0; i < n; i++) {
             if (!(vars[i].isInstantiated() && vars[i + n].isInstantiated())) {
                 allInst = false;
+                break;
             }
-            if (X[i].isInstantiated() && !Y[X[i].getValue() - minX].contains(i + minY)) {
-                return ESat.FALSE;
+            if (X[i].isInstantiated()) {
+                int x = X[i].getValue() - minX;
+                if (x < 0 || x >= n) return ESat.FALSE;
+                if (!Y[x].contains(i + minY) && Y[x].isInstantiated()) return ESat.FALSE;
             }
-            if (Y[i].isInstantiated() && !X[Y[i].getValue() - minY].contains(i + minX)) {
-                return ESat.FALSE;
+            if (Y[i].isInstantiated()) {
+                int y = Y[i].getValue() - minY;
+                if (y < 0 || y >= n) return ESat.FALSE;
+                if (!X[y].contains(i + minX) && X[i].isInstantiated()) return ESat.FALSE;
             }
         }
         if (allInst) return ESat.TRUE;
