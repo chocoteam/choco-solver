@@ -359,13 +359,13 @@ public interface IDecompositionFactory extends ISelf<Model> {
     default void circuitDec(IntVar[] S, int offset) {
         int n = S.length;
         ref().allDifferent(S, "AC").post();
-        IntVar[] t = ref().intVarArray("t", n - 1, 1 + offset, n - 1 + offset);
-        ref().allDifferent(t, "AC3").post();
-        ref().element(t[0], S, ref().intVar(offset), 0).post();
+        IntVar[] t = ref().intVarArray("t", n - 1, offset + 1, n + offset -1 );
+        ref().allDifferent(t, "AC").post();
+        ref().arithm(t[0], "=", S[0]).post();
         for (int i = 1; i < n - 2; i++) {
-            ref().element(t[i], S, t[i - 1], 0).post();
+            ref().element(t[i], S, t[i - 1], offset).post();
         }
-        ref().element(ref().intVar(offset), S, t[n - 2], 0).post();
+        ref().element(ref().intVar(offset), S, t[n - 2], offset).post();
     }
 
     /**
