@@ -72,7 +72,7 @@ public class PerformanceTest {
         return getInstances("instances.csv");
     }
 
-    @Test(groups = "mzn", dataProvider = "instances", timeOut = 600_000, priority = 2)
+    @Test(groups = "mzn", dataProvider = "instances", timeOut = 60_000, priority = 2)
     public void testThemAll(String path, int solutions, Integer bst, int nodes, int failures) throws SetUpException {
         String file = Objects.requireNonNull(this.getClass().getResource(path)).getFile();
         String[] args = new String[]{
@@ -84,22 +84,21 @@ public class PerformanceTest {
         };
         Flatzinc fzn = new Flatzinc();
         fzn.setUp(args);
-        //fzn.getSettings().setLCG(true).setWarnUser(false);
         fzn.createSolver();
         fzn.buildModel();
         fzn.configureSearch();
         //fzn.getModel().displayVariableOccurrences();
         //fzn.getModel().displayPropagatorOccurrences();
         fzn.solve();
-//        Assert.assertEquals(fzn.getModel().getSolver().getSearchState(), SearchState.TERMINATED, "Unexpected search state");
+        Assert.assertEquals(fzn.getModel().getSolver().getSearchState(), SearchState.TERMINATED, "Unexpected search state");
         if (bst != null) {
             Assert.assertEquals(fzn.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), bst, "Unexpected best solution");
-        }else{
+        } else {
             Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), solutions, "Unexpected number of solutions");
         }
-//        Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), solutions, "Unexpected number of solutions");
-//        Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), nodes, "Unexpected number of nodes");
-//        Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), failures, "Unexpected number of failures");
+        Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), solutions, "Unexpected number of solutions");
+        Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), nodes, "Unexpected number of nodes");
+        Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), failures, "Unexpected number of failures");
     }
 
     @DataProvider()
@@ -272,5 +271,40 @@ public class PerformanceTest {
         Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), 22, "Unexpected number of solutions");
         Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), 313, "Unexpected number of nodes");
         Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), 257, "Unexpected number of failures");
+    }
+
+    @DataProvider()
+    public Object[][] lcg() {
+        return getInstances("lcg.csv");
+    }
+
+    @Test(groups = "mzn", dataProvider = "lcg", timeOut = 60_000, priority = 2)
+    public void testLCG(String path, int solutions, Integer bst, int nodes, int failures) throws SetUpException {
+        String file = Objects.requireNonNull(this.getClass().getResource(path)).getFile();
+        String[] args = new String[]{
+                file,
+                "--disable-shutdown-hook",
+                "-limit", "[50s]", // but, problems are expected to end within 15s max
+                "-lvl", LEVEL,
+                "-p", "1",
+        };
+        Flatzinc fzn = new Flatzinc();
+        fzn.setUp(args);
+        fzn.getSettings().setLCG(true).setWarnUser(false);
+        fzn.createSolver();
+        fzn.buildModel();
+        fzn.configureSearch();
+        //fzn.getModel().displayVariableOccurrences();
+        //fzn.getModel().displayPropagatorOccurrences();
+        fzn.solve();
+        Assert.assertEquals(fzn.getModel().getSolver().getSearchState(), SearchState.TERMINATED, "Unexpected search state");
+        if (bst != null) {
+            Assert.assertEquals(fzn.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), bst, "Unexpected best solution");
+        } else {
+            Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), solutions, "Unexpected number of solutions");
+        }
+        Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), solutions, "Unexpected number of solutions");
+        Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), nodes, "Unexpected number of nodes");
+        Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), failures, "Unexpected number of failures");
     }
 }

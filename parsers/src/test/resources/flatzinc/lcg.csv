@@ -1,0 +1,10 @@
+#year,name,solutions,best,nodes,fails
+## Testing CIRCUIT
+2019,vrp-s5-v2-c6_vrp-v2-c6_det.fzn,112,247,15248,9393
+2019,vrp-s3-v2-c7_vrp-v2-c7_det.fzn,35,230,29435,27157
+2020,p1f-pjs+10_new.fzn,27,300,6549,6003
+2020,p1f-pjs+17_new.fzn,0,_,4900,4901
+# time limit
+#2020,is+Ws5Q6fhGi5.fzn,28,180224,12860,3303
+2020,is+A3PZaPjnUz.fzn,33,103936,1683,168
+## Testing SUBCIRCUIT
