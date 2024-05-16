@@ -17,7 +17,9 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -136,5 +138,25 @@ public class SubcircuitTest {
 
 	private static int parmi(int k, int n) {
 		return factorial(n) / (factorial(k) * factorial(n - k));
+	}
+
+	@Test(groups = "1s")
+	public void testThomSerg1() {
+		int n = 3;
+		Model model = new Model();
+
+		IntVar[] nodes = model.intVarArray(3, 0, n - 1);
+		IntVar length = model.intVar(0, n);
+
+		BoolVar a = model.subCircuit(nodes, 0, length).reify();
+		model.arithm(a, "=", 1).post();
+
+		model.arithm(nodes[0], "!=", 0).post();
+		model.arithm(nodes[1], "=", 1).post();
+		model.arithm(nodes[2], "!=", 2).post();
+
+		Solver solver = model.getSolver();
+		solver.showDecisions();
+		Assert.assertNotNull(solver.findSolution());
 	}
 }
