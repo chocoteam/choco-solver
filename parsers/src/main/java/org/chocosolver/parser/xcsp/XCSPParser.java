@@ -1358,6 +1358,14 @@ public class XCSPParser implements XCallbacks2 {
     }
 
     @Override
+    public void buildCtrLex(String id, XVariables.XVarInteger[] list, int[] limit, Types.TypeOperatorRel operator) {
+        IntVar[][] scopes = new IntVar[2][];
+        scopes[0] = vars(list);
+        scopes[1] = Arrays.stream(limit).mapToObj(l -> model.intVar(l)).toArray(IntVar[]::new);
+        lexCtr(scopes, operator);
+    }
+
+    @Override
     public void buildCtrLex(String id, XVariables.XVarInteger[][] lists, Types.TypeOperatorRel operator) {
         lexCtr(vars(lists), operator);
     }
