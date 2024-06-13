@@ -1,0 +1,3 @@
+[submodule "solver/src/main/java/cpp"]
+	path = solver/src/main/java/cpp
+	url = https://github.com/chocoteam/cpp-integration
