@@ -67,12 +67,6 @@ public class GraphvizGenerator extends SearchViz {
         connected = true;
     }
 
-
-    @Override
-    protected boolean connect(String label) {
-        return true;
-    }
-
     @Override
     protected void disconnect() {
         try {

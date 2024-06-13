@@ -52,7 +52,10 @@ OPTIONS:
         Override the jar file.  (The default is %CHOCO_JAR%.)
 
     --jargs <args>
-    Override default java argument (The default is %JAVA_ARGS%.)
+        Override default java argument (The default is %JAVA_ARGS%.)
+
+    --cp-profiler <id>,<port>
+        Enable the cp-profiler with the given id and port.
 
 EXAMPLES:
 
@@ -100,6 +103,10 @@ if /i "%~1"=="-r" (
 )else
 if /i "%~1"=="-jar" (
     set "CHOCO_JAR=%~2"
+    shift
+)else
+if /i "%~1"=="--cp-profiler" (
+    set ARGS=%ARGS%" --cp-profiler %~2"
     shift
 )else
 if /i "%~1"=="--jargs" (

@@ -41,8 +41,11 @@ OPTIONS:
     -jar <j>
         Override the jar file.  (The default is $CHOCO_JAR.)
 
+    --cp-profiler id,port
+        Enable the cp-profiler with the given id and port.
+
     --jargs <args>
-		Override default java argument (The default is $JAVA_ARGS.)
+		    Override default java argument (The default is $JAVA_ARGS.)
 		
 EXAMPLES:
 	
@@ -112,10 +115,15 @@ do
             shift
         ;;
 
-    	--jargs)
-            JAVA_ARGS="$2"
-            shift
-        ;;
+        --jargs)
+              JAVA_ARGS="$2"
+              shift
+          ;;
+
+        --cp-profiler)
+              ARGS="$ARGS --cp-profiler $2"
+              shift
+          ;;
 
         -*)
             echo "$0: unknown option \`$1'" 1>&2

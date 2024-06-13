@@ -42,11 +42,6 @@ public class GephiGenerator extends SearchViz {
     }
 
     @Override
-    protected boolean connect(String label) {
-        return true;
-    }
-
-    @Override
     protected void disconnect() {
         Path file = Paths.get(instance);
         if (Files.exists(file)) {

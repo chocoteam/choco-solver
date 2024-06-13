@@ -22,6 +22,7 @@ import org.chocosolver.solver.learn.XParameters;
 import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.SearchParams;
+import org.chocosolver.solver.trace.CPProfiler;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.VariableUtils;
@@ -30,6 +31,7 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -172,6 +174,9 @@ public abstract class RegParser implements IParser {
 
     @Option(name = "-dfx", usage = "Force default explanation algorithm.")
     public boolean dftexp = false;
+
+    @Option(name = "--cp-profiler", usage = "Connect to CP-Profiler. Two comma-separated values are expected: the execution id and the port.")
+    public String cpProfiler = null;
 
     /**
      * Default settings to apply
@@ -339,7 +344,19 @@ public abstract class RegParser implements IParser {
             getModel().getSolver().log().white().printf("Problem solving starts at %s\n", dtf.format(now));
         }
         if (portfolio.getModels().size() == 1) {
+            CPProfiler profiler = null;
+            if (cpProfiler != null) {
+                String[] params = cpProfiler.split(",");
+                profiler = new CPProfiler(getModel().getSolver(), Integer.parseInt(params[0]), Integer.parseInt(params[1]), false);
+            }
             singleThread();
+            if (cpProfiler != null) {
+                try {
+                    profiler.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         } else {
             manyThread();
         }
