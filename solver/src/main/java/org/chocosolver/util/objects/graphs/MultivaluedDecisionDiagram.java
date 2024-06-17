@@ -22,7 +22,31 @@ import java.util.Arrays;
  * <p>
  * Created by cprudhom on 30/10/14.
  */
-public class MultivaluedDecisionDiagram  {
+public class MultivaluedDecisionDiagram {
+
+    /**
+     * Define when to compact the MDD.
+     * There are three options:
+     * <ul>
+     *     <li>NEVER: Never compact the MDD</li>
+     *     <li>ONCE: Compact the MDD after having added all the tuples</li>
+     *     <li>EACH: Compact the MDD after each tuple addition (this is the default value)</li>
+     * </ul>
+     */
+    public enum Compact {
+        /**
+         * Never compact the MDD
+         */
+        NEVER,
+        /**
+         * Compact the MDD after having added all the tuples
+         */
+        ONCE,
+        /**
+         * Compact the MDD after each tuple addition
+         */
+        EACH
+    }
 
     /**
      * The terminal node. An extreme (likely unused) value is set
@@ -57,7 +81,7 @@ public class MultivaluedDecisionDiagram  {
      */
     private int nextFreeCell;
 
-    private final boolean compactOnce;
+    private final Compact compact;
     private final boolean sortTuples;
 
     // TEMPORARY DATA STRUCTURE, PREFIX WITH "_", CLEARED AFTER USAGE
@@ -84,6 +108,7 @@ public class MultivaluedDecisionDiagram  {
 
     /**
      * Create an MDD based on an array of flatten domains and a set of tuples
+     * Note that the MDD is compacted once all tuples are added.
      *
      * @param VARIABLES array of flatten domains
      * @param TUPLES    set of (allowed) tuples
@@ -95,38 +120,39 @@ public class MultivaluedDecisionDiagram  {
     /**
      * Create an MDD based on an array of flatten domains and a set of tuples
      *
-     * @param VARIABLES   array of flatten domains
-     * @param TUPLES      set of (allowed) tuples
-     * @param compactOnce set to true to compact the MDD after having added all the TUPLES, set to false to try to compact the MDD after each tuple addition
-     * @param sortTuple   set to true to sort the TUPLES in increasing order before adding them
+     * @param VARIABLES array of flatten domains
+     * @param TUPLES    set of (allowed) tuples
+     * @param compact   define when to compact the MDD
+     * @param sortTuple set to true to sort the TUPLES in increasing order before adding them
      */
-    public MultivaluedDecisionDiagram(IntVar[] VARIABLES, Tuples TUPLES, boolean compactOnce, boolean sortTuple) {
-        this(flattenDomain(VARIABLES), TUPLES, compactOnce, sortTuple);
+    public MultivaluedDecisionDiagram(IntVar[] VARIABLES, Tuples TUPLES, Compact compact, boolean sortTuple) {
+        this(flattenDomain(VARIABLES), TUPLES, compact, sortTuple);
     }
 
     /**
      * Create an MDD based on an array of flatten domains and a set of tuples
+     * Note that the MDD is compacted once all tuples are added.
      *
      * @param FLATDOM array of flatten domains
      * @param TUPLES  set of (allowed) tuples
      */
     public MultivaluedDecisionDiagram(int[][] FLATDOM, Tuples TUPLES) {
-        this(FLATDOM, TUPLES, true, false);
+        this(FLATDOM, TUPLES, Compact.ONCE, false);
     }
 
     /**
      * Create an MDD based on an array of flatten domains and a set of tuples
      *
-     * @param FLATDOM     array of flatten domains
-     * @param TUPLES      set of (allowed) tuples
-     * @param compactOnce set to true to compact the MDD after having added all the TUPLES, set to false to try to compact the MDD after each tuple addition
-     * @param sortTuple   set to true to sort the TUPLES in increasing order before adding them
+     * @param FLATDOM   array of flatten domains
+     * @param TUPLES    set of (allowed) tuples
+     * @param compact   define when to compact the MDD
+     * @param sortTuple set to true to sort the TUPLES in increasing order before adding them
      */
-    public MultivaluedDecisionDiagram(int[][] FLATDOM, Tuples TUPLES, boolean compactOnce, boolean sortTuple) {
+    public MultivaluedDecisionDiagram(int[][] FLATDOM, Tuples TUPLES, Compact compact, boolean sortTuple) {
         this.nbLayers = FLATDOM.length;
         this.offsets = new int[nbLayers];
         this.sizes = new int[nbLayers];
-        this.compactOnce = compactOnce;
+        this.compact = compact;
         this.sortTuples = sortTuple;
         int maxDom = 0;
         for (int i = 0; i < nbLayers; i++) {
@@ -144,16 +170,17 @@ public class MultivaluedDecisionDiagram  {
      * Create an MDD based on an array of flatten domains and a set of transitions.
      * The first of the graph has to be labeled '0' and the last node of the graph has to be labeled '-1'.
      * Then, a transition is triple <f, v, t> which denotes an arc from node 'f' to node 't' valued to 'v'.
+     * Note that the MDD is compacted once all transitions are added.
      *
      * @param VARIABLES   array of flatten domains
-     * @param TRANSITIONS      list of transitions
+     * @param TRANSITIONS list of transitions
      */
     public MultivaluedDecisionDiagram(IntVar[] VARIABLES, int[][] TRANSITIONS) {
-        int[][]FLATDOM = flattenDomain(VARIABLES);
+        int[][] FLATDOM = flattenDomain(VARIABLES);
         this.nbLayers = FLATDOM.length;
         this.offsets = new int[nbLayers];
         this.sizes = new int[nbLayers];
-        this.compactOnce = true;
+        this.compact = Compact.ONCE;
         this.sortTuples = true;
         int maxDom = 0;
         for (int i = 0; i < nbLayers; i++) {
@@ -178,7 +205,7 @@ public class MultivaluedDecisionDiagram  {
 
         // Then add tuples
         if (TUPLES.nbTuples() > 0) {
-            if (addTuples(TUPLES) && compactOnce) { // compact at the end, or not
+            if (addTuples(TUPLES) && Compact.ONCE.equals(compact)) { // compact at the end, or not
                 compact();
             }
         }
@@ -206,7 +233,7 @@ public class MultivaluedDecisionDiagram  {
     public boolean addTuple(int[] TUPLE) {
         for (int i = 0; i < nbLayers; i++) {
             // if the tuple is out of declared domain
-            if(TUPLE[i] < offsets[i] || TUPLE[i] >= offsets[i] + sizes[i]){
+            if (TUPLE[i] < offsets[i] || TUPLE[i] >= offsets[i] + sizes[i]) {
                 return false;
             }
             // get the position of the value relatively to the offset of each variable
@@ -227,7 +254,7 @@ public class MultivaluedDecisionDiagram  {
                 p = mdd[p];
             }
         }
-        if (!compactOnce) { // compact during the addition or not
+        if (Compact.EACH.equals(compact)) { // compact during the addition or not
             compact();
         }
         return true;
@@ -239,7 +266,7 @@ public class MultivaluedDecisionDiagram  {
         _pos = new int[nbLayers];
         Arrays.sort(TRANSITIONS, (t1, t2) -> {
             int d = t1[0] - t2[0];
-            if(d == 0){
+            if (d == 0) {
                 return t1[2] - t2[2];
             }
             return d;
@@ -259,8 +286,8 @@ public class MultivaluedDecisionDiagram  {
             int f = TRANSITIONS[t][0];
             int v = TRANSITIONS[t][1];
             int d = TRANSITIONS[t][2];
-            if(f == 0){
-                if(v < offsets[f] || v >= offsets[f] + sizes[f]){
+            if (f == 0) {
+                if (v < offsets[f] || v >= offsets[f] + sizes[f]) {
                     continue;
                 }
                 int p = v - offsets[f];
@@ -269,23 +296,23 @@ public class MultivaluedDecisionDiagram  {
                 if (d == -1) { // if this is the last variable => terminal node
                     mdd[p] = TERMINAL;
                 } else { // otherwise, create an edge to a new location, stated by nextFreeCell
-                    if(!node.containsKey(d)) {
+                    if (!node.containsKey(d)) {
                         mdd[p] = nextFreeCell;
                         pf = f + 1;
                         node.putIfAbsent(d, f + 1);
                         posi.putIfAbsent(d, nextFreeCell);
                         nextFreeCell += sizes[f + 1];
-                    }else{
+                    } else {
                         mdd[p] = posi.get(d);
                     }
                 }
-            }else{
+            } else {
                 int _f = node.get(f);
-                if(v < offsets[_f] || v >= offsets[_f] + sizes[_f]){
+                if (v < offsets[_f] || v >= offsets[_f] + sizes[_f]) {
                     continue;
                 }
                 int p = posi.get(f) + v - offsets[_f];
-                if(pf!=_f){
+                if (pf != _f) {
 //                    detectIsomorphism(0, pf);
 //                    deleteIsomorphism();
                     pf = f;
@@ -295,12 +322,12 @@ public class MultivaluedDecisionDiagram  {
                     if (d == -1) { // if this is the last variable => terminal node
                         mdd[p] = TERMINAL;
                     } else { // otherwise, create an edge to a new location, stated by nextFreeCell
-                        if(!node.containsKey(d)) {
+                        if (!node.containsKey(d)) {
                             mdd[p] = nextFreeCell;
                             node.putIfAbsent(d, _f + 1);
                             posi.putIfAbsent(d, nextFreeCell);
                             nextFreeCell += sizes[_f + 1];
-                        }else{
+                        } else {
                             mdd[p] = posi.get(d);
                         }
                     }
@@ -330,9 +357,9 @@ public class MultivaluedDecisionDiagram  {
      */
     @SuppressWarnings("unchecked")
     private void compact() {
-        long card = Arrays.stream(sizes).mapToLong(i -> (long)i)
-                .reduce((a,b) -> a * b).getAsLong();
-        if(card <= 2_000_000) {
+        long card = Arrays.stream(sizes).mapToLong(i -> (long) i)
+                .reduce((a, b) -> a * b).getAsLong();
+        if (card <= 2_000_000) {
             _nodesToRemove.clear();
             for (int i = 0; i < nbLayers; i++) {
                 _identicalNodes[i] = new ArrayList[sizes[i]];
