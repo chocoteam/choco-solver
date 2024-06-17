@@ -13,6 +13,7 @@ import org.chocosolver.sat.MiniSat;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.sat.NogoodStealer;
 import org.chocosolver.solver.constraints.nary.sat.PropSat;
+import org.chocosolver.solver.objective.ObjectiveStrategy;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -140,9 +141,11 @@ public class NogoodFromRestarts implements IMonitorRestart {
             l = MiniSat.makeLiteral(png.makeIntEq(var, val), false);
         } else if (DecisionOperatorFactory.makeIntNeq().equals(op)) {
             l = MiniSat.makeLiteral(png.makeIntEq(var, val), true);
-        } else if (DecisionOperatorFactory.makeIntSplit().equals(op)) {
+        } else if (DecisionOperatorFactory.makeIntSplit().equals(op)
+                || op instanceof ObjectiveStrategy.BottomUpDecisionOperator) {
             l = MiniSat.makeLiteral(png.makeIntLe(var, val), false);
-        } else if (DecisionOperatorFactory.makeIntReverseSplit().equals(op)) {
+        } else if (DecisionOperatorFactory.makeIntReverseSplit().equals(op)
+                || op instanceof ObjectiveStrategy.TopDownDecisionOperator) {
             l = MiniSat.makeLiteral(png.makeIntLe(var, val), true);
         } else {
             throw new UnsupportedOperationException("Cannot deal with such operator: " + op);

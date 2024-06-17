@@ -10,6 +10,7 @@
 package org.chocosolver.solver.search;
 
 
+import org.chocosolver.solver.search.restart.GeometricalCutoff;
 import org.chocosolver.solver.search.restart.LubyCutoff;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
@@ -469,5 +470,21 @@ public class ObjectiveTest {
         }
         assertFalse(model.getSolver().isStopCriterionMet());
         assertEquals(solver.getBestSolutionValue(), 44);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testCP2() {
+        for (OptimizationPolicy p : OptimizationPolicy.values()) {
+            Model model = makeGolombRuler(12);
+            IntVar objective = (IntVar) model.getHook("objective");
+            model.setObjective(Model.MINIMIZE, objective);
+            Solver solver = model.getSolver();
+            solver.setSearch(Search.objectiveStrategy(objective, p), minDomUBSearch(objective));
+            solver.setRestarts(c -> solver.getFailCount() > c, new GeometricalCutoff(10, 1.2), 15);
+            solver.setNoGoodRecordingFromRestarts();
+            solver.showShortStatistics();
+            while (model.getSolver().solve()) ;
+            assertFalse(model.getSolver().isStopCriterionMet());
+        }
     }
 }

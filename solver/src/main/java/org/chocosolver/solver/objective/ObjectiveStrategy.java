@@ -49,7 +49,8 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
     private boolean firstCall;
     private DecisionOperator<IntVar> decOperator;
     private final OptimizationPolicy optPolicy;
-
+    public final DecisionOperator<IntVar> decUB = new BottomUpDecisionOperator();
+    public final DecisionOperator<IntVar> incLB = new TopDownDecisionOperator();
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
@@ -95,34 +96,34 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
 
     private static int[] getCoefs(OptimizationPolicy policy) {
         switch (policy) {
-        case BOTTOM_UP:
-            return new int[]{1, 0};
-        case TOP_DOWN:
-            return new int[]{0, 1};
-        case DICHOTOMIC:
-            return new int[]{1, 1};
-        default:
-            throw new UnsupportedOperationException("unknown OptimizationPolicy " + policy);
+            case BOTTOM_UP:
+                return new int[]{1, 0};
+            case TOP_DOWN:
+                return new int[]{0, 1};
+            case DICHOTOMIC:
+                return new int[]{1, 1};
+            default:
+                throw new UnsupportedOperationException("unknown OptimizationPolicy " + policy);
         }
     }
 
     private DecisionOperator<IntVar> getOperator(OptimizationPolicy optPolicy, ResolutionPolicy resoPolicy) {
         switch (optPolicy) {
-        case BOTTOM_UP:
-            return decUB;
-        case TOP_DOWN:
-            return incLB;
-        case DICHOTOMIC:
-            switch (resoPolicy) {
-            case MINIMIZE:
+            case BOTTOM_UP:
                 return decUB;
-            case MAXIMIZE:
+            case TOP_DOWN:
                 return incLB;
+            case DICHOTOMIC:
+                switch (resoPolicy) {
+                    case MINIMIZE:
+                        return decUB;
+                    case MAXIMIZE:
+                        return incLB;
+                    default:
+                        throw new UnsupportedOperationException("ObjectiveStrategy is not for " + resoPolicy + " ResolutionPolicy");
+                }
             default:
-                throw new UnsupportedOperationException("ObjectiveStrategy is not for "+resoPolicy+" ResolutionPolicy");
-            }
-        default:
-            throw new UnsupportedOperationException("unknown OptimizationPolicy " + optPolicy);
+                throw new UnsupportedOperationException("unknown OptimizationPolicy " + optPolicy);
         }
     }
 
@@ -164,19 +165,19 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
             return null;
         }
 
-        if(model.getSettings().warnUser()){
+        if (model.getSettings().warnUser()) {
             model.getSolver().log().bold().println("- objective in [" + globalLB + ", " + globalUB + "]");
         }
         int target;
         target = (globalLB * coefLB + globalUB * coefUB) / (coefLB + coefUB);
         IntDecision dec = model.getSolver().getDecisionPath().makeIntDecision(obj, decOperator, target);
-        if(model.getSettings().warnUser()){
+        if (model.getSettings().warnUser()) {
             model.getSolver().log().bold().println("- trying " + obj + " " + (decOperator == decUB ? "<=" : ">=") + " " + target);
         }
         return dec;
     }
 
-    private final DecisionOperator<IntVar> decUB = new DecisionOperator<IntVar>() {
+    public class BottomUpDecisionOperator implements DecisionOperator<IntVar> {
         //FIXME can not serialize decision 
 
         @Override
@@ -200,9 +201,9 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         public DecisionOperator<IntVar> opposite() {
             return incLB;
         }
-    };
+    }
 
-    private final DecisionOperator<IntVar> incLB = new DecisionOperator<IntVar>() {
+    public class TopDownDecisionOperator implements DecisionOperator<IntVar> {
         //FIXME can not serialize decision 
         @Override
         public boolean apply(IntVar var, int value, ICause cause) throws ContradictionException {
@@ -225,5 +226,5 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         public DecisionOperator<IntVar> opposite() {
             return decUB;
         }
-    };
+    }
 }
