@@ -1,83 +1,88 @@
 MiniZinc Parser
 ===============
 
-This is related to [MiniZinc and FlatZinc format](http://www.minizinc.org).
+You can find here the instructions to parse and solve [MiniZinc](http://www.minizinc.org) files with Choco-solver.
+The first thing to understand is that MiniZinc is a high-level constraint modeling language and 
+choco-solver is not able to parse MiniZinc files directly.
+Actually, MiniZinc files must be converted into [FlatZinc](https://docs.minizinc.dev/en/stable/part_4_reference.html) 
+files before being parsed by Choco-solver.
 
 There exists different ways to parse and solve MiniZinc files with Choco-solver.
+The recommended way is to use the MiniZinc IDE, 
+which is a graphical user interface that allows to write, parse and solve MiniZinc files.
+             
+## Pre-requisites
 
-### MiniZinc IDE
+### Choco-solver jar file
 
-The first approach, that should be favoured, is to add Choco-solver as a [third-Party Solver in MiniZinc IDE](https://www.minizinc.org/doc-2.5.5/en/fzn-spec.html#solver-configuration-files). 
-A *solver configuration file* that contains some basic information is available, named [choco.msc](https://github.com/chocoteam/choco-solver/blob/master/parsers/src/main/minizinc/choco.msc).
-With respect to MiniZinc specification, this file should be added in:
+Before starting, you need to download the Choco-solver jar file that contains the parser for FlatZinc files.
+This jar file is available on the [Choco-solver repository](https://github.com/chocoteam/choco-solver/releases) on GitHub.
+Or you can build it from the source code. 
+In that case, you need to get the jar file from the `parsers/target` directory.
+Select the jar file that contains the `-light` suffix.
+                          
+### Executable script
+                      
+To parse and solve FlatZinc files, you need an executable script that calls the Choco-solver parser.
+This script is available in the [`parsers/src/main/minizinc` directory](https://github.com/chocoteam/choco-solver/tree/master/parsers/src/main/minizinc) 
+of the Choco-solver repository on GitHub.
+The entry point of this script is the `fzn-choco.py` file, which is a Python script that calls the Choco-solver parser.
+Unfortunately, MiniZinc requires an executable script, so you need to create a shell script that calls the Python script.
+
+Creating the executable script is quite straighforward with [Nuitka](https://nuitka.net/).
+
+##### Building the executable script with Nuitka
+
+First of all, you have to have a Python interpreter installed on your machine (version >=3.10).
+Then, you can install Nuitka with the following command:
+```bash                                     
+pip install nuitka
+```
+
+Once Nuitka is installed, you need to adapt the `fzn-choco.py` script to set the path to the Choco-solver jar file.
+Set the `JAR_FILE` variable to the path of the Choco-solver jar file.
+
+Then, you can build the executable script with the following command:
+```bash
+python -m nuitka fzn-choco.py
+```   
+
+This command will create an executable script in the same directory as the Python script.
+In the following, we will refer to this script as `fzn-choco` (without the `.py` extension).
+     
+**Important**:
+For some reason, the executable script may be slower than the Python script.
+
+## MiniZinc IDE
+             
+Now, Choco-solver can be added as a [third-Party Solver in MiniZinc IDE](https://docs.minizinc.dev/en/stable/fzn-spec.html#solver-configuration-files)
+in MiniZincIDE. 
+This step requires to create a *solver configuration file*  (with _.msc_ extension) that contains some basic information.
+With respect to [MiniZinc specification](https://www.minizinc.org/doc-2.4.3/en/fzn-spec.html#solver-configuration-files), 
+this file can be added in:
 > the directory `$HOME/.minizinc/solvers` on Linux and macOS systems, and the Application Data directory on Windows systems.
-> [Source](https://www.minizinc.org/doc-2.4.3/en/fzn-spec.html#solver-configuration-files)
- 
+             
+### Important
+Before moving the file to the correct directory, it must be edited to set the correct paths.
+There are two fields in the _.msc_ file that must be set:
+- `"mznlib"`: the absolute path to the directory containing the global constraints definition, i.e. `mzn_lib` directory.
+- `"executable"`: the absolute path to the executable script `fzn_choco` or `fzn-choco.exe` depending on your OS.
 
-The script referred to in this file, together with global constraints definition can be downloaded from [the MiniZinc repository](https://github.com/chocoteam/choco-solver/tree/master/parsers/src/main/minizinc) on GitHub. 
+The script referred to in this file (_choco.msc)_, together with global constraints definition can be downloaded from 
+[the MiniZinc repository](https://github.com/chocoteam/choco-solver/tree/master/parsers/src/main/minizinc) on GitHub. 
+           
 
 1. Edit `choco.msc` to set the `"mznlib"` and `"executable"` fields.
-The `"executable"` field should point to the script `fzn_choco` or `fzn-choco.exe` depending on your OS.
-The `"mznlib"` field should point to the directory containing the global constraints definition, i.e. `mzn_lib` directory.
-Full path are expected.
-2. Copy `choco.msc` to `~/.minizinc/solvers/` directory on Linux and macOS systems (
-`cp ./parsers/src/main/minizinc/choco.msc ~/.minizinc/solvers/`).
-On Windows systems, the file must be placed in the Application Data directory.
-3. Edit `./parsers/src/main/minizinc/fzn-choco` (or `./parsers/src/main/minizinc/fzn-choco.exe` for Windows users)
-and set the `CHOCO_JAR` variable to the path of the Choco-solver jar file, i.e. `choco-parsers-4.10.15-light.jar`.
-
-
-### Converting from MiniZinc to FlatZinc
-
-If one wants to manually convert MiniZinc files into FlatZinc files parsable by Choco-solver. 
-
-The [`mzn_lib`](https://github.com/chocoteam/choco-solver/blob/master/parsers/src/main/minizinc/mzn_lib) directory lists the supported global constraints for Choco-solver.
-It is needed as an argument of `minizinc`, a tool to convert MiniZinc files to FlatZinc files. 
-    
-```bash
-minizinc -c --solver org.minizinc.mzn-fzn -I "/path/to/mzn_lib" model.mzn -d data.dzn -o output.fzn
-```
-
-where `model.mzn` is the MiniZinc file describing the model, 
-`data.dzn` (optional) contains data to instantiate the MiniZinc file and
-`output.fzn` is the output FlatZinc filename you want.
-
-The `-I` argument defines global constraints provided by Choco-solver.
-
-See MiniZinc documentation for more details on how to convert MiniZinc files into FlatZinc files.
-
-### Parsing and solving a FlatZinc file
-
-Then, there are two ways to parse and solve a FlatZinc file with Choco:
-
-* ##### Java front-end
-
-```bash
-java -cp .:/path/to/choco-parsers-4.10.3-jar-with-dependencies.jar org.chocosolver.parser.flatzinc.ChocoFZN [<options>] [<file>]
-```
-  
-Common __options__ are:
-* ```-a``` : This causes the solver to search for, and output all solutions in case of satisfaction problems. For optimization problems, the solver search for an optimal solution and outputs all intermediate solutions. When this option is not given the solver should search for and output only the first solution (for satisfaction problems) or the best known one (for optimization problems).
-* ```-f```: When invoked with this option the solver ignores any specified search strategy.
-* ```-p <n>```: When invoked with this option the solver is free to use multiple threads and/or cores during search.  The argument <n> specifies the number of cores that are available. 
-* ```-tl <n>```: Limit the resolution time of each problem instance to <n> ms.
-* other Choco-specific options are available
-  
-* ##### In a terminal (shell for Linux based OS)
-  
-```bash 
-sh ./parser/src/main/minizinc/fzn-choco -jar /path/to/choco-parsers-4.10.3-jar-with-dependencies.jar [<options>] [<file>]
-```
-
-Calling the shell with `-h` option will print the help message.
-
-To avoid declaring the `-jar` option, you can export it once before calling the shell:
-
-   `PARSER_JAR=/path/to/choco-parsers-4.10.3-jar-with-dependencies.jar`
-   
-   `sh ./parser/src/main/minizinc/fzn-choco [<options>] [<file>]`
+   1. The `"executable"` field should be set to the path of the executable script `fzn-choco`. 
+    You must set the full path to the script, including the extension (like `.exe` or `.bin`).
+   2. The `"mznlib"` field should be set to the absolute path of the directory containing the global constraints definition,
+   i.e. `mzn_lib` directory.
+2. Copy `choco.msc` to the directory recommended by MiniZinc (please refer to the MiniZinc documentation).
+3. Restart MiniZinc IDE.
 
 
 ### Dockerfile
-
-Some Choco-solver Docker images for the MiniZinc Challenge are available on [hub.docker.com/](https://hub.docker.com/repository/docker/chocoteam/choco-solver-mzn/general).
+Note that the `fzn-choco` script can be used in a Docker container.
+A `Dockerfile` is available in the `parsers/src/main/minizinc` directory of the Choco-solver repository on GitHub.
+Some Choco-solver Docker images for the MiniZinc Challenge are available on 
+[hub.docker.com/](https://hub.docker.com/repository/docker/chocoteam/choco-solver-mzn/general).

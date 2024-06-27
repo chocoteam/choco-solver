@@ -60,7 +60,7 @@ msc: compet
 	@sed -i '' 's|  "version": .*|  "version" : "$(CURRENT_VERSION)",|' parsers/src/main/minizinc/choco.msc
 	@sed -i '' 's|SNAPSHOT|$(DATE)|g' parsers/src/main/minizinc/choco.msc
 	@sed -i '' 's|  "mznlib": .*|  "mznlib" : "$(ROOT_DIR)/parsers/src/main/minizinc/mzn_lib/",|' parsers/src/main/minizinc/choco.msc
-	@sed -i '' 's|  "executable": .*|  "executable" : "$(ROOT_DIR)/parsers/src/main/minizinc/fzn-choco",|' parsers/src/main/minizinc/choco.msc
+	@sed -i '' 's|  "executable": .*|  "executable" : "$(ROOT_DIR)/parsers/src/main/minizinc/fzn-choco.bin",|' parsers/src/main/minizinc/choco.msc
 	@sed -i '' 's|^[^ ]*CHOCO_JAR=.*|CHOCO_JAR=$(ROOT_DIR)/parsers/target/choco-parsers-$(CURRENT_VERSION)-light.jar|' parsers/src/main/minizinc/fzn-choco
 	@cp $(ROOT_DIR)/parsers/src/main/minizinc/choco.msc ~/.minizinc/solvers/choco-$(CURRENT_VERSION)-$(DATE).msc
 
