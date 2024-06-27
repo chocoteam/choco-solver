@@ -317,6 +317,7 @@ public class Datas {
             solver.log().printf("%%%%%%mzn-stat: nodes=%d%n", solver.getNodeCount());
             solver.log().printf("%%%%%%mzn-stat: failures=%d%n", solver.getFailCount());
             solver.log().printf("%%%%%%mzn-stat: restarts=%d%n", solver.getRestartCount());
+            solver.log().printf("%%%%%%mzn-stat: max depth=%d%n", solver.getMaxDepth());
             solver.log().println("%%%mzn-stat-end");
         }
     }
