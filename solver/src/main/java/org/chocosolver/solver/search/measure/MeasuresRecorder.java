@@ -128,7 +128,7 @@ public final class MeasuresRecorder extends Measures {
      */
     public void incNodeCount() {
         nodeCount++;
-        depth = getCurrentDepth();
+        depth++;
         maxDepth = Math.max(maxDepth, depth);
     }
 
@@ -136,6 +136,7 @@ public final class MeasuresRecorder extends Measures {
      * increment backtrack counter
      */
     public void incBackTrackCount() {
+        depth--;
         backtrackCount++;
     }
 

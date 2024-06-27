@@ -189,6 +189,9 @@ public class Datas {
                 }
             }
         }
+        if (oss) {
+            outputStatistics(solver);
+        }
         if (level.isLoggable(Level.COMPET)) {
             solver.log().bold().print("----------\n");
         }
@@ -309,17 +312,32 @@ public class Datas {
             solver.log().bold().white().printf("%s \n", solver.getMeasures().toOneLineString());
         }
         if (oss) {
-            solver.log().printf(Locale.US, "%%%%%%mzn-stat: initTime=%.3f%n", solver.getReadingTimeCount());
-            solver.log().printf(Locale.US, "%%%%%%mzn-stat: solveTime=%.3f%n", solver.getTimeCount());
-            solver.log().printf("%%%%%%mzn-stat: solutions=%d%n", solver.getSolutionCount());
-            solver.log().printf("%%%%%%mzn-stat: variables=%d%n", solver.getModel().getNbVars());
-            solver.log().printf("%%%%%%mzn-stat: constraints=%d%n", solver.getModel().getNbCstrs());
-            solver.log().printf("%%%%%%mzn-stat: nodes=%d%n", solver.getNodeCount());
-            solver.log().printf("%%%%%%mzn-stat: failures=%d%n", solver.getFailCount());
-            solver.log().printf("%%%%%%mzn-stat: restarts=%d%n", solver.getRestartCount());
-            solver.log().printf("%%%%%%mzn-stat: max depth=%d%n", solver.getMaxDepth());
-            solver.log().println("%%%mzn-stat-end");
+            outputStatistics(solver);
         }
+    }
+
+    private void outputStatistics(Solver solver) {
+        solver.log().printf(Locale.US, "%%%%%%mzn-stat: initTime=%.3f%n", solver.getReadingTimeCount());
+        solver.log().printf(Locale.US, "%%%%%%mzn-stat: solveTime=%.3f%n", solver.getTimeCount());
+        solver.log().printf("%%%%%%mzn-stat: solutions=%d%n", solver.getSolutionCount());
+        solver.log().printf("%%%%%%mzn-stat: variables=%d%n", solver.getModel().getNbVars());
+        solver.log().printf("%%%%%%mzn-stat: intVariables=%d%n", solver.getModel().getNbIntVar(false));
+        solver.log().printf("%%%%%%mzn-stat: boolVariables=%d%n", solver.getModel().getNbBoolVar());
+        solver.log().printf("%%%%%%mzn-stat: setVariables=%d%n", solver.getModel().getNbSetVar());
+        solver.log().printf("%%%%%%mzn-stat: constraints=%d%n", solver.getModel().getNbCstrs());
+        if (solver.getObjectiveManager().isOptimization()) {
+            solver.log().printf("%%%%%%mzn-stat: objective=%d%n", solver.getObjectiveManager().getBestSolutionValue().intValue());
+//            Number bnd = solver.getObjectiveManager().getBestLB();
+//            if (solver.getObjectiveManager().getPolicy().equals(ResolutionPolicy.MAXIMIZE)) {
+//                bnd = solver.getObjectiveManager().getBestUB();
+//            }
+//            solver.log().printf("%%%%%%mzn-stat: objectiveBound=%d%n", bnd.intValue());
+        }
+        solver.log().printf("%%%%%%mzn-stat: nodes=%d%n", solver.getNodeCount());
+        solver.log().printf("%%%%%%mzn-stat: failures=%d%n", solver.getFailCount());
+        solver.log().printf("%%%%%%mzn-stat: restarts=%d%n", solver.getRestartCount());
+        solver.log().printf("%%%%%%mzn-stat: peakDepth=%d%n", solver.getMaxDepth());
+        solver.log().println("%%%mzn-stat-end");
     }
 
     public void incCstrCounter(String name) {
