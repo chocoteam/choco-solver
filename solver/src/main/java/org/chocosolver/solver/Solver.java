@@ -1378,6 +1378,15 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
+     * Operation to execute when a solution is found
+     *
+     * @param r operation to execute
+     */
+    public void onSolution(Runnable r) {
+        searchMonitors.add((IMonitorSolution) r::run);
+    }
+
+    /**
      * Empties the list of search monitors.
      */
     @SuppressWarnings("WeakerAccess")
