@@ -24,6 +24,7 @@ import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.loop.Reporting;
 import org.chocosolver.solver.search.loop.learn.Learn;
 import org.chocosolver.solver.search.loop.learn.LearnNothing;
+import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorList;
 import org.chocosolver.solver.search.loop.move.Move;
