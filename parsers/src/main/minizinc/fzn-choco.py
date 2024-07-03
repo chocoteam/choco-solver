@@ -6,10 +6,6 @@ import argparse
 import os
 import sys
 
-from timeit import default_timer as timer
-
-start = timer()
-
 # THIS IS WHERE YOU NEED TO CHANGE THE PATH TO THE JAR FILE
 JAR_FILE= '/Users/kyzrsoze/Sources/CHOCO/continuous-branch/parsers/target/choco-parsers-4.10.15-SNAPSHOT-light.jar'
 
@@ -106,10 +102,8 @@ if args.random_seed:
 if args.cp_profiler:
     arguments += ' --cp-profiler ' + str(args.cp_profiler[0]) + ',' + str(args.cp_profiler[1])
 
-cmd = f'java {args.jvm_args} -cp .:{args.jar_file} org.chocosolver.parser.flatzinc.ChocoFZN {args.fzn_file} {arguments}'
+cmd = f'java {args.jvm_args} -cp {args.jar_file} org.chocosolver.parser.flatzinc.ChocoFZN {args.fzn_file} {arguments}'
 
 # if __lvl__ == 'INFO':
-print(f'Running command: {cmd}')
-end = timer()
-print("% ", end - start, "sec")
+#cprint(f'Running command: {cmd}')
 os.system(cmd)

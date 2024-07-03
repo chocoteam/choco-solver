@@ -12,38 +12,28 @@
 # Using the MiniZinc Challenge docker image
 FROM minizinc/mznc2024:latest as build
 
-# Install Java 17               @
+# Install Java 21               @
 RUN apt-get update && \
 	apt-get install -y  \
-	vim python3.11 python3-pip patchelf && \
-    pip install nuitka
+    #default-jre-headless
+	openjdk-21-jre-headless \
+    python3 \
+    vim
 
 # The following command is used to disable caching for the ADD command and the next ones
 ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
 # Copy Choco's files from the local repository
 COPY ./parsers/target/choco-parsers-*-light.jar /choco/choco.jar
 COPY ./parsers/src/main/minizinc/fzn-choco.py /choco/fzn-choco.py
+COPY ./parsers/src/main/minizinc/fzn-choco.sh /choco/fzn-choco.sh
 COPY ./parsers/src/main/minizinc/choco.msc /choco/choco.msc
 COPY ./parsers/src/main/minizinc/mzn_lib/* /choco/mzn-lib/
 
 # Update files
 RUN sed -i 's&JAR_FILE=.*&JAR_FILE="/choco/choco.jar"&g' /choco/fzn-choco.py && \
+    #sed -i 's&python3 .*&python3 /choco/fzn-choco.py "$@"&g' /choco/fzn-choco.sh && \
     sed -i 's&"mznlib".*&"mznlib":"/choco/mzn-lib/",&g' /choco/choco.msc && \
-    sed -i 's&"executable".*&"executable":"/choco/fzn-choco.bin",&g' /choco/choco.msc && \
-    cd /choco/ && \
-    # Now compile the python file to a binary file called fzn-choco.bin \
-    python3 -m nuitka /choco/fzn-choco.py && \
-    cd /minizinc/
-
-# 2. Stage: Move the Choco executable and its MiniZinc library to the MiniZinc Challenge docker image
-FROM minizinc/mznc2024:latest as main
-
-RUN apt-get update && \
-	apt-get install -y  \
-	#default-jre-headless
-    openjdk-21-jre-headless vim
-
-COPY --from=build /choco/ /choco/
-
-RUN echo '{"mzn_solver_path": ["/choco/"],'        > $HOME/.minizinc/Preferences.json && \
+    sed -i 's&"executable".*&"executable":"/choco/fzn-choco.sh",&g' /choco/choco.msc && \
+    cd /minizinc/ && \
+    echo '{"mzn_solver_path": ["/choco/"],'        > $HOME/.minizinc/Preferences.json && \
     echo '"tagDefaults": [["", "org.choco.choco"]]}' >> $HOME/.minizinc/Preferences.json

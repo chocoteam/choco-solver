@@ -62,7 +62,7 @@ EXAMPLES:
 
 
 	Additionnal arguments:
-	$> xcsp3_choco.sh --jargs \"-Xmx128m\" -tl 100 ./choco.jar ./alpha.xml
+	$> ./xcsp3-exec -a -tl 100 -p 2 ./alpha.xml
 
 "
 

@@ -9,12 +9,12 @@ docker build -f ./Dockerfile.dms -t chocoteam/choco-solver-mzn:<tag> <path-to-ch
 ```
 
 where 
-- `<tag>` is the tag of the Docker image (e.g. `latest` or `4.10.0`)
+- `<tag>` is the tag of the Docker image (e.g. `4.10.0`)
 - `<path-to-choco-solver>` is the path to the local repository of choco-solver (relative or absolute).
 
 Then you can run the Docker image with the following command:
 
 ```bash
-docker run --rm <repository>:<tag> minizinc fd.mpc /minizinc/test.mzn /minizinc/2.dzn
+docker run --rm chocoteam/choco-solver-mzn:<tag> minizinc fd.mpc /minizinc/test.mzn /minizinc/2.dzn
 ```
 
