@@ -13,6 +13,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.propagation.PropagationProfiler;
 import org.chocosolver.solver.search.limits.NodeCounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
@@ -28,6 +29,7 @@ import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ProblemMaker;
+import org.chocosolver.util.tools.VariableUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -432,5 +434,17 @@ public class SolverTest {
         Assert.assertEquals(m.group(1), "45");
         Assert.assertEquals(m.group(2), "155");
         Assert.assertEquals(m.group(3), "1024");
+    }
+
+    @Test(groups = "1s")
+    public void testPreprocessing() throws ContradictionException {
+        Model model = ProblemMaker.makeNQueenWithBinaryConstraints(4);
+        Solver solver = model.getSolver();
+        long before = VariableUtils.domainCardinality(model.retrieveIntVars(true));
+        Assert.assertEquals(before, 256);
+        solver.propagate();
+        solver.preprocessing(2000);
+        long after = VariableUtils.domainCardinality(model.retrieveIntVars(true));
+        Assert.assertEquals(after,32);
     }
 }
