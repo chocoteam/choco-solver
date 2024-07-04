@@ -1297,9 +1297,20 @@ public enum FConstraint {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
             boolean AC = annotations.stream().anyMatch(a -> a.id.toString().equals("domain"));
-            IntVar[] x = exps.get(0).toIntVarArray(model);
-            IntVar[] y = exps.get(1).toIntVarArray(model);
-            model.inverseChanneling(x, y, 1, 1, AC).post();
+            IntVar[] x;
+            int ox = 1;
+            IntVar[] y;
+            int oy = 1;
+            if(exps.size() == 2) {
+                x = exps.get(0).toIntVarArray(model);
+                y = exps.get(1).toIntVarArray(model);
+            }else{
+                x = exps.get(0).toIntVarArray(model);
+                ox = exps.get(1).intValue();
+                y = exps.get(2).toIntVarArray(model);
+                oy = exps.get(3).intValue();
+            }
+            model.inverseChanneling(x, y, ox, oy, AC).post();
 
         }
     },
