@@ -266,7 +266,7 @@ public interface IViewFactory extends ISelf<Model> {
             if (ref().getSettings().enableViews()) {
                 int p = checkDeclaredView(var, v, BoolGeqView.class, ref().getSettings().checkDeclaredViews());
                 if (p >= 0) {
-                    return var.getView(p).asBoolVar().not();
+                    return var.getView(p).asBoolVar();
                 } else {
                     return new BoolGeqView<>(var, v);
                 }
