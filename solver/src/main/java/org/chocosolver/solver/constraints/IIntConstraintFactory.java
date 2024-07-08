@@ -1881,7 +1881,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 BoolVar xis = ref().isEq(X[i], S);
                 ref().addClausesBoolLe(xis, bs[i + 1]);
                 ref().impXrelYC(bs[i], "=", bs[i + 1], 0, xis.not());
-                ref().impXrelYC(X[i], "=", ref().intVar(T), 0, xis.not());
+                ref().impXrelYC(X[i], "!=", ref().intVar(T), 0, bs[i].not());
             }
             return ref().voidConstraint();
         }
@@ -1904,8 +1904,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                     ref().getSolver().log().white().println(
                             "Warning: intValuePrecedeChain constraint is decomposed (due to LCG).");
                 }
+                TIntHashSet values = new TIntHashSet();
+                values.add(V[0]);
                 for (int i = 1; i < V.length; i++) {
-                    ref().intValuePrecedeChain(X, V[i - 1], V[i]).post();
+                    if (values.contains(V[i])) {
+                        throw new SolverException("\"int_value_precede\" requires V to be made of distinct values");
+                    }
+                    values.add(V[i]);
+                    ref().intValuePrecedeChain(X, V[i - 1], V[i]);
                 }
                 return ref().voidConstraint();
             }
