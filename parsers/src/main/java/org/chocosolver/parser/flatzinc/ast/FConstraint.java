@@ -752,7 +752,25 @@ public enum FConstraint {
 
             IntVar[] vars = exps.get(0).toIntVarArray(model);
             if (vars.length > 1) {
-                model.allDifferentExcept0(vars).post();
+                if(model.getSettings().isLCG()){
+                    if (model.getSettings().warnUser()) {
+                        model.getSolver().log().white().println(
+                                "Warning: fzn_alldifferent_except_0 constraint is decomposed (due to LCG).");
+                    }
+                    IntIterableRangeSet values = new IntIterableRangeSet();
+                    for(int i = 0; i < vars.length; i++){
+                        values.addAll(vars[i]);
+                    }
+                    values.add(0);
+                    int[] valuesArray = values.toArray();
+                    IntVar[] occurrences = new IntVar[valuesArray.length];
+                    for(int i = 0; i < valuesArray.length; i++){
+                        occurrences[i] = model.intVar(0, valuesArray[i] == 0?vars.length:1);
+                    }
+                    model.globalCardinality(vars, valuesArray, occurrences, true).post();
+                }else {
+                    model.allDifferentExcept0(vars).post();
+                }
             }
 
         }
