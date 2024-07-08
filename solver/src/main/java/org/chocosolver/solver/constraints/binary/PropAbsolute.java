@@ -98,12 +98,11 @@ public class PropAbsolute extends Propagator<IntVar> {
                 setPassive();
             } else if (Y.hasEnumeratedDomain()) {
                 int val = X.getValue();
-                Y.updateLowerBound(-val, this, lcg() ? Reason.r(X.getMaxLit()) : Reason.undef());
-                Y.updateUpperBound(val, this, lcg() ? Reason.r(X.getMaxLit()) : Reason.undef());
+                Y.updateLowerBound(-val, this, lcg() ? Reason.r(X.getValLit()) : Reason.undef());
+                Y.updateUpperBound(val, this, lcg() ? Reason.r(X.getValLit()) : Reason.undef());
                 val--;
                 for (int v = -val; v <= val; v = Y.nextValue(v)) {
-                    Y.removeValue(v, this,
-                            lcg() ? Reason.r(X.getLit(Math.abs(v), IntVar.LR_EQ)) : Reason.undef());
+                    Y.removeValue(v, this, lcg() ? Reason.r(X.getValLit()) : Reason.undef());
                 }
                 setPassive();
             } else {
@@ -126,8 +125,7 @@ public class PropAbsolute extends Propagator<IntVar> {
         Y.updateLowerBound(-max, this, lcg() ? Reason.r(X.getMaxLit()) : Reason.undef());
         Y.updateUpperBound(max, this, lcg() ? Reason.r(X.getMaxLit()) : Reason.undef());
         for (int v = 1 - min; v <= min - 1; v = Y.nextValue(v)) {
-            Y.removeValue(v, this,
-                    lcg() ? Reason.r(X.getLit(Math.abs(v), IntVar.LR_EQ)) : Reason.undef());
+            Y.removeValue(v, this, lcg() ? Reason.r(X.getMinLit()) : Reason.undef());
         }
         //if (!lcg()) Y.removeInterval(1 - min, min - 1, this);
         /////////////////////////////////////////////////
@@ -137,12 +135,12 @@ public class PropAbsolute extends Propagator<IntVar> {
         max = Y.getUB();
         if (max <= 0) {
             X.updateLowerBound(-max, this,
-                    lcg() ? Reason.r(Y.getMinLit(), Y.getMaxLit()) : Reason.undef());
+                    lcg() ? Reason.r(Y.getMaxLit()) : Reason.undef());
             X.updateUpperBound(-min, this,
                     lcg() ? Reason.r(Y.getMinLit(), Y.getMaxLit()) : Reason.undef());
         } else if (min >= 0) {
             X.updateLowerBound(min, this,
-                    lcg() ? Reason.r(Y.getMinLit(), Y.getMaxLit()) : Reason.undef());
+                    lcg() ? Reason.r(Y.getMinLit()) : Reason.undef());
             X.updateUpperBound(max, this,
                     lcg() ? Reason.r(Y.getMinLit(), Y.getMaxLit()) : Reason.undef());
         } else {
@@ -151,8 +149,13 @@ public class PropAbsolute extends Propagator<IntVar> {
                 int mN = -Y.previousValue(1);
                 X.updateLowerBound(Math.min(mP, mN), this);
             }
-            X.updateUpperBound(Math.max(-min, max), this,
-                    lcg() ? Reason.r(X.getMinLit(), X.getMaxLit()) : Reason.undef());
+            if(max >= -min){
+                X.updateLowerBound(-max, this,
+                        lcg() ? Reason.r(Y.getMaxLit()) : Reason.undef());
+            }else{
+                X.updateLowerBound(min, this,
+                        lcg() ? Reason.r(Y.getMinLit()) : Reason.undef());
+            }
         }
         if (prevLB != X.getLB() || prevUB != X.getUB()) setBounds();
     }
