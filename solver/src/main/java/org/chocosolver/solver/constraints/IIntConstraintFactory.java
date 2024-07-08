@@ -85,6 +85,8 @@ import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static java.lang.Math.abs;
+
 /**
  * Interface to make constraints over BoolVar and IntVar
  * <p>
@@ -378,26 +380,33 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     /**
-     * Creates a modulo constraint: X % a = Y
+     * Creates a modulo constraint: X % a = Z
      *
      * @param X   first integer variable
-     * @param mod the value of the modulo operand
-     * @param Y   second integer variable (result of the modulo operation)
+     * @param y the value of the modulo operand
+     * @param Z   second integer variable (result of the modulo operation)
      */
-    default Constraint mod(IntVar X, int mod, IntVar Y) {
-        if (mod == 0) {
-            throw new SolverException("a should not be 0 for " + X.getName() + " MOD a = " + Y.getName());
+    default Constraint mod(IntVar X, int y, IntVar Z) {
+        if (y == 0) {
+            throw new SolverException("a should not be 0 for " + X.getName() + " MOD a = " + Z.getName());
         }
 
-        if (Y.isInstantiated()) {
-            return mod(X, mod, Y.getValue());
-        } else if (TuplesFactory.canBeTupled(X, Y)) {
-            return table(X, Y, TuplesFactory.modulo(X, mod, Y));
+        if (Z.isInstantiated()) {
+            return mod(X, y, Z.getValue());
+        } else if (TuplesFactory.canBeTupled(X, Z)) {
+            return table(X, Z, TuplesFactory.modulo(X, y, Z));
         } else {
             if (ref().getSolver().isLCG()) {
-                throw new SolverException("Modulo constraint is not supported in LCG mode");
+                int xl = abs(X.getLB());
+                int xu = abs(X.getUB());
+                int b = Math.max(xl, xu);
+                IntVar t1 = ref().intVar(ref().generateName("T1_"), -b, b, true);
+                IntVar t2 = ref().intVar(ref().generateName("T2_"), -b, b, true);
+                div(X, ref().intVar(y), t1).post();
+                times(t1, y, t2).post();
+                return sum(new IntVar[]{Z, t2}, "=", X);
             }
-            return new Constraint((X.getName() + " MOD " + mod + " = " + Y.getName()), new PropModXY(X, mod, Y));
+            return new Constraint((X.getName() + " MOD " + y + " = " + Z.getName()), new PropModXY(X, y, Z));
         }
     }
 
@@ -680,9 +689,6 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param result   result
      */
     default Constraint div(IntVar dividend, IntVar divisor, IntVar result) {
-        if (ref().getSolver().isLCG()) {
-            throw new SolverException("Division constraint is not supported in LCG mode");
-        }
         return new Constraint(ConstraintsName.DIVISION, new PropDivXYZ(dividend, divisor, result));
     }
 
@@ -738,7 +744,15 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             return table(new IntVar[]{X, Y, Z}, TuplesFactory.modulo(X, Y, Z));
         } else {
             if (ref().getSolver().isLCG()) {
-                throw new SolverException("Modulo constraint is not supported in LCG mode");
+                int xl = abs(X.getLB());
+                int xu = abs(X.getUB());
+                int b = Math.max(xl, xu);
+                Model model = X.getModel();
+                IntVar t1 = model.intVar(model.generateName("T1_"), -b, b, true);
+                IntVar t2 = model.intVar(model.generateName("T2_"), -b, b, true);
+                div(X, Y, t1).post();
+                times(t1, Y, t2).post();
+                return sum(new IntVar[]{Z, t2}, "=", X);
             }
             return new Constraint(X.getName() + " MOD " + Y.getName() + " = " + Z.getName(), new PropModXYZ(X, Y, Z));
         }
