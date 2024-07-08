@@ -2314,6 +2314,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         vars = (IntVar[]) args[0];
         nValues = ((IntVar[]) args[1])[0];
         if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: nValues constraint is decomposed (due to LCG).");
+            }
             /*return new Constraint(
                     ConstraintsName.NVALUES,
                     new PropNValue(vars, nValues)
