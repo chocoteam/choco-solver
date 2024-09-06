@@ -471,9 +471,19 @@ public class VariableUtils {
      * @param var a variable
      * @return <i>true</i> if the variable is an int variable, based on its kind,
      * <i>false</i> otherwise
+     * @implNote BoolVar is considered as an int variable too
      */
     public static boolean isInt(Variable var) {
         return (var.getTypeAndKind() & Variable.INT) != 0;
+    }
+
+    /**
+     * @param var a variable
+     * @return <i>true</i> if the variable is a Boolean variable, based on its kind,
+     * <i>false</i> otherwise
+     */
+    public static boolean isBool(Variable var) {
+        return ((var.getTypeAndKind() & Variable.KIND) == Variable.BOOL);
     }
 
     /**
