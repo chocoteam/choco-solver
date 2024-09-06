@@ -26,6 +26,7 @@ import org.chocosolver.solver.variables.view.integer.IntAffineView;
 import org.chocosolver.solver.variables.view.set.*;
 import org.chocosolver.util.objects.graphs.IGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.Arrays;
 
