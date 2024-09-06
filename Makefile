@@ -2,7 +2,7 @@
 # like running test suites
 
 ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-DATE := $(shell date +'%y%m%d')
+DATE := $(shell date +'%y%m%d_%H:%M')
 CURRENT_VERSION := $(shell mvn help:evaluate -Dexpression=project.version | grep -v "\[INFO\]" | grep -v "\[WARNING\]")
 
 .PHONY: all clean compile tests 1s 10s ibex checker mzn xcsp mps dimacs expl update_date compet msc delmsc help
@@ -60,7 +60,7 @@ msc: compet
 	@sed -i '' 's|  "version": .*|  "version" : "$(CURRENT_VERSION)",|' parsers/src/main/minizinc/choco.msc
 	@sed -i '' 's|SNAPSHOT|$(DATE)|g' parsers/src/main/minizinc/choco.msc
 	@sed -i '' 's|  "mznlib": .*|  "mznlib" : "$(ROOT_DIR)/parsers/src/main/minizinc/mzn_lib/",|' parsers/src/main/minizinc/choco.msc
-	@sed -i '' 's|  "executable": .*|  "executable" : "$(ROOT_DIR)/parsers/src/main/minizinc/fzn-choco.bin",|' parsers/src/main/minizinc/choco.msc
+	@sed -i '' 's|  "executable": .*|  "executable" : "$(ROOT_DIR)/parsers/src/main/minizinc/fzn-choco",|' parsers/src/main/minizinc/choco.msc
 	@sed -i '' 's|^[^ ]*CHOCO_JAR=.*|CHOCO_JAR=$(ROOT_DIR)/parsers/target/choco-parsers-$(CURRENT_VERSION)-light.jar|' parsers/src/main/minizinc/fzn-choco
 	@cp $(ROOT_DIR)/parsers/src/main/minizinc/choco.msc ~/.minizinc/solvers/choco-$(CURRENT_VERSION)-$(DATE).msc
 
