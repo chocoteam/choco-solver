@@ -754,7 +754,7 @@ public enum FConstraint {
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
             IntVar[] vars = exps.get(0).toIntVarArray(model);
             BoolVar b = exps.get(1).boolVarValue(model);
-            IntVar count = model.intVar(0, vars.length);
+            IntVar count = model.intVar(1, vars.length);
             model.nValues(vars, count).post();
             model.reifyXeqC(count, 1, b);
         }
