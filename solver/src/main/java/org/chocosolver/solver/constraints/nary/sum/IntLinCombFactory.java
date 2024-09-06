@@ -17,6 +17,7 @@ import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.ternary.PropXplusYeqZ;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.view.integer.IntAffineView;
 import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.Arrays;
@@ -113,6 +114,15 @@ public class IntLinCombFactory {
                 RESULT -= (long)NVARS[i].getValue() * NCOEFFS[i]; // potential overflow
                 NCOEFFS[i] = 0;
             } else if (NCOEFFS[i] != 0) {
+                if(NVARS[i] instanceof IntAffineView){
+                    IntAffineView<?> view = (IntAffineView<?>) NVARS[i];
+                    IntVar var = view.getVariable();
+                    int a = view.a * (view.p ? 1 : -1);
+                    long b = view.b;
+                    NVARS[i] = var;
+                    NCOEFFS[i] *= a;
+                    RESULT += b * NCOEFFS[i];
+                }
                 int id = NVARS[i].getId();
                 int pos = map.get(id);
                 if (pos == -1) {
