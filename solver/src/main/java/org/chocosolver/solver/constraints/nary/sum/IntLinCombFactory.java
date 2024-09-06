@@ -121,7 +121,7 @@ public class IntLinCombFactory {
                     long b = view.b;
                     NVARS[i] = var;
                     NCOEFFS[i] *= a;
-                    RESULT += b * NCOEFFS[i];
+                    RESULT -= b * NCOEFFS[i];
                 }
                 int id = NVARS[i].getId();
                 int pos = map.get(id);
