@@ -412,6 +412,9 @@
                         <include>**/*.template</include>
                         <include>**/pom.xml</include>
                     </includes>
+                    <excludes>
+                        <exclude>**/cpp/**</exclude>
+                    </excludes>
                 </configuration>
                 <executions>
                     <execution>
