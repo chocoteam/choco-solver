@@ -224,6 +224,14 @@ public interface IViewFactory extends ISelf<Model> {
         } else if (!var.contains(v)) {
             return ref().boolVar(false);
         } else {
+            if (VariableUtils.isBool(var)) {
+                BoolVar bvar = (BoolVar) var;
+                if (v == 0) {
+                    return bvar.not();
+                } else {
+                    return bvar;
+                }
+            }
             if (ref().getSettings().enableViews()) {
                 int p = checkDeclaredView(var, v, BoolEqView.class, ref().getSettings().checkDeclaredViews());
                 if (p >= 0) {
@@ -252,6 +260,11 @@ public interface IViewFactory extends ISelf<Model> {
         } else if (var.getUB() < v) {
             return ref().boolVar(false);
         } else {
+            if (VariableUtils.isBool(var)) {
+                BoolVar bvar = (BoolVar) var;
+                assert v == 1;
+                return bvar;
+            }
             if (ref().getSettings().enableViews()) {
                 int p = checkDeclaredView(var, v - 1, BoolLeqView.class, ref().getSettings().checkDeclaredViews());
                 if (p >= 0) {
