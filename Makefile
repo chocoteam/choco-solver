@@ -2,7 +2,8 @@
 # like running test suites
 
 ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-DATE := $(shell date +'%y%m%d_%H:%M')
+PRETTY_DATE := $(shell date +'%m/%d/%Y %H:%M')
+DATE := $(shell date +'%y%m%d_%H%M')
 CURRENT_VERSION := $(shell mvn help:evaluate -Dexpression=project.version | grep -v "\[INFO\]" | grep -v "\[WARNING\]")
 
 .PHONY: all clean compile tests 1s 10s ibex checker mzn xcsp mps dimacs expl update_date compet msc delmsc help
@@ -52,17 +53,17 @@ tests : 1s 10s ibex checker mzn xcsp mps dimacs expl lcg
 	mvn -q test -DtestFailureIgnore=true -Dgroups="$@"
 
 update_date:
-	@sed -i '' 's|\s*System.out.printf("c Choco.*|System.out.printf("c Choco%s ($(DATE))\\n", lcg? " with LCG" : "");|' parsers/src/main/java/org/chocosolver/parser/xcsp/XCSP.java
-	@sed -i '' 's|\s*System.out.printf("%% Choco%s (.*|System.out.printf("%% Choco%s ($(DATE))\\n", lcg? " with LCG" : "");|' parsers/src/main/java/org/chocosolver/parser/flatzinc/Flatzinc.java
+	@sed -i '' 's|\s*System.out.printf("c Choco.*|System.out.printf("c Choco%s ($(PRETTY_DATE))\\n", lcg? " with LCG" : "");|' parsers/src/main/java/org/chocosolver/parser/xcsp/XCSP.java
+	@sed -i '' 's|\s*System.out.printf("%% Choco%s (.*|System.out.printf("%% Choco%s ($(PRETTY_DATE))\\n", lcg? " with LCG" : "");|' parsers/src/main/java/org/chocosolver/parser/flatzinc/Flatzinc.java
 
 compet: update_date clean package
 
 msc: compet
-	@sed -i '' 's|  "version": .*|  "version" : "$(CURRENT_VERSION)",|' parsers/src/main/minizinc/choco.msc
+	@sed -i '' 's|  "version" : .*|  "version" : "$(CURRENT_VERSION)",|' parsers/src/main/minizinc/choco.msc
 	@sed -i '' 's|SNAPSHOT|$(DATE)|g' parsers/src/main/minizinc/choco.msc
-	@sed -i '' 's|  "mznlib": .*|  "mznlib" : "$(ROOT_DIR)/parsers/src/main/minizinc/mzn_lib/",|' parsers/src/main/minizinc/choco.msc
-	@sed -i '' 's|  "executable": .*|  "executable" : "$(ROOT_DIR)/parsers/src/main/minizinc/fzn-choco",|' parsers/src/main/minizinc/choco.msc
-	#@sed -i '' 's|^[^ ]*CHOCO_JAR=.*|CHOCO_JAR=$(ROOT_DIR)/parsers/target/choco-parsers-$(CURRENT_VERSION)-light.jar|' parsers/src/main/minizinc/fzn-choco
+	@sed -i '' 's|  "mznlib" : .*|  "mznlib" : "$(ROOT_DIR)/parsers/src/main/minizinc/mzn_lib/",|' parsers/src/main/minizinc/choco.msc
+	@sed -i '' 's|  "executable" : .*|  "executable" : "$(ROOT_DIR)/parsers/src/main/minizinc/fzn-choco",|' parsers/src/main/minizinc/choco.msc
+	@sed -i '' 's|^[^ ]*JAR_FILE=.*|JAR_FILE="$(ROOT_DIR)/parsers/target/choco-parsers-$(CURRENT_VERSION)-light.jar"|' parsers/src/main/minizinc/fzn-choco.py
 	@cp $(ROOT_DIR)/parsers/src/main/minizinc/choco.msc ~/.minizinc/solvers/choco-$(CURRENT_VERSION)-$(DATE).msc
 
 delmsc:
