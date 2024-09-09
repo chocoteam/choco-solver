@@ -1,6 +1,9 @@
 name: Draft JOSS Paper
 
-on: [push]
+on:
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   paper:
