@@ -27,9 +27,6 @@ jobs:
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
-      - name: Build with Maven
-        run: mvn -B --file pom.xml package -Dgroups="1s,10s,checker"
-
       - name: publish packages
         run: mvn -P ossrhDeploy --batch-mode -DskipTests javadoc:aggregate-jar source:jar deploy
         env:
