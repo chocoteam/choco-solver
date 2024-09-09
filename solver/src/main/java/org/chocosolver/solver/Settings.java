@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver;
 
+import org.chocosolver.memory.EnvironmentBuilder;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.ISatFactory;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -95,6 +96,8 @@ public class Settings {
 
     private boolean lcg = false;
 
+    private Supplier<IEnvironment> environmentSupplier = () -> new EnvironmentBuilder().fromFlat().build();
+
     private Settings() {
     }
 
@@ -169,6 +172,23 @@ public class Settings {
     public Settings setModelChecker(Predicate<Solver> modelChecker) {
         this.modelChecker = modelChecker;
         return this;
+    }
+
+    /**
+     * Set the environment to be used
+     * @param environmentSupplier provide an environment
+     * @return the current instance
+     */
+    public Settings setEnvironmentSupplier(Supplier<IEnvironment> environmentSupplier) {
+        this.environmentSupplier = environmentSupplier;
+        return this;
+    }
+
+    /**
+     * @return the environment builder
+     */
+    public Supplier<IEnvironment> getEnvironmentSupplier() {
+        return environmentSupplier;
     }
 
     /**
