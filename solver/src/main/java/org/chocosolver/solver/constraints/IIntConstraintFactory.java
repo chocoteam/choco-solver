@@ -1608,19 +1608,27 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint diffN(IntVar[] X, IntVar[] Y, IntVar[] width, IntVar[] height, boolean addCumulativeReasoning) {
         Model model = X[0].getModel();
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: diffN constraint is decomposed (due to LCG).");
+            }
+            for (int i = 0; i < X.length; i++) {
+                for (int j = i + 1; j < X.length; j++) {
+                    ref().or(
+                            ref().arithm(X[i], "+", width[i], "<=", X[j]),
+                            ref().arithm(X[j], "+", width[j], "<=", X[i]),
+                            ref().arithm(Y[i], "+", height[i], "<=", Y[j]),
+                            ref().arithm(Y[j], "+", height[j], "<=", Y[i])
+                    ).post();
+                }
+            }
+            return ref().voidConstraint();
+        }
         Constraint diffNCons = new Constraint(
                 ConstraintsName.DIFFN,
                 new PropDiffN(X, Y, width, height)
         );
-        if (ref().getSolver().isLCG()) {
-            if (addCumulativeReasoning) {
-                if (ref().getSettings().warnUser()) {
-                    ref().getSolver().log().white().println(
-                            "Warning: disable cumulative reasoning for diffN constraint n(due to LCG).");
-                }
-                addCumulativeReasoning = false;
-            }
-        }
         if (addCumulativeReasoning) {
             IntVar[] EX = new IntVar[X.length];
             IntVar[] EY = new IntVar[X.length];
