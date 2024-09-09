@@ -45,7 +45,7 @@ then
 
     ## For MiniZinc
     sedInPlace "s%  \"version\": .*%  \"version\": \"$VERSION\",%"  ./parsers/src/main/minizinc/choco.msc
-    sedInPlace "s%CHOCO_JAR=~/.m2/.*%CHOCO_JAR=~/.m2/repository/org/choco-solver/choco-parsers/$VERSION/choco-parsers-$VERSION-light.jar%" ./parsers/src/main/minizinc/fzn-choco
+    sedInPlace "s%JAR_FILE=.*%JAR_FILE='~/.m2/repository/org/choco-solver/choco-parsers/$VERSION/choco-parsers-$VERSION-light.jar'%" ./parsers/src/main/minizinc/fzn-choco.py
 
     ## The CHANGES.md
     # replace the 'NEXT MILESTONE' version by VERSION
