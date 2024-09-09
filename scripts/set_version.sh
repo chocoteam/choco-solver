@@ -72,7 +72,7 @@ See [milestone '${VERSION%%-SNAPSHOT}'](https://github.com/chocoteam/choco-solve
 \
 #### Contributors to this release:\
 \
-
-**Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v${OVERSION}...v${VERSION%%-SNAPSHOT}
+\
+**Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v'${OVERSION}'...v'${VERSION%%-SNAPSHOT}'
     ' CHANGES.md
 fi
