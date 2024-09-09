@@ -9,7 +9,10 @@ NEXT MILESTONE
 
 ### Major features:
 
-- Add `PickOnDom` and variants (see `Search.pickOnDom`)                            
+- Add `PickOnDom` and variants (see `Search.pickOnDom`)       
+- Enhance MiniZinc output
+- Revamp scripts to solver flatzinc files
+- Fix bugs (see closed issues)
 
 ### Deprecated API (to be removed in next release):
 
@@ -17,6 +20,11 @@ NEXT MILESTONE
 See [milestone 4.10.15](https://github.com/chocoteam/choco-solver/milestone/39)
 
 #### Contributors to this release:
+- [Arthur Godet](https://github.com/ArthurGodet) (@ArthurGodet) 
+- [Paul King](https://github.com/paulk-asert) (@paulk-asert)
+- [Zhang Yang](https://github.com/zy-nesime) (@zy-nesime)
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
+                                                                         
 
 **Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v4.10.14...v4.10.15
 

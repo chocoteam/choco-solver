@@ -24,4 +24,4 @@
 5. Now you can run the command: 
 
 
-    ./scritps/release.sh
+    ./scripts/release.sh
