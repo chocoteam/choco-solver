@@ -2323,7 +2323,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                     new PropNValue(vars, nValues)
             );*/
             IntIterableRangeSet set = VariableUtils.union(vars);
-            BoolVar[] vs = ref().boolVarArray(set.size());
+            BoolVar[] vs = ref().boolVarArray("vs", set.size());
             int k = 0;
             for (int v : set) {
                 BoolVar[] bs = new BoolVar[vars.length];
