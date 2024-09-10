@@ -11,6 +11,7 @@ package org.chocosolver.solver.constraints.nary;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -28,6 +29,7 @@ import org.chocosolver.util.tools.ArrayUtils;
  * @author Jean-Guillaume Fages
  * @since 31/01/13
  */
+@Explained
 public class PropDiffN extends Propagator<IntVar> {
 
     //***********************************************************************************
@@ -193,22 +195,25 @@ public class PropDiffN extends Propagator<IntVar> {
     private boolean filter(int i, int j, boolean hori) throws ContradictionException {
         boolean hasFiltered = false;
         int offSet = hori ? 0 : n;
-        int s_i = vars[i + offSet].getUB();
-        int e_i = vars[i + offSet].getLB() + vars[i + 2 * n + offSet].getLB();
-        int s_j = vars[j + offSet].getUB();
-        int e_j = vars[j + offSet].getLB() + vars[j + 2 * n + offSet].getLB();
-        if (s_i < e_i || s_j < e_j) {
-            if (e_j > s_i) {
-                if (vars[j + offSet].updateLowerBound(e_i, this, explainSlb(j, i, hori))) {
+        int s_i = vars[i + offSet].getUB(); // latest start of i
+        int e_i = vars[i + offSet].getLB() + vars[i + 2 * n + offSet].getLB(); // earliest end of i
+        int s_j = vars[j + offSet].getUB(); // latest start of j
+        int e_j = vars[j + offSet].getLB() + vars[j + 2 * n + offSet].getLB(); // earliest end of j
+        if (s_i < e_i || s_j < e_j) { // if at least one mandatory part is not empty
+            if (e_j > s_i) { // if j ends after i starts
+                // then update the start of j to the end of i
+                if (vars[j + offSet].updateLowerBound(e_i, this, explainFilter(j, i))) {
                     if (!pruneList.contains(j)) {
                         pruneList.add(j);
                     }
                     hasFiltered = true;
                 }
+                // and update the start of i to the end of j
                 boolean filtPrun1 = vars[i + offSet].updateUpperBound(s_j - vars[i + 2 * n + offSet].getLB(), this,
-                        explainSub(i, j, hori));
+                        explainFilter(i, j));
+                // and update the size of i to the space between the earliest start of j and the earliest start of i
                 boolean filtPrun2 = vars[i + offSet + 2 * n].updateUpperBound(s_j - vars[i + offSet].getLB(), this,
-                        explainDub(i, j, hori));
+                        explainFilter(i, j));
                 if (filtPrun1 || filtPrun2) {
                     if (!pruneList.contains(i)) {
                         pruneList.add(i);
@@ -216,17 +221,20 @@ public class PropDiffN extends Propagator<IntVar> {
                     hasFiltered = true;
                 }
             }
-            if (s_j < e_i) {
-                if (vars[i + offSet].updateLowerBound(e_j, this, explainSlb(i, j, hori))) {
+            if (s_j < e_i) { // if j starts before i ends
+                // then update the start of i to the end of j
+                if (vars[i + offSet].updateLowerBound(e_j, this, explainFilter(i, j))) {
                     if (!pruneList.contains(i)) {
                         pruneList.add(i);
                     }
                     hasFiltered = true;
                 }
+                // and update the start of j to the end of i
                 boolean filtPrun1 = vars[j + offSet].updateUpperBound(s_i - vars[j + 2 * n + offSet].getLB(), this,
-                        explainSub(j, i, hori));
+                        explainFilter(j, i));
+                // and update the size of j to the space between the earliest start of i and the earliest start of j
                 boolean filtPrun2 = vars[j + offSet + 2 * n].updateUpperBound(s_i - vars[j + offSet].getLB(), this,
-                        explainDub(j, i, hori));
+                        explainFilter(j, i));
                 if (filtPrun1 || filtPrun2) {
                     if (!pruneList.contains(j)) {
                         pruneList.add(j);
@@ -238,54 +246,31 @@ public class PropDiffN extends Propagator<IntVar> {
         return hasFiltered;
     }
 
-    private Reason explainSlb(int o1, int o2, boolean orientation) {
+    private Reason explainFilter(int o1, int o2) {
         if (lcg()) {
-            int offSet = orientation ? 0 : n;
-            int[] ps = new int[9];
+            int[] ps = new int[13];
             int m = 1;
-            ps[m++] = vars[o2 + offSet].getMinLit();
-            ps[m++] = vars[o2 + 2 * n + offSet].getMinLit();
-            fillWithOtherDimension(ps, m, o1, o2, orientation);
+            // start of o1 in dimension 1
+            ps[m++] = vars[o1].getMinLit();
+            ps[m++] = vars[o1].getMaxLit();
+            ps[m++] = vars[o1 + 2 * n].getMinLit();
+            // start of o1 in dimension 2
+            ps[m++] = vars[o1 + n].getMinLit();
+            ps[m++] = vars[o1 + n].getMaxLit();
+            ps[m++] = vars[o1 + 2 * n + n].getMinLit();
+            // start of o2 in dimension 1
+            ps[m++] = vars[o2].getMinLit();
+            ps[m++] = vars[o2].getMaxLit();
+            ps[m++] = vars[o2 + 2 * n].getMinLit();
+            // start of o2 in dimension 2
+            ps[m++] = vars[o2 + n].getMinLit();
+            ps[m++] = vars[o2 + n].getMaxLit();
+            ps[m] = vars[o2 + 2 * n + n].getMinLit();
             return Reason.r(ps);
         }
         return Reason.undef();
     }
 
-    private Reason explainSub(int o1, int o2, boolean orientation) {
-        if (lcg()) {
-            int offSet = orientation ? 0 : n;
-            int[] ps = new int[9];
-            int m = 1;
-            ps[m++] = vars[o2 + offSet].getMaxLit();
-            ps[m++] = vars[o1 + 2 * n + offSet].getMinLit();
-            fillWithOtherDimension(ps, m, o1, o2, orientation);
-            return Reason.r(ps);
-        }
-        return Reason.undef();
-    }
-
-    private Reason explainDub(int o1, int o2, boolean orientation) {
-        if (lcg()) {
-            int offSet = orientation ? 0 : n;
-            int[] ps = new int[9];
-            int m = 1;
-            ps[m++] = vars[o2 + offSet].getMaxLit();
-            ps[m++] = vars[o1 + offSet].getMinLit();
-            fillWithOtherDimension(ps, m, o1, o2, orientation);
-            return Reason.r(ps);
-        }
-        return Reason.undef();
-    }
-
-    private void fillWithOtherDimension(int[] ps, int m, int o1, int o2, boolean orientation) {
-        int offSet = orientation ? n : 0;
-        ps[m++] = vars[o1 + offSet].getMinLit();
-        ps[m++] = vars[o1 + offSet].getMaxLit();
-        ps[m++] = vars[o2 + offSet].getMinLit();
-        ps[m++] = vars[o2 + offSet].getMaxLit();
-        ps[m++] = vars[o1 + 2 * n + offSet].getMinLit();
-        ps[m] = vars[o2 + 2 * n + offSet].getMinLit();
-    }
 
 
     @Override
