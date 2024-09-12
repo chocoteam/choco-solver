@@ -126,7 +126,7 @@ public class Flatzinc extends RegParser {
     @Override
     public void createSolver() {
         if (level.isLoggable(Level.COMPET)) {
-            System.out.println("%% Choco 240909_14:08");
+            System.out.println("%% Choco 240912_11:16");
         }
         super.createSolver();
         datas = new Datas[nb_cores];
