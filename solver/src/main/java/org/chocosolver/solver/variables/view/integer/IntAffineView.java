@@ -536,15 +536,6 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
         return var.hasEnumeratedDomain() || a > 1;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof IntAffineView)) return false;
-
-        IntAffineView<?> intView = (IntAffineView<?>) o;
-        if (!var.equals(intView.var)) return false;
-        return a == intView.a && b == intView.b && p == intView.p;
-    }
 
     public boolean equals(IntVar v, int a, int b) {
         if (!this.var.equals(v)) return false;
