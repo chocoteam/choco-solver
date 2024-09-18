@@ -18,6 +18,8 @@ import org.chocosolver.solver.*;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
+import org.chocosolver.solver.constraints.extension.hybrid.HybridTuples;
+import org.chocosolver.solver.constraints.extension.hybrid.ISupportable;
 import org.chocosolver.solver.constraints.extension.nary.TuplesLargeTable;
 import org.chocosolver.solver.constraints.extension.nary.TuplesTable;
 import org.chocosolver.solver.constraints.extension.nary.TuplesVeryLargeTable;
@@ -33,12 +35,14 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 import static java.lang.System.out;
 import static org.chocosolver.solver.constraints.extension.TuplesFactory.generateTuples;
 import static org.chocosolver.solver.constraints.extension.TuplesFactory.scalar;
+import static org.chocosolver.solver.constraints.extension.hybrid.HybridTuples.*;
 import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 import static org.testng.Assert.assertEquals;
 
@@ -940,6 +944,24 @@ public class TableTest {
             out.printf("%d - %d - %d\n", x.getValue(), y.getValue(), z.getValue());
         }
         Assert.assertEquals(model.getSolver().getSolutionCount(), (int) Math.pow(3, 3) - 3);
+    }
+
+    @Test(groups = "1s")
+    public void testHybrid() {
+        Model m = new Model();
+        IntVar[] intVars = m.intVarArray(3, 0, 5);
+        ISupportable[][] htuples = new ISupportable[][]{
+                {eq(1), gt(2), le(col(0))},
+                {eq(2), le(2), ne(col(1))}
+
+        };
+        HybridTuples ht = new HybridTuples();
+        ht.add(htuples);
+        m.table(intVars, ht).post();
+        for (int i = 0; i < 7; i++) {
+            m.getSolver().solve();
+            out.println(Arrays.toString(intVars));
+        }
     }
 
 }
