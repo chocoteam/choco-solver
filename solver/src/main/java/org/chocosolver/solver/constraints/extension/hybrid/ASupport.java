@@ -83,7 +83,9 @@ public abstract class ASupport {
         @Override
         void support(int value) {
             value -= offset;
-            ac.set(value);
+            if(value > -1) {
+                ac.set(value);
+            }
         }
 
         @Override
