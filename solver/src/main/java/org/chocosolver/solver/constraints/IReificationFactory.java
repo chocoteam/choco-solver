@@ -463,8 +463,7 @@ public interface IReificationFactory extends ISelf<Model> {
         switch (Operator.get(op)) {
             case EQ:
                 new Constraint(ConstraintsName.BASIC_REI,
-                        new PropXleYHalfReif(X, ref().intView(1, Y, C), B),
-                        new PropXleYHalfReif(Y, ref().intView(1, X, -C), B),
+                        new PropXeqYHalfReif(X, ref().intView(1, Y, C), B),
                         new PropXneYHalfReif(X, ref().intView(1, Y, C), B.not())
                 ).post();
                 break;

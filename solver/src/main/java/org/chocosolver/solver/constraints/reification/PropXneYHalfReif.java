@@ -49,25 +49,24 @@ public class PropXneYHalfReif extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (b.isInstantiatedTo(0)) { // if b is false, then no filtering is required
+        if (b.isInstantiatedTo(0)) {
+            // if b is false, then no filtering is required
             setPassive();
-            return;
-        }
-        if (x.isInstantiated() && y.isInstantiated() && x.getValue() == y.getValue()) {
-            b.setToFalse(this,
-                    lcg() ? Reason.r(x.getValLit(), y.getValLit()) : Reason.undef());
-            setPassive();
-            return;
-        }
-        if (b.isInstantiatedTo(1)) {
+        } else if (b.isInstantiatedTo(1)) {
+            // if b is true, then x and y must be different
             if (x.isInstantiated()) {
                 y.removeValue(x.getValue(), this,
                         lcg() ? Reason.r(x.getValLit(), b.getValLit()) : Reason.undef());
-            }
-            if (y.isInstantiated()) {
+                setPassive();
+            }else if (y.isInstantiated()) {
                 x.removeValue(y.getValue(), this,
                         lcg() ? Reason.r(y.getValLit(), b.getValLit()) : Reason.undef());
+                setPassive();
             }
+        } else if (x.isInstantiated() && y.isInstantiated() && x.getValue() == y.getValue()) {
+            // if x and y are instantiated and equal, then b must be false
+            b.setToFalse(this,
+                    lcg() ? Reason.r(x.getValLit(), y.getValLit()) : Reason.undef());
         }
     }
 
