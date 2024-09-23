@@ -19,6 +19,7 @@ import org.chocosolver.solver.constraints.binary.*;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
+import org.chocosolver.solver.constraints.nary.PropIntValuePrecedeChain;
 import org.chocosolver.solver.constraints.nary.alldifferent.PropAllDiffAC;
 import org.chocosolver.solver.constraints.nary.alldifferent.PropAllDiffBC;
 import org.chocosolver.solver.constraints.nary.alldifferent.PropAllDiffInst;
@@ -26,20 +27,16 @@ import org.chocosolver.solver.constraints.nary.channeling.PropEnumDomainChanneli
 import org.chocosolver.solver.constraints.nary.channeling.PropInverseChannelAC;
 import org.chocosolver.solver.constraints.nary.channeling.PropInverseChannelBC;
 import org.chocosolver.solver.constraints.nary.circuit.PropNoSubtour;
-import org.chocosolver.solver.constraints.nary.count.PropCount_AC;
 import org.chocosolver.solver.constraints.nary.element.PropElementV2;
 import org.chocosolver.solver.constraints.nary.lex.PropLex;
 import org.chocosolver.solver.constraints.nary.min_max.PropMax;
 import org.chocosolver.solver.constraints.nary.min_max.PropMin;
-import org.chocosolver.solver.constraints.nary.nvalue.PropNValue;
 import org.chocosolver.solver.constraints.nary.sum.*;
+import org.chocosolver.solver.constraints.reification.PropXeqYHalfReif;
 import org.chocosolver.solver.constraints.reification.PropXinSHalfReif;
 import org.chocosolver.solver.constraints.reification.PropXleYHalfReif;
 import org.chocosolver.solver.constraints.reification.PropXneYHalfReif;
-import org.chocosolver.solver.constraints.ternary.PropMaxBC;
-import org.chocosolver.solver.constraints.ternary.PropMinBC;
-import org.chocosolver.solver.constraints.ternary.PropTimesNaive;
-import org.chocosolver.solver.constraints.ternary.PropXplusYeqZ;
+import org.chocosolver.solver.constraints.ternary.*;
 import org.chocosolver.solver.constraints.unary.*;
 import org.chocosolver.solver.search.SearchState;
 import org.chocosolver.solver.search.loop.learn.LazyClauseGeneration;
@@ -98,6 +95,7 @@ public class TestExplanation {
                 {PropScale.class, new Class[]{IntVar.class, int.class, IntVar.class}, new Object[]{null, 2, null}},
                 {PropScale.class, new Class[]{IntVar.class, int.class, IntVar.class}, new Object[]{null, 3, null}},
                 {PropTimesNaive.class, new Class[]{IntVar.class, IntVar.class, IntVar.class}, new Object[]{null}},
+                {PropDivXYZ.class, new Class[]{IntVar.class, IntVar.class, IntVar.class}, new Object[]{null}},
 //                 nary
                 {PropSum.class, new Class[]{IntVar[].class, int.class, Operator.class, int.class}, new Object[]{4, 1, "=", 0}},
                 {PropSum.class, new Class[]{IntVar[].class, int.class, Operator.class, int.class}, new Object[]{4, 1, ">=", 0}},
@@ -128,6 +126,7 @@ public class TestExplanation {
                 {PropMax.class, new Class[]{IntVar[].class, IntVar.class}, new Object[]{4, null}},
                 {PropMin.class, new Class[]{IntVar[].class, IntVar.class}, new Object[]{4, null}},
                 {PropXleYHalfReif.class, new Class[]{IntVar.class, IntVar.class, BoolVar.class}, new Object[]{null, null, null}},
+                {PropXeqYHalfReif.class, new Class[]{IntVar.class, IntVar.class, BoolVar.class}, new Object[]{null, null, null}},
                 {PropXneYHalfReif.class, new Class[]{IntVar.class, IntVar.class, BoolVar.class}, new Object[]{null, null, null}},
                 {PropXinSHalfReif.class, new Class[]{IntVar.class, IntIterableRangeSet.class, BoolVar.class}, new Object[]{null, null, null}},
                 {PropXplusYeqZ.class, new Class[]{IntVar.class, IntVar.class, IntVar.class}, new Object[]{null, null, null}},
@@ -136,13 +135,11 @@ public class TestExplanation {
                 {PropAllDiffAC.class, new Class[]{IntVar[].class, boolean.class}, new Object[]{6, false}},
                 {PropLex.class, new Class[]{IntVar[].class, IntVar[].class, boolean.class}, new Object[]{5, 5, null}},
                 {PropElementV2.class, new Class[]{IntVar.class, IntVar[].class, IntVar.class, int.class}, new Object[]{null, 8, null, 0}},
-                {PropCount_AC.class, new Class[]{IntVar[].class, int.class, IntVar.class}, new Object[]{5, null, null}},
-                {PropNValue.class, new Class[]{IntVar[].class, IntVar.class}, new Object[]{5, null, null}},
                 {PropEnumDomainChanneling.class, new Class[]{BoolVar[].class, IntVar.class, int.class}, new Object[]{5, null, null}},
                 {PropNoSubtour.class, new Class[]{IntVar[].class, int.class}, new Object[]{8, null}},
                 {PropInverseChannelBC.class, new Class[]{IntVar[].class, IntVar[].class, int.class, int.class}, new Object[]{6, 6, 1, 1}},
                 {PropInverseChannelAC.class, new Class[]{IntVar[].class, IntVar[].class, int.class, int.class}, new Object[]{6, 6, 1, 1}},
-
+                {PropIntValuePrecedeChain.class, new Class[]{IntVar[].class, int.class, int.class}, new Object[]{6, 1, 3}},
         };
         return Providers.merge(objs, getSeeds());
     }

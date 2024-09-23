@@ -1868,21 +1868,6 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param T another value
      */
     default Constraint intValuePrecedeChain(IntVar[] X, int S, int T) {
-        if (ref().getSolver().isLCG()) {
-            if (ref().getSettings().warnUser()) {
-                ref().getSolver().log().white().println(
-                        "Warning: intValuePrecedeChain constraint is decomposed (due to LCG).");
-            }
-            BoolVar[] bs = ref().boolVarArray(X.length + 1);
-            bs[0].eq(0).post();
-            for (int i = 0; i < X.length; i++) {
-                BoolVar xis = ref().isEq(X[i], S);
-                ref().addClausesBoolLe(xis, bs[i + 1]);
-                ref().impXrelYC(bs[i], "=", bs[i + 1], 0, xis.not());
-                ref().impXrelYC(X[i], "!=", ref().intVar(T), 0, bs[i].not());
-            }
-            return ref().voidConstraint();
-        }
         return new Constraint(ConstraintsName.INT_VALUE_PRECEDE, new PropIntValuePrecedeChain(X, S, T));
     }
 
@@ -1897,22 +1882,6 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint intValuePrecedeChain(IntVar[] X, int[] V) {
         if (V.length > 1) {
-            if (ref().getSolver().isLCG()) {
-                if (ref().getSettings().warnUser()) {
-                    ref().getSolver().log().white().println(
-                            "Warning: intValuePrecedeChain constraint is decomposed (due to LCG).");
-                }
-                TIntHashSet values = new TIntHashSet();
-                values.add(V[0]);
-                for (int i = 1; i < V.length; i++) {
-                    if (values.contains(V[i])) {
-                        throw new SolverException("\"int_value_precede\" requires V to be made of distinct values");
-                    }
-                    values.add(V[i]);
-                    ref().intValuePrecedeChain(X, V[i - 1], V[i]);
-                }
-                return ref().voidConstraint();
-            }
             TIntHashSet values = new TIntHashSet();
             PropIntValuePrecedeChain[] ps = new PropIntValuePrecedeChain[V.length - 1];
             values.add(V[0]);

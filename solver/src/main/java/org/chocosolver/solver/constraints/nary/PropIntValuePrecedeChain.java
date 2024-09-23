@@ -11,6 +11,8 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -26,6 +28,7 @@ import org.chocosolver.util.ESat;
  * Created by cprudhom on 03/07/15.
  * Project: choco.
  */
+@Explained
 public class PropIntValuePrecedeChain extends Propagator<IntVar> {
 
     private final int s;
@@ -51,7 +54,8 @@ public class PropIntValuePrecedeChain extends Propagator<IntVar> {
         // initial propagation only
         int _a = a.get();
         while (_a < n && !vars[_a].contains(s)) {
-            vars[_a].removeValue(t, this);
+            // remove t from variables that do not contain s
+            vars[_a].removeValue(t, this, explainTrem(_a));
             _a++;
         }
         a.set(_a);
@@ -59,7 +63,7 @@ public class PropIntValuePrecedeChain extends Propagator<IntVar> {
         g.set(_a);
         int _g = _a;
         if (_a < n) {
-            vars[_a].removeValue(t, this);
+            vars[_a].removeValue(t, this, explainTrem(_a));
             do {
                 _g++;
             } while (_g < n && !vars[_g].isInstantiatedTo(t));
@@ -76,15 +80,15 @@ public class PropIntValuePrecedeChain extends Propagator<IntVar> {
             if (i == _a && !vars[i].contains(s)) {
                 _a++;
                 while (_a < _b) {
-                    vars[_a].removeValue(t, this);
+                    vars[_a].removeValue(t, this, explainTrem(_a));
                     _a++;
                 }
                 while (_a < n && !vars[_a].contains(s)) {
-                    vars[_a].removeValue(t, this);
+                    vars[_a].removeValue(t, this, explainTrem(_a));
                     _a++;
                 }
                 if (_a < n) {
-                    vars[_a].removeValue(t, this);
+                    vars[_a].removeValue(t, this, explainTrem(_a ));
                 }
                 a.set(_a);
                 b.set(_a);
@@ -124,7 +128,8 @@ public class PropIntValuePrecedeChain extends Propagator<IntVar> {
             _b++;
         } while (_b < n && !vars[_b].contains(s));
         if (_b > g.get()) {
-            vars[a.get()].instantiateTo(s, this);
+            //  if g < b, then x_α can be bound to s.
+            vars[a.get()].instantiateTo(s, this, explainSin(a.get(), g.get()));
             setPassive();
         }
         b.set(_b);
@@ -134,9 +139,64 @@ public class PropIntValuePrecedeChain extends Propagator<IntVar> {
         if (b.get() < g.get() && i < g.get() && vars[i].isInstantiatedTo(t)) {
             g.set(i);
             if (b.get() > i) {
-                vars[a.get()].instantiateTo(s, this);
+                vars[a.get()].instantiateTo(s, this, explainSin2(a.get(), g.get()));
                 setPassive();
             }
         }
+    }
+
+    /**
+     * Explain why the value t can be removed from the domain of the variable at position to
+     *
+     * @param to position of the variable (exclusive)
+     * @return a reason
+     */
+    private Reason explainTrem(int to) {
+        Reason r = Reason.undef();
+        if (lcg()) {
+            // value t can be removed from the domains of the variables before or at position to
+            // because those variables do not contain s
+            int[] lits = new int[to + 1];
+            int m = 1;
+            for (int i = 0; i < to; i++) {
+                lits[m++] = vars[i].getLit(s, IntVar.LR_EQ);
+            }
+            r = Reason.r(lits);
+        }
+        return r;
+    }
+
+    private Reason explainSin(int a, int g) {
+        Reason r = Reason.undef();
+        if (lcg()) {
+            // value t can be removed from the domains of the variables before or at position a
+            // because those variables do not contain s
+            int[] lits = new int[g - a + 1];
+            int m = 1;
+            lits[m++] = vars[g].getLit(t, IntVar.LR_NE);
+            for (int i = a + 1; i < g; i++) {
+                lits[m++] = vars[i].getLit(s, IntVar.LR_EQ);
+            }
+            r = Reason.r(lits);
+        }
+        return r;
+    }
+
+    private Reason explainSin2(int a, int g) {
+        Reason r = Reason.undef();
+        if (lcg()) {
+            // value t can be removed from the domains of the variables before or at position a
+            // because those variables do not contain s
+            int[] lits = new int[g + 1];
+            int m = 1;
+            lits[m++] = vars[g].getLit(t, IntVar.LR_NE);
+            for (int i = 0; i < g; i++) {
+                if (i != a) {
+                    lits[m++] = vars[i].getLit(s, IntVar.LR_EQ);
+                }
+            }
+            r = Reason.r(lits);
+        }
+        return r;
     }
 }
