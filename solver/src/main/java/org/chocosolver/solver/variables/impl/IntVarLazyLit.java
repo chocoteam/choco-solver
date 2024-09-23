@@ -9,9 +9,6 @@
  */
 package org.chocosolver.solver.variables.impl;
 
-import gnu.trove.stack.TIntStack;
-import gnu.trove.stack.array.TIntArrayStack;
-import org.chocosolver.memory.IStateInt;
 import org.chocosolver.sat.MiniSat;
 import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.Cause;
@@ -22,15 +19,16 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IDelta;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.impl.lazyness.ILazyBound;
+import org.chocosolver.solver.variables.impl.lazyness.StrongBound;
+import org.chocosolver.solver.variables.impl.lazyness.WeakBound;
 import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import static org.chocosolver.sat.MiniSat.C_Undef;
 
@@ -48,30 +46,12 @@ import static org.chocosolver.sat.MiniSat.C_Undef;
 @Explained
 public final class IntVarLazyLit extends AbstractVariable implements IntVar, LitVar {
 
-    private static class Node {
-        int var;
-        int val;
-        int prev;
-        int next;
-
-        public Node(int var, int val, int prev, int next) {
-            this.var = var;
-            this.val = val;
-            this.prev = prev;
-            this.next = next;
-        }
-    }
-
     final IntVar var; // the observed variable
     final MiniSat sat; // the sat solver
 
     boolean channeling = true; // to communicate with the sat solver or not
 
-    final List<Node> ld; // todo: check type
-    final TIntStack freelist = new TIntArrayStack();
-
-    final IStateInt li;
-    final IStateInt hi;
+    private final ILazyBound bnd;
     int valLit;
 
     final int min0;
@@ -92,28 +72,16 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar, Lit
             throw new UnsupportedOperationException("IntVarLazyLit can only wrap bounded integer variables");
         }
         this.sat = getModel().getSolver().getSat();
-
-        ld = new ArrayList<>();
-        ld.add(new Node(0, getLB() - 1, -1, 1));
-        ld.add(new Node(1, getUB(), 0, -1));
-        li = model.getEnvironment().makeInt(0);
-        hi = model.getEnvironment().makeInt(1);
+        if (getModel().getSettings().intVarLazyLitWithWeakBounds()) {
+            bnd = new WeakBound(getModel());
+        } else {
+            bnd = new StrongBound(getModel(), min0, max0);
+        }
         valLit = MiniSat.makeLiteral(sat.nVars(), true);
         sat.newVariable(new MiniSat.ChannelInfo(this, 1, 2, 0, false));
         if (var.isInstantiated()) {
             sat.cEnqueue(getLit(valLit, LR_EQ), Reason.undef());
         }
-    }
-
-    private int getLitNode() {
-        int i = -1;
-        if (freelist.size() != 0) {
-            i = freelist.pop();
-        } else {
-            i = ld.size();
-            ld.add(new Node(-1, -1, -1, -1));
-        }
-        return i;
     }
 
     // duplicated code from IntVarEagerLit
@@ -165,12 +133,12 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar, Lit
 
     @Override
     public int getMinLit() {
-        return MiniSat.makeLiteral(ld.get(li.get()).var, false);
+        return MiniSat.makeLiteral(bnd.currentMinVar(), false);
     }
 
     @Override
     public int getMaxLit() {
-        return MiniSat.makeLiteral(ld.get(hi.get()).var, true);
+        return MiniSat.makeLiteral(bnd.currentMaxVar(), true);
     }
 
     @Override
@@ -188,26 +156,14 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar, Lit
             return getMaxLit();
         }
         assert (v >= getLB()) : var + " >= " + v;
-        int ni = li.get();
+        return extracted(v);
+    }
+
+    private int extracted(int v) {
         int prev = previousValue(v);
         prev = (prev == Integer.MIN_VALUE) ? v - 1 : prev;
-        while (ld.get(ni).val < prev) {
-            ni = ld.get(ni).next;
-            assert (0 <= ni && ni < ld.size());
-        }
-        if (ld.get(ni).val == prev) {
-            return MiniSat.makeLiteral(ld.get(ni).var, true);
-        }
-        // create new var and insert before ni
-        int mi = getLitNode();
-        ld.get(mi).var = sat.newVariable(new MiniSat.ChannelInfo(this, 1, 1, prev)); // todo recycle lits
-        ld.get(mi).val = prev;
-        ld.get(mi).next = ni;
-        ld.get(mi).prev = ld.get(ni).prev;
-        ld.get(ni).prev = mi;
-        ld.get(ld.get(mi).prev).next = mi;
-
-        return MiniSat.makeLiteral(ld.get(mi).var, true);
+        int var = bnd.getSATVar(prev, this, sat);
+        return MiniSat.makeLiteral(var, true);
     }
 
     private int getLELit(int v) {
@@ -224,29 +180,18 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar, Lit
     void channelMin(int v, int p) {
         Reason r = Reason.r(MiniSat.neg(p));
         int prev = previousValue(v);
-        int ni;
-        for (ni = ld.get(li.get()).next; ld.get(ni).val < prev; ni = ld.get(ni).next) {
-            sat.cEnqueue(MiniSat.makeLiteral(ld.get(ni).var, true), r);
-        }
-        assert (ld.get(ni).val == prev);
-        li.set(ni);
+        bnd.channelMin(prev, sat, r);
     }
 
     void channelMax(int v, int p) {
         Reason r = Reason.r(MiniSat.neg(p));
-        int ni;
-        for (ni = ld.get(hi.get()).prev; ld.get(ni).val > v; ni = ld.get(ni).prev) {
-            sat.cEnqueue(MiniSat.makeLiteral(ld.get(ni).var, false), r);
-        }
-        assert (ld.get(ni).val == v);
-        hi.set(ni);
+        bnd.channelMax(v, sat, r);
     }
 
-    void updateFixed(int v) {
+    void updateFixed() {
         Reason r = Reason.r(getMinLit(), getMaxLit());
         sat.cEnqueue(valLit, r);
     }
-
 
     @Override
     public boolean removeValue(int value, ICause cause, Reason reason) throws ContradictionException {
@@ -279,7 +224,7 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar, Lit
         if (value > getLB()) {
             int p = getGELit(value);
             if (channeling) {
-                this.notify( reason, cause, sat, p);
+                this.notify(reason, cause, sat, p);
             }
             if (value > getUB()) {
                 // ignore: should be detected by the SAT
@@ -290,7 +235,7 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar, Lit
             int ub = getUB();
             IntEventType e = IntEventType.INCLOW;
             if (value == ub) {// || var.nextValue(value - 1) == ub) {
-                updateFixed(ub);
+                updateFixed();
                 e = IntEventType.INSTANTIATE;
             }
             // then update the variable, should not fail...
@@ -317,7 +262,7 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar, Lit
             int lb = getLB();
             IntEventType e = IntEventType.DECUPP;
             if (value == lb) {// || var.previousValue(value + 1) == lb) {
-                updateFixed(lb);
+                updateFixed();
                 e = IntEventType.INSTANTIATE;
             }
             // then update the variable, should not fail...
