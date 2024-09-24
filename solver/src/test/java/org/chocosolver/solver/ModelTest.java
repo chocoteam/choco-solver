@@ -740,4 +740,11 @@ public class ModelTest {
         sol.limit(10).forEach(s -> System.out.printf("%s%n", s));
     }
 
+    @Test(groups = "1s", expectedExceptions = SolverException.class)
+    public void testOperator(){
+        Model m = new Model();
+        IntVar[] vars = m.intVarArray(10, 0, 3);
+        m.sum(vars, "==", 10).post();
+    }
+
 }
