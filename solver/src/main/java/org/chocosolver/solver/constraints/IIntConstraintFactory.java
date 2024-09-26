@@ -1955,11 +1955,12 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         if (ref().getSolver().isLCG()) {
             if (ref().getSettings().warnUser()) {
                 ref().getSolver().log().white().println(
-                        "Warning: knapsack constraint is decomposed into sum constraints (due to LCG).");
+                        "Warning: weaker version of knapsack constraint (due to LCG).");
             }
             return new Constraint(ConstraintsName.KNAPSACK, ArrayUtils.append(
                     scalar1.propagators,
-                    scalar2.propagators));
+                    scalar2.propagators,
+                    new Propagator[]{new PropKnapsack(occurrences, weightSum, energySum, weight, energy)}));
         }
         return new Constraint(ConstraintsName.KNAPSACK, ArrayUtils.append(
                 scalar1.propagators,
