@@ -277,7 +277,7 @@
                     <!-- see http://www.mojohaus.org/extra-enforcer-rules/enforceBytecodeVersion.html -->
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.1.0
+                    <version>3.3.0
                     </version> <!-- find the latest version at http://maven.apache.org/plugins/maven-enforcer-plugin/ -->
                     <executions>
                         <execution>
@@ -362,7 +362,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <id>enforce-maven</id>
