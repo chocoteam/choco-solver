@@ -41,10 +41,8 @@ public class AllDifferent extends Constraint {
         if (model.getSolver().isLCG()) {
             String message = "";
             if (consistency.equals("AC") || consistency.equals("AC_ZHANG")) {
-                if (model.getSettings().warnUser()) {
-                    consistency = "AC_REGIN";
-                    message = "Warning: Adjust consistency level of AllDifferent to \"AC_REGIN\" due to LCG resolution.";
-                }
+                consistency = "AC_REGIN";
+                message = "Warning: Adjust consistency level of AllDifferent to \"AC_REGIN\" due to LCG resolution.";
             }
             boolean allEnum = Arrays.stream(VARS).allMatch(IntVar::hasEnumeratedDomain);
             if (!allEnum) {
