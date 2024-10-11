@@ -1402,13 +1402,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     /**
      * <p>
      * Create a decreasing constraint which ensures that the variables in {@code vars} are decreasing.
-     * The {@code delta} parameter make possible to adjust bounds.
+     * The {@code delta} parameter allows to adjust the bounds.
      * </p>
-     * <p>That is: (X_0 &ge; X_1 +delta) &and; (X_1 &ge; X_2 + delta) &and ...</p>
+     * <p>That is: (X_0 &ge; X_1 + delta) &and; (X_1 &ge; X_2 + delta) &and; ...</p>
      *
      * @param vars  variables to maintain in decreasing order
      * @param delta set to 0 for &ge;, to 1 for &gt;, and so on
-     * @return a decresing constraint
+     * @return a decreasing constraint
      */
     default Constraint decreasing(IntVar[] vars, int delta) {
         IntVar[] rvars = vars.clone();
@@ -1538,14 +1538,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 
     /**
      * <p>
-     * Create a increasing constraint which ensures that the variables in {@code vars} are increasing.
-     * The {@code delta} parameter make possible to adjust bounds.
+     * Create an increasing constraint which ensures that the variables in {@code vars} are increasing.
+     * The {@code delta} parameter allows to adjust the bounds.
      * </p>
-     * <p>That is: (X_0 &le; X_1 +delta) &and; (X_1 &le; X_2 + delta) &and ...</p>
+     * <p>That is: (X_0 + delta &le; X_1) &and; (X_1 + delta &le; X_2) &and; ...</p>
      *
-     * @param vars  variables to maintain in decreasing order
+     * @param vars  variables to maintain in increasing order
      * @param delta set to 0 for &le;, to 1 for &lt;, and so on
-     * @return a decresing constraint
+     * @return an increasing constraint
      */
     default Constraint increasing(IntVar[] vars, int delta) {
         return new Constraint(ConstraintsName.INCREASING, new PropIncreasing(vars, delta));
