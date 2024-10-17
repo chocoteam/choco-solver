@@ -87,7 +87,8 @@ public class PropKLoops extends Propagator<IntVar> {
     private void filter() throws ContradictionException {
         int nbMin = nbMinLoops.get();
         int nbMax = nbMin + possibleLoops.size();
-        vars[n].updateBounds(nbMin, nbMax, this);
+        vars[n].updateLowerBound(nbMin, this);
+        vars[n].updateUpperBound(nbMax, this);
         if (vars[n].isInstantiated() && nbMin != nbMax) {
             if (vars[n].getValue() == nbMax) {
                 ISetIterator iter = possibleLoops.iterator();
