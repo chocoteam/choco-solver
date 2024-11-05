@@ -53,6 +53,7 @@ public class MiniSat implements SatFactory, Dimacs {
     public static final int lFalse = 0b10;
     public static final int lUndef = 0b11;
     // undefined clause
+    protected static ThreadLocal<Integer> clauseCounter = ThreadLocal.withInitial(() -> 0);
     public static final Clause C_Undef = Clause.undef();
     private static final Reason R_Undef = Reason.undef();
     static final VarData VD_Undef = new VarData(R_Undef, -1, -1);
@@ -153,7 +154,7 @@ public class MiniSat implements SatFactory, Dimacs {
             trail_.add(l);
             seen.set(v);
         }
-        Clause.counter = 0;
+        clauseCounter.set(2);
     }
 
     @Override
@@ -384,8 +385,8 @@ public class MiniSat implements SatFactory, Dimacs {
                 return b;
             } else {
                 // not b
-                //return b ^ lUndef;
-                return (b == lTrue) ? lFalse : lTrue;
+                //return (b == lTrue) ? lFalse : lTrue;
+                return b ^ lUndef;
             }
         }
         return b;
@@ -436,9 +437,7 @@ public class MiniSat implements SatFactory, Dimacs {
         assert vardata.size() >= v;
         VarData vd = vardata.get(v);
         if (vd != VD_Undef) {
-            vd.cr = from;
-            vd.level = trailMarker();
-            vd.pos = trail_.size();
+            vd.set(from, trailMarker(), trail_.size());
         } else {
             vardata.set(v, new VarData(from, trailMarker(), trail_.size()));
         }
@@ -478,9 +477,7 @@ public class MiniSat implements SatFactory, Dimacs {
         assert vardata.size() >= v;
         VarData vd = vardata.get(v);
         if (vd != VD_Undef) {
-            vd.cr = r;
-            vd.level = trailMarker();
-            vd.pos = trail_.size();
+            vd.set(r, trailMarker(), trail_.size());
         } else {
             vardata.set(v, new VarData(r, trailMarker(), trail_.size()));
         }
@@ -839,7 +836,8 @@ public class MiniSat implements SatFactory, Dimacs {
                 int q = c._g(j);
                 int x = var(q);
                 if (!seen.get(x) && level(x) > rootlvl) {
-                    assert p == litUndef || pos(var(p)) > pos(x) : "chronological inconsistency :(" + printLit(p) + ") is explained by a previous event (" + printLit(x) + ")";
+                    assert p == litUndef || pos(var(p)) > pos(x) : "chronological inconsistency :(" + printLit(p) + " @ " + pos(var(p)) +
+                            ") is explained by a previous event (" + printLit(x) + " @ " + pos(x) + ") "+c;
                     varBumpActivity(x);
                     seen.set(x);
                     if (DEBUG > 1) System.out.printf("mark %d\n", x);
@@ -1008,7 +1006,7 @@ public class MiniSat implements SatFactory, Dimacs {
         detachClause(cr);
         // Don't leave pointers to free'd memory!
         if (locked(cr)) {
-            vardata.get(var(cr._g(0))).cr = R_Undef;
+            vardata.get(var(cr._g(0))).clearReason();
         }
     }
 
@@ -1141,13 +1139,13 @@ public class MiniSat implements SatFactory, Dimacs {
                 int op = ci.val_type * 3 ^ (sgn(p) ? 1 : 0);
                 switch (op) {
                     case 0:
-                        return (ci.reliable ? "" : "*") + p + ":" + ci.var + " != " + ci.val;
+                        return (ci.reliable ? "" : "*") + p + "|" + valueLit(p) + "|:" + ci.var + " != " + ci.val + " ";
                     case 1:
-                        return (ci.reliable ? "" : "*") + p + ":" + ci.var + " == " + ci.val;
+                        return (ci.reliable ? "" : "*") + p + "|" + valueLit(p) + "|:" + ci.var + " == " + ci.val;
                     case 2:
-                        return (ci.reliable ? "" : "*") + p + ":" + ci.var + " >= " + (ci.val + 1);
+                        return (ci.reliable ? "" : "*") + p + "|" + valueLit(p) + "|:" + ci.var + " >= " + (ci.val + 1);
                     case 3:
-                        return (ci.reliable ? "" : "*") + p + ":" + ci.var + " <= " + ci.val;
+                        return (ci.reliable ? "" : "*") + p + "|" + valueLit(p) + "|:" + ci.var + " <= " + ci.val;
                     case 6:
                         return "*" + p + ":~" + ci.var + " fixed";
                     case 7:
@@ -1199,9 +1197,9 @@ public class MiniSat implements SatFactory, Dimacs {
      * @author Charles Prud'homme
      * @since 12/07/13
      */
-    static class Watcher {
+    private static final class Watcher {
 
-        Clause clause;
+        final Clause clause;
         int blocker;
 
         Watcher(final Clause cr, int l) {
@@ -1211,15 +1209,25 @@ public class MiniSat implements SatFactory, Dimacs {
     }
 
 
-    static class VarData {
-        Reason cr;
-        int level;
-        int pos;
+    private static final class VarData {
+        private Reason cr;
+        private int level;
+        private int pos;
 
         public VarData(Reason cr, int level, int pos) {
             this.cr = cr;
             this.level = level;
             this.pos = pos;
+        }
+
+        private void set(Reason cr, int level, int pos){
+            this.cr = cr;
+            this.level = level;
+            this.pos = pos;
+        }
+
+        private void clearReason(){
+            this.cr = R_Undef;
         }
     }
 
@@ -1227,12 +1235,12 @@ public class MiniSat implements SatFactory, Dimacs {
         void channel(boolean sign);
     }
 
-    public static class ChannelInfo implements Channeler {
-        LitVar var;
-        int cons_type;
-        int val_type;
-        int val;
-        boolean reliable;
+    public static final class ChannelInfo implements Channeler {
+        private final LitVar var;
+        private final int cons_type;
+        private final int val_type;
+        private final int val;
+        private final boolean reliable;
 
         public ChannelInfo(LitVar var, int ct, int vt, int v) {
             this(var, ct, vt, v, true);

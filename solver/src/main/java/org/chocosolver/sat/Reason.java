@@ -20,17 +20,40 @@ import org.chocosolver.solver.ICause;
  * @since 04/09/2023
  */
 public abstract class Reason implements ICause {
-    static final Clause UNDEF = new Clause(new int[]{0});;//Clause.undef();
-    private final static Clause short_expl_2 = new Clause(new int[]{0, 0});
-    private final static Clause short_expl_3 = new Clause(new int[]{0, 0, 0});
+    /**
+     * An undefined reason.
+     * This reason is static and should not be modified.
+     */
+    static final Clause UNDEF = new Clause(new int[]{0});
+    /**
+     * A thread-local clause to explain a propagation with one literal.
+     * This clause is static and can be reused in the same thread.
+     */
+    private final static ThreadLocal<Clause> short_expl_2 = ThreadLocal.withInitial(() -> new Clause(new int[]{0, 0}));
+    /**
+     * A thread-local clause to explain a propagation with two literals.
+     * This clause is static and can be reused in the same thread.
+     */
+    private final static ThreadLocal<Clause> short_expl_3 = ThreadLocal.withInitial(() -> new Clause(new int[]{0, 0, 0}));
+    /**
+     * The type of reason among {0, 2, 3}.
+     * 2: a reason with one literal (and the asserting literal)
+     * 3: a reason with two literals (and the asserting literal)
+     * 0: a reason with more than two literals (and the asserting literal)
+     */
+    final int type;
 
-    int type;
+    /**
+     * Create a reason with a type.
+     * @param type the type of reason
+     */
     Reason(int type) {
         this.type = type;
     }
 
     /**
      * Create an undefined reason.
+     *
      * @return an undefined static reason
      * @implSpec In practice, this reason is static and thus should not be modified.
      */
@@ -50,6 +73,7 @@ public abstract class Reason implements ICause {
 
     /**
      * Create a reason from a single literal
+     *
      * @param p a literal
      * @return a reason
      */
@@ -59,6 +83,7 @@ public abstract class Reason implements ICause {
 
     /**
      * Create a reason from two literals
+     *
      * @param p a literal
      * @param q a literal
      * @return a reason
@@ -125,6 +150,7 @@ public abstract class Reason implements ICause {
 
     /**
      * Extract the conflict clause from the reason.
+     *
      * @return a clause
      */
     abstract Clause getConflict();
@@ -142,8 +168,8 @@ public abstract class Reason implements ICause {
 
         @Override
         public Clause getConflict() {
-            short_expl_2._s(1, d1);
-            return short_expl_2;
+            short_expl_2.get()._s(1, d1);
+            return short_expl_2.get();
         }
 
         @Override
@@ -167,9 +193,9 @@ public abstract class Reason implements ICause {
 
         @Override
         public Clause getConflict() {
-            short_expl_3._s(1, d1);
-            short_expl_3._s(2, d2);
-            return short_expl_3;
+            short_expl_3.get()._s(1, d1);
+            short_expl_3.get()._s(2, d2);
+            return short_expl_3.get();
         }
 
         @Override
