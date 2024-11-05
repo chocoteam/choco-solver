@@ -79,7 +79,7 @@ public class Settings {
 
     private int nbMaxLearnt = 100_000;
 
-    private boolean intVarLazyLitWithWeakBounds = true;
+    private boolean intVarLazyLitWithWeakBounds = false;
 
     private double ibexContractionRatio = Ibex.RATIO;
 
