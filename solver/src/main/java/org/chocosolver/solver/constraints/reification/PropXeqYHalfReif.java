@@ -28,6 +28,8 @@ import org.chocosolver.util.ESat;
 @Explained
 public class PropXeqYHalfReif extends Propagator<IntVar> {
 
+    private static final int THRESHOLD = 300;
+
     private final IntVar x;
     private final IntVar y;
     private final BoolVar b;
@@ -76,7 +78,8 @@ public class PropXeqYHalfReif extends Propagator<IntVar> {
                         lcg() ? Reason.r(vars[0].getMaxLit(), b.getValLit()) : Reason.undef()));
 
                 // if x and y support value removal, then remove value from x if not in y and vice versa
-                /*if (vars[0].hasEnumeratedDomain() && vars[1].hasEnumeratedDomain()) {
+                if (vars[0].hasEnumeratedDomain() && vars[1].hasEnumeratedDomain()) {
+                    if ((long) vars[0].getDomainSize() + vars[1].getDomainSize() > THRESHOLD || lcg()) return;
                     int ub = vars[0].getUB();
                     for (int val = vars[0].getLB(); val <= ub; val = vars[0].nextValue(val)) {
                         if (!vars[1].contains(val)) {
@@ -91,7 +94,7 @@ public class PropXeqYHalfReif extends Propagator<IntVar> {
                                     lcg() ? Reason.r(vars[0].getLit(val, IntVar.LR_NE), b.getValLit()) : Reason.undef());
                         }
                     }
-                }*/
+                }
             }
         }
         // if b is undefined and x and y are different, b must be false
