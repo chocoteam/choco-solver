@@ -195,6 +195,16 @@ public class SatTest {
     }
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
+    public void test14(boolean sat) {
+        Model model = new Model(Settings.init().setEnableSAT(sat));
+        BoolVar[] bs = model.boolVarArray("b", 3);
+        BoolVar d = model.boolVar("d");
+        model.addClausesBoolAndArrayEqVar(bs, d);
+        while (model.getSolver().solve()) ;
+        assertEquals(model.getSolver().getSolutionCount(), 8);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
     public void testAlexLoboda(boolean sat) throws ContradictionException {
         Model model = new Model(Settings.init().setEnableSAT(sat));
         // VARS
