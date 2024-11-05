@@ -10,6 +10,7 @@
 package org.chocosolver.solver.constraints.reification;
 
 import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -26,6 +27,7 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
  * @author Charles Prud'homme
  * @since 12/03/2024
  */
+@Explained
 public class PropXinSHalfReif extends Propagator<IntVar> {
     final IntVar var;
     final IntIterableRangeSet set;
