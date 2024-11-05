@@ -73,7 +73,7 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
             loop = filterPlus(z, x, y);
             loop |= filterMinus(x, z, y);
             loop |= filterMinus(y, z, x);
-            loop &= allbounded; // loop only when BC is selected
+            loop &= (allbounded || lcg()); // loop only when BC is selected
         } while (loop);
     }
 
