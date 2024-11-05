@@ -65,7 +65,7 @@ public class LazyClauseGeneration implements Learn {
     /**
      * A temporary storage for learnt clauses.
      */
-    final TIntArrayList learnt_clause = new TIntArrayList();
+    private final TIntArrayList learnt_clause = new TIntArrayList();
 
     public LazyClauseGeneration(Solver solver, MiniSat sat) {
         this.mSolver = solver;
@@ -99,8 +99,10 @@ public class LazyClauseGeneration implements Learn {
                 mSat.addLearnt(learnt_clause);
             }
         } else {
-            nbRestarts++;
-            mSat.topLevelCleanUp();
+            nbRestarts = mSolver.getRestartCount();
+            if(mSolver.getSearchWorldIndex() == mSolver.getEnvironment().getWorldIndex()){
+                mSat.topLevelCleanUp();
+            }
         }
         if (mSat.nLearnts() >= max_learnts) {
             mSat.doReduceDB();

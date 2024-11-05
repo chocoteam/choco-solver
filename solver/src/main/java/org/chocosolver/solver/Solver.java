@@ -38,6 +38,7 @@ import org.chocosolver.solver.search.loop.propagate.Propagate;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.measure.MeasuresRecorder;
 import org.chocosolver.solver.search.restart.AbstractRestart;
+import org.chocosolver.solver.search.restart.ForceRestartBeforeCut;
 import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -606,10 +607,11 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * It sequentially applies Arc Consistency on every combination of (variable, value).
      * If a value is not supported by any other variable, it is removed from the domain of the variable.
      * The method ends when the time limit is reached or when all combination have been checked.
+     *
      * @implSpec A first propagation must have been done before calling this method.
      */
     public void preprocessing(long timeLimitInMS) {
-        if(!getEngine().isInitialized()){
+        if (!getEngine().isInitialized()) {
             throw new SolverException("A call to solver.propagate() must be done before calling solver.preprocessing()");
         }
         if (timeLimitInMS > 0 && getModel().getSettings().warnUser()) {
@@ -627,7 +629,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
                         break loop;
                     }
                     int a = it.next();
-                    if(!hasSupport(v, a)){
+                    if (!hasSupport(v, a)) {
                         try {
                             v.removeValue(a, Cause.Null);
                             if (getModel().getSettings().warnUser()) {
@@ -712,7 +714,9 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         action = propagate;
         if (restarter.mustRestart(this)) {
             this.restart();
-        } else if (!M.extend(this)) {
+            L.forget();
+        } else
+            if (!M.extend(this)) {
             action = validate;
         }
         searchMonitors.afterOpenNode();
@@ -941,6 +945,50 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         dpath.synchronize();
     }
 
+    /**
+     * Actions to perform when a cut is injected in the search loop from an external source.
+     * This typically occurs when a solver is declared in a portfolio of solvers.
+     * The cut is posted while the search is running.
+     *
+     * @param newBestVal the new best value found
+     */
+    public void onReceivingExternalCut(int newBestVal) {
+        if (isLCG()) {
+            // When LCG is plugged-in, injecting the cut will lead to error.
+            // Actually, the current bound of the objective variable could
+            // have been as part of reasons for domain reduction. So adding a cut could
+            // lead to chronological inconsistency.
+            // To prevent such a situation, the search should restart then the cut can be injected.
+            ForceRestartBeforeCut rbc = getRestartBeforeCut();
+            rbc.storeCut(newBestVal);
+        } else {
+            // The cut can be injected as soon as it is received.
+            this.getObjectiveManager().updateBestSolution(newBestVal);
+        }
+    }
+
+    /**
+     * Return or declare and return the restart strategy that manages the cut injection.
+     *
+     * @return the restart strategy that manages the cut injection
+     */
+    private ForceRestartBeforeCut getRestartBeforeCut() {
+        AbstractRestart rst = this.getRestarter();
+        while (rst != null && !(rst instanceof ForceRestartBeforeCut)) {
+            rst = rst.getNext();
+        }
+        ForceRestartBeforeCut rbc;
+        if (rst == null) {
+            // create a new instance of ForceRestartBeforeCut
+            rbc = new ForceRestartBeforeCut(this);
+            // define it as the first restart strategy
+            rbc.setNext(restarter);
+            this.restarter = rbc;
+        } else {
+            rbc = (ForceRestartBeforeCut) rst;
+        }
+        return rbc;
+    }
 
     /**
      * <p>
