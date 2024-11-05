@@ -64,6 +64,23 @@ public class PortFolioTest {
     }
 
     @Test(groups = "10s", timeOut = 60000)
+    public void testP111() {
+        ParallelPortfolio pares = new ParallelPortfolio();
+        int n = 6; // number of solvers to use
+        for (int i = 0; i < n; i++) {
+            pares.addModel(ProblemMaker.makeGolombRuler(9, true));
+        }
+        int nbSols = 0;
+        while (pares.solve()) {
+            nbSols++;
+        }
+        Model finder = pares.getBestModel();
+        Assert.assertTrue(nbSols > 0);
+        Assert.assertNotNull(finder);
+        Assert.assertEquals(finder.getSolver().getObjectiveManager().getBestSolutionValue(), 44);
+    }
+
+    @Test(groups = "10s", timeOut = 60000)
     public void testParBug() {
         for (int iter = 0; iter < 50; iter++) {
             ParallelPortfolio pares = new ParallelPortfolio();
