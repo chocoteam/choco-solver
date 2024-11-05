@@ -11,6 +11,8 @@ package org.chocosolver.sat;
 
 import gnu.trove.list.TIntList;
 
+import static org.chocosolver.sat.MiniSat.*;
+
 /**
  * Clause -- a simple class for representing a clause
  * <br/>
@@ -18,38 +20,73 @@ import gnu.trove.list.TIntList;
  * @author Charles Prud'homme, Laurent Perron
  * @since 12/07/13
  */
-public class Clause extends Reason{
-    static int counter = 0;
-    //private static Clause UNDEF = new Clause(new int[0]);
-
+public class Clause extends Reason {
+    /**
+     * The list of literals composing the clause
+     */
     private final int[] literals_;
+    /**
+     * Indicate if the clause is learnt or not
+     */
     private final boolean learnt;
+    /**
+     * Activity of the clause (related to frequency of conflict)
+     */
     double activity;
-
+    /**
+     * A unique id
+     */
     private final int id;
 
+    /**
+     * Create a clause with a set of literals
+     *
+     * @param ps     literals
+     * @param learnt indicate if the clause is learnt
+     */
     public Clause(int[] ps, boolean learnt) {
         super(0);
         literals_ = ps.clone();
         this.learnt = learnt;
-        this.id = counter++;
+        this.id = clauseCounter.get();
+        clauseCounter.set(clauseCounter.get() + 1);
     }
 
+    /**
+     * Create a clause with a set of literals, not learnt
+     *
+     * @param ps literals
+     */
     Clause(int[] ps) {
         this(ps, false);
     }
 
+    /**
+     * Create a clause with a set of literals
+     *
+     * @param ps     literals
+     * @param learnt indicate if the clause is learnt
+     */
     public Clause(TIntList ps, boolean learnt) {
         super(0);
         literals_ = ps.toArray();
         this.learnt = learnt;
-        this.id = counter++;
+        this.id = clauseCounter.get();
+        clauseCounter.set(clauseCounter.get() + 1);
     }
 
+    /**
+     * Create a clause with a set of literals, not learnt
+     *
+     * @param ps
+     */
     Clause(TIntList ps) {
         this(ps, false);
     }
 
+    /**
+     * @return an undefined clause
+     */
     public static Clause undef() {
         return UNDEF;
     }
@@ -59,28 +96,48 @@ public class Clause extends Reason{
         return this;
     }
 
+    /**
+     * @return the number of literals composing the clause
+     */
     public int size() {
         return literals_.length;
     }
 
+    /**
+     * @return <i>true</i> if the clause is learnt, <i>false</i> otherwise
+     */
     public boolean learnt() {
         return learnt;
     }
 
 
+    /**
+     * Get the i-th literal of the clause
+     *
+     * @param i index of the literal
+     * @return the i-th literal of the clause
+     */
     public int _g(int i) {
         return literals_[i];
     }
 
+    /**
+     * Set the i-th literal of the clause
+     *
+     * @param pos position of the literal
+     * @param l   literal
+     */
     void _s(int pos, int l) {
         literals_[pos] = l;
     }
 
+    @Override
     public String toString() {
         StringBuilder st = new StringBuilder();
+        st.append("T").append(Thread.currentThread());
         st.append("#").append(id).append(" Size:").append(literals_.length).append(" - ");
         if (literals_.length > 0) {
-            st.append(literals_[0]);
+            st.append(literals_[0]).append(" ");
         }
         for (int i = 1; i < literals_.length; i++) {
             st.append(" ∨ ").append(literals_[i]);
