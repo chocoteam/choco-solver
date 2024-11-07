@@ -302,10 +302,10 @@ public class PropagationEngine {
         }
         if (propagator.isActive()) {
             propagator.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
+            propagateSat();
             while (!var_queue.isEmpty()) {
                 var_queue.pollFirst().schedulePropagators(this);
             }
-            propagateSat();
         }
     }
 
