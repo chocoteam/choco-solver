@@ -1094,7 +1094,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 }
                 ref().addClausesBoolOrArrayEqVar(bs, vs[k++]);
             }
-            return ref().sum(vs, "<=", nValues);
+            return ref().sum(vs, ">=", nValues);
         }
         if (AC) {
             return new Constraint(ConstraintsName.ATLEASTNVALUES, new PropAtLeastNValues(vars, nValues),
