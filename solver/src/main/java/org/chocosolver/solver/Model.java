@@ -11,6 +11,7 @@ package org.chocosolver.solver;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.sat.MiniSat;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
@@ -199,6 +200,9 @@ public final class Model implements IModel {
         this.hooks = new HashMap<>();
         this.settings = settings;
         this.solver = settings.initSolver(this);
+        // to make sure MiniSat.C_Undef is not null, call it once
+        this.hooks.put("C_Undef", MiniSat.C_Undef);
+        this.hooks.clear();
         this.groups = new ArrayList<>();
     }
 
