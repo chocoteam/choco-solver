@@ -457,6 +457,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         if (isStateLess()) {
             state = ACTIVE;
             model.getEnvironment().save(operations[NEW]);
+            assert eventsets == null || eventsets.isEmpty();
         } else {
             throw new SolverException("Try to activate a propagator already active, passive or reified.\n" +
                     this + " of " + this.getConstraint());
