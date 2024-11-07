@@ -169,6 +169,62 @@ public class LitVarTests {
         Assert.assertEquals(b.getMaxLit(), b.getLit(1, LR_GE));
     }
 
+    @Test(groups = "{1s,lcg}")
+    public void testBoolVar6() {
+        Model model = new Model("LCG testBoolVar0",
+                Settings.init().setLCG(true)
+                        .setWarnUser(true));
+        BoolVar b1 = model.boolVar("b1");
+        BoolVar b2 = model.boolVar("b2");
+        Assert.assertEquals(b1.satVar(), 2);
+        Assert.assertEquals(b2.satVar(), 3);
+
+        Assert.assertEquals(b1.getLit(0, LR_EQ), 4);
+        Assert.assertEquals(b1.getLit(1, LR_EQ), 5);
+        Assert.assertEquals(b1.getLit(0, LR_NE), 5);
+        Assert.assertEquals(b1.getLit(1, LR_NE), 4);
+
+        Assert.assertEquals(b2.getLit(0, LR_EQ), 6);
+        Assert.assertEquals(b2.getLit(1, LR_EQ), 7);
+        Assert.assertEquals(b2.getLit(0, LR_NE), 7);
+        Assert.assertEquals(b2.getLit(1, LR_NE), 6);
+    }
+
+    @Test(groups = "{1s,lcg}")
+    public void testBoolVar7() {
+        Model model = new Model("LCG testBoolVar0",
+                Settings.init().setLCG(true)
+                        .setWarnUser(true));
+        BoolVar b1 = model.boolVar("b1");
+        IntVar v1 = new IntVarEagerLit(new BitsetIntVarImpl("b", 2, 3, model));
+        BoolVar b2 = new BoolEqView<>(v1, 2);
+        BoolVar b3 = new BoolEqView<>(v1, 3);
+
+        Assert.assertEquals(b1.satVar(), 2);
+        Assert.assertEquals(b2.satVar(), 3);
+        Assert.assertEquals(b3.satVar(), 4);
+
+        Assert.assertEquals(b1.getLit(0, LR_EQ), 4);
+        Assert.assertEquals(b1.getLit(1, LR_EQ), 5);
+        Assert.assertEquals(b1.getLit(0, LR_NE), 5);
+        Assert.assertEquals(b1.getLit(1, LR_NE), 4);
+
+        Assert.assertEquals(v1.getLit(2, LR_EQ), 7);
+        Assert.assertEquals(v1.getLit(3, LR_EQ), 9);
+        Assert.assertEquals(v1.getLit(2, LR_NE), 6);
+        Assert.assertEquals(v1.getLit(3, LR_NE), 8);
+
+        Assert.assertEquals(b2.getLit(0, LR_EQ), 6);
+        Assert.assertEquals(b2.getLit(1, LR_EQ), 7);
+        Assert.assertEquals(b2.getLit(0, LR_NE), 7);
+        Assert.assertEquals(b2.getLit(1, LR_NE), 6);
+
+        Assert.assertEquals(b3.getLit(0, LR_EQ), 8);
+        Assert.assertEquals(b3.getLit(1, LR_EQ), 9);
+        Assert.assertEquals(b3.getLit(0, LR_NE), 9);
+        Assert.assertEquals(b3.getLit(1, LR_NE), 8);
+    }
+
     @DataProvider(name = "range")
     private Object[][] range() {
         return new Object[][]{
