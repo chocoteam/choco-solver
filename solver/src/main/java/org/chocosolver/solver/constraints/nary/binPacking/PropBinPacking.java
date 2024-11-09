@@ -133,10 +133,6 @@ public class PropBinPacking extends Propagator<IntVar> {
                 if(itemBin[i].contains(j+offset)) {
                     P[j].add(i);
                     pj += itemSize[i];
-                    if(itemBin[i].isInstantiated()) {
-                        R[j].add(i);
-                        rj += itemSize[i];
-                    }
                 }
             }
             sumR[j] = itemBin[0].getModel().getEnvironment().makeInt(rj);
