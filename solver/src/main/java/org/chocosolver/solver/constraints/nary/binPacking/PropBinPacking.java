@@ -333,19 +333,26 @@ public class PropBinPacking extends Propagator<IntVar> {
         forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
     }
 
+    private void initializeBinsDataStructure() {
+        for(int j = 0; j<nbAvailableBins; j++) {
+            R[j].clear();
+            P[j].clear();
+            sumR[j].set(0);
+            int pj = 0;
+            for (int i = 0; i < nbItems; i++) {
+                if (itemBin[i].contains(j + offset)) {
+                    P[j].add(i);
+                    pj += itemSize[i];
+                }
+            }
+            sumP[j].set(pj);
+        }
+    }
+
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if(PropagatorEventType.isFullPropagation(evtmask)) {
-            for(int j = 0; j<nbAvailableBins; j++) {
-                int pj = 0;
-                for (int i = 0; i < nbItems; i++) {
-                    if (itemBin[i].contains(j + offset)) {
-                        P[j].add(i);
-                        pj += itemSize[i];
-                    }
-                }
-                sumP[j].set(pj);
-            }
+            initializeBinsDataStructure();
             for(int i = 0; i<itemBin.length; i++) { // Pack All
                 itemBin[i].updateBounds(offset, nbAvailableBins+offset-1, this);
                 if(itemBin[i].isInstantiated()) {
