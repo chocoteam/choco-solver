@@ -11,6 +11,7 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.nary.binPacking.PropBinPacking;
@@ -18,6 +19,9 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.impl.BitsetIntVarImpl;
+import org.chocosolver.solver.variables.impl.BoolVarImpl;
+import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -156,5 +160,27 @@ public class BinPackingTest {
 		model.binPacking(itemBin, itemSize, binLoad, 0).post();
 		model.getSolver().findAllSolutions();
 		Assert.assertEquals(model.getSolver().getSolutionCount(), 16);
+	}
+
+	@Test(groups = "1s", timeOut = 60000)
+	public void testBug1() {
+		Model model = new Model();
+		int[] itemSize = new int[]{2, 9};
+		IntVar[] itemBin = new IntVar[2];
+		itemBin[0] = new BitsetIntVarImpl("X_0", new int[]{0, 1}, model);
+		itemBin[1] = new BitsetIntVarImpl("X_1", new int[]{0}, model);
+		IntVar[] binLoad = new IntVar[2];
+		binLoad[0] = new BoolVarImpl("X_6", model);
+		binLoad[1] = new BitsetIntVarImpl("X_8", new int[]{0, 9, 11}, model);
+		Constraint c = model.binPacking(itemBin, itemSize, binLoad, 0);
+		c.post();
+		Assert.assertEquals(c.isSatisfied(), ESat.FALSE);
+		Solver solver = model.getSolver();
+		try {
+			solver.propagate();
+			Assert.fail();
+		} catch (ContradictionException e) {
+			// should fail
+		}
 	}
 }
