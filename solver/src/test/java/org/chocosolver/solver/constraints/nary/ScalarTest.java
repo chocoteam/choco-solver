@@ -14,6 +14,7 @@ import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Task;
 import org.chocosolver.util.ESat;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -190,4 +191,18 @@ public class ScalarTest {
         }
     }
 
+    @Test(groups = "1s", timeOut = 60000)
+    public void testScalarAndTaskBug1() {
+        int[] coeffs = new int[]{3, -2,-1,-2};
+        IntVar[] vars = new IntVar[4];
+        vars[0] = model.intVar(8, 9);
+        vars[1] = model.intVar(2, 4);
+        vars[2] = model.intVar(new int[]{1,2,4,5,6});
+        vars[3] = model.intVar(3, 5);
+        model.scalar(vars, coeffs, "<=", 1).post();
+        IntVar ee = model.intVar(4, 9);
+        new Task(vars[3], vars[2], ee);
+        model.getSolver().solve();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
+    }
 }

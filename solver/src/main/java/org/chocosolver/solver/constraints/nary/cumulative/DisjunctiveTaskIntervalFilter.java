@@ -92,6 +92,7 @@ public class DisjunctiveTaskIntervalFilter extends CumulFilter {
                 }
             }
         }
+        propStartDurationEndRelation(s, d, e, h, aCause);
     }
 
     private static class StartComparator implements IntComparator {
