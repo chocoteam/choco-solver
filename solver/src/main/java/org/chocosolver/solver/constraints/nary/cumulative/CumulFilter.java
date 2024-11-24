@@ -59,12 +59,15 @@ public abstract class CumulFilter {
 
 	protected void propStartDurationEndRelation(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, Propagator<IntVar> aCause) throws ContradictionException {
 		int n = s.length;
+		boolean hasFiltered;
 		for (int i = 0; i < n; i++) {
 			d[i].updateLowerBound(0, aCause);
 			h[i].updateLowerBound(0, aCause);
-			s[i].updateBounds(e[i].getLB() - d[i].getUB(), e[i].getUB() - d[i].getLB(), aCause);
-			e[i].updateBounds(s[i].getLB() + d[i].getLB(), s[i].getUB() + d[i].getUB(), aCause);
-			d[i].updateBounds(e[i].getLB() - s[i].getUB(), e[i].getUB() - s[i].getLB(), aCause);
+			do {
+				hasFiltered = s[i].updateBounds(e[i].getLB() - d[i].getUB(), e[i].getUB() - d[i].getLB(), aCause);
+				hasFiltered |= e[i].updateBounds(s[i].getLB() + d[i].getLB(), s[i].getUB() + d[i].getUB(), aCause);
+				hasFiltered |= d[i].updateBounds(e[i].getLB() - s[i].getUB(), e[i].getUB() - s[i].getLB(), aCause);
+			} while (hasFiltered);
 		}
 	}
 }
