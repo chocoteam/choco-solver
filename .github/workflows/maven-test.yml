@@ -27,14 +27,17 @@ jobs:
           cache: 'maven'
           
       - name: Set up Python 3.10 (for Ibex)
+        if: matrix.group == 'ibex'
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
       
       # Install Ibex
-      - name: Install Ibex
+      - name: Set up C++11 and install ibex
         if: matrix.group == 'ibex'
-        run: sh scripts/install-ibex.sh
+        run: |
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 60
+          sh scripts/install-ibex.sh
 
       # Regression tests
       - name: Test ${{ matrix.group }}
