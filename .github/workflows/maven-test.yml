@@ -25,7 +25,12 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
           cache: 'maven'
-
+          
+      - name: Set up Python 3.10 (for Ibex)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      
       # Install Ibex
       - name: Install Ibex
         if: matrix.group == 'ibex'
