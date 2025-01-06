@@ -50,7 +50,7 @@ jobs:
           echo "Python version"
           python --version
           echo "pip show imp"
-          python -m pip show imp
+          python -c "import imp"
           sh scripts/install-ibex.sh
 
       # Regression tests
