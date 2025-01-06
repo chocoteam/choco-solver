@@ -44,6 +44,8 @@ jobs:
           sudo update-alternatives --config gcc <<< '1'
           echo "Using g++ version:"
           g++ --version
+          echo "Using python version:"
+          python --version
           sh scripts/install-ibex.sh
 
       # Regression tests
