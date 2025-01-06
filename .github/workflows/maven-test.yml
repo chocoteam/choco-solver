@@ -6,13 +6,36 @@ name: Java CI with Maven
 on: [push, pull_request]
 
 jobs:
+  test-ibex:
+    runs-on: ubuntu-20.04
+    # The different steps
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: 'maven'
+        
+      # Install Ibex
+      - name: Install ibex
+        run: |
+          sh scripts/install-ibex.sh
+
+      # Regression tests
+      - name: Test Ibex
+        run: mvn -B --file pom.xml package -Pcoverage -DtestFailureIgnore=true -Dgroups=ibex
+  
   test-solver:
     runs-on: ubuntu-latest
     # Tests matrix
     strategy:
       #fail-fast: false
       matrix:
-        group: [ "1s", "10s", "checker", "ibex" ]
+        group: [ "1s", "10s", "checker" ]
 
     # The different steps
     steps:
@@ -25,39 +48,11 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
           cache: 'maven'
-          
-      - name: Set up Python 3.10 (for Ibex)
-        if: matrix.group == 'ibex'
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-      
-      # Install Ibex
-      - name: Set up C++11 and install ibex
-        if: matrix.group == 'ibex'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y g++-11
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 100
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100
-          sudo update-alternatives --config g++ <<< '1'
-          sudo update-alternatives --config gcc <<< '1'
-          echo "Using g++ version:"
-          g++ --version
-          echo "Using venv"
-          python3.10 -m venv venv
-          source venv/bin/activate
-          echo "Python version"
-          python --version
-          echo "pip show imp"
-          python -c "import imp"
-          echo "now env"
-          /usr/bin/env
-          sh scripts/install-ibex.sh
 
       # Regression tests
       - name: Test ${{ matrix.group }}
         run: mvn -B --file pom.xml package -Pcoverage -DtestFailureIgnore=true -Dgroups=${{ matrix.group }}
+        
   test-parser:
     needs: [ test-solver ]
     runs-on: ubuntu-latest
