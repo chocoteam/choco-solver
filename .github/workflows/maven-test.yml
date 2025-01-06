@@ -51,6 +51,8 @@ jobs:
           python --version
           echo "pip show imp"
           python -c "import imp"
+          echo "now env"
+          /usr/bin/env
           sh scripts/install-ibex.sh
 
       # Regression tests
