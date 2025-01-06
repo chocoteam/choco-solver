@@ -36,7 +36,8 @@ jobs:
       - name: Set up C++11 and install ibex
         if: matrix.group == 'ibex'
         run: |
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 60
+          sudo apt-get update
+          sudo apt-get install -y g++-11
           sh scripts/install-ibex.sh
 
       # Regression tests
