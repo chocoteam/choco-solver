@@ -38,6 +38,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y g++-11
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 100
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100
+          sudo update-alternatives --config g++ <<< '1'
+          sudo update-alternatives --config gcc <<< '1'
+          echo "Using g++ version:"
+          g++ --version
           sh scripts/install-ibex.sh
 
       # Regression tests
