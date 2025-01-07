@@ -73,7 +73,7 @@ public interface PropagationInsight {
 
         @Override
         public void update(Propagator<?> p, Variable v, boolean onFailure) {
-            if (!changed) return;
+            if (!changed && !onFailure) return;
             changed = false;
             if (!onFailure) {
                 long card_ = card;
@@ -126,7 +126,7 @@ public interface PropagationInsight {
 
         @Override
         public void update(Propagator<?> p, Variable v, boolean onFailure) {
-            if (!changed) return;
+            if (!changed && !onFailure) return;
             changed = false;
             if (!onFailure) {
                 long card_ = card;
