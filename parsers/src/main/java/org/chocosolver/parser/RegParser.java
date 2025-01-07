@@ -75,7 +75,7 @@ public abstract class RegParser implements IParser {
     )
     protected String logFilePath = null;
 
-    @Option(name = "-limit",
+    @Option(name = "-limit", aliases = {"-limits"},
             handler = LimitHandler.class,
             usage = "Resolution limits [XXhYYmZZs,Nruns,Msols] where each is optional (no space allowed).")
     protected SearchParams.LimConf limits = new SearchParams.LimConf(-1, -1, -1);
