@@ -10,12 +10,15 @@
 package org.chocosolver.solver;
 
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.limits.TimeCounter;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.*;
+import org.chocosolver.util.ESat;
 import org.chocosolver.util.ProblemMaker;
 import org.chocosolver.util.criteria.Criterion;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -23,6 +26,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.text.MessageFormat;
+import java.util.BitSet;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
@@ -745,6 +749,46 @@ public class ModelTest {
         Model m = new Model();
         IntVar[] vars = m.intVarArray(10, 0, 3);
         m.sum(vars, "==", 10).post();
+    }
+
+    private class MyProp extends Propagator{
+
+        BitSet fixed;
+        public MyProp(Variable[] vars) {
+            super(vars, PropagatorPriority.LINEAR, true);
+            fixed = new BitSet(vars.length);
+            fixed.clear();
+        }
+
+        @Override
+        public void propagate(int evtmask) throws ContradictionException {
+            for(int i = 0; i < vars.length; i++){
+                if(vars[i].isInstantiated()){
+                    fixed.set(i);
+                }
+            }
+        }
+
+        @Override
+        public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+            if(fixed.get(idxVarInProp)){
+                throw new UnsupportedOperationException("Should not be called!");
+            }
+        }
+
+        @Override
+        public ESat isEntailed() {
+            return TRUE;
+        }
+    }
+
+    @Test(groups = "1s")
+    public void testFineEvents() throws ContradictionException {
+        Model m = new Model();
+        IntVar[] X = m.intVarArray(2, 0,2);
+        X[0].instantiateTo(1, Cause.Null);
+        new Constraint("TEST", new MyProp(X)).post();
+        m.getSolver().solve();
     }
 
 }

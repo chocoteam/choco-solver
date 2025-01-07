@@ -110,7 +110,7 @@ public class RegParserTest {
     @Test(groups = "1s")
     public void testLimit4() throws CmdLineException {
         CmdLineParser p = new CmdLineParser(parser);
-        p.parseArgument("-limit=[2s,2sols,2runs]", "/file");
+        p.parseArgument("-limits=[2s,2sols,2runs]", "/file");
         Assert.assertEquals(parser.limits.getTime(), 2000);
         Assert.assertEquals(parser.limits.getSols(), 2);
         Assert.assertEquals(parser.limits.getRuns(), 2);
