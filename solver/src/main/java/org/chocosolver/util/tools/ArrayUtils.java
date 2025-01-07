@@ -350,8 +350,117 @@ public enum ArrayUtils {
         return append(array, elements);
     }
 
+
     /**
-     * Reverse all signs of the a given int table.
+     * Interlace n arrays: [a1[0], a2[0], ..., an[0], a1[1], a2[1], ..., an[1], ...]
+     *
+     * @param toInterlace arrays to interlace
+     * @return a new Array composed of those given in parameters.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T[] interlace(T[]... toInterlace) {
+        return flatten(transpose(toInterlace));
+    }
+
+    /**
+     * Interlace n arrays: [a1[0], a2[0], ..., an[0], a1[1], a2[1], ..., an[1], ...]
+     *
+     * @param toInterlace arrays to interlace
+     * @return a new Array composed of those given in parameters.
+     */
+    public static IntVar[] interlace(IntVar[]... toInterlace) {
+        return flatten(transpose(toInterlace));
+    }
+
+    /**
+     * Interlace n arrays: [a1[0], a2[0], ..., an[0], a1[1], a2[1], ..., an[1], ...]
+     *
+     * @param toInterlace arrays to interlace
+     * @return a new Array composed of those given in parameters.
+     */
+    public static BoolVar[] interlace(BoolVar[]... toInterlace) {
+        return flatten(transpose(toInterlace));
+    }
+
+    /**
+     * Extract a sub-matrix from a matrix
+     *
+     * @param matrix  matrix to extract from
+     * @param fromRow starting row (inclusive)
+     * @param toRow   ending row (exclusive)
+     * @param fromCol starting column (inclusive)
+     * @param toCol   ending column (exclusive)
+     * @param <T>     the class of the objects in the input matrix
+     * @return a sub-matrix
+     */
+    public static <T> T[][] subMatrix(T[][] matrix, int fromRow, int toRow, int fromCol, int toCol) {
+        if (fromRow < 0 || toRow > matrix.length || fromCol < 0 || toCol > matrix[0].length) {
+            throw new ArrayIndexOutOfBoundsException("Sub-matrix indices are out of bounds");
+        }
+        if (fromRow >= toRow || fromCol >= toCol) {
+            throw new IllegalArgumentException("Sub-matrix indices are not valid");
+        }
+        T[][] subMatrix = (T[][]) newInstance(matrix.getClass().getComponentType(), toRow - fromRow);
+        for (int i = fromRow; i < toRow; i++) {
+            subMatrix[i - fromRow] = (T[]) newInstance(matrix[0].getClass().getComponentType(), toCol - fromCol);
+            System.arraycopy(matrix[i], fromCol, subMatrix[i - fromRow], 0, toCol - fromCol);
+        }
+        return subMatrix;
+    }
+
+    /**
+     * Extract a sub-matrix from a matrix
+     *
+     * @param matrix  matrix to extract from
+     * @param fromRow starting row (inclusive)
+     * @param toRow   ending row (exclusive)
+     * @param fromCol starting column (inclusive)
+     * @param toCol   ending column (exclusive)
+     * @return a sub-matrix
+     */
+    public static IntVar[][] subMatrix(IntVar[][] matrix, int fromRow, int toRow, int fromCol, int toCol) {
+        if (fromRow < 0 || toRow > matrix.length || fromCol < 0 || toCol > matrix[0].length) {
+            throw new ArrayIndexOutOfBoundsException("Sub-matrix indices are out of bounds");
+        }
+        if (fromRow >= toRow || fromCol >= toCol) {
+            throw new IllegalArgumentException("Sub-matrix indices are not valid");
+        }
+        IntVar[][] subMatrix = (IntVar[][]) newInstance(matrix.getClass().getComponentType(), toRow - fromRow);
+        for (int i = fromRow; i < toRow; i++) {
+            subMatrix[i - fromRow] = (IntVar[]) newInstance(matrix[0].getClass().getComponentType(), toCol - fromCol);
+            System.arraycopy(matrix[i], fromCol, subMatrix[i - fromRow], 0, toCol - fromCol);
+        }
+        return subMatrix;
+    }
+
+    /**
+     * Extract a sub-matrix from a matrix
+     *
+     * @param matrix  matrix to extract from
+     * @param fromRow starting row (inclusive)
+     * @param toRow   ending row (exclusive)
+     * @param fromCol starting column (inclusive)
+     * @param toCol   ending column (exclusive)
+     * @return a sub-matrix
+     */
+    public static BoolVar[][] subMatrix(BoolVar[][] matrix, int fromRow, int toRow, int fromCol, int toCol) {
+        if (fromRow < 0 || toRow > matrix.length || fromCol < 0 || toCol > matrix[0].length) {
+            throw new ArrayIndexOutOfBoundsException("Sub-matrix indices are out of bounds");
+        }
+        if (fromRow >= toRow || fromCol >= toCol) {
+            throw new IllegalArgumentException("Sub-matrix indices are not valid");
+        }
+        BoolVar[][] subMatrix = (BoolVar[][]) newInstance(matrix.getClass().getComponentType(), toRow - fromRow);
+        for (int i = fromRow; i < toRow; i++) {
+            subMatrix[i - fromRow] = (BoolVar[]) newInstance(matrix[0].getClass().getComponentType(), toCol - fromCol);
+            System.arraycopy(matrix[i], fromCol, subMatrix[i - fromRow], 0, toCol - fromCol);
+        }
+        return subMatrix;
+    }
+
+
+    /**
+     * Reverse all signs of the given int table.
      *
      * @param tab array to inverse
      */
