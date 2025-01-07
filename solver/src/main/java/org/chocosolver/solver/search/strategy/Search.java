@@ -597,7 +597,7 @@ public class Search {
      * <br/>[DOI]:<a href="https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.CP.2023.9">10.4230/LIPIcs.CP.2023.9</a>
      */
     public static AbstractStrategy<IntVar> pickOnFil(IntVar... vars) {
-        return intVarSearch(new PickOnDom<>(vars), new IntDomainMin(), vars);
+        return intVarSearch(new PickOnFil<>(vars), new IntDomainMin(), vars);
     }
 
     /**
