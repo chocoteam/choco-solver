@@ -25,6 +25,7 @@ import org.chocosolver.solver.constraints.extension.nary.*;
 import org.chocosolver.solver.constraints.nary.PropDiffN;
 import org.chocosolver.solver.constraints.nary.PropIntValuePrecedeChain;
 import org.chocosolver.solver.constraints.nary.PropKLoops;
+import org.chocosolver.solver.constraints.nary.PropSweepBasedDiffN;
 import org.chocosolver.solver.constraints.nary.alldifferent.AllDifferent;
 import org.chocosolver.solver.constraints.nary.alldifferent.conditions.CondAllDifferent;
 import org.chocosolver.solver.constraints.nary.alldifferent.conditions.Condition;
@@ -1469,6 +1470,27 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             return diffNCons;
         }
     }
+
+    /**
+     * Creates a diffN constraint with <i>k</i> dimensions.
+     * Each orthotope<sub>i</sub>, given by their origins X<sub>i,j</sub>
+     * and sizes l<sub>i,j</sub> should be non-overlapping on at least one dimension <i>0 ≤ j < k</i>.
+     *
+     * @implNote This constraint is more general than {@link #diffN(IntVar[][], int[][])} that only considers 2 dimensions.
+     * However, it is also more complex and less efficient.
+     *
+     * @param X collection of orthotopes
+     * @param l collection of lengths (each length should be > 0)
+     * @return a non-overlapping constraint
+     * @see #diffN(IntVar[][], int[][])
+     */
+    default Constraint diffN(IntVar[][] X,
+                             int[][] l) {
+        return new Constraint(
+                ConstraintsName.DIFFN,
+                new PropSweepBasedDiffN(X, l));
+    }
+    
 
     /**
      * Creates a element constraint: value = table[index-offset]
