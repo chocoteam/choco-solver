@@ -683,12 +683,19 @@ public class Model implements IModel {
 
     /**
      * Returns an estimation of the current memory footprint of this.
+     * If an error occurs during the estimation (related to SizeOf), -1 is returned.
      * @return the total size in bytes for this model
      * @implNote this is based on : <a href="https://github.com/ehcache/sizeof">SizeOf</a>
      */
-    public long getEstimatedMemory() throws UnsupportedOperationException{
-        SizeOf sizeOf = SizeOf.newInstance();
-        return sizeOf.deepSizeOf(this);
+    public long getEstimatedMemory() {
+        long size = -1;
+        try {
+            SizeOf sizeOf = SizeOf.newInstance();
+            size = sizeOf.deepSizeOf(this);
+        }catch (UnsupportedOperationException ignored){
+            // do nothing
+        }
+        return size;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
