@@ -10,20 +10,17 @@
 package org.chocosolver.solver.trace;
 
 import org.chocosolver.solver.ISelf;
-import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.propagation.PropagationEngineObserver;
 import org.chocosolver.solver.propagation.PropagationObserver;
 import org.chocosolver.solver.propagation.PropagationProfiler;
 import org.chocosolver.solver.search.loop.monitors.*;
-import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.StringUtils;
 
 import java.io.Closeable;
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.List;
 
 /**
  * This aims at simplifying resolution trace output by providing
@@ -416,56 +413,6 @@ public interface IOutputFactory extends ISelf<Solver> {
         GephiNetwork.write(gexfFilename, this.ref().getModel());
     }
 
-
-    /**
-     * Compute the distance matrix of integer solutions.
-     * The Minkowski's p-distance is used
-     *
-     * @param solutions list of solutions
-     * @param p         parameter p of p-distance (set to 2 for euclidean distance)
-     */
-    default double[][] buildDistanceMatrix(List<Solution> solutions, int p) {
-        int n = solutions.size();
-        IntVar[] vars = solutions.get(0).retrieveIntVars(true).toArray(new IntVar[0]);
-        double[][] m = new double[n][n];
-        for (int i = 0; i < n; i++) {
-            Solution soli = solutions.get(i);
-            for (int j = i + 1; j < n; j++) {
-                Solution solj = solutions.get(j);
-                double d = 0;
-                for (int k = 0; k < vars.length; k++) {
-                    double a = Math.abs(soli.getIntVal(vars[k]) - solj.getIntVal(vars[k]));
-                    d += Math.pow(a, p);
-                }
-                m[i][j] = m[j][i] = Math.pow(d, 1. / p);
-            }
-        }
-        return m;
-    }
-
-    /**
-     * Compute the distance matrix of integer solutions.
-     * The Levenshtein's distance is used
-     *
-     * @param solutions list of solutions
-     */
-    default double[][] buildDifferenceMatrix(List<Solution> solutions) {
-        int n = solutions.size();
-        IntVar[] vars = solutions.get(0).retrieveIntVars(true).toArray(new IntVar[0]);
-        double[][] m = new double[n][n];
-        for (int i = 0; i < n; i++) {
-            Solution soli = solutions.get(i);
-            for (int j = i + 1; j < n; j++) {
-                Solution solj = solutions.get(j);
-                double d = 0;
-                for (int k = 0; k < vars.length; k++) {
-                    d += (soli.getIntVal(vars[k]) == solj.getIntVal(vars[k])) ? 0. : 1.;
-                }
-                m[i][j] = m[j][i] = d / vars.length;
-            }
-        }
-        return m;
-    }
 
     //////////////
 
