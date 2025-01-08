@@ -8,7 +8,6 @@
 
 ![Build](https://github.com/chocoteam/choco-solver/actions/workflows/maven-test.yml/badge.svg)
 [![codecov.io](https://codecov.io/github/chocoteam/choco-solver/coverage.svg?branch=master)](https://codecov.io/github/chocoteam/choco-solver?branch=master)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/chocoteam/choco-solver.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/chocoteam/choco-solver/alerts/)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/f1bafa113f94486b96343d63782c0f7a)](https://www.codacy.com/gh/chocoteam/choco-solver/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=chocoteam/choco-solver&amp;utm_campaign=Badge_Grade)
 
 
