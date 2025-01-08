@@ -9,15 +9,14 @@
  */
 package org.chocosolver.solver.variables;
 
+import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.variables.events.IEventType;
-import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.view.integer.IntAffineView;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
-import java.util.ArrayList;
 import java.util.function.Consumer;
 
 import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils.unionOf;
@@ -29,7 +28,7 @@ import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterabl
  * @author Jean-Guillaume Fages
  * @since 04/02/2013
  */
-public class Task {
+public class Task implements ICause {
 
     //***********************************************************************************
     // VARIABLES
@@ -38,7 +37,7 @@ public class Task {
     private final IntVar start;
     private final IntVar duration;
     private final IntVar end;
-    private IVariableMonitor<IntVar> update;
+    private Constraint arithmConstraint;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -53,17 +52,12 @@ public class Task {
      * @param lst latest starting time
      * @param d duration
      * @param ect earliest completion time
-     * @param lct latest completion time time
+     * @param lct latest completion time
      */
     public Task(Model model, int est, int lst, int d, int ect, int lct) {
-        start = model.intVar(est, lst);
+        start = model.intVar(Math.max(est, ect - d), Math.min(lst, lct - d));
         duration = model.intVar(d);
-        if(ect == est+d && lct == lst+d) {
-            end = start.getModel().offset(start, d);
-        } else {
-            end = model.intVar(ect, lct);
-            declareMonitor();
-        }
+        end = start.getModel().offset(start, d);
     }
 
     /**
@@ -85,15 +79,31 @@ public class Task {
      *
      * @param s start variable
      * @param d duration value
+     */
+    public Task(IntVar s, IntVar d) {
+        if (d.isInstantiated()) {
+            start = s;
+            duration = d;
+            end = start.getModel().offset(start, d.getValue());
+        } else {
+            start = s;
+            duration = d;
+            end = start.getModel().intVar(s.getLB() + d.getLB(), s.getUB() + d.getUB());
+            arithmConstraint = start.getModel().arithm(start, "+", duration, "=", end);
+            arithmConstraint.post();
+        }
+    }
+
+    /**
+     * Container representing a task:
+     * It ensures that: start + duration = end, end being an offset view of start + duration.
+     *
+     * @param s start variable
+     * @param d duration value
      * @param e end variable
      */
     public Task(IntVar s, int d, IntVar e) {
-        start = s;
-        duration = start.getModel().intVar(d);
-        end = e;
-        if(!isOffsetView(s, d, e)) {
-            declareMonitor();
-        }
+        this(s, s.getModel().intVar(d), e);
     }
 
     /**
@@ -105,36 +115,30 @@ public class Task {
      * @param e end variable
      */
     public Task(IntVar s, IntVar d, IntVar e) {
+        this(s, d, e, !d.isInstantiated() || !isOffsetView(s, d.getValue(), e));
+    }
+
+    private Task(IntVar s, IntVar d, IntVar e, boolean postArithm) {
         start = s;
         duration = d;
         end = e;
-        if(!d.isInstantiated() || !isOffsetView(s, d.getValue(), e)) {
-            declareMonitor();
+        if (postArithm) {
+            arithmConstraint = start.getModel().arithm(start, "+", duration, "=", end);
+            arithmConstraint.post();
         }
     }
 
     private static boolean isOffsetView(IntVar s, int d, IntVar e) {
         if(e instanceof IntAffineView) {
             IntAffineView<?> intOffsetView = (IntAffineView<?>) e;
-            return intOffsetView.equals(s, 1, d);
+            if (intOffsetView.p) {
+                return intOffsetView.equals(s, 1, d);
+            } else {
+                intOffsetView = (IntAffineView<?>) s;
+                return intOffsetView.equals(e.neg().intVar(), -1, -d);
+            }
         }
         return false;
-    }
-
-    private void declareMonitor() {
-        if (start.hasEnumeratedDomain() || duration.hasEnumeratedDomain() || end.hasEnumeratedDomain()) {
-            update = new TaskMonitor(start, duration, end, true);
-        } else {
-            update = new TaskMonitor(start, duration, end, false);
-        }
-        Model model = start.getModel();
-        //noinspection unchecked
-        ArrayList<Task> tset = (ArrayList<Task>) model.getHook(Model.TASK_SET_HOOK_NAME);
-        if(tset == null){
-            tset = new ArrayList<>();
-            model.addHook(Model.TASK_SET_HOOK_NAME, tset);
-        }
-        tset.add(this);
     }
 
     //***********************************************************************************
@@ -147,7 +151,15 @@ public class Task {
      * @throws ContradictionException thrown if a inconsistency has been detected between start, end and duration
      */
     public void ensureBoundConsistency() throws ContradictionException {
-        update.onUpdate(start, IntEventType.REMOVE);
+        boolean hasFiltered;
+        do {
+            // start
+            hasFiltered = start.updateBounds(end.getLB() - duration.getUB(), end.getUB() - duration.getLB(), this);
+            // end
+            hasFiltered |= end.updateBounds(start.getLB() + duration.getLB(), start.getUB() + duration.getUB(), this);
+            // duration
+            hasFiltered |= duration.updateBounds(end.getLB() - start.getUB(), end.getUB() - start.getLB(), this);
+        } while (hasFiltered);
     }
 
     //***********************************************************************************
@@ -166,8 +178,8 @@ public class Task {
         return end;
     }
 
-    public IVariableMonitor<IntVar> getMonitor() {
-        return update;
+    public Constraint getArithmConstraint() {
+        return arithmConstraint;
     }
 
     private static void doExplain(IntVar S, IntVar D, IntVar E,
@@ -201,54 +213,21 @@ public class Task {
     @Override
     public String toString() {
         return "Task[" +
-            "start=" + start +
-            ", duration=" + duration +
-            ", end=" + end +
-            ']';
+                "start=" + start +
+                ", duration=" + duration +
+                ", end=" + end +
+                ']';
     }
 
-    private static class TaskMonitor implements IVariableMonitor<IntVar> {
-        private final IntVar S, D, E;
-        private final boolean isEnum;
+    @Override
+    public void explain(int p, ExplanationForSignedClause explanation) {
+        doExplain(start, duration, end, p, explanation);
+    }
 
-        private TaskMonitor(IntVar S, IntVar D, IntVar E, boolean isEnum) {
-            this.S = S;
-            this.D = D;
-            this.E = E;
-            S.addMonitor(this);
-            D.addMonitor(this);
-            E.addMonitor(this);
-            this.isEnum = isEnum;
-        }
-
-        @Override
-        public void onUpdate(IntVar var, IEventType evt) throws ContradictionException {
-            boolean fixpoint;
-            do {
-                // start
-                fixpoint = S.updateBounds(E.getLB() - D.getUB(), E.getUB() - D.getLB(), this);
-                // end
-                fixpoint |= E.updateBounds(S.getLB() + D.getLB(), S.getUB() + D.getUB(), this);
-                // duration
-                fixpoint |= D.updateBounds(E.getLB() - S.getUB(), E.getUB() - S.getLB(), this);
-            } while (fixpoint && isEnum);
-        }
-
-        @Override
-        public void explain(int p, ExplanationForSignedClause explanation) {
-            doExplain(S, D, E, p, explanation);
-        }
-
-        @Override
-        public void forEachIntVar(Consumer<IntVar> action) {
-            action.accept(S);
-            action.accept(D);
-            action.accept(E);
-        }
-
-        @Override
-        public String toString() {
-            return "Task["+S.getName()+"+"+D.getName()+"="+E.getName()+"]";
-        }
+    @Override
+    public void forEachIntVar(Consumer<IntVar> action) {
+        action.accept(start);
+        action.accept(duration);
+        action.accept(end);
     }
 }

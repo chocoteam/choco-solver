@@ -105,6 +105,7 @@ public class TimeCumulFilter extends CumulFilter {
 				}
 			}
 		}
+		propStartDurationEndRelation(s, d, e, h, aCause);
 	}
 
 	protected void filterInf(IntVar start, int elb, int dlb, int hlb, int min, int max, int[] time, int capaMax, Propagator<IntVar> aCause) throws ContradictionException {

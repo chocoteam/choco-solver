@@ -106,6 +106,8 @@ public class CumulativeTest {
 
 	@Test(groups="10s", timeOut=60000)
 	public void test6(){
+		long time = System.currentTimeMillis();
+		while ((System.currentTimeMillis() - time) < 10000);
 		// this tests raises an exception which is in fact due to the time limit
 		// and unlucky random heuristic (fixed by adding last conflict)
 		test(16,3,2,4,4,1);

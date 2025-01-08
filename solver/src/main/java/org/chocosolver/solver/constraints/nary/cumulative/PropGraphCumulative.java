@@ -79,6 +79,7 @@ public class PropGraphCumulative extends PropCumulative {
             super.propagate(evtmask);
             graphComputation();
         } else {
+            propIni();
             if (full) {
                 filter(allTasks);
             } else {
@@ -105,6 +106,7 @@ public class PropGraphCumulative extends PropCumulative {
                     }
                 }
             }
+            propIni();
         }
         toCompute.clear();
         full = false;

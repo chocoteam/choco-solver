@@ -109,6 +109,7 @@ public class SweepCumulFilter extends CumulFilter {
 				if(!FIXPOINT)break;
 			}
 			pruneMin(s, aCause);
+			propStartDurationEndRelation(s, d, e, h, aCause);
 			// symmetric approach for the end upper bounds
 			i = 0;
 			tIter = tasksToUSe.iterator();
@@ -125,6 +126,7 @@ public class SweepCumulFilter extends CumulFilter {
 				if(!FIXPOINT)break;
 			}
 			pruneMax(e, aCause);
+			propStartDurationEndRelation(s, d, e, h, aCause);
 		}while(FIXPOINT && again);
 	}
 

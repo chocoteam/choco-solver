@@ -50,9 +50,11 @@ public class TaskTest {
     public void testDecreaseDuration() throws ContradictionException {
         checkVariable(duration, 0, 10);
         start.removeValue(0, Cause.Null);
+        task.ensureBoundConsistency();
         checkVariable(duration, 0, 9);
 
         end.removeValue(10, Cause.Null);
+        task.ensureBoundConsistency();
         checkVariable(duration, 0, 8);
     }
 
@@ -60,11 +62,13 @@ public class TaskTest {
     @Test(groups = "1s", timeOut = 60000)
     public void testIncreaseDuration() throws ContradictionException {
         start.removeInterval(4, 5, Cause.Null);
+        task.ensureBoundConsistency();
         checkVariable(duration, 2, 10);
 
         end.removeValue(5, Cause.Null);
         end.removeValue(6, Cause.Null);
         end.removeValue(7, Cause.Null);
+        task.ensureBoundConsistency();
         checkVariable(duration, 5, 10);
     }
 
@@ -99,8 +103,9 @@ public class TaskTest {
     public void testRemoveValueSameVariable() throws ContradictionException {
         IntVar start = model.intVar(-5, 0);
         IntVar durationAndEnd = model.intVar(10);
-        new Task(start, durationAndEnd, durationAndEnd);
+        Task task = new Task(start, durationAndEnd, durationAndEnd);
         start.removeValue(0, Cause.Null);
+        task.ensureBoundConsistency();
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -173,16 +178,16 @@ public class TaskTest {
                 && t1.getEnd().getLB() == t2.getEnd().getLB() && t1.getEnd().getUB() == t2.getEnd().getUB();
     }
 
-    private static boolean hasTaskMonitor(Task task) {
-        return task.getMonitor() != null;
+    private static boolean hasArithmConstraint(Task task) {
+        return task.getArithmConstraint() != null;
     }
 
     private void specificToTask(Model m) {
         // Task(Model model, int est, int lst, int d, int ect, int lct)
-        Task t1 = new Task(m, 0, 10, 2, 0, 10);
-        Assert.assertTrue(hasTaskMonitor(t1));
-        Task t2 = new Task(m, 0, 10, 2, 2, 12);
-        Assert.assertFalse(hasTaskMonitor(t2));
+        Task t1 = new Task(m, 0, 10, 2, 2, 12);
+        Assert.assertFalse(hasArithmConstraint(t1));
+        Task t2 = new Task(m, 0, 10, 2, 0, 10);
+        Assert.assertFalse(hasArithmConstraint(t2));
     }
 
     private void specificToIVariableFactory(Model m) {
@@ -190,11 +195,11 @@ public class TaskTest {
         IntVar s = m.intVar(0, 10);
         IntVar d = m.intVar(1, 5);
         Task t1 = m.taskVar(s, d);
-        Assert.assertTrue(hasTaskMonitor(t1));
+        Assert.assertTrue(hasArithmConstraint(t1));
 
         Task t2 = m.taskVar(s, m.intVar(2));
         Assert.assertTrue(t2.getEnd() instanceof IntAffineView);
-        Assert.assertFalse(hasTaskMonitor(t2));
+        Assert.assertFalse(hasArithmConstraint(t2));
     }
 
     private void inCommon(Model m) {
@@ -204,53 +209,53 @@ public class TaskTest {
         Task t1 = new Task(m.intVar(0, 10), d);
         Task t2 = m.taskVar(m.intVar(0, 10), d);
         Assert.assertTrue(sameTaskVars(t1, t2));
-        Assert.assertFalse(hasTaskMonitor(t1));
-        Assert.assertFalse(hasTaskMonitor(t2));
+        Assert.assertFalse(hasArithmConstraint(t1));
+        Assert.assertFalse(hasArithmConstraint(t2));
 
         // Task(IntVar s, int d, IntVar e)
         Task t3 = new Task(m.intVar(0, 10), d, m.intVar(0, 10));
         Task t4 = m.taskVar(m.intVar(0, 10), d, m.intVar(0, 10));
         Assert.assertTrue(sameTaskVars(t3, t4));
-        Assert.assertTrue(hasTaskMonitor(t3));
-        Assert.assertTrue(hasTaskMonitor(t4));
+        Assert.assertTrue(hasArithmConstraint(t3));
+        Assert.assertTrue(hasArithmConstraint(t4));
 
         IntVar s5 = m.intVar(0, 10);
         Task t5 = new Task(s5, d, m.offset(s5, d));
         IntVar s6 = m.intVar(0, 10);
         Task t6 = m.taskVar(s6, d, m.offset(s6, d));
         Assert.assertTrue(sameTaskVars(t5, t6));
-        Assert.assertFalse(hasTaskMonitor(t5));
-        Assert.assertFalse(hasTaskMonitor(t6));
+        Assert.assertFalse(hasArithmConstraint(t5));
+        Assert.assertFalse(hasArithmConstraint(t6));
 
         // Task(IntVar s, IntVar d, IntVar e)
         Task t7 = new Task(m.intVar(0, 10), m.intVar(1, 5), m.intVar(0, 10));
         Task t8 = m.taskVar(m.intVar(0, 10), m.intVar(1, 5), m.intVar(0, 10));
         Assert.assertTrue(sameTaskVars(t7, t8));
-        Assert.assertTrue(hasTaskMonitor(t7));
-        Assert.assertTrue(hasTaskMonitor(t8));
+        Assert.assertTrue(hasArithmConstraint(t7));
+        Assert.assertTrue(hasArithmConstraint(t8));
 
         IntVar s9 = m.intVar(0, 10);
         Task t9 = new Task(s9, m.intVar(d), m.offset(s9, d));
         IntVar s10 = m.intVar(0, 10);
         Task t10 = m.taskVar(s10, m.intVar(d), m.offset(s10, d));
         Assert.assertTrue(sameTaskVars(t9, t10));
-        Assert.assertFalse(hasTaskMonitor(t9));
-        Assert.assertFalse(hasTaskMonitor(t10));
+        Assert.assertFalse(hasArithmConstraint(t9));
+        Assert.assertFalse(hasArithmConstraint(t10));
 
         // Task(IntVar s, IntVar d, IntVar e, boolean declareMonitor)
         Task t11 = new Task(m.intVar(0, 10), m.intVar(1, 5), m.intVar(0, 10));
         Task t12 = m.taskVar(m.intVar(0, 10), m.intVar(1, 5), m.intVar(0, 10));
         Assert.assertTrue(sameTaskVars(t11, t12));
-        Assert.assertTrue(hasTaskMonitor(t11));
-        Assert.assertTrue(hasTaskMonitor(t12));
+        Assert.assertTrue(hasArithmConstraint(t11));
+        Assert.assertTrue(hasArithmConstraint(t12));
 
         IntVar s13 = m.intVar(0, 10);
         Task t13 = new Task(s13, m.intVar(d), m.offset(s13, d));
         IntVar s14 = m.intVar(0, 10);
         Task t14 = m.taskVar(s14, m.intVar(d), m.offset(s14, d));
         Assert.assertTrue(sameTaskVars(t13, t14));
-        Assert.assertFalse(hasTaskMonitor(t13));
-        Assert.assertFalse(hasTaskMonitor(t14));
+        Assert.assertFalse(hasArithmConstraint(t13));
+        Assert.assertFalse(hasArithmConstraint(t14));
     }
 
     @Test(groups = "1s", timeOut = 60000)
