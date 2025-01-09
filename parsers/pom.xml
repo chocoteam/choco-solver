@@ -120,7 +120,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.4.2</version>
+                <version>3.7.1</version>
                 <executions>
                     <execution>
                         <id>make-assembly</id>
