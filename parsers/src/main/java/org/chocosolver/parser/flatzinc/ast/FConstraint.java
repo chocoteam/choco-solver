@@ -1859,7 +1859,7 @@ public enum FConstraint {
 
             SetVar a = exps.get(0).setVarValue(model);
             SetVar b = exps.get(1).setVarValue(model);
-            SetVar c = exps.get(1).setVarValue(model);
+            SetVar c = exps.get(2).setVarValue(model);
             model.partition(new SetVar[]{c, b}, a).post();
 
         }
