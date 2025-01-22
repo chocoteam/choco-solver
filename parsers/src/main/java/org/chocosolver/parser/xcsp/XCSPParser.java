@@ -1224,7 +1224,7 @@ public class XCSPParser implements XCallbacks2 {
         IntVar[][] vars = vars(matrix);
         int min = Arrays.stream(vars).mapToInt(r -> Arrays.stream(r).mapToInt(IntVar::getLB)
                 .min().getAsInt()).min().getAsInt();
-        int max = Arrays.stream(vars).mapToInt(r -> Arrays.stream(r).mapToInt(IntVar::getLB)
+        int max = Arrays.stream(vars).mapToInt(r -> Arrays.stream(r).mapToInt(IntVar::getUB)
                 .max().getAsInt()).max().getAsInt();
         IntVar x = condToVar(condition, min, max);
         model.element(x, vars(matrix), var(rowIndex), startColIndex, var(colIndex), startColIndex);
