@@ -120,16 +120,18 @@ public interface IDecompositionFactory extends ISelf<Model> {
      * @param colIndex  index of the selected column
      * @param colOffset offset for column index
      */
-    default IntVar[] element(IntVar value, int[][] matrix, IntVar rowIndex, int rowOffset, IntVar colIndex, int colOffset) {
-        IntVar[] results = new IntVar[matrix.length];
-        for (int r = 0; r < matrix.length; r++) {
-            int min = IntStream.of(matrix[r]).min().orElse(IntVar.MIN_INT_BOUND);
-            int max = IntStream.of(matrix[r]).max().orElse(IntVar.MAX_INT_BOUND);
-            results[r] = ref().intVar("val[" + r + "]", min, max);
-            ref().element(results[r], matrix[r], colIndex, colOffset).post();
-        }
-        ref().element(value, results, rowIndex, rowOffset).post();
-        return results;
+    default void element(IntVar value, int[][] matrix, IntVar rowIndex, int rowOffset, IntVar colIndex, int colOffset) {
+        int d0 = matrix.length;
+        int d1 = matrix[0].length;
+        // Create the index as idx = row * d1 + col
+        IntVar rv = ref().intView(1, rowIndex, rowOffset);
+        IntVar cv = ref().intView(1, colIndex, colOffset);
+        IntVar idx = ref().intVar(0, d0 * d1 - 1);
+        ref().scalar(new IntVar[]{rv, cv}, new int[]{d1, 1}, "=", idx).post();
+        // flatten the array
+        int[] mvars = ArrayUtils.flatten(matrix);
+        // post the element constraint
+        ref().element(value, mvars, idx, 0).post();
     }
 
     /**
@@ -142,16 +144,18 @@ public interface IDecompositionFactory extends ISelf<Model> {
      * @param colIndex  index of the selected column
      * @param colOffset offset for column index
      */
-    default IntVar[] element(IntVar value, IntVar[][] matrix, IntVar rowIndex, int rowOffset, IntVar colIndex, int colOffset) {
-        IntVar[] results = new IntVar[matrix.length];
-        for (int r = 0; r < matrix.length; r++) {
-            int min = Stream.of(matrix[r]).mapToInt(IntVar::getLB).min().orElse(IntVar.MIN_INT_BOUND);
-            int max = Stream.of(matrix[r]).mapToInt(IntVar::getUB).max().orElse(IntVar.MAX_INT_BOUND);
-            results[r] = ref().intVar("val[" + r + "]", min, max);
-            ref().element(results[r], matrix[r], colIndex, colOffset).post();
-        }
-        ref().element(value, results, rowIndex, rowOffset).post();
-        return results;
+    default void element(IntVar value, IntVar[][] matrix, IntVar rowIndex, int rowOffset, IntVar colIndex, int colOffset) {
+        int d0 = matrix.length;
+        int d1 = matrix[0].length;
+        // Create the index as idx = row * d1 + col
+        IntVar rv = ref().intView(1, rowIndex, rowOffset);
+        IntVar cv = ref().intView(1, colIndex, colOffset);
+        IntVar idx = ref().intVar(0, d0 * d1 - 1);
+        ref().scalar(new IntVar[]{rv, cv}, new int[]{d1, 1}, "=", idx).post();
+        // flatten the array
+        IntVar[] mvars = ArrayUtils.flatten(matrix);
+        // post the element constraint
+        ref().element(value, mvars, idx, 0).post();
     }
 
 
