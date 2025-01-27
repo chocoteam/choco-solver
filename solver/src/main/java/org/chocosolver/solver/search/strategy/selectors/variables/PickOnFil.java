@@ -10,7 +10,6 @@
 package org.chocosolver.solver.search.strategy.selectors.variables;
 
 import gnu.trove.list.array.TLongArrayList;
-import gnu.trove.map.hash.TObjectDoubleHashMap;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.propagation.PropagationInsight;
@@ -33,15 +32,12 @@ public class PickOnFil<V extends Variable> extends AbstractCriterionBasedVariabl
 
     private final int variant;
 
-    private final TObjectDoubleHashMap<Variable> scores;
-
     public PickOnFil(V[] vars) {
         this(vars, 3, 32);
     }
 
     public PickOnFil(V[] vars, int variant, int flushRate) {
         super(vars, 0, flushRate);
-        this.scores = new TObjectDoubleHashMap<>(15, 1.5f, 0.);
         this.variant = variant;
     }
 
@@ -66,7 +62,7 @@ public class PickOnFil<V extends Variable> extends AbstractCriterionBasedVariabl
 
     @Override
     protected double weight(V v) {
-        return scores.get(v);
+        return weights.get(v);
     }
 
     @Override
@@ -78,7 +74,7 @@ public class PickOnFil<V extends Variable> extends AbstractCriterionBasedVariabl
                 for (int i = 0; i < Lcstrs.size(); i++) {
                     Propagator<?> lc = Lcstrs.get(i);
                     for (Variable lv : lc.getVars()) {
-                        scores.adjustOrPutValue(lv, 1, 1);
+                        weights.adjustOrPutValue(lv, 1, 1);
                     }
                 }
                 break;
@@ -86,7 +82,7 @@ public class PickOnFil<V extends Variable> extends AbstractCriterionBasedVariabl
                 for (int i = 0; i < Lcstrs.size(); i++) {
                     Propagator<?> lc = Lcstrs.get(i);
                     for (Variable lv : lc.getVars()) {
-                        scores.adjustOrPutValue(lv, Ldeltas.get(i), Ldeltas.get(i));
+                        weights.adjustOrPutValue(lv, Ldeltas.get(i), Ldeltas.get(i));
                     }
                 }
                 break;
@@ -97,7 +93,7 @@ public class PickOnFil<V extends Variable> extends AbstractCriterionBasedVariabl
                     double amnt = r * Ldeltas.get(i);
                     Propagator<?> lc = Lcstrs.get(i);
                     for (Variable lv : lc.getVars()) {
-                        scores.adjustOrPutValue(lv, amnt, amnt);
+                        weights.adjustOrPutValue(lv, amnt, amnt);
                     }
                 }
                 break;
@@ -110,7 +106,7 @@ public class PickOnFil<V extends Variable> extends AbstractCriterionBasedVariabl
                     double amnt = r * Ldeltas.get(i);
                     Propagator<?> lc = Lcstrs.get(i);
                     for (Variable lv : lc.getVars()) {
-                        scores.adjustOrPutValue(lv, amnt, amnt);
+                        weights.adjustOrPutValue(lv, amnt, amnt);
                     }
                 }
                 break;

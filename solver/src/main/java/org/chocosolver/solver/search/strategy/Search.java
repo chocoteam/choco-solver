@@ -635,6 +635,44 @@ public class Search {
         return new ObjectiveStrategy(objective, optPolicy);
     }
 
+    /**
+     * Defines a round-robin search strategy over the variables.
+     * <p>
+     * The strategy is composed of the following variable selectors:
+     * <ul>
+     *     <li>DomOverWDegRef</li>
+     *     <li>DomOverWDeg</li>
+     *     <li>PickOnDom</li>
+     *     <li>FailureBased</li>
+     *     </ul>
+     * <p>
+     *     The strategy is composed of the following value selectors:
+     *     <ul>
+     *         <li>IntDomainMin</li>
+     *         <li>IntDomainMax</li>
+     *         <li>IntDomainRandom</li>
+     *      </ul>
+     * In addition, the phase-saving mechanism is activated.
+     *
+     * @param vars list of variables
+     * @return a round-robin search strategy
+     */
+    public static AbstractStrategy<IntVar> roundRobinSearch(IntVar... vars) {
+        long seed = 1_000_000_007;
+        return new RoundRobin(vars,
+                new VariableSelector[]{
+                        new DomOverWDegRef<>(vars, seed),
+                        new DomOverWDeg<>(vars, seed),
+                        new PickOnDom<>(vars, 2, 32),
+                        new FailureBased<>(vars, seed, 4)
+                },
+                new IntValueSelector[]{
+                        new IntDomainMin(),
+                        new IntDomainMax(),
+                        new IntDomainRandom(seed)},
+                true, false);
+    }
+
     // ************************************************************************************
     // SOME EXAMPLES OF STRATEGIES YOU CAN BUILD
     // ************************************************************************************

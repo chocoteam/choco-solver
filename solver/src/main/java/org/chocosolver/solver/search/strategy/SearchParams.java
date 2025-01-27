@@ -56,7 +56,6 @@ public interface SearchParams {
         ACTIVITY,
         CHS,
         DOM, /* or */ FIRST_FAIL,
-
         DOMWDEG,
         DOMWDEG_CACD,
         FLBA,
@@ -71,6 +70,7 @@ public interface SearchParams {
         PICKONFIL2,
         PICKONFIL3,
         RAND,
+        ROUND_ROBIN,
     }
 
     /**
@@ -284,9 +284,6 @@ public interface SearchParams {
                 case DOM:
                 case FIRST_FAIL:
                     return (vars, vsel) -> Search.intVarSearch(new FirstFail(vars[0].getModel()), vsel, vars);
-                default:
-                case DOMWDEG:
-                    return (vars, vsel) -> Search.intVarSearch(new DomOverWDeg<>(vars, 0, flushRate), vsel, vars);
                 case DOMWDEG_CACD:
                     return (vars, vsel) -> Search.intVarSearch(new DomOverWDegRef<>(vars, 0, flushRate), vsel, vars);
                 case FLBA:
@@ -311,8 +308,13 @@ public interface SearchParams {
                     return (vars, vsel) -> Search.intVarSearch(new PickOnFil<>(vars, 2, flushRate), vsel, vars);
                 case PICKONFIL3:
                     return (vars, vsel) -> Search.intVarSearch(new PickOnFil<>(vars, 3, flushRate), vsel, vars);
+                case ROUND_ROBIN:
+                    return (vars, vsel) -> Search.roundRobinSearch(vars);
                 case RAND:
                     return (vars, vsel) -> Search.intVarSearch(new Random<>(vars[0].getModel().getSeed()), vsel, vars);
+                case DOMWDEG:
+                default:
+                    return (vars, vsel) -> Search.intVarSearch(new DomOverWDeg<>(vars, 0, flushRate), vsel, vars);
             }
         }
 

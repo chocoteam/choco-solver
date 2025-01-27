@@ -12,7 +12,9 @@ package org.chocosolver.solver.search.strategy.selectors.values;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.variables.IntVar;
 
+import java.util.OptionalInt;
 import java.util.function.BiPredicate;
+import java.util.function.Function;
 
 /**
  * Value selector for optimization problems: Branches on the value in the last solution, if still in
@@ -20,7 +22,7 @@ import java.util.function.BiPredicate;
  *
  * @author Jean-Guillaume FAGES, Charles Prud'homme
  */
-public final class IntDomainLast implements IntValueSelector {
+public final class IntDomainLast implements IntValueSelector, Function<IntVar, OptionalInt> {
 
     /**
      * The last solution found
@@ -41,7 +43,7 @@ public final class IntDomainLast implements IntValueSelector {
      * @param solution container of the last solution
      * @param mainSelector falling back selector
      * @param condition condition to force, when return true, or skip, when return false, phase saving.
-     * Can be null, in that case will be consider as true.
+     * Can be null, in that case will be considered as true.
      */
     public IntDomainLast(Solution solution, IntValueSelector mainSelector,
         BiPredicate<IntVar, Integer> condition) {
@@ -66,6 +68,17 @@ public final class IntDomainLast implements IntValueSelector {
             }
         }
         return mainSelector.selectValue(var);
+    }
+
+    @Override
+    public OptionalInt apply(IntVar var) {
+        if (lastSolution.exists()) {
+            int value = lastSolution.getIntVal(var);
+            if (relevant(var, value) && condition.test(var, value)) {
+                return OptionalInt.of(value);
+            }
+        }
+        return OptionalInt.empty();
     }
 
     private boolean relevant(IntVar var, int value) {
