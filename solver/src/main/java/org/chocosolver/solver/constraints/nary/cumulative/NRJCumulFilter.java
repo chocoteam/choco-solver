@@ -96,5 +96,6 @@ public class NRJCumulFilter extends CumulFilter{
 				}
 			}
 		}
+		propStartDurationEndRelation(s, d, e, h, aCause);
 	}
 }
