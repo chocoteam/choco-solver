@@ -94,7 +94,7 @@ public final class Restarter extends AbstractRestart {
             restartFromStrategyCount++;
             if (restartFromStrategyCount >= restartLimit) {
                 limit = Long.MAX_VALUE;
-            } else if (criterion.isMet(limit)) {
+            } else {
                 limit += restartStrategy.getNextCutoff();
             }
             return true;
