@@ -124,8 +124,8 @@ public interface IDecompositionFactory extends ISelf<Model> {
         int d0 = matrix.length;
         int d1 = matrix[0].length;
         // Create the index as idx = row * d1 + col
-        IntVar rv = ref().intView(1, rowIndex, rowOffset);
-        IntVar cv = ref().intView(1, colIndex, colOffset);
+        IntVar rv = ref().intView(1, rowIndex, -rowOffset);
+        IntVar cv = ref().intView(1, colIndex, -colOffset);
         IntVar idx = ref().intVar(0, d0 * d1 - 1);
         ref().scalar(new IntVar[]{rv, cv}, new int[]{d1, 1}, "=", idx).post();
         // flatten the array
@@ -148,8 +148,8 @@ public interface IDecompositionFactory extends ISelf<Model> {
         int d0 = matrix.length;
         int d1 = matrix[0].length;
         // Create the index as idx = row * d1 + col
-        IntVar rv = ref().intView(1, rowIndex, rowOffset);
-        IntVar cv = ref().intView(1, colIndex, colOffset);
+        IntVar rv = ref().intView(1, rowIndex, -rowOffset);
+        IntVar cv = ref().intView(1, colIndex, -colOffset);
         IntVar idx = ref().intVar(0, d0 * d1 - 1);
         ref().scalar(new IntVar[]{rv, cv}, new int[]{d1, 1}, "=", idx).post();
         // flatten the array
