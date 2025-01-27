@@ -52,9 +52,9 @@ import java.util.stream.StreamSupport;
  */
 public class Model implements IModel {
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////// PRIVATE FIELDS /////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// //////////////////////////////////// PRIVATE FIELDS /////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static boolean MAXIMIZE = true;
     public static boolean MINIMIZE = false;
@@ -64,9 +64,6 @@ public class Model implements IModel {
      */
     public static final String TASK_SET_HOOK_NAME = "H_TASKSET";
 
-    public static final String TRUE_CONSTRAINT_NAME= "H_TRUE";
-
-    public static final String FALSE_CONSTRAINT_NAME= "H_FALSE";
     public static final String MINISAT_HOOK_NAME = "H_MINISAT";
 
     public static final String CLAUSES_HOOK_NAME = "H_CLAUSES";
@@ -120,6 +117,11 @@ public class Model implements IModel {
      * Index of the last added constraint
      */
     private int cIdx;
+
+    /**
+     * Groups of variables
+     */
+    private List<Group<?>> groups;
 
     /**
      * Environment, based of the search tree (trailing or copying)
@@ -203,6 +205,7 @@ public class Model implements IModel {
         this.hooks = new HashMap<>();
         this.settings = settings;
         this.solver = settings.initSolver(this);
+        this.groups = new ArrayList<>();
     }
 
     /**
@@ -575,6 +578,43 @@ public class Model implements IModel {
     }
 
     /**
+     * Add a group of variables to the model.
+     * A group is a set of variables that are related to each other or have a specific semantic.
+     * A name should be associated to a group, to help identifying it.
+     *
+     * @param g   a group of variables
+     * @param <V> the type of variables in the group
+     */
+    public <V extends Variable> void addGroup(Group<V> g) {
+        groups.add(g);
+    }
+
+    /**
+     * Add a group of variables to the model.
+     * A group is a set of variables that are related to each other or have a specific semantic.
+     * A name should be associated to a group, to help identifying it.
+     *
+     * @param name the name of the group
+     * @param vars the variables in the group
+     * @param <V>  the type of variables in the group
+     */
+    @SafeVarargs
+    public final <V extends Variable> void addAsGroup(String name, V... vars) {
+        addGroup(new Group<>(name, vars));
+    }
+
+    /**
+     * Get the groups of variables in the model.
+     * A group is a set of variables that are related to each other or have a specific semantic.
+     *
+     * @return an unmodifiable list that contains all the groups of variables in the model.
+     * If no group is declared, an empty list is returned.
+     */
+    public List<Group<?>> getGroups() {
+        return Collections.unmodifiableList(groups);
+    }
+
+    /**
      * The basic "true" constraint, which is always satisfied
      *
      * @return a "true" constraint
@@ -684,6 +724,7 @@ public class Model implements IModel {
     /**
      * Returns an estimation of the current memory footprint of this.
      * If an error occurs during the estimation (related to SizeOf), -1 is returned.
+     *
      * @return the total size in bytes for this model
      * @implNote this is based on : <a href="https://github.com/ehcache/sizeof">SizeOf</a>
      */
@@ -692,7 +733,7 @@ public class Model implements IModel {
         try {
             SizeOf sizeOf = SizeOf.newInstance();
             size = sizeOf.deepSizeOf(this);
-        }catch (UnsupportedOperationException ignored){
+        } catch (UnsupportedOperationException ignored) {
             // do nothing
         }
         return size;
