@@ -15,7 +15,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.choco-solver</groupId>
     <artifactId>choco</artifactId>
-    <version>4.10.18</version>
+    <version>4.10.19-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>choco</name>
     <url>http://choco-solver.org/</url>
