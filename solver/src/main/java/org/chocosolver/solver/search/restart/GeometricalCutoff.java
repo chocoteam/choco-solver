@@ -20,16 +20,16 @@ package org.chocosolver.solver.search.restart;
  * @author Charles Prud'homme, Arnaud Malapert
  * @since 13/05/11
  */
-public final class GeometricalCutoff extends AbstractCutoff {
+public class GeometricalCutoff extends AbstractCutoff {
 
     /**
      * Declared geometrical factor
      */
-    private final double geometricalFactor;
+    protected final double geometricalFactor;
     /**
      * Current geometrical factor, after n calls to {@link #getNextCutoff()}.
      */
-    private double geometricalFactorPower;
+    protected double geometricalFactorPower;
 
     /**
      * A geometrical cutoff strategy.

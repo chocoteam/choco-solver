@@ -46,7 +46,7 @@ public interface SearchParams {
      * Different restart strategies
      */
     enum Restart {
-        NONE, LUBY, GEOMETRIC, ARITHMETIC
+        NONE, LUBY, GEOMETRIC, INNER_OUTER, ARITHMETIC
     }
 
     /**
@@ -152,6 +152,9 @@ public interface SearchParams {
                 case GEOMETRIC:
                     return (s) -> new Restarter(new GeometricalCutoff(cutoff, geo),
                             c -> s.getFailCount() >= c, offset, resetOnSolution);
+                case INNER_OUTER:
+                    return (s) -> new Restarter(new InnerOuterCutoff(cutoff, geo, geo),
+                            c -> s.getFailCount() >= c, offset, resetOnSolution);
                 case ARITHMETIC:
                     return (s) -> new Restarter(new LinearCutoff(cutoff),
                             c -> s.getFailCount() >= c, offset, resetOnSolution);
@@ -165,6 +168,11 @@ public interface SearchParams {
                 return pol == other.pol && cutoff == other.cutoff && offset == other.offset && geo == other.geo && resetOnSolution == other.resetOnSolution;
             }
             return false;
+        }
+
+        @Override
+        public String toString() {
+            return "[" + pol + "," + cutoff + "," + geo + "," + offset + "," + resetOnSolution + ']';
         }
     }
 
@@ -233,6 +241,13 @@ public interface SearchParams {
          */
         public int getRuns() {
             return runs;
+        }
+
+        @Override
+        public String toString() {
+            return "[" + time / 1000f +
+                    "s, " + runs +
+                    "runs, " + sols + "sols]";
         }
     }
 
