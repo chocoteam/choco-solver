@@ -37,7 +37,7 @@ public interface IOutputFactory extends ISelf<Solver> {
      * Default welcome message
      */
     String WELCOME_MESSAGE =
-        "** Choco 4.10.17 (2024-09) : Constraint Programming Solver, Copyright (c) 2010-2024";
+        "** Choco 4.10.18 (2025-01) : Constraint Programming Solver, Copyright (c) 2010-2025";
 
     /**
      * Print the version message.
