@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2024, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2025, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -36,8 +36,8 @@ public class PickOnDom<V extends Variable> extends AbstractCriterionBasedVariabl
         this(vars, 0, 32);
     }
 
-    public PickOnDom(V[] vars, int variant, int flushRare) {
-        super(vars, 0, flushRare);
+    public PickOnDom(V[] vars, int variant, int flushRate) {
+        super(vars, 0, flushRate);
         this.variant = variant;
     }
 

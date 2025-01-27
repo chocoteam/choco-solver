@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2024, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2025, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -33,7 +33,7 @@ public class VerboseSolving implements IMonitorInitialize, IMonitorSolution, IMo
 
     private final Solver solver;
 
-    private final long[] counters = new long[3];
+    private final long[] counters = new long[4];
     /**
      * A boolean to kill the printer when the resolution ends.
      */
@@ -86,9 +86,9 @@ public class VerboseSolving implements IMonitorInitialize, IMonitorSolution, IMo
     private void header() {
         boolean opt = solver.getObjectiveManager().isOptimization();
         solver.log().white().printf((opt ? "          Objective        |" : "")
-                        + "              Measures              |     Progress    %n" +
+                        + "                 Measures                |     Progress    %n" +
                         (opt ? "     CurrentDomain BestBnd |" : "")
-                        + " Depth Decisions WrongDecs Restarts | SolCount   Time |%n"
+                        + " Depth Decisions WrongDecs  Failures Restarts | SolCount   Time |%n"
         );
     }
 
@@ -104,17 +104,19 @@ public class VerboseSolving implements IMonitorInitialize, IMonitorSolution, IMo
         }
         counters[0] = solver.getNodeCount();
         counters[1] = solver.getFailCount();
-        counters[2] = solver.getRestartCount();
+        counters[2] = solver.getBackTrackCount();
+        counters[3] = solver.getRestartCount();
         calls++;
     }
 
     private void bodySat(boolean onSol) {
-        solver.log().white().printf("%s %5d %9d %8.2f%% %8d | %8d %5.0fs |%s%n%s",
+        solver.log().white().printf("%s %5d %9d %9d %9d %8d | %8d %5.0fs |%s%n%s",
                 onSol ? StringUtils.ANSI_BOLD + StringUtils.ANSI_BLACK : StringUtils.ANSI_WHITE,
                 solver.getCurrentDepth(),
                 solver.getNodeCount() - counters[0],
-                (solver.getFailCount() - counters[1]) * 100f / (solver.getNodeCount() - counters[0]),
-                solver.getRestartCount() - counters[2],
+                solver.getBackTrackCount() - counters[2],
+                solver.getFailCount() - counters[1],
+                solver.getRestartCount() - counters[3],
                 solver.getSolutionCount(),
                 solver.getTimeCount(),
                 onSol ? "*" : "",
@@ -126,15 +128,16 @@ public class VerboseSolving implements IMonitorInitialize, IMonitorSolution, IMo
         IntVar obj = solver.getObjectiveManager().getObjective().asIntVar();
         Number best = solver.getObjectiveManager().getBestSolutionValue();
 
-        solver.log().white().printf("%s%8d %8d %8s | %5d %9d %8.2f%% %8d | %8d %5.0fs |%s%n%s",
+        solver.log().white().printf("%s%8d %8d %8s | %5d %9d %9d %9d %8d | %8d %5.0fs |%s%n%s",
                 onSol ? StringUtils.ANSI_BOLD + StringUtils.ANSI_BLACK : StringUtils.ANSI_WHITE,
                 obj.getLB(),
                 obj.getUB(),
                 solver.getSolutionCount() > 0 ? best : "--",
                 solver.getCurrentDepth(),
                 solver.getNodeCount() - counters[0],
-                (solver.getFailCount() - counters[1]) * 100f / (solver.getNodeCount() - counters[0]),
-                solver.getRestartCount() - counters[2],
+                solver.getBackTrackCount() - counters[2],
+                solver.getFailCount() - counters[1],
+                solver.getRestartCount() - counters[3],
                 solver.getSolutionCount(),
                 solver.getTimeCount(),
                 onSol ? "*" : "",

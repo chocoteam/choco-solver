@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2024, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2025, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -94,7 +94,7 @@ public final class Restarter extends AbstractRestart {
             restartFromStrategyCount++;
             if (restartFromStrategyCount >= restartLimit) {
                 limit = Long.MAX_VALUE;
-            } else if (criterion.isMet(limit)) {
+            } else {
                 limit += restartStrategy.getNextCutoff();
             }
             return true;

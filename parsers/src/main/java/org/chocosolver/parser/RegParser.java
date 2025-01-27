@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2024, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2025, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -75,7 +75,7 @@ public abstract class RegParser implements IParser {
     )
     protected String logFilePath = null;
 
-    @Option(name = "-limit",
+    @Option(name = "-limit", aliases = {"-limits"},
             handler = LimitHandler.class,
             usage = "Resolution limits [XXhYYmZZs,Nruns,Msols] where each is optional (no space allowed).")
     protected SearchParams.LimConf limits = new SearchParams.LimConf(-1, -1, -1);

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2024, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2025, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -46,7 +46,7 @@ public interface SearchParams {
      * Different restart strategies
      */
     enum Restart {
-        NONE, LUBY, GEOMETRIC, ARITHMETIC
+        NONE, LUBY, GEOMETRIC, INNER_OUTER, ARITHMETIC
     }
 
     /**
@@ -56,7 +56,6 @@ public interface SearchParams {
         ACTIVITY,
         CHS,
         DOM, /* or */ FIRST_FAIL,
-
         DOMWDEG,
         DOMWDEG_CACD,
         FLBA,
@@ -71,6 +70,7 @@ public interface SearchParams {
         PICKONFIL2,
         PICKONFIL3,
         RAND,
+        ROUND_ROBIN,
     }
 
     /**
@@ -152,6 +152,9 @@ public interface SearchParams {
                 case GEOMETRIC:
                     return (s) -> new Restarter(new GeometricalCutoff(cutoff, geo),
                             c -> s.getFailCount() >= c, offset, resetOnSolution);
+                case INNER_OUTER:
+                    return (s) -> new Restarter(new InnerOuterCutoff(cutoff, geo, geo),
+                            c -> s.getFailCount() >= c, offset, resetOnSolution);
                 case ARITHMETIC:
                     return (s) -> new Restarter(new LinearCutoff(cutoff),
                             c -> s.getFailCount() >= c, offset, resetOnSolution);
@@ -165,6 +168,11 @@ public interface SearchParams {
                 return pol == other.pol && cutoff == other.cutoff && offset == other.offset && geo == other.geo && resetOnSolution == other.resetOnSolution;
             }
             return false;
+        }
+
+        @Override
+        public String toString() {
+            return "[" + pol + "," + cutoff + "," + geo + "," + offset + "," + resetOnSolution + ']';
         }
     }
 
@@ -234,6 +242,13 @@ public interface SearchParams {
         public int getRuns() {
             return runs;
         }
+
+        @Override
+        public String toString() {
+            return "[" + time / 1000f +
+                    "s, " + runs +
+                    "runs, " + sols + "sols]";
+        }
     }
 
     /**
@@ -269,9 +284,6 @@ public interface SearchParams {
                 case DOM:
                 case FIRST_FAIL:
                     return (vars, vsel) -> Search.intVarSearch(new FirstFail(vars[0].getModel()), vsel, vars);
-                default:
-                case DOMWDEG:
-                    return (vars, vsel) -> Search.intVarSearch(new DomOverWDeg<>(vars, 0, flushRate), vsel, vars);
                 case DOMWDEG_CACD:
                     return (vars, vsel) -> Search.intVarSearch(new DomOverWDegRef<>(vars, 0, flushRate), vsel, vars);
                 case FLBA:
@@ -296,8 +308,13 @@ public interface SearchParams {
                     return (vars, vsel) -> Search.intVarSearch(new PickOnFil<>(vars, 2, flushRate), vsel, vars);
                 case PICKONFIL3:
                     return (vars, vsel) -> Search.intVarSearch(new PickOnFil<>(vars, 3, flushRate), vsel, vars);
+                case ROUND_ROBIN:
+                    return (vars, vsel) -> Search.roundRobinSearch(vars);
                 case RAND:
                     return (vars, vsel) -> Search.intVarSearch(new Random<>(vars[0].getModel().getSeed()), vsel, vars);
+                case DOMWDEG:
+                default:
+                    return (vars, vsel) -> Search.intVarSearch(new DomOverWDeg<>(vars, 0, flushRate), vsel, vars);
             }
         }
 

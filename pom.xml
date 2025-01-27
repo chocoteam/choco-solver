@@ -3,7 +3,7 @@
 
     This file is part of choco, http://choco-solver.org/
 
-    Copyright (c) 2024, IMT Atlantique. All rights reserved.
+    Copyright (c) 2025, IMT Atlantique. All rights reserved.
 
     Licensed under the BSD 4-clause license.
 
@@ -15,7 +15,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.choco-solver</groupId>
     <artifactId>choco</artifactId>
-    <version>4.10.17</version>
+    <version>4.10.18</version>
     <packaging>pom</packaging>
     <name>choco</name>
     <url>http://choco-solver.org/</url>

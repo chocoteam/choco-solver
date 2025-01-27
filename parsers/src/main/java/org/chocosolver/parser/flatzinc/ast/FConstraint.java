@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2024, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2025, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -1859,7 +1859,7 @@ public enum FConstraint {
 
             SetVar a = exps.get(0).setVarValue(model);
             SetVar b = exps.get(1).setVarValue(model);
-            SetVar c = exps.get(1).setVarValue(model);
+            SetVar c = exps.get(2).setVarValue(model);
             model.partition(new SetVar[]{c, b}, a).post();
 
         }

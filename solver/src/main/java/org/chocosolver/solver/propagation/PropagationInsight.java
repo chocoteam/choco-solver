@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2024, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2025, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -73,7 +73,7 @@ public interface PropagationInsight {
 
         @Override
         public void update(Propagator<?> p, Variable v, boolean onFailure) {
-            if (!changed) return;
+            if (!changed && !onFailure) return;
             changed = false;
             if (!onFailure) {
                 long card_ = card;
@@ -126,7 +126,7 @@ public interface PropagationInsight {
 
         @Override
         public void update(Propagator<?> p, Variable v, boolean onFailure) {
-            if (!changed) return;
+            if (!changed && !onFailure) return;
             changed = false;
             if (!onFailure) {
                 long card_ = card;

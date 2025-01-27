@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2024, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2025, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -142,6 +142,9 @@ public class PropagationEngine {
         if (!init) {
             notEmpty = 0;
             init = true;
+            while (!var_queue.isEmpty()) {
+                var_queue.pollFirst().clearEvents();
+            }
             Constraint[] constraints = model.getCstrs();
             for (Constraint constraint : constraints) {
                 Propagator<?>[] cprops = constraint.getPropagators();

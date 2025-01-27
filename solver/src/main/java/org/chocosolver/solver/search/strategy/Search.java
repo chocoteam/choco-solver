@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2024, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2025, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -597,7 +597,7 @@ public class Search {
      * <br/>[DOI]:<a href="https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.CP.2023.9">10.4230/LIPIcs.CP.2023.9</a>
      */
     public static AbstractStrategy<IntVar> pickOnFil(IntVar... vars) {
-        return intVarSearch(new PickOnDom<>(vars), new IntDomainMin(), vars);
+        return intVarSearch(new PickOnFil<>(vars), new IntDomainMin(), vars);
     }
 
     /**
@@ -633,6 +633,44 @@ public class Search {
     public static AbstractStrategy<IntVar> objectiveStrategy(IntVar objective,
                                                              OptimizationPolicy optPolicy) {
         return new ObjectiveStrategy(objective, optPolicy);
+    }
+
+    /**
+     * Defines a round-robin search strategy over the variables.
+     * <p>
+     * The strategy is composed of the following variable selectors:
+     * <ul>
+     *     <li>DomOverWDegRef</li>
+     *     <li>DomOverWDeg</li>
+     *     <li>PickOnDom</li>
+     *     <li>FailureBased</li>
+     *     </ul>
+     * <p>
+     *     The strategy is composed of the following value selectors:
+     *     <ul>
+     *         <li>IntDomainMin</li>
+     *         <li>IntDomainMax</li>
+     *         <li>IntDomainRandom</li>
+     *      </ul>
+     * In addition, the phase-saving mechanism is activated.
+     *
+     * @param vars list of variables
+     * @return a round-robin search strategy
+     */
+    public static AbstractStrategy<IntVar> roundRobinSearch(IntVar... vars) {
+        long seed = 1_000_000_007;
+        return new RoundRobin(vars,
+                new VariableSelector[]{
+                        new DomOverWDegRef<>(vars, seed),
+                        new DomOverWDeg<>(vars, seed),
+                        new PickOnDom<>(vars, 2, 32),
+                        new FailureBased<>(vars, seed, 4)
+                },
+                new IntValueSelector[]{
+                        new IntDomainMin(),
+                        new IntDomainMax(),
+                        new IntDomainRandom(seed)},
+                true, false);
     }
 
     // ************************************************************************************
