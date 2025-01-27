@@ -4,6 +4,18 @@ Choco Solver ChangeLog
 This file is dedicated to sum up the new features added and bugs fixed in Choco-solver since the version, 4.0.0.
 **Note**: double-space is replaced by "\t" character on release process. Make sure the format is ok.
 
+4.10.18 - 27 Jan 2025
+---------------------
+
+### Major features:
+- Fix unexpected behaviour when using `neg()` intvar in arithm #1115
+- Fix bin packing initial propagation (#1113)
+- Fixed an error in `increasing` constraint documentation and updated `decreasing` constraint documentation (#1103)
+- 
+### Deprecated API (to be removed in next release):
+
+**Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v4.10.17...v4.10.18
+
 4.10.17 - 23 Sep 2024
  -------------------
  
