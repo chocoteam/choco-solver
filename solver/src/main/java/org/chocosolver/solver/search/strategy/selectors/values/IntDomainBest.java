@@ -17,6 +17,7 @@ import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.variables.IntVar;
 
+import java.util.OptionalInt;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
@@ -26,7 +27,7 @@ import java.util.function.Function;
  *
  * @author Jean-Guillaume FAGES, Charles Prud'homme
  */
-public final class IntDomainBest implements IntValueSelector {
+public final class IntDomainBest implements IntValueSelector, Function<IntVar, OptionalInt> {
 
     /**
      * Maximum enumerated domain size this selector falls into.
@@ -153,6 +154,19 @@ public final class IntDomainBest implements IntValueSelector {
             return fallbackValueSelector.selectValue(var);
         }
         assert var.getModel().getObjective() != null;
+        return getBestValue(var);
+    }
+
+    @Override
+    public OptionalInt apply(IntVar var) {
+        if (!trigger.apply(var)) {
+            return OptionalInt.empty();
+        }
+        assert var.getModel().getObjective() != null;
+        return OptionalInt.of(getBestValue(var));
+    }
+
+    private int getBestValue(IntVar var) {
         if (var.hasEnumeratedDomain() && var.getDomainSize() < maxdom) {
             int bestCost = Integer.MAX_VALUE;
             int ub = var.getUB();
