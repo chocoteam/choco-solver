@@ -1166,9 +1166,9 @@ public class MiniSat implements SatFactory, Dimacs {
             case 0:
                 st.append("clause (");
                 Clause cl = (Clause) r;
-                st.append(printLit(neg(cl._g(1))));
-                for (int i = 2; i < cl.size(); i++) {
-                    st.append(" ∧ ").append(printLit(neg(cl._g(i))));
+                for (int i = 1; i < cl.size(); i++) {
+                    if (i > 1) st.append(" ∧ ");
+                    st.append(printLit(neg(cl._g(i))));
                 }
                 st.append(")");
                 //st.append(" -> ").append(printLit(r.cl._g(0)));
