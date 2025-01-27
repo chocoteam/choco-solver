@@ -11,6 +11,8 @@ package org.chocosolver.sat;
 
 import gnu.trove.list.TIntList;
 
+import java.util.stream.IntStream;
+
 import static org.chocosolver.sat.MiniSat.*;
 
 /**
@@ -46,10 +48,40 @@ public class Clause extends Reason {
      */
     public Clause(int[] ps, boolean learnt) {
         super(0);
-        literals_ = ps.clone();
+        if (ps.length <= 3) { // 3 is the max. size of short_expl_3
+            literals_ = ps.clone();
+        } else {
+            literals_ = Clause.reduceOs(ps);
+        }
         this.learnt = learnt;
         this.id = clauseCounter.get();
         clauseCounter.set(clauseCounter.get() + 1);
+    }
+
+    /**
+     * This method reduces the number of occurrences of literal 0 in the clause.
+     * If no 0 is present or if one 0 is present, the clause is returned as is.
+     * If more than one 0 is present, the clause is reduced to remove all but one 0.
+     *
+     * @param ps literals
+     * @return the reduced clause
+     */
+    private static int[] reduceOs(int[] ps) {
+        int nb0 = (int) IntStream.of(ps).filter(p -> p == 0).count();
+        if (nb0 <= 1) {
+            return ps;
+        } else {
+            int[] reduced = new int[ps.length - nb0 + 1];
+            int j = 0;
+            for (int i = 0; i < ps.length; i++) {
+                if (ps[i] != 0) {
+                    reduced[j++] = ps[i];
+                } else if (j == 0) {
+                    reduced[j++] = 0;
+                }
+            }
+            return reduced;
+        }
     }
 
     /**
@@ -134,8 +166,8 @@ public class Clause extends Reason {
     @Override
     public String toString() {
         StringBuilder st = new StringBuilder();
-        st.append("T").append(Thread.currentThread());
-        st.append("#").append(id).append(" Size:").append(literals_.length).append(" - ");
+        st.append("T").append(Thread.currentThread().getId());
+        st.append("~#").append(id).append(" Size:").append(literals_.length).append(" - ");
         if (literals_.length > 0) {
             st.append(literals_[0]).append(" ");
         }
