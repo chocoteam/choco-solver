@@ -27,9 +27,7 @@ import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
 import org.ehcache.sizeof.SizeOf;
 import org.ehcache.sizeof.filters.SizeOfFilter;
-import org.ehcache.sizeof.filters.SizeOfFilter;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Function;
