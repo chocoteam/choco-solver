@@ -242,22 +242,6 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
         return getLit(getLB(), LR_NE);
     }
 
-    private int getNELit(int v) {
-        return getLit(v, LR_NE);
-    }
-
-    private int getEQLit(int v) {
-        return getLit(v, LR_EQ);
-    }
-
-    private int getGELit(int v) {
-        return getLit(v, LR_GE);
-    }
-
-    private int getLELit(int v) {
-        return getLit(v, LR_LE);
-    }
-
     // Use when you've just set [x >= v]
     private void channelMin(int v) {
         // Set [x >= v-1] to [x >= min+1] using [x >= i] \/ ![x >= v]
