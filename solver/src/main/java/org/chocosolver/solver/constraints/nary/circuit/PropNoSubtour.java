@@ -114,7 +114,7 @@ public class PropNoSubtour extends Propagator<IntVar> {
         int last = end[val].get(); // last in [0,n-1]
         int start = origin[var].get(); // start in [0,n-1]
         if (origin[val].get() != val) {
-            fails(Propagator.reason(null, vars));
+            fails(lcg() ? Propagator.reason(null, vars) : Reason.undef());
         }
         if (end[var].get() != var) {
             // should not happen
@@ -129,7 +129,7 @@ public class PropNoSubtour extends Propagator<IntVar> {
             size[start].add(size[val].get());
             if (size[start].get() == n) {
                 vars[last].instantiateTo(start + offset, this,
-                        lcg()?Propagator.reason(vars[last], vars):Reason.undef());
+                        lcg() ? Propagator.reason(vars[last], vars) : Reason.undef());
                 setPassive();
 //                throw new UnsupportedOperationException("unexpected situation");
             }
