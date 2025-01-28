@@ -49,10 +49,7 @@ compile:
 
 tests : 1s 10s ibex checker mzn xcsp mps dimacs expl lcg
 
-1s 10s ibex checker mzn xcsp mps dimacs: compile
-	mvn -q test -DtestFailureIgnore=true -Dgroups="$@" -Dexcludegroups="lcg"
-
-lcg: compile
+1s 10s ibex checker mzn xcsp mps dimacs lcg: compile
 	mvn -q test -DtestFailureIgnore=true -Dgroups="$@"
 
 update_date:
