@@ -115,6 +115,7 @@ public class BoolVarEagerLit extends AbstractVariable implements BoolVar, LitVar
     @Override
     public boolean instantiateTo(int value, ICause cause, Reason reason) throws ContradictionException {
         if (!channeling) {
+            channeling = true; // to prevent infinite loop
             // the variable is instantiated by the SAT solver
             if (sat.confl != C_Undef) {
                 this.contradiction(cause, "sat failure");
