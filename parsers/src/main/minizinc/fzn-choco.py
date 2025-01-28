@@ -63,7 +63,7 @@ parser.add_argument('-r', '--random-seed', type=int,
 parser.add_argument('--cp-profiler', type=parse_id_port,
                     help='enable the cp-profiler with the given id and port.')
 
-parser.add_argument('-lcg', '--lazy-clause-generation',
+parser.add_argument('-lcg', '--lazy-clause-generation',  action='store_true',
                     help='when invoked with this option the solver uses lazy clause generation.')
 
 parser.add_argument('--jvm-args', type=str,
