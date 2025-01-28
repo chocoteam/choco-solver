@@ -54,12 +54,12 @@ public final class BoolEqView<I extends IntVar> extends BoolIntView<I> {
     public boolean instantiateTo(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         boolean done = false;
-        if (!this.contains(value)) {
+        if (value < 0 || value > 1) {
             if (getModel().getSolver().isLCG()) {
                 getModel().getSolver().getSat().cEnqueue(0, reason);
             }
             this.contradiction(cause, MSG_EMPTY);
-        } else if (!isInstantiated()) {
+        } else {
             if (reactOnRemoval) {
                 delta.add(1 - value, cause);
             }
