@@ -202,7 +202,7 @@ public class CumulativeTest {
         Model model = new Model("test");
         // Ajout des starting times
         IntVar[] start = model.intVarArray("start", 11, 0, 3);
-        model.cumulative(start, duration, height, capaMax);
+        model.cumulative(start, duration, height, capaMax).post();
 
         Solver solver = model.getSolver();
         while (solver.solve()) {
