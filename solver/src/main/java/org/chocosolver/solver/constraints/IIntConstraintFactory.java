@@ -1186,6 +1186,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 ref().getSolver().log().white().println(
                         "Warning: binPacking constraint is decomposed (due to LCG).");
             }
+            for(int i = 0; i < itemBin.length; i++){
+                ref().member(itemBin[i], offset, binLoad.length - 1 + offset).post();
+            }
             for (int i = 0; i < binLoad.length; i++) {
                 IntVar[] loads = new IntVar[itemSize.length];
                 for (int j = 0; j < itemSize.length; j++) {
@@ -2523,15 +2526,25 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @return a subCircuit constraint
      */
     default Constraint subCircuit(IntVar[] vars, int offset, IntVar subCircuitLength) {
-        if (ref().getSolver().isLCG()) {
-            throw new SolverException("subCircuit constraint is not supported in LCG mode");
-        }
+        Constraint alldiff = allDifferent(vars, "AC");
+        alldiff.ignore();
         int n = vars.length;
         Model model = vars[0].getModel();
         IntVar nbLoops = model.intVar("nLoops", 0, n, true);
         nbLoops.add(subCircuitLength).eq(n).post();
-        Constraint alldiff = allDifferent(vars, "AC");
-        alldiff.ignore();
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: subCircuit constraint restricted to lighter filtering options due to LCG.");
+            }
+            return new Constraint(ConstraintsName.SUBCIRCUIT, ArrayUtils.append(
+                    alldiff.getPropagators(),
+                    ArrayUtils.toArray(
+                            new PropKLoops(vars, offset, nbLoops),
+                            new PropSubcircuit(vars, offset, subCircuitLength)
+                    )
+            ));
+        }
         return new Constraint(ConstraintsName.SUBCIRCUIT, ArrayUtils.append(
                 alldiff.getPropagators(),
                 ArrayUtils.toArray(
