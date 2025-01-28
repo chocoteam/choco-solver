@@ -151,7 +151,7 @@ public class PropSweepBasedDiffN extends Propagator<IntVar> {
                 int nbF = getOutBoxes(os, nbDimensions, o, i);
                 if (o.assignedInAllDimensions()) {
                     if (nbF > 0) {
-                        this.fails("Cond 1");
+                        this.fails();
                     }
                 } else {
                     for (int d = 0; d < nbDimensions && nbF > 0; d++) {
@@ -473,7 +473,7 @@ public class PropSweepBasedDiffN extends Propagator<IntVar> {
             am += os[j].al;
             if (am > ar) {
                 //System.out.printf("(%d,%d) : %d > %d ?\n", i, j, am, ar);
-                this.fails("Cond 2");
+                this.fails();
             }
         }
         if (Arrays.stream(ls).min().orElse(0) > 0) {
@@ -482,7 +482,7 @@ public class PropSweepBasedDiffN extends Propagator<IntVar> {
                 nbOr *= (ur[d] - dl[d]) * 1. / ls[d];
             }
             if (nbOr <= neigh.size()) {
-                this.fails("Cond 3");
+                this.fails();
             }
         }
         return os[i].area() < am;
@@ -504,7 +504,7 @@ public class PropSweepBasedDiffN extends Propagator<IntVar> {
                 area_i += computeArea(i, j);
             }
             if (area_i > limArea) {
-                this.fails("Cond 4");// TODO: could be more precise, for explanation purpose
+                this.fails();// TODO: could be more precise, for explanation purpose
             }
         }
     }
