@@ -836,6 +836,46 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
     }
 
     /**
+     * Get the literal corresponding to [x != v]
+     * @param v the value
+     * @return the literal
+     * @implNote a literal <code>l</code> can be negated with <code>MiniSat.neg(l)</code>
+     */
+    default int getNELit(int v) {
+        return getLit(v, LR_NE);
+    }
+
+    /**
+     * Get the literal corresponding to [x = v]
+     * @param v the value
+     * @return the literal
+     * @implNote a literal <code>l</code> can be negated with <code>MiniSat.neg(l)</code>
+     */
+    default int getEQLit(int v) {
+        return getLit(v, LR_EQ);
+    }
+
+    /**
+     * Get the literal corresponding to [x >= v]
+     * @param v the value
+     * @return the literal
+     * @implNote a literal <code>l</code> can be negated with <code>MiniSat.neg(l)</code>
+     */
+    default int getGELit(int v) {
+        return getLit(v, LR_GE);
+    }
+
+    /**
+     * Get the literal corresponding to [x <= v]
+     * @param v the value
+     * @return the literal
+     * @implNote a literal <code>l</code> can be negated with <code>MiniSat.neg(l)</code>
+     */
+    default int getLELit(int v) {
+        return getLit(v, LR_LE);
+    }
+
+    /**
      * @return the literal corresponding to current lower bound
      */
     default int getMinLit() {

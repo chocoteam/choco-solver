@@ -147,7 +147,8 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar, Lit
         return MiniSat.neg(valLit);
     }
 
-    private int getGELit(int v) {
+    @Override
+    public int getGELit(int v) {
         if (v < min0) {
             return 1;
         } else if (v > max0) {
@@ -166,7 +167,8 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar, Lit
         return MiniSat.makeLiteral(var, true);
     }
 
-    private int getLELit(int v) {
+    @Override
+    public int getLELit(int v) {
         if (v < min0) {
             return 0;
         } else if (v > max0) {
