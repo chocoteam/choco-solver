@@ -119,6 +119,14 @@ public class PropXeqYHalfReif extends Propagator<IntVar> {
                         setPassive();
                     }
                     break;
+                case 0b00:
+                    if (x.getLB() > y.getUB()) {
+                        b.setToFalse(this, lcg() ? Reason.r(x.getMinLit(), y.getMaxLit()) : Reason.undef());
+                        setPassive();
+                    } else if (x.getUB() < y.getLB()) {
+                        b.setToFalse(this, lcg() ? Reason.r(x.getMaxLit(), y.getMinLit()) : Reason.undef());
+                        setPassive();
+                    }
                 default:
                     break;
             }
