@@ -9,9 +9,11 @@
  */
 package org.chocosolver.solver.constraints.checker;
 
+import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -125,7 +127,7 @@ public class DomainBuilder {
         return MIN_LOW_BND + rnd.nextInt(MAX_DOM_SIZE);
     }
 
-    public static int[] makeInts(Random rnd){
+    public static int[] makeInts(Random rnd) {
         return rnd.ints(1 + rnd.nextInt(MAX_DOM_SIZE - 1), MIN_LOW_BND, MIN_LOW_BND + MAX_DOM_SIZE).toArray();
     }
 
@@ -161,6 +163,21 @@ public class DomainBuilder {
                 }
                 break;
 
+        }
+        return var;
+    }
+
+    public static SetVar makeSetVar(Model model, Random rnd, int pos) {
+        SetVar var;
+        String name = "S_" + pos;
+        // random selection where 75% of the time, the kernel is empty
+        if (rnd.nextInt(4) == 0) { // else
+            int[] lbs = makeInts(rnd);
+            TIntHashSet ubs = new TIntHashSet(lbs);
+            ubs.addAll(makeInts(rnd));
+            var = model.setVar(name, lbs, ubs.toArray());
+        } else {// empty kernel
+            var = model.setVar(name, new int[]{}, makeInts(rnd));
         }
         return var;
     }
