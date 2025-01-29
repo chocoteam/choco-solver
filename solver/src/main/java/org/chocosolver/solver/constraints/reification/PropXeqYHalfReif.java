@@ -79,7 +79,7 @@ public class PropXeqYHalfReif extends Propagator<IntVar> {
 
                 // if x and y support value removal, then remove value from x if not in y and vice versa
                 if (vars[0].hasEnumeratedDomain() && vars[1].hasEnumeratedDomain()) {
-                    if ((long) vars[0].getDomainSize() + vars[1].getDomainSize() > THRESHOLD || lcg()) return;
+                    if ((long) vars[0].getDomainSize() + vars[1].getDomainSize() > THRESHOLD) return;
                     int ub = vars[0].getUB();
                     for (int val = vars[0].getLB(); val <= ub; val = vars[0].nextValue(val)) {
                         if (!vars[1].contains(val)) {
@@ -127,6 +127,18 @@ public class PropXeqYHalfReif extends Propagator<IntVar> {
                         b.setToFalse(this, lcg() ? Reason.r(x.getMaxLit(), y.getMinLit()) : Reason.undef());
                         setPassive();
                     }
+                    if ((long) vars[0].getDomainSize() + vars[1].getDomainSize() > THRESHOLD) return;
+                    // check if x and y have a common value
+                    int smallest = vars[0].getDomainSize() < vars[1].getDomainSize() ? 0 : 1;
+                    int other = 1 - smallest;
+                    int ub = vars[smallest].getUB();
+                    for (int val = vars[smallest].getLB(); val <= ub; val = vars[smallest].nextValue(val)) {
+                        if (vars[other].contains(val)) {
+                            return;
+                        }
+                    }
+                    // if no common value, then b must be false
+                    b.setToFalse(this, lcg() ? Propagator.reason(b, x, y) : Reason.undef());
                 default:
                     break;
             }
