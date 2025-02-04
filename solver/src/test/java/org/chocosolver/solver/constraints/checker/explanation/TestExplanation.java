@@ -175,7 +175,7 @@ public class TestExplanation {
                 {"min", new Class[]{IntVar.class, IntVar.class, IntVar.class}, new Object[]{null, null, null}},
                 {"min", new Class[]{BoolVar.class, BoolVar[].class}, new Object[]{null, 6}},
                 {"notAllEqual", new Class[]{IntVar[].class}, new Object[]{6}},
-                {"nValues", new Class[]{IntVar[].class, IntVar.class}, new Object[]{6, null}},
+                {"nValues", new Class[]{IntVar[].class, IntVar.class}, new Object[]{4, null}},
                 {"or", new Class[]{BoolVar[].class}, new Object[]{6}},
                 {"path", new Class[]{IntVar[].class, IntVar.class, IntVar.class}, new Object[]{6, null, null}},
                 {"path", new Class[]{IntVar[].class, IntVar.class, IntVar.class, int.class}, new Object[]{6, null, null, null}},
