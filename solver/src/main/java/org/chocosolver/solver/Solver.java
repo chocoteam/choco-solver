@@ -1706,6 +1706,11 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     @Override
+    public long getPropagationCount() {
+        return getMeasures().getPropagationCount();
+    }
+
+    @Override
     public long getRestartCount() {
         return getMeasures().getRestartCount();
     }

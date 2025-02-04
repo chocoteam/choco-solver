@@ -257,6 +257,7 @@ public class PropagationEngine {
 
     private void propagateSat() throws ContradictionException {
         if (sat != null) {
+            model.getSolver().getMeasures().incPropagationCount();
             sat.propagate();
             if (sat.confl != C_Undef) {
                 model.getSolver().throwsException(Cause.Sat, null, null); //todo better !
@@ -266,12 +267,14 @@ public class PropagationEngine {
 
     protected void propagateEvents() throws ContradictionException {
         if (lastProp.reactToFineEvent()) {
+            model.getSolver().getMeasures().incPropagationCount();
             lastProp.doFinePropagation();
             // now we can check whether a delayed propagation has been scheduled
             if (delayedPropagationType > 0) {
                 lastProp.propagate(delayedPropagationType);
             }
         } else if (lastProp.isActive()) { // need to be checked due to views
+            model.getSolver().getMeasures().incPropagationCount();
             lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
         }
     }
@@ -301,7 +304,9 @@ public class PropagationEngine {
             propagator.setActive();
         }
         if (propagator.isActive()) {
+            model.getSolver().getMeasures().incPropagationCount();
             propagator.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
+            model.getSolver().getMeasures().incPropagationCount();
             propagateSat();
             while (!var_queue.isEmpty()) {
                 var_queue.pollFirst().schedulePropagators(this);
