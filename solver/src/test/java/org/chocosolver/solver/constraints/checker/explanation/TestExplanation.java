@@ -12,9 +12,7 @@ package org.chocosolver.solver.constraints.checker.explanation;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Providers;
 import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.Operator;
-import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.*;
 import org.chocosolver.solver.constraints.binary.*;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.constraints.extension.Tuples;
@@ -26,8 +24,7 @@ import org.chocosolver.solver.constraints.nary.alldifferent.PropAllDiffInst;
 import org.chocosolver.solver.constraints.nary.channeling.PropEnumDomainChanneling;
 import org.chocosolver.solver.constraints.nary.channeling.PropInverseChannelAC;
 import org.chocosolver.solver.constraints.nary.channeling.PropInverseChannelBC;
-import org.chocosolver.solver.constraints.nary.circuit.PropNoSubtour;
-import org.chocosolver.solver.constraints.nary.element.PropElementV2;
+import org.chocosolver.solver.constraints.nary.element.PropElementV_fast;
 import org.chocosolver.solver.constraints.nary.lex.PropLex;
 import org.chocosolver.solver.constraints.nary.min_max.PropMax;
 import org.chocosolver.solver.constraints.nary.min_max.PropMin;
@@ -41,25 +38,26 @@ import org.chocosolver.solver.constraints.unary.*;
 import org.chocosolver.solver.search.SearchState;
 import org.chocosolver.solver.search.loop.learn.LazyClauseGeneration;
 import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.strategy.FullyRandom;
 import org.chocosolver.solver.trace.IMessage;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+import org.chocosolver.util.tools.VariableUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.lang.reflect.Method;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 /**
  * <br/>
@@ -134,14 +132,134 @@ public class TestExplanation {
                 {PropAllDiffBC.class, new Class[]{IntVar[].class}, new Object[]{6}},
                 {PropAllDiffAC.class, new Class[]{IntVar[].class, boolean.class}, new Object[]{6, false}},
                 {PropLex.class, new Class[]{IntVar[].class, IntVar[].class, boolean.class}, new Object[]{5, 5, null}},
-                {PropElementV2.class, new Class[]{IntVar.class, IntVar[].class, IntVar.class, int.class}, new Object[]{null, 8, null, 0}},
+                {PropElementV_fast.class, new Class[]{IntVar.class, IntVar[].class, IntVar.class}, new Object[]{null, 6, null}},
                 {PropEnumDomainChanneling.class, new Class[]{BoolVar[].class, IntVar.class, int.class}, new Object[]{5, null, null}},
-                {PropNoSubtour.class, new Class[]{IntVar[].class, int.class}, new Object[]{8, null}},
                 {PropInverseChannelBC.class, new Class[]{IntVar[].class, IntVar[].class, int.class, int.class}, new Object[]{6, 6, 1, 1}},
                 {PropInverseChannelAC.class, new Class[]{IntVar[].class, IntVar[].class, int.class, int.class}, new Object[]{6, 6, 1, 1}},
                 {PropIntValuePrecedeChain.class, new Class[]{IntVar[].class, int.class, int.class}, new Object[]{6, 1, 3}},
+                //{PropCardinality.class, new Class[]{SetVar.class, IntVar.class}, new Object[]{null, null}}
         };
         return Providers.merge(objs, getSeeds());
+    }
+
+    @DataProvider(name = "constraints")
+    public Object[][] getConstraints() {
+        Object[][] objs = new Object[][]{
+                {"allDifferent", new Class[]{IntVar[].class}, new Object[]{6}},
+                {"allEqual", new Class[]{IntVar[].class}, new Object[]{6}},
+                {"allEqual", new Class[]{IntVar[].class}, new Object[]{6}},
+                {"among", new Class[]{IntVar.class, IntVar[].class, int[].class}, new Object[]{null, 6, 6}},
+                {"and", new Class[]{BoolVar[].class}, new Object[]{6}},
+                {"argmax", new Class[]{IntVar.class, int.class, IntVar[].class}, new Object[]{null, null, 6}},
+                {"argmin", new Class[]{IntVar.class, int.class, IntVar[].class}, new Object[]{null, null, 6}},
+                {"atMostNValues", new Class[]{IntVar[].class, IntVar.class, boolean.class}, new Object[]{3, null, null}},
+                {"atLeastNValues", new Class[]{IntVar[].class, IntVar.class, boolean.class}, new Object[]{6, null, null}},
+                {"binPacking", new Class[]{IntVar[].class, int[].class, IntVar[].class, int.class}, new Object[]{6, 6, 4, null}},
+                {"bitsIntChanneling", new Class[]{BoolVar[].class, IntVar.class}, new Object[]{6, null}},
+                {"boolsIntChanneling", new Class[]{BoolVar[].class, IntVar.class, int.class}, new Object[]{6, null, null}},
+                {"circuit", new Class[]{IntVar[].class}, new Object[]{6}},
+                {"circuit", new Class[]{IntVar[].class, int.class}, new Object[]{6, null}},
+                {"count", new Class[]{IntVar.class, IntVar[].class, IntVar.class}, new Object[]{null, 6, null}},
+                {"count", new Class[]{int.class, IntVar[].class, IntVar.class}, new Object[]{null, 6, null}},
+                {"decreasing", new Class[]{IntVar[].class, int.class}, new Object[]{6, null}},
+                {"div", new Class[]{IntVar.class, IntVar.class, IntVar.class}, new Object[]{null, null, null}},
+                {"increasing", new Class[]{IntVar[].class, int.class}, new Object[]{6, null}},
+                {"inverseChanneling", new Class[]{IntVar[].class, IntVar[].class, int.class, int.class}, new Object[]{6, 6, null, null}},
+                {"inverseChanneling", new Class[]{IntVar[].class, IntVar[].class}, new Object[]{6, 6}},
+                {"lexLess", new Class[]{IntVar[].class, IntVar[].class}, new Object[]{6, 6}},
+                {"lexLessEq", new Class[]{IntVar[].class, IntVar[].class}, new Object[]{6, 6}},
+                {"max", new Class[]{IntVar.class, IntVar[].class}, new Object[]{null, 6}},
+                {"max", new Class[]{IntVar.class, IntVar.class, IntVar.class}, new Object[]{null, null, null}},
+                {"max", new Class[]{BoolVar.class, BoolVar[].class}, new Object[]{null, 6}},
+                {"min", new Class[]{IntVar.class, IntVar[].class}, new Object[]{null, 6}},
+                {"min", new Class[]{IntVar.class, IntVar.class, IntVar.class}, new Object[]{null, null, null}},
+                {"min", new Class[]{BoolVar.class, BoolVar[].class}, new Object[]{null, 6}},
+                {"notAllEqual", new Class[]{IntVar[].class}, new Object[]{6}},
+                {"nValues", new Class[]{IntVar[].class, IntVar.class}, new Object[]{6, null}},
+                {"or", new Class[]{BoolVar[].class}, new Object[]{6}},
+                {"path", new Class[]{IntVar[].class, IntVar.class, IntVar.class}, new Object[]{6, null, null}},
+                {"path", new Class[]{IntVar[].class, IntVar.class, IntVar.class, int.class}, new Object[]{6, null, null, null}},
+                {"subPath", new Class[]{IntVar[].class, IntVar.class, IntVar.class, int.class, IntVar.class}, new Object[]{6, null, null, null, null}},
+                {"subCircuit", new Class[]{IntVar[].class, int.class, IntVar.class}, new Object[]{6, null, null}},
+                {"times", new Class[]{IntVar.class, IntVar.class, int.class}, new Object[]{null, null, null}},
+                {"times", new Class[]{IntVar.class, IntVar.class, IntVar.class}, new Object[]{null, null, null}},
+                {"times", new Class[]{IntVar.class, int.class, IntVar.class}, new Object[]{null, null, null}},
+
+                //not supported {"allDifferentExcept0", new Class[]{IntVar[].class}, new Object[]{6}},
+                //not supported {"cumulative", new Class[]{IntVar[].class, int[].class, int[].class, int.class}, new Object[]{6, 6, 6, null}},
+                //not supported {"diffN", new Class[]{IntVar[].class, IntVar[].class, IntVar[].class, IntVar[].class, boolean.class}, new Object[]{4, 4, 4, 4, null}},
+                //not supported {"knapsack", new Class[]{IntVar[].class, IntVar.class, IntVar.class, int[].class, int[].class}, new Object[]{4, null, null, 4, 4}},
+                // ignored {"clausesIntChanneling", new Class[]{IntVar.class, BoolVar[].class, BoolVar[].class}, new Object[]{null, 6, 6}},
+                // ignored {"intValuePrecedeChain", new Class[]{IntVar[].class, int[].class}, new Object[]{6, 6}},
+                //ignored: decomposed and generation not straightforward  {"globalCardinality", new Class[]{IntVar[].class, int[].class, IntVar[].class, boolean.class}, new Object[]{6, 6, 6, null}},
+                //not supported {"sort", new Class[]{IntVar[].class, IntVar[].class}, new Object[]{6, 6}},
+                //not supported {"square", new Class[]{IntVar.class, IntVar.class}, new Object[]{null, null}},
+                //not supported {"tree", new Class[]{IntVar[].class, IntVar.class}, new Object[]{6, null}},
+                //not supported {"tree", new Class[]{IntVar[].class, IntVar.class, int.class}, new Object[]{6, null, null}},
+        };
+        return Providers.merge(objs, getSeeds());
+    }
+
+    @DataProvider(name = "intconstraints")
+    public Object[][] getIntConstraints() {
+        List<Object[]> objs = new ArrayList<>();
+        mm:
+        for (Method m : IIntConstraintFactory.class.getMethods()) {
+            if (!m.getReturnType().isAssignableFrom(Constraint.class)) continue;
+            // check parameters, should be among IntVar, IntVar[], int or int[]
+            Class<?>[] parameterTypes = m.getParameterTypes();
+            if (parameterTypes.length == 0) continue;
+            Object[] info = new Object[parameterTypes.length];
+            String[] classes = new String[parameterTypes.length];
+            String[] objects = new String[parameterTypes.length];
+            int i = 0;
+            for (Class<?> parameterType : parameterTypes) {
+                if (BoolVar.class.isAssignableFrom(parameterType)) {
+                    info[i] = null;
+                    classes[i] = "BoolVar.class";
+                    objects[i] = null;
+                } else if (BoolVar[].class.isAssignableFrom(parameterType)) {
+                    info[i] = 5;
+                    classes[i] = "BoolVar[].class";
+                    objects[i] = String.valueOf(6);
+                } else if (IntVar.class.isAssignableFrom(parameterType)) {
+                    info[i] = null;
+                    classes[i] = "IntVar.class";
+                    objects[i] = null;
+                } else if (IntVar[].class.isAssignableFrom(parameterType)) {
+                    info[i] = 5;
+                    classes[i] = "IntVar[].class";
+                    objects[i] = String.valueOf(6);
+                } else if (int.class.isAssignableFrom(parameterType)) {
+                    info[i] = null;
+                    classes[i] = "int.class";
+                    objects[i] = null;
+                } else if (int[].class.isAssignableFrom(parameterType)) {
+                    info[i] = 5;
+                    classes[i] = "int[].class";
+                    objects[i] = String.valueOf(6);
+                } else if (boolean.class.isAssignableFrom(parameterType)) {
+                    info[i] = null;
+                    classes[i] = "boolean.class";
+                    objects[i] = null;
+//                    bool = true;
+                } else {
+                    //System.out.println("skip -> "+m.getName()+" due to "+ parameterType.getName());
+                    continue mm;
+                }
+                i++;
+            }
+            //if(!bool) continue;
+            objs.add(new Object[]{m.getName(), parameterTypes, info});
+            System.out.println("{\"" + m.getName() + "\", " +
+                    "new Class[]{" + Arrays.toString(classes) + "}, " +
+                    "new Object[]{" + Arrays.toString(objects).replace("[", "").replace("]", "") + "}},");
+        }
+        Object[][] robjs = new Object[objs.size()][];
+        for (int i = 0; i < objs.size(); i++) {
+            robjs[i] = objs.get(i);
+        }
+        return Providers.merge(robjs, getSeeds());
     }
 
     @DataProvider(name = "seed")
@@ -155,9 +273,23 @@ public class TestExplanation {
                     .map(v -> v.getValue() + " ")
                     .reduce("", String::concat);
 
-    @Test(groups = {"1s", "lcg"}, /*timeOut = 60000,*/ dataProvider = "propagators")
-    public void testClauses(Class<? extends Propagator<IntVar>> prop, Class<?>[] parameterTypes, Object[] info, long seed) {
+    @Test(groups = "lcg", timeOut = 60000, dataProvider = "propagators")
+    public void testPropagator(Class<? extends Propagator<IntVar>> prop, Class<?>[] parameterTypes, Object[] info,
+                               long seed) {
+        boolean isExplained = false;
+        Annotation[] annotations = prop.getAnnotations();
+        for (Annotation annotation : annotations) {
+            if (Objects.equals(annotation.annotationType(), Explained.class)) {
+                isExplained = true;
+            }
+        }
+        Assert.assertTrue(isExplained);
         mainLooop((l, s) -> buildModel(prop, parameterTypes, info, l, s), seed, Scalar::create);
+    }
+
+    @Test(groups = "lcg", timeOut = 60000, dataProvider = "constraints")
+    public void testFromFactory(String constraint, Class<?>[] parameterTypes, Object[] info, long seed) {
+        mainLooop((l, s) -> buildModel(constraint, parameterTypes, info, l, s), seed, Scalar::create);
     }
 
     @Test(groups = "1s", dataProvider = "seed")
@@ -169,19 +301,26 @@ public class TestExplanation {
             set.addBetween(2, 5);
             BoolVar r = model.boolVar("r");
             model.reifyXinS(x, set, r);
+            model.addHook("variables", new ArrayList<Variable>() {{
+                add(x);
+                add(r);
+            }});
             model.getSolver().setSearch(Search.randomSearch(new IntVar[]{x, r}, seed));
             return model;
         }, seed, Table::create);
     }
 
-    public void mainLooop(BiFunction<Boolean, Long, Model> modeler, long seed, BiFunction<IntVar[], Long, Cut> cutsup) {
+    @SuppressWarnings("unchecked")
+    public void mainLooop(BiFunction<Boolean, Long, Model> modeler, long seed, BiFunction<IntVar[],
+            Long, Cut> cutsup) {
         boolean PRINT = false;
         int LIMIT = 100;
         Model ref = modeler.apply(false, seed);
-        IntVar[] rvars = ref.retrieveIntVars(true);
-        if (Stream.of(rvars).allMatch(Variable::isAConstant)) {
+        List<Variable> variables = (List<Variable>) ref.getHook("variables");
+        if (variables.stream().allMatch(Variable::isAConstant)) {
             return;
         }
+        IntVar[] rvars = variables.stream().filter(VariableUtils::isInt).map(Variable::asIntVar).toArray(IntVar[]::new);
         if (PRINT) System.out.println(ref);
         List<Cut> cuts = new ArrayList<>();
         //BiFunction<IntVar[], Long, Cut> sup = cut::create; //Table::table;
@@ -206,7 +345,8 @@ public class TestExplanation {
         if (PRINT) System.out.println("#Solutions : " + ref.getSolver().getSolutionCount());
         if (ref.getSolver().getFailCount() > 0) {
             Model test = modeler.apply(true, seed);
-            IntVar[] tvars = test.retrieveIntVars(true);
+            variables = (List<Variable>) test.getHook("variables");
+            IntVar[] tvars = variables.stream().filter(VariableUtils::isInt).map(Variable::asIntVar).toArray(IntVar[]::new);
             for (Cut cut : cuts) {
                 cut.post(test, tvars);
             }
@@ -224,17 +364,19 @@ public class TestExplanation {
         }
     }
 
-    private Model buildModel(Class<? extends Propagator<?>> prop, Class<?>[] parameterTypes, Object[] info, boolean lcg, long seed) {
+    private Model buildModel(Class<? extends Propagator<?>> prop, Class<?>[] parameterTypes, Object[] info,
+                             boolean lcg, long seed) {
 
         try {
             Model model = new Model(prop.getSimpleName(), Settings.init().setLCG(lcg));
             Constructor<?> constructor = prop.getConstructor(parameterTypes);
             Object[] parameters = new Object[parameterTypes.length];
-            List<IntVar> variables = new ArrayList<>();
+            List<Variable> variables = new ArrayList<>();
             buildInputParameters(parameterTypes, info, variables, parameters, model, new Random(seed));
+            model.addHook("variables", variables);
             Propagator<?> propagator = (Propagator<?>) constructor.newInstance(parameters);
             new Constraint(prop.getSimpleName(), propagator).post();
-            model.getSolver().setSearch(Search.randomSearch(variables.toArray(new IntVar[0]), seed));
+            model.getSolver().setSearch(new FullyRandom(variables.toArray(new Variable[0]), seed));
             return model;
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
                  InvocationTargetException e) {
@@ -242,7 +384,26 @@ public class TestExplanation {
         }
     }
 
-    private static void buildInputParameters(Class<?>[] parameterTypes, Object[] info, List<IntVar> variables, Object[] parameters, Model model, Random rnd) {
+    private Model buildModel(String method, Class<?>[] parameterTypes, Object[] info, boolean lcg, long seed) {
+
+        try {
+            Model model = new Model(method, Settings.init().setLCG(lcg));
+            Method m = Model.class.getMethod(method, parameterTypes);
+            Object[] parameters = new Object[parameterTypes.length];
+            List<Variable> variables = new ArrayList<>();
+            buildInputParameters(parameterTypes, info, variables, parameters, model, new Random(seed));
+            model.addHook("variables", variables);
+            Constraint c = (Constraint) m.invoke(model, parameters);
+            c.post();
+            model.getSolver().setSearch(new FullyRandom(variables.toArray(new Variable[0]), seed));
+            return model;
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void buildInputParameters(Class<?>[] parameterTypes, Object[]
+            info, List<Variable> variables, Object[] parameters, Model model, Random rnd) {
         int i = 0;
         for (Class<?> parameterType : parameterTypes) {
             if (parameterType.isArray()) {
@@ -382,7 +543,7 @@ public class TestExplanation {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-    @Test(groups = {"1s", "lcg"}, timeOut = 6000000, dataProvider = "trueOrFalse", dataProviderClass = Providers.class)
+    @Test(groups = "lcg", timeOut = 60_000, dataProvider = "trueOrFalse", dataProviderClass = Providers.class)
     public void testTable2(boolean lcg) {
         // Test bug l.724 in ISatFactory
         // What if the model detects inconsistency during declaration?
@@ -398,7 +559,7 @@ public class TestExplanation {
         Assert.assertFalse(model.getSolver().solve());
     }
 
-    @Test(groups = {"1s", "lcg"}, timeOut = 6000000, dataProvider = "trueOrFalse", dataProviderClass = Providers.class)
+    @Test(groups = "lcg", timeOut = 60_000, dataProvider = "trueOrFalse", dataProviderClass = Providers.class)
     public void testDummy1(boolean lcg) {
         Model model = new Model(Settings.init().setLCG(lcg));
         IntVar x = model.intVar("x", 3, 4);
@@ -408,7 +569,7 @@ public class TestExplanation {
         Assert.assertFalse(model.getSolver().solve());
     }
 
-    @Test(groups = {"1s", "lcg"}, timeOut = 6000000, dataProvider = "trueOrFalse", dataProviderClass = Providers.class)
+    @Test(groups = "lcg", timeOut = 60_000, dataProvider = "trueOrFalse", dataProviderClass = Providers.class)
     public void testDummy3(boolean lcg) {
         Model model = new Model(Settings.init().setLCG(lcg));
         IntVar x = model.intVar("x", 3, 4);
@@ -418,5 +579,28 @@ public class TestExplanation {
         Assert.assertTrue(model.getSolver().solve());
         Assert.assertTrue(model.getSolver().solve());
         Assert.assertFalse(model.getSolver().solve());
+    }
+
+    @Test(groups = "lcg", timeOut = 60_000, dataProvider = "trueOrFalse", dataProviderClass = Providers.class)
+    public void testNotAllEquals1(boolean lcg) {
+        Model model = new Model(Settings.init().setLCG(lcg));
+        IntVar x = model.intVar("x", 3, 4);
+        IntVar y = model.intVar("y", 3, 4);
+        model.notAllEqual(x, y).post();
+        //model.getSolver().showSolutions(x, y);
+        Assert.assertTrue(model.getSolver().solve());
+        Assert.assertTrue(model.getSolver().solve());
+        Assert.assertFalse(model.getSolver().solve());
+    }
+
+    @Test(groups = "lcg", timeOut = 60_000, dataProvider = "trueOrFalse", dataProviderClass = Providers.class)
+    public void testAtMostNValues(boolean lcg) {
+        Model model = new Model(Settings.init().setLCG(lcg));
+        IntVar[] x = model.intVarArray("x", 3, 2, 4);
+        IntVar z = model.intVar("z", 1, 2);
+        model.atMostNValues(x, z, true).post();
+//        model.getSolver().showSolutions(x);
+        model.getSolver().findAllSolutions();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 24);
     }
 }
