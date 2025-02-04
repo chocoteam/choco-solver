@@ -43,7 +43,7 @@ public class PropXinSHalfReif extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         if (vIdx == 0) {
-            return IntEventType.INSTANTIATE.getMask();
+            return IntEventType.all();
         }
         return IntEventType.INCLOW.getMask();
     }
