@@ -113,7 +113,8 @@
                 <version>3.0.0-M7</version>
                 <configuration>
                     <!--suppress UnresolvedMavenProperty -->
-                    <argLine>${argLine} -Xms384m -Xmx768m -Djava.library.path=/usr/local/lib</argLine>
+<!--                    <argLine>${argLine} -Xms384m -Xmx768m -Djava.library.path=/usr/local/lib</argLine>-->
+                    <argLine>${argLine} -Djava.library.path=/usr/local/lib</argLine>
                     <properties>
                         <property>
                             <name>listener</name>
