@@ -181,7 +181,7 @@ public interface IReificationFactory extends ISelf<Model> {
                 return;
             }
         }
-        reifXrelYC(X, "=", ref().intVar(C), 0, B);
+        reifXrelC(X, "=", C, B);
     }
 
     /**
@@ -302,7 +302,7 @@ public interface IReificationFactory extends ISelf<Model> {
                 return;
             }
         }
-        reifXrelYC(X, "<", ref().intVar(C), 0, B);
+        reifXrelC(X, "<", C, B);
     }
 
     /**
@@ -427,10 +427,16 @@ public interface IReificationFactory extends ISelf<Model> {
      */
     default void reifyXinS(IntVar X, IntIterableRangeSet S, BoolVar B) {
         // no check to allow addition during resolution
-        IntIterableRangeSet nS = S.duplicate().flip(X.getLB() - 1, X.getUB() + 1);
-        ref().post(new Constraint(ConstraintsName.BASIC_REI,
-                new PropXinSHalfReif(X, S, B),
-                new PropXinSHalfReif(X, nS, B.not())));
+        /* not obvious that this is more efficient -- see flatzinc/2020/skill_allocation+mzn_1m_1.fzn
+        if (S.size() == 1) {
+            reifyXeqC(X, S.min(), B);
+        } else */
+        {
+            IntIterableRangeSet nS = S.duplicate().flip(X.getLB() - 1, X.getUB() + 1);
+            ref().post(new Constraint(ConstraintsName.BASIC_REI,
+                    new PropXinSHalfReif(X, S, B),
+                    new PropXinSHalfReif(X, nS, B.not())));
+        }
     }
 
     /**
@@ -443,12 +449,63 @@ public interface IReificationFactory extends ISelf<Model> {
      */
     default void reifyXnotinS(IntVar X, IntIterableRangeSet S, BoolVar B) {
         // no check to allow addition during resolution
-        IntIterableRangeSet nS = S.duplicate().flip(X.getLB() - 1, X.getUB() + 1);
-        ref().post(new Constraint(ConstraintsName.BASIC_REI,
-                new PropXinSHalfReif(X, S, B.not()),
-                new PropXinSHalfReif(X, nS, B)));
+        /* not obvious that this is more efficient -- see flatzinc/2020/skill_allocation+mzn_1m_1.fzn
+        if (S.size() == 1) {
+            reifyXneC(X, S.min(), B);
+        } else */{
+            IntIterableRangeSet nS = S.duplicate().flip(X.getLB() - 1, X.getUB() + 1);
+            ref().post(new Constraint(ConstraintsName.BASIC_REI,
+                    new PropXinSHalfReif(X, S, B.not()),
+                    new PropXinSHalfReif(X, nS, B)));
+        }
     }
 
+
+    /**
+     * Posts one constraint that expresses : (X op C) &hArr; B.
+     *
+     * @param X  an integer variable
+     * @param op an operator (allowed: =, !=, <, <=, >, >=)
+     * @param C  an int
+     * @param B  a boolean variable
+     */
+    default void reifXrelC(IntVar X, String op, int C, BoolVar B) {
+        switch (Operator.get(op)) {
+            case EQ:
+                new Constraint(ConstraintsName.BASIC_REI,
+                        new PropXeqCHalfReif(X, C, B),
+                        new PropXneCHalfReif(X, C, B.not())
+                ).post();
+                break;
+            case NQ:
+                reifXrelC(X, "=", C, B.not());
+                break;
+            case LT:
+                // x < c <-> r <=> x <= c - 1 <-> r
+                reifXrelC(X, "<=", C - 1, B);
+                break;
+            case LE:
+                // x <= c <-> r <=> x <= c <- r /\ x >= c + 1 <- !r
+                new Constraint(ConstraintsName.BASIC_REI,
+                        new PropXleCHalfReif(X, C, B),
+                        new PropXgeCHalfReif(X, C + 1, B.not())
+                ).post();
+                break;
+            case GT:
+                // x > c <-> r <=> c + 1 <= x <-> r
+                reifXrelC(X, ">=", C + 1, B);
+                break;
+            case GE:
+                // x >= c <-> r <=> x >= c <- r /\ x <= c - 1 <- !r
+                new Constraint(ConstraintsName.BASIC_REI,
+                        new PropXgeCHalfReif(X, C, B),
+                        new PropXleCHalfReif(X, C - 1, B.not())
+                ).post();
+                break;
+            default:
+                throw new SolverException("Unexpected operator: " + op);
+        }
+    }
 
     /**
      * Posts one constraint that expresses : (X op Y + C) &hArr; B.
@@ -460,6 +517,10 @@ public interface IReificationFactory extends ISelf<Model> {
      * @param B  a boolean variable
      */
     default void reifXrelYC(IntVar X, String op, IntVar Y, int C, BoolVar B) {
+        if (Y.isInstantiated()) {
+            reifXrelC(X, op, Y.getValue() + C, B);
+            return;
+        }
         switch (Operator.get(op)) {
             case EQ:
                 new Constraint(ConstraintsName.BASIC_REI,
@@ -495,6 +556,47 @@ public interface IReificationFactory extends ISelf<Model> {
     }
 
     /**
+     * Posts one constraint that expresses : (X op C) &lArr; B.
+     *
+     * @param X  an integer variable
+     * @param op an operator (allowed: =, !=, <, <=, >, >=)
+     * @param C  an int
+     * @param B  a boolean variable
+     */
+    default void impXrelC(IntVar X, String op, int C, BoolVar B) {
+        switch (Operator.get(op)) {
+            case EQ:
+                ref().post(new Constraint(ConstraintsName.BASIC_REI,
+                        new PropXeqCHalfReif(X, C, B)
+                ));
+                break;
+            case NQ:
+                ref().post(new Constraint(ConstraintsName.BASIC_REI,
+                        new PropXneCHalfReif(X, C, B)
+                ));
+                break;
+            case LT:
+                impXrelC(X, "<=", C - 1, B);
+                break;
+            case LE:
+                ref().post(new Constraint(ConstraintsName.BASIC_REI,
+                        new PropXleCHalfReif(X, C, B)
+                ));
+                break;
+            case GT:
+                impXrelC(X, ">=", C + 1, B);
+                break;
+            case GE:
+                ref().post(new Constraint(ConstraintsName.BASIC_REI,
+                        new PropXgeCHalfReif(X, C, B)
+                ));
+                break;
+            default:
+                throw new SolverException("Unexpected operator: " + op);
+        }
+    }
+
+    /**
      * Posts one constraint that expresses : (X op Y + C) &lArr; B.
      *
      * @param X  an integer variable
@@ -504,6 +606,10 @@ public interface IReificationFactory extends ISelf<Model> {
      * @param B  a boolean variable
      */
     default void impXrelYC(IntVar X, String op, IntVar Y, int C, BoolVar B) {
+        if (Y.isInstantiated()) {
+            impXrelC(X, op, Y.getValue() + C, B);
+            return;
+        }
         switch (Operator.get(op)) {
             case EQ:
                 ref().post(new Constraint(ConstraintsName.BASIC_REI,

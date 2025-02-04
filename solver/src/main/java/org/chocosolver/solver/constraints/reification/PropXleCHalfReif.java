@@ -20,32 +20,29 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
 /**
- * A propagator dedicated to express b &rArr; x != y
+ * A propagator dedicated to express b &rArr; x <= c
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 08/02/2024
+ * @since 02/03/2024
  */
 @Explained
-public class PropXneYHalfReif extends Propagator<IntVar> {
+public class PropXleCHalfReif extends Propagator<IntVar> {
 
     private final IntVar x;
-    private final IntVar y;
+    private final int c;
     private final BoolVar b;
 
-    public PropXneYHalfReif(IntVar x, IntVar y, BoolVar b) {
+    public PropXleCHalfReif(IntVar x, int c, BoolVar b) {
         // The priority is set to 'LINEAR' to delay the propagation of this constraint
-        super(new IntVar[]{x, y, b}, PropagatorPriority.LINEAR, false, false);
+        super(new IntVar[]{x, b}, PropagatorPriority.LINEAR, false, false);
         this.x = x;
-        this.y = y;
+        this.c = c;
         this.b = b;
     }
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        if (vIdx < 2) {
-            return IntEventType.INSTANTIATE.getMask();
-        }
         return IntEventType.INCLOW.getMask();
     }
 
@@ -55,20 +52,13 @@ public class PropXneYHalfReif extends Propagator<IntVar> {
             // if b is false, then no filtering is required
             setPassive();
         } else if (b.isInstantiatedTo(1)) {
-            // if b is true, then x and y must be different
-            if (x.isInstantiated()) {
-                y.removeValue(x.getValue(), this,
-                        lcg() ? Reason.r(x.getValLit(), b.getValLit()) : Reason.undef());
-                setPassive();
-            }else if (y.isInstantiated()) {
-                x.removeValue(y.getValue(), this,
-                        lcg() ? Reason.r(y.getValLit(), b.getValLit()) : Reason.undef());
-                setPassive();
-            }
-        } else if (x.isInstantiated() && y.isInstantiated() && x.getValue() == y.getValue()) {
-            // if x and y are instantiated and equal, then b must be false
-            b.setToFalse(this,
-                    lcg() ? Reason.r(x.getValLit(), y.getValLit()) : Reason.undef());
+            // b is not false, so x <= c
+            x.updateUpperBound(c, this, lcg() ? Reason.r(b.getValLit()) : Reason.undef());
+            setPassive();
+        } else if (x.getLB() > c) {
+            // b must be false
+            b.setToFalse(this, lcg() ? Reason.r(x.getMinLit()) : Reason.undef());
+            setPassive();
         }
     }
 
@@ -76,7 +66,7 @@ public class PropXneYHalfReif extends Propagator<IntVar> {
     public ESat isEntailed() {
         if (isCompletelyInstantiated()) {
             if (b.isInstantiatedTo(1)) {
-                return ESat.eval(x.getValue() != y.getValue());
+                return ESat.eval(x.getValue() <= c);
             }
             return ESat.TRUE;
         }
