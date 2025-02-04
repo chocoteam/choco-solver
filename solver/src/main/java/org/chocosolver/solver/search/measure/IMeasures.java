@@ -95,6 +95,11 @@ public interface IMeasures extends Serializable {
     long getFixpointCount();
 
     /**
+     * @return the propagation count
+     */
+    long getPropagationCount();
+
+    /**
      * @return the non chronological backtracks count
      */
     long getBackjumpCount();
@@ -163,14 +168,15 @@ public interface IMeasures extends Serializable {
             String.format(
                 "Resolution time %.3fs, "
                     + (hasObjective() ? String.format("Time to best solution %.3fs, ", getTimeToBestSolution()) : "")
-                    + "%d Nodes (%,.1f n/s), %d Backtracks, %d Backjumps, %d Fails, %d Restarts",
+                    + "%d Nodes (%,.1f n/s), %d Backtracks, %d Backjumps, %d Fails, %d Restarts, %d Propagations",
                 getTimeCount(),
                 getNodeCount(),
                 getNodeCount() / getTimeCount(),
                 getBackTrackCount(),
                 getBackjumpCount(),
                 getFailCount(),
-                getRestartCount()
+                getRestartCount(),
+                getPropagationCount()
             )
         );
         return st.toString();
@@ -184,8 +190,9 @@ public interface IMeasures extends Serializable {
             final DecimalFormat df = new DecimalFormat("#.###");
             st.append("o ").append(df.format(getBoundsManager().getBestSolutionValue())).append("\n");
         }
-        st.append(String.format("d NBSOLS %d\nd TIME %.3f\nd NODES %d\nd BACKTRACKS %d\nd FAILURES %d\nd RESTARTS %d",
-                getSolutionCount(), getTimeCount(), getNodeCount(), getBackTrackCount(), getFailCount(), getRestartCount()));
+        st.append(String.format("d NBSOLS %d\nd TIME %.3f\nd NODES %d\nd BACKTRACKS %d\nd FAILURES %d\nd RESTARTS %d\nd PROPAGATIONS %d",
+                getSolutionCount(), getTimeCount(), getNodeCount(), getBackTrackCount(),
+                getFailCount(), getRestartCount(), getPropagationCount()));
         return st.toString();
     }
 
@@ -235,7 +242,8 @@ public interface IMeasures extends Serializable {
                     "\tBacktracks: %,d\n" +
                     "\tBackjumps: %,d\n" +
                     "\tFails: %,d\n" +
-                    "\tRestarts: %,d",
+                    "\tRestarts: %,d\n" +
+                    "\tPropagations: %,d",
                 getReadingTimeCount(),
                 getTimeCount(),
                 getNodeCount(),
@@ -243,7 +251,8 @@ public interface IMeasures extends Serializable {
                 getBackTrackCount(),
                 getBackjumpCount(),
                 getFailCount(),
-                getRestartCount()
+                getRestartCount(),
+                getPropagationCount()
             )
         );
         return st.toString();
@@ -263,7 +272,8 @@ public interface IMeasures extends Serializable {
                 getNodeCount(),
                 getBackTrackCount(),
                 getFailCount(),
-                getRestartCount()
+                getRestartCount(),
+                getPropagationCount()
         };
     }
 
@@ -272,7 +282,7 @@ public interface IMeasures extends Serializable {
      */
     default String toCSV() {
         // solutionCount;buildingTime(sec);totalTime(sec);timeToBest(sec);objective;nodes;backtracks;backjumps;fails;restarts;
-        return String.format("%c;%d;%.3f;%.3f;%.3f;%d;%d;%d;%d;%d;%d;",
+        return String.format("%c;%d;%.3f;%.3f;%.3f;%d;%d;%d;%d;%d;%d;%d;",
                 getSearchState().toString().charAt(0),
                 getSolutionCount(),
                 getReadingTimeCount(),
@@ -283,7 +293,8 @@ public interface IMeasures extends Serializable {
                 getBackTrackCount(),
                 getBackjumpCount(),
                 getFailCount(),
-                getRestartCount()
+                getRestartCount(),
+                getPropagationCount()
         );
     }
 
