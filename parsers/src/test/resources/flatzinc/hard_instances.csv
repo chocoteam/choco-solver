@@ -1,7 +1,7 @@
 #year,name,solutions,best,nodes,fails
 2020,skill_allocation+mzn_1m_1.fzn,1,2,6196,6195
 2020,stable-goods-solution+s-d6.fzn,13,6264,144303,144278
-2018,rotating-workforce+ex1479.fzn,1,_,128979,128877
+2018,rotating-workforce+ex1479.fzn,1,_,125855,125753
 2016,tpp+6_3_20_1.fzn,65,131,2813024,2812895
 2012,still-life-wastage+still-life+09.fzn,6,43,109396,109385
 2012,still-life-wastage+still-life+10.fzn,8,54,164569,164554

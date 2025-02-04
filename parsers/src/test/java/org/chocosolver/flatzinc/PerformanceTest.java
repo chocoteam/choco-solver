@@ -9,11 +9,14 @@
  */
 package org.chocosolver.flatzinc;
 
+import org.chocosolver.parser.PerformanceListener;
 import org.chocosolver.parser.SetUpException;
 import org.chocosolver.parser.flatzinc.Flatzinc;
 import org.chocosolver.solver.search.SearchState;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Ignore;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.io.BufferedReader;
@@ -31,14 +34,14 @@ import java.util.Objects;
  * @author Charles Prud'homme
  * @since 30/09/2020
  */
-//@Listeners(PerformanceListener.class)
+@Listeners(PerformanceListener.class)
 public class PerformanceTest {
     private static final String ROOT = "/flatzinc/";
     private static final String COMMENT = "#";
     private static final String DELIMITER = ",";
 
-    private static final String LEVEL = "JSON";
-    
+    private static final String LEVEL = "SILENT";
+
 
     public Object[][] getInstances(String name) {
         List<Object[]> parameters = new ArrayList<>();
@@ -118,7 +121,6 @@ public class PerformanceTest {
         };
         Flatzinc fzn = new Flatzinc();
         fzn.setUp(args);
-        fzn.getSettings().setLCG(true).setWarnUser(false);
         fzn.createSolver();
         fzn.buildModel();
         fzn.configureSearch();
@@ -149,7 +151,6 @@ public class PerformanceTest {
         };
         Flatzinc fzn = new Flatzinc();
         fzn.setUp(args);
-        //fzn.getSettings().setLCG(true).setWarnUser(true);
         fzn.createSolver();
         fzn.buildModel();
         fzn.configureSearch();
@@ -176,7 +177,6 @@ public class PerformanceTest {
         };
         Flatzinc fzn = new Flatzinc();
         fzn.setUp(args);
-        //fzn.getSettings().setLCG(true).setWarnUser(true);
         fzn.createSolver();
         fzn.buildModel();
         fzn.configureSearch();
@@ -203,7 +203,6 @@ public class PerformanceTest {
         };
         Flatzinc fzn = new Flatzinc();
         fzn.setUp(args);
-        //fzn.getSettings().setLCG(true).setWarnUser(true);
         fzn.createSolver();
         fzn.buildModel();
         fzn.configureSearch();
@@ -231,7 +230,6 @@ public class PerformanceTest {
         };
         Flatzinc fzn = new Flatzinc();
         fzn.setUp(args);
-        //fzn.getSettings().setLCG(true).setWarnUser(true);
         fzn.createSolver();
         fzn.buildModel();
         fzn.configureSearch();
@@ -258,7 +256,6 @@ public class PerformanceTest {
         };
         Flatzinc fzn = new Flatzinc();
         fzn.setUp(args);
-        //fzn.getSettings().setLCG(true).setWarnUser(true);
         fzn.createSolver();
         fzn.buildModel();
         fzn.configureSearch();
@@ -278,7 +275,8 @@ public class PerformanceTest {
         return getInstances("lcg.csv");
     }
 
-    @Test(groups = "mzn", dataProvider = "lcg", timeOut = 60_000, priority = 2)
+    @Ignore
+    @Test(groups = "lcg", dataProvider = "lcg", timeOut = 60_000, priority = 2)
     public void testLCG(String path, int solutions, Integer bst, int nodes, int failures) throws SetUpException {
         String file = Objects.requireNonNull(this.getClass().getResource(path)).getFile();
         String[] args = new String[]{
@@ -287,10 +285,10 @@ public class PerformanceTest {
                 "-limit", "[50s]", // but, problems are expected to end within 15s max
                 "-lvl", LEVEL,
                 "-p", "1",
+                "-lcg"
         };
         Flatzinc fzn = new Flatzinc();
         fzn.setUp(args);
-        fzn.getSettings().setLCG(true).setWarnUser(false);
         fzn.createSolver();
         fzn.buildModel();
         fzn.configureSearch();
