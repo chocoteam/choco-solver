@@ -101,10 +101,11 @@ public class Flatzinc extends RegParser {
     public void createSettings() {
         defaultSettings = Settings.prod()
                 .setMinCardinalityForSumDecomposition(256)
-                .setNbMaxLearntClauses(Integer.MAX_VALUE)
-                .set("adhocReification", true)
                 .setLCG(lcg)
-//                .setWarnUser(true)
+                .setNbMaxLearntClauses(100_000)
+                //.setIntVarLazyLitWithWeakBounds(false)
+                .set("adhocReification", true)
+                .setWarnUser(false)
         ;
     }
 
