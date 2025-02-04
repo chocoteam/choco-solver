@@ -46,7 +46,7 @@ import org.chocosolver.solver.constraints.nary.count.PropCountVar;
 import org.chocosolver.solver.constraints.nary.count.PropCount_AC;
 import org.chocosolver.solver.constraints.nary.cumulative.CumulFilter;
 import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
-import org.chocosolver.solver.constraints.nary.element.PropElementV2;
+import org.chocosolver.solver.constraints.nary.element.PropElementV_fast;
 import org.chocosolver.solver.constraints.nary.globalcardinality.GlobalCardinality;
 import org.chocosolver.solver.constraints.nary.knapsack.PropKnapsack;
 import org.chocosolver.solver.constraints.nary.knapsack.PropKnapsackKatriel01;
@@ -382,9 +382,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     /**
      * Creates a modulo constraint: X % a = Z
      *
-     * @param X   first integer variable
+     * @param X first integer variable
      * @param y the value of the modulo operand
-     * @param Z   second integer variable (result of the modulo operation)
+     * @param Z second integer variable (result of the modulo operation)
      */
     default Constraint mod(IntVar X, int y, IntVar Z) {
         if (y == 0) {
@@ -1186,7 +1186,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 ref().getSolver().log().white().println(
                         "Warning: binPacking constraint is decomposed (due to LCG).");
             }
-            for(int i = 0; i < itemBin.length; i++){
+            for (int i = 0; i < itemBin.length; i++) {
                 ref().member(itemBin[i], offset, binLoad.length - 1 + offset).post();
             }
             for (int i = 0; i < binLoad.length; i++) {
@@ -1692,9 +1692,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             // uses two propagator to perform a fix point
             return new Constraint(
                     ConstraintsName.ELEMENT,
-//                    new PropElementV_fast(value, table, index, offset)
-                    new PropElementV2(value, table, index, offset)
-            );
+                    new PropElementV_fast(value, table, ref().intView(1, index, -offset)));
         }
     }
 
