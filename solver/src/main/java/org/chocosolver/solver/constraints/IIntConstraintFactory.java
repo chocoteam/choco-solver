@@ -1775,7 +1775,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                         "Warning: increasing constraint is decomposed (due to LCG).");
             }
             for (int i = 0; i < vars.length - 1; i++) {
-                ref().arithm(vars[i], "<=", vars[i + 1], "+", delta).post();
+                ref().arithm(vars[i], "<=", vars[i + 1], "-", delta).post();
             }
             return ref().voidConstraint();
         }
