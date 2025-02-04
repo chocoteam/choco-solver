@@ -12,6 +12,7 @@ package org.chocosolver.solver.constraints.reification;
 import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -35,7 +36,8 @@ public class PropXeqYHalfReif extends Propagator<IntVar> {
     private final BoolVar b;
 
     public PropXeqYHalfReif(IntVar x, IntVar y, BoolVar b) {
-        super(x, y, b);
+        // The priority is set to 'LINEAR' to delay the propagation of this constraint
+        super(new IntVar[]{x, y, b}, PropagatorPriority.LINEAR, false, false);
         this.x = x;
         this.y = y;
         this.b = b;
