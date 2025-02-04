@@ -19,6 +19,8 @@ package org.chocosolver.solver.constraints.nary.circuit;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -34,6 +36,7 @@ import java.util.BitSet;
  *
  * @author Jean-Guillaume Fages
  */
+@Explained(partial = true)
 public class PropSubcircuit extends Propagator<IntVar> {
 
     //***********************************************************************************
@@ -82,7 +85,8 @@ public class PropSubcircuit extends Propagator<IntVar> {
         }
         TIntArrayList fixedVar = new TIntArrayList();
         for (int i = 0; i < n; i++) {
-            vars[i].updateBounds(offset, n - 1 + offset, this);
+            vars[i].updateLowerBound(offset, this, Reason.undef());
+            vars[i].updateUpperBound(n - 1 + offset, this, Reason.undef());
             if (vars[i].isInstantiated() && i + offset != vars[i].getValue()) {
                 fixedVar.add(i);
             }
@@ -114,27 +118,28 @@ public class PropSubcircuit extends Propagator<IntVar> {
         int last = end[val].get();  // last in [0, n-1]
         int start = origin[var].get(); // start in [0, n-1]
         if (origin[val].get() != val) {
-            fails(); // TODO: could be more precise, for explanation purpose
+            fails(lcg() ? Propagator.reason(null, vars): Reason.undef());
         }
         if (end[var].get() != var) {
-            fails(); // TODO: could be more precise, for explanation purpose
+            // should not happen
+            throw new UnsupportedOperationException("unexpected situation");
         }
         if (val == start) {
-            length.instantiateTo(size[start].get(), this);
+            length.instantiateTo(size[start].get(), this/*todo*/);
         } else {
             size[start].add(size[val].get());
             if (size[start].get() == length.getUB()) {
-                vars[last].instantiateTo(start + offset, this);
+                vars[last].instantiateTo(start + offset, this/*todo*/);
                 for (int i = 0; i < n; i++) {
                     if (!vars[i].isInstantiated()) {
-                        vars[i].instantiateTo(i + offset, this);
+                        vars[i].instantiateTo(i + offset, this/*todo*/);
                     }
                 }
                 setPassive();
             }
             boolean isInst = false;
             if (size[start].get() < length.getLB()) {
-                if (vars[last].removeValue(start + offset, this)) {
+                if (vars[last].removeValue(start + offset, this/*todo*/)) {
                     isInst = vars[last].isInstantiated();
                 }
             }
