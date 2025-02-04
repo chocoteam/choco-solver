@@ -136,7 +136,7 @@ public class RestartTest {
         assertEquals(solver.getSolutionCount(), 9);
     }
 
-    @Test(groups = "1s",dataProvider = "random", dataProviderClass = Providers.class)
+    @Test(groups = "lcg",dataProvider = "random", dataProviderClass = Providers.class)
     @Providers.Arguments(values = {"0", "20", "1"})
     public void testGolombRulerWithLCG(long seed) {
         Model model = ProblemMaker.makeGolombRuler(8, true);
