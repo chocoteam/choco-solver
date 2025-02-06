@@ -13,14 +13,12 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.IntCircularQueue;
 import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.List;
 
 /**
@@ -38,10 +36,9 @@ public class PropMinCostMaxFlow extends Propagator<IntVar> {
     private final IntVar[] flows;
     private final IntVar cost;
     private final Residual g;
-    private final BitSet toCheck;
 
     public PropMinCostMaxFlow(int[] starts, int[] ends, int[] balances, int[] weights, IntVar[] flows, IntVar cost, int offset) {
-        super(ArrayUtils.append(flows, new IntVar[]{cost}), PropagatorPriority.QUADRATIC, true);
+        super(ArrayUtils.append(flows, new IntVar[]{cost}), PropagatorPriority.QUADRATIC, false);
         this.offset = offset;
         this.starts = starts;
         this.ends = ends;
@@ -50,34 +47,28 @@ public class PropMinCostMaxFlow extends Propagator<IntVar> {
         this.flows = flows;
         this.cost = cost;
         this.g = new Residual();
-        this.toCheck = new BitSet(flows.length);
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (PropagatorEventType.isFullPropagation(evtmask)) {
-            toCheck.clear();
-            toCheck.set(0, flows.length);
-        }
-        g.refresh(-1, 0);
-        int minCost = minCostFlow(-1, 0);
-        if (minCost == -1) {
-            toCheck.clear();
-            this.fails();
-        }
-        this.cost.updateLowerBound(minCost, this);
-
-        int maxcost = this.cost.getUB();
-        try {
-            for (int i = toCheck.nextSetBit(0); i > -1; i = toCheck.nextSetBit(i + 1)) {
-                updateFlow(i, maxcost);
+        boolean hasChanged = true;
+        while (hasChanged) {
+            hasChanged = false;
+            g.refresh(-1, 0);
+            int minCost = minCostFlow(-1, 0);
+            if (minCost == -1) {
+                this.fails();
             }
-        } finally {
-            toCheck.clear();
+            this.cost.updateLowerBound(minCost, this);
+
+            int maxcost = this.cost.getUB();
+            for (int i = 0; i < flows.length; i++) {
+                hasChanged |= updateFlow(i, maxcost);
+            }
         }
     }
 
-    private void updateFlow(int i, int maxcost) throws ContradictionException {
+    private boolean updateFlow(int i, int maxcost) throws ContradictionException {
         int l = flows[i].getLB();
         int u = flows[i].getUB();
         int m = u;
@@ -96,21 +87,13 @@ public class PropMinCostMaxFlow extends Propagator<IntVar> {
                     l = m + 1;
                 }
             }
-            flows[i].updateUpperBound(u, this);
+            return flows[i].updateUpperBound(u, this)
+                    && u > flows[i].getUB();
         }
+        return false;
     }
 
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        if (idxVarInProp < flows.length) {
-            toCheck.set(idxVarInProp);
-        } else {
-            toCheck.set(0, flows.length);
-        }
-        forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
-    }
-
-    ////////////////////////
+    /// /////////////////////
     private final static class Edge {
         final int id;
         final int from;
