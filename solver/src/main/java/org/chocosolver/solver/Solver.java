@@ -24,6 +24,7 @@ import org.chocosolver.solver.objective.ObjectiveFactory;
 import org.chocosolver.solver.propagation.PropagationEngine;
 import org.chocosolver.solver.search.SearchState;
 import org.chocosolver.solver.search.limits.ICounter;
+import org.chocosolver.solver.search.limits.TimeCounter;
 import org.chocosolver.solver.search.loop.Reporting;
 import org.chocosolver.solver.search.loop.learn.LazyClauseGeneration;
 import org.chocosolver.solver.search.loop.learn.Learn;
@@ -178,6 +179,8 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * When at least one is satisfied, the search loop ends.
      */
     private final List<Criterion> criteria;
+
+    protected TimeCounter timeCounter;
 
     /**
      * Indicates if the default search loop is in use (set to <tt>true</tt> in that case).
@@ -1242,10 +1245,20 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
+     * @return <tt>true</tt> if the time limit is met.
+     */
+    public boolean isTimeLimitMet() {
+        if (timeCounter != null) {
+            return timeCounter.isMet();
+        }
+        return false;
+    }
+
+    /**
      * @return <tt>true</tt> if the search loops encountered at least one of the stop criteria declared.
      */
     public boolean isStopCriterionMet() {
-        boolean ismet = false;
+        boolean ismet = isTimeLimitMet();
         for (int i = 0; i < criteria.size() && !ismet; i++) {
             ismet = criteria.get(i).isMet();
         }
@@ -1529,7 +1542,16 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     public void addStopCriterion(Criterion... criterion) {
         if (criterion != null) {
-            Collections.addAll(criteria, criterion);
+            for (int i = 0; i < criterion.length; i++) {
+                if (criterion[i] instanceof TimeCounter) {
+                    TimeCounter tc = (TimeCounter) criterion[i];
+                    if (timeCounter == null || timeCounter.getLimitValue() > tc.getLimitValue()) {
+                        timeCounter = tc;
+                    }
+                } else {
+                    criteria.add(criterion[i]);
+                }
+            }
         }
     }
 
