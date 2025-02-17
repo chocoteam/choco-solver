@@ -10,6 +10,7 @@
 package org.chocosolver.solver.search.restart;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Providers;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.limits.FailCounter;
@@ -51,7 +52,7 @@ public class RestartTest {
         return model;
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testGeometricalRestart1() {
         Model model = buildQ(4);
         model.getSolver().setGeometricalRestart(2, 1.1, new NodeCounter(model, 2), 2);
@@ -62,7 +63,7 @@ public class RestartTest {
         assertEquals(model.getSolver().getNodeCount(), 12);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testLubyRestart1() {
         Model model = buildQ(4);
         model.getSolver().setLubyRestart(2, new NodeCounter(model, 2), 2);
@@ -88,7 +89,7 @@ public class RestartTest {
 
     public final static int[] GEOMETRIC_1_3 = {1, 2, 2, 3, 3, 4, 5, 7, 9, 11, 14, 18, 24, 31, 40};
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void test1() {
 
         for (int j = 1; j < 5; j++) {
@@ -108,7 +109,7 @@ public class RestartTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testGeometricalRestart2() {
         Model model = buildQ(8);
         model.getSolver().setGeometricalRestart(10, 1.2, new FailCounter(model, 10), 2);
@@ -119,7 +120,7 @@ public class RestartTest {
     }
 
     @Test(groups = "1s")
-    public void testGolombRuler(){
+    public void testGolombRuler() {
         Model model = ProblemMaker.makeGolombRuler(10);
         IntVar[] ticks = (IntVar[]) model.getHook("ticks");
         Solver solver = model.getSolver();
@@ -133,5 +134,17 @@ public class RestartTest {
         while (solver.solve()) ;
         assertEquals(solver.getRestartCount(), 2);
         assertEquals(solver.getSolutionCount(), 9);
+    }
+
+    @Test(groups = "lcg",dataProvider = "random", dataProviderClass = Providers.class)
+    @Providers.Arguments(values = {"0", "20", "1"})
+    public void testGolombRulerWithLCG(long seed) {
+        Model model = ProblemMaker.makeGolombRuler(8, true);
+        IntVar[] ticks = (IntVar[]) model.getHook("ticks");
+        Solver solver = model.getSolver();
+        solver.setGeometricalRestart(10, 1.05, new NodeCounter(model, 2), 2);
+        solver.setSearch(randomSearch(ticks, seed));
+        while (solver.solve()) ;
+        assertEquals(solver.getBestSolutionValue(), 34);
     }
 }

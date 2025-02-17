@@ -9,8 +9,11 @@
  */
 package org.chocosolver.solver.variables.view.integer;
 
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
@@ -32,6 +35,7 @@ import static org.chocosolver.solver.variables.events.IntEventType.INCLOW;
  * @author Charles Prud'homme
  * @since 05/10/2023
  */
+@Explained
 public final class IntAffineView<I extends IntVar> extends IntView<I> {
 
     public final boolean p; // positive
@@ -68,12 +72,11 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
 
 
     @Override
-    public boolean removeValue(int value, ICause cause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         int inf = getLB();
         int sup = getUB();
         if (inf > value || value > sup) return false;
-        model.getSolver().getEventObserver().removeValue(this, value, cause);
         value -= b;
         if (a > 1) {
             if ((value % a) != 0) {
@@ -84,7 +87,7 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
         if (!p) {
             value = -value;
         }
-        if (var.removeValue(value, this)) {
+        if (var.removeValue(value, this, reason)) {// todo channel??
             IntEventType e = IntEventType.REMOVE;
             if (value == inf) {
                 e = IntEventType.INCLOW;
@@ -96,19 +99,19 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
             }
             this.notifyPropagators(e, cause);
             return true;
-        } else {
-            model.getSolver().getEventObserver().undo();
-            return false;
         }
+        return false;
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
-        model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
         value -= b;
         if (a > 1) {
             if ((value % a) != 0) {
+                if (getModel().getSolver().isLCG()) {
+                    getModel().getSolver().getSat().cEnqueue(0, reason);
+                }
                 this.contradiction(this, MSG_INST);
             }
             value /= a;
@@ -116,21 +119,18 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
         if (!p) {
             value = -value;
         }
-        if (var.instantiateTo(value, this)) {
+        if (var.instantiateTo(value, this, reason)) { // todo channel??
             notifyPropagators(IntEventType.INSTANTIATE, cause);
             return true;
-        } else {
-            model.getSolver().getEventObserver().undo();
-            return false;
         }
+        return false;
     }
 
     @Override
-    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         int old = this.getLB();
         if (old >= value) return false;
-        model.getSolver().getEventObserver().updateLowerBound(this, value, getLB(), cause);
         value--;
         value -= b;
         if (a > 1) {
@@ -138,9 +138,9 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
         }
         boolean change;
         if (!p) {
-            change = var.updateUpperBound(-value - 1, this);
+            change = var.updateUpperBound(-value - 1, this, reason); // todo channel??
         } else {
-            change = var.updateLowerBound(value + 1, this);
+            change = var.updateLowerBound(value + 1, this, reason); // todo channel??
         }
         if (change) {
             IntEventType e = IntEventType.INCLOW;
@@ -149,27 +149,24 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
             }
             this.notifyPropagators(e, cause);
             return true;
-        } else {
-            model.getSolver().getEventObserver().undo();
-            return false;
         }
+        return false;
     }
 
     @Override
-    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         int old = this.getUB();
         if (old <= value) return false;
-        model.getSolver().getEventObserver().updateUpperBound(this, value, getUB(), cause);
         value -= b;
         if (a > 1) {
             value = value / a - (value % a < 0 ? 1 : 0);
         }
         boolean change;
         if (!p) {
-            change = var.updateLowerBound(-value, this);
+            change = var.updateLowerBound(-value, this, reason); // todo channel??
         } else {
-            change = var.updateUpperBound(value, this);
+            change = var.updateUpperBound(value, this, reason); // todo channel??
         }
         if (change) {
             IntEventType e = IntEventType.DECUPP;
@@ -178,10 +175,8 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
             }
             this.notifyPropagators(e, cause);
             return true;
-        } else {
-            model.getSolver().getEventObserver().undo();
-            return false;
         }
+        return false;
     }
 
     @Override
@@ -543,29 +538,49 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
     }
 
     @Override
-    public void justifyEvent(IntEventType mask, int one, int two, int three) {
-        switch (mask) {
-            case DECUPP:
-                if (p) {
-                    model.getSolver().getEventObserver().updateUpperBound(this, -one * a + b, -two * a + b, this);
-                } else {
-                    model.getSolver().getEventObserver().updateLowerBound(this, one * a + b, two * a + b, this);
+    public int getLit(int val, int t) {
+        val -= b;
+        if (a > 1) {
+            int k = val % a;
+            val = val / a;
+            if (k != 0) {
+                if (t == 0) {
+                    throw new SolverException("Cannot compute lit from " + this + " and " + val + " and " + t);
                 }
-                break;
-            case INCLOW:
-                if (p) {
-                    model.getSolver().getEventObserver().updateLowerBound(this, one * a + b, two * a + b, this);
-                } else {
-                    model.getSolver().getEventObserver().updateUpperBound(this, -one * a + b, -two * a + b, this);
+                if (t == 1) {
+                    //return MiniSat.falseLit;
+                    throw new SolverException("Check falseLit");
                 }
-                break;
-            case REMOVE:
-                model.getSolver().getEventObserver().removeValue(this, one * (p ? 1 : -1) * a + b, this);
-            case INSTANTIATE:
-                model.getSolver().getEventObserver().instantiateTo(this, one * (p ? 1 : -1) * a + b, this,
-                        (p ? two : -three) * a + b, (p ? three : -two) * a + b);
-                break;
+                if (t == 2 && k > 0) {
+                    val++;
+                }
+                if (t == 3 && k < 0) {
+                    val--;
+                }
+            }
         }
+        if (!p) {
+            val = -val;
+            if (t >= 2) {
+                assert 5 - t >= 0;
+                return var.getLit(val, 5 - t);
+            }
+        }
+        return var.getLit(val, t);
     }
 
+    @Override
+    public int getMinLit() {
+        return p ? var.getMinLit() : var.getMaxLit();
+    }
+
+    @Override
+    public int getMaxLit() {
+        return p ? var.getMaxLit() : var.getMinLit();
+    }
+
+    @Override
+    public int getValLit() {
+        return var.getValLit();
+    }
 }

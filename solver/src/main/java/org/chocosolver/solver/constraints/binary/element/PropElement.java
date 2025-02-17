@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints.binary.element;
 
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -29,6 +30,7 @@ import org.chocosolver.util.tools.ArrayUtils;
  */
 //2015OCT - cprudhom : simplify the code, without changing the consistency, no Sort anymore
 //2016AUG - jg : move filtering from bound/range to AC (add member reasoning)
+@Explained(ignored = true, comment = "Turned into clauses")
 public class PropElement extends Propagator<IntVar> {
 
     /**

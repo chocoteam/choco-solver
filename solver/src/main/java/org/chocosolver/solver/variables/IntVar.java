@@ -9,17 +9,14 @@
  */
 package org.chocosolver.solver.variables;
 
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.XParameters;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
-import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 import java.util.Spliterator;
@@ -53,6 +50,10 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * Do not prevent from overflow, but may avoid it, somehow.
      */
     int MAX_INT_BOUND = Integer.MAX_VALUE / 100;
+    int LR_NE = 0; // [x != v]
+    int LR_EQ = 1; // [x = v]
+    int LR_GE = 2; // [x >= v]
+    int LR_LE = 3; // [x <= v]
 
     /**
      * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
@@ -70,14 +71,35 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return true if the value has been removed, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    boolean removeValue(int value, ICause cause) throws ContradictionException;
+    default boolean removeValue(int value, ICause cause) throws ContradictionException {
+        return removeValue(value, cause, cause.defaultReason(this));
+    }
+
+    /**
+     * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
+     * <ul>
+     * <li>If <code>value</code> is out of the domain, nothing is done and the return value is <code>false</code>,</li>
+     * <li>if removing <code>value</code> leads to a dead-end (domain wipe-out),
+     * a <code>ContradictionException</code> is thrown,</li>
+     * <li>otherwise, if removing <code>value</code> from the domain can be done safely,
+     * the event type is created (the original event can be promoted) and observers are notified
+     * and the return value is <code>true</code></li>
+     * </ul>
+     *
+     * @param value  value to remove from the domain (int)
+     * @param cause  removal releaser
+     * @param reason the reason why the value is removed
+     * @return true if the value has been removed, false otherwise
+     * @throws ContradictionException if the domain become empty due to this action
+     */
+    boolean removeValue(int value, ICause cause, Reason reason) throws ContradictionException;
 
     /**
      * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
      * <p>
-     *     This method deals with <code>value</code> as <b>long</b>.
-     *     If such a long can be safely cast to an int, this falls back to regular case (int).
-     *     Otherwise, it can either trivially do nothing or fail.
+     * This method deals with <code>value</code> as <b>long</b>.
+     * If such a long can be safely cast to an int, this falls back to regular case (int).
+     * Otherwise, it can either trivially do nothing or fail.
      * </p>
      * <ul>
      * <li>If <code>value</code> is out of the domain, nothing is done and the return value is <code>false</code>,</li>
@@ -93,7 +115,7 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return true if the value has been removed, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    default boolean removeValue(long value, ICause cause) throws ContradictionException{
+    default boolean removeValue(long value, ICause cause) throws ContradictionException {
         if ((int) value != value) { // cannot be cast to an int
             return false;
         } else {
@@ -114,10 +136,11 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      *
      * @param values set of ordered values to remove
      * @param cause  removal release
+     * @param reason the reason why the values are removed
      * @return true if at least a value has been removed, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    default boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException{
+    default boolean removeValues(IntIterableSet values, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         boolean hasChanged = false, fixpoint;
         int vlb, vub;
@@ -144,15 +167,79 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
                 } while (nlb > Integer.MIN_VALUE && nub > Integer.MIN_VALUE && vub == nub);
             }
             // the new bounds are now known, delegate to the right method
-            fixpoint = updateBounds(nlb, nub, cause);
+            fixpoint = updateBounds(nlb, nub, cause, reason);
             hasChanged |= fixpoint;
         } while (fixpoint);
         // now deal with holes
-        if(hasEnumeratedDomain()){
+        if (hasEnumeratedDomain()) {
             int value = vlb;
             while (value <= vub) {
-                hasChanged |= removeValue(value, cause);
+                hasChanged |= removeValue(value, cause, reason);
                 value = values.nextValue(value);
+            }
+        }
+        return hasChanged;
+    }
+
+    /**
+     * Removes the value in <code>values</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
+     * <ul>
+     * <li>If all values are out of the domain, nothing is done and the return value is <code>false</code>,</li>
+     * <li>if removing a value leads to a dead-end (domain wipe-out),
+     * a <code>ContradictionException</code> is thrown,</li>
+     * <li>otherwise, if removing the <code>values</code> from the domain can be done safely,
+     * the event type is created (the original event can be promoted) and observers are notified
+     * and the return value is <code>true</code></li>
+     * </ul>
+     *
+     * @param values set of ordered values to remove
+     * @param cause  removal release
+     * @return true if at least a value has been removed, false otherwise
+     * @throws ContradictionException if the domain become empty due to this action
+     */
+    default boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
+        return removeValues(values, cause, cause.defaultReason(this));
+    }
+
+    /**
+     * Removes all values from the domain of <code>this</code> except those in <code>values</code>. The instruction comes from <code>propagator</code>.
+     * <ul>
+     * <li>If all values are out of the domain,
+     * a <code>ContradictionException</code> is thrown,</li>
+     * <li>if the domain is a subset of values,
+     * nothing is done and the return value is <code>false</code>,</li>
+     * <li>otherwise, if removing all values but <code>values</code> from the domain can be done safely,
+     * the event type is created (the original event can be promoted) and observers are notified
+     * and the return value is <code>true</code></li>
+     * </ul>
+     *
+     * @param values set of ordered values to keep in the domain
+     * @param cause  removal cause
+     * @param reason the reason why the values are removed
+     * @return true if a at least a value has been removed, false otherwise
+     * @throws ContradictionException if the domain become empty due to this action
+     */
+    default boolean removeAllValuesBut(IntIterableSet values, ICause cause, Reason reason) throws ContradictionException {
+        boolean hasChanged = false, fixpoint;
+        int nlb, nub;
+        do {
+            int clb = getLB();
+            int cub = getUB();
+            nlb = values.nextValue(clb - 1);
+            nub = values.previousValue(cub + 1);
+            // the new bounds are now known, delegate to the right method
+            fixpoint = updateBounds(nlb, nub, cause, reason);
+            hasChanged |= fixpoint;
+        } while (fixpoint);
+        // now deal with holes
+        int to = previousValue(nub);
+        if (hasEnumeratedDomain()) {
+            int value = nextValue(nlb);
+            // iterate over the values in the domain, remove the ones that are not in values
+            for (; value <= to; value = nextValue(value)) {
+                if (!values.contains(value)) {
+                    hasChanged |= removeValue(value, cause, reason);
+                }
             }
         }
         return hasChanged;
@@ -176,29 +263,7 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @throws ContradictionException if the domain become empty due to this action
      */
     default boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
-        boolean hasChanged = false, fixpoint;
-        int nlb, nub;
-        do {
-            int clb = getLB();
-            int cub = getUB();
-            nlb = values.nextValue(clb - 1);
-            nub = values.previousValue(cub + 1);
-            // the new bounds are now known, delegate to the right method
-            fixpoint = updateBounds(nlb, nub, cause);
-            hasChanged |= fixpoint;
-        } while (fixpoint);
-        // now deal with holes
-        int to = previousValue(nub);
-        if(hasEnumeratedDomain()) {
-            int value = nextValue(nlb);
-            // iterate over the values in the domain, remove the ones that are not in values
-            for (; value <= to; value = nextValue(value)) {
-                if (!values.contains(value)) {
-                    hasChanged |= removeValue(value, cause);
-                }
-            }
-        }
-        return hasChanged;
+        return removeAllValuesBut(values, cause, cause.defaultReason(this));
     }
 
     /**
@@ -218,7 +283,7 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return true if the value has been removed, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    default boolean removeInterval(int from, int to, ICause cause) throws ContradictionException{
+    default boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         assert cause != null;
         if (from <= getLB()) {
             return updateLowerBound(to + 1, cause);
@@ -250,14 +315,35 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return true if the instantiation is done, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    boolean instantiateTo(int value, ICause cause) throws ContradictionException;
+    default boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+        return instantiateTo(value, cause, cause.defaultReason(this));
+    }
+
+    /**
+     * Instantiates the domain of <code>this</code> to <code>value</code>. The instruction comes from <code>propagator</code>.
+     * <ul>
+     * <li>If the domain of <code>this</code> is already instantiated to <code>value</code>,
+     * nothing is done and the return value is <code>false</code>,</li>
+     * <li>If the domain of <code>this</code> is already instantiated to another value,
+     * then a <code>ContradictionException</code> is thrown,</li>
+     * <li>Otherwise, the domain of <code>this</code> is restricted to <code>value</code> and the observers are notified
+     * and the return value is <code>true</code>.</li>
+     * </ul>
+     *
+     * @param value  instantiation value (int)
+     * @param cause  instantiation releaser
+     * @param reason the reason why the variable is instantiated
+     * @return true if the instantiation is done, false otherwise
+     * @throws ContradictionException if the domain become empty due to this action
+     */
+    boolean instantiateTo(int value, ICause cause, Reason reason) throws ContradictionException;
 
     /**
      * Instantiates the domain of <code>this</code> to <code>value</code>. The instruction comes from <code>propagator</code>.
      * <p>
-     *     This method deals with <code>value</code> as <b>long</b>.
-     *     If such a long can be safely cast to an int, this falls back to regular case (int).
-     *     Otherwise, it can either trivially do nothing or fail.
+     * This method deals with <code>value</code> as <b>long</b>.
+     * If such a long can be safely cast to an int, this falls back to regular case (int).
+     * Otherwise, it can either trivially do nothing or fail.
      * </p>
      * <ul>
      * <li>If the domain of <code>this</code> is already instantiated to <code>value</code>,
@@ -273,7 +359,7 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return true if the instantiation is done, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    default boolean instantiateTo(long value, ICause cause) throws ContradictionException{
+    default boolean instantiateTo(long value, ICause cause) throws ContradictionException {
         if ((int) value != value) { // cannot be cast to an int
             return instantiateTo(value < getLB() ? getLB() - 1 : getUB() + 1, cause);
         } else {
@@ -298,15 +384,37 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return true if the lower bound has been updated, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    boolean updateLowerBound(int value, ICause cause) throws ContradictionException;
+    default boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+        return updateLowerBound(value, cause, cause.defaultReason(this));
+    }
+
+    /**
+     * Updates the lower bound of the domain of <code>this</code> to <code>value</code>.
+     * The instruction comes from <code>propagator</code>.
+     * <ul>
+     * <li>If <code>value</code> is smaller than the lower bound of the domain, nothing is done and the return value is <code>false</code>,</li>
+     * <li>if updating the lower bound to <code>value</code> leads to a dead-end (domain wipe-out),
+     * a <code>ContradictionException</code> is thrown,</li>
+     * <li>otherwise, if updating the lower bound to <code>value</code> can be done safely,
+     * the event type is created (the original event can be promoted) and observers are notified
+     * and the return value is <code>true</code></li>
+     * </ul>
+     *
+     * @param value  new lower bound (included)
+     * @param cause  updating releaser
+     * @param reason the reason why the lower bound is updated
+     * @return true if the lower bound has been updated, false otherwise
+     * @throws ContradictionException if the domain become empty due to this action
+     */
+    boolean updateLowerBound(int value, ICause cause, Reason reason) throws ContradictionException;
 
     /**
      * Updates the lower bound of the domain of <code>this</code> to <code>value</code>.
      * The instruction comes from <code>propagator</code>.
      * <p>
-     *     This method deals with <code>value</code> as <b>long</b>.
-     *     If such a long can be safely cast to an int, this falls back to regular case (int).
-     *     Otherwise, it can either trivially do nothing or fail.
+     * This method deals with <code>value</code> as <b>long</b>.
+     * If such a long can be safely cast to an int, this falls back to regular case (int).
+     * Otherwise, it can either trivially do nothing or fail.
      * </p>
      * <ul>
      * <li>If <code>value</code> is smaller than the lower bound of the domain, nothing is done and the return value is <code>false</code>,</li>
@@ -351,15 +459,37 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return true if the upper bound has been updated, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    boolean updateUpperBound(int value, ICause cause) throws ContradictionException;
+    default boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+        return updateUpperBound(value, cause, cause.defaultReason(this));
+    }
+
+    /**
+     * Updates the upper bound of the domain of <code>this</code> to <code>value</code>.
+     * The instruction comes from <code>propagator</code>.
+     * <ul>
+     * <li>If <code>value</code> is greater than the upper bound of the domain, nothing is done and the return value is <code>false</code>,</li>
+     * <li>if updating the upper bound to <code>value</code> leads to a dead-end (domain wipe-out),
+     * a <code>ContradictionException</code> is thrown,</li>
+     * <li>otherwise, if updating the upper bound to <code>value</code> can be done safely,
+     * the event type is created (the original event can be promoted) and observers are notified
+     * and the return value is <code>true</code></li>
+     * </ul>
+     *
+     * @param value  new upper bound (included)
+     * @param cause  update releaser
+     * @param reason the reason why the upper bound is updated
+     * @return true if the upper bound has been updated, false otherwise
+     * @throws ContradictionException if the domain become empty due to this action
+     */
+    boolean updateUpperBound(int value, ICause cause, Reason reason) throws ContradictionException;
 
     /**
      * Updates the upper bound of the domain of <code>this</code> to <code>value</code>.
      * The instruction comes from <code>propagator</code>.
      * <p>
-     *     This method deals with <code>value</code> as <b>long</b>.
-     *     If such a long can be safely cast to an int, this falls back to regular case (int).
-     *     Otherwise, it can either trivially do nothing or fail.
+     * This method deals with <code>value</code> as <b>long</b>.
+     * If such a long can be safely cast to an int, this falls back to regular case (int).
+     * Otherwise, it can either trivially do nothing or fail.
      * </p>
      * <ul>
      * <li>If <code>value</code> is greater than the upper bound of the domain, nothing is done and the return value is <code>false</code>,</li>
@@ -411,8 +541,37 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return true if the upper bound has been updated, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    default boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException{
-        return updateLowerBound(lb, cause) | updateUpperBound(ub, cause);
+    default boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
+        return updateBounds(lb, ub, cause, cause.defaultReason(this));
+    }
+
+    /**
+     * Updates the lower bound and the upper bound of the domain of <code>this</code> to, resp. <code>lb</code> and <code>ub</code>.
+     * The instruction comes from <code>propagator</code>.
+     * <p>
+     * <ul>
+     * <li>If <code>lb</code> is smaller than the lower bound of the domain
+     * and <code>ub</code> is greater than the upper bound of the domain,
+     * <p>
+     * nothing is done and the return value is <code>false</code>,</li>
+     * <li>if updating the lower bound to <code>lb</code>, or updating the upper bound to <code>ub</code> leads to a dead-end (domain wipe-out),
+     * or if <code>lb</code> is strictly greater than <code>ub</code>,
+     * a <code>ContradictionException</code> is thrown,</li>
+     * <li>otherwise, if updating the lower bound to <code>lb</code> and/or the upper bound to <code>ub</code>
+     * can be done safely can be done safely,
+     * the event type is created (the original event can be promoted) and observers are notified
+     * and the return value is <code>true</code></li>
+     * </ul>
+     *
+     * @param lb     new lower bound (included)
+     * @param ub     new upper bound (included)
+     * @param cause  update cause
+     * @param reason the reason why the bounds are updated
+     * @return true if the upper bound has been updated, false otherwise
+     * @throws ContradictionException if the domain become empty due to this action
+     */
+    default boolean updateBounds(int lb, int ub, ICause cause, Reason reason) throws ContradictionException {
+        return updateLowerBound(lb, cause, reason) | updateUpperBound(ub, cause, reason);
     }
 
     /**
@@ -643,207 +802,6 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
         return true;
     }
 
-    /**
-     * Create the signed literal.
-     * @param rootDomain the domain at root node
-     */
-    void createLit(IntIterableRangeSet rootDomain);
-
-    /**
-     * @return the current signed literal
-     * @implSpec a call to {@link #createLit(IntIterableRangeSet)} is required
-     */
-    SignedLiteral getLit();
-
-    /**
-     * Flush the current signed literal
-     */
-    default void flushLit() {
-        this.getLit().clear();
-    }
-
-    /**
-     * Perform the union of this internal signed literal and {@code set}:
-     * <p>{@code lit} = {@code set} ∪ {@code lit}
-     *
-     * @param set         set of ints to join this signed literal with
-     * @param explanation the explanation
-     * @implNote {@code set} is considered as <b>read-only</b> and is not intended to modified.
-     * Before this methods ends, {@code set} is recycled and <b>must not be used</b>.
-     * @apiNote This method is supposed to be called on <b>non-pivot</b> variables only.
-     * It can be called many times on the same variable while explaning a cause
-     * since it applies a union operation on signed literal.
-     */
-    default void unionLit(IntIterableRangeSet set, ExplanationForSignedClause explanation) {
-        if (XParameters.FINE_PROOF) {
-            System.out.printf("%s: %s ∪ %s\n", getName(), getLit(), set);
-        }
-        this.getLit().addAll(set);
-        if (this.getLit().isEmpty()) {
-            if (XParameters.FINE_PROOF) {
-                System.out.print("skip\n");
-            }
-        } else {
-            if (XParameters.FINE_PROOF) {
-                System.out.print("\n");
-            }
-            explanation.addLit(this);
-        }
-        explanation.returnSet(set);
-    }
-
-    /**
-     * Perform the union of this internal signed literal and the range [{@code l}, {@code u}]:
-     * <p>{@code lit} = [{@code l}, {@code u}] ∪ {@code lit}
-     *
-     * @param l           inclusive lower bound
-     * @param u           inclusive upper bound
-     * @param explanation the explanation
-     * @apiNote This method is supposed to be called on <b>non-pivot</b> variables only.
-     * It can be called many times on the same variable while explaning a cause
-     * since it applies a union operation on signed literal.
-     */
-    default void unionLit(int l, int u, ExplanationForSignedClause explanation) {
-        if (XParameters.FINE_PROOF) {
-            System.out.printf("%s: %s ∪ [%d, %d]", getName(), getLit(), l, u);
-        }
-        this.getLit().addBetween(l, u);
-        if (this.getLit().isEmpty()) {
-            if (XParameters.FINE_PROOF) {
-                System.out.print("-- skip\n");
-            }
-        } else {
-            if (XParameters.FINE_PROOF) {
-                System.out.print("\n");
-            }
-            explanation.addLit(this);
-        }
-    }
-
-    /**
-     * Perform the union of this internal signed literal and {{@code v}}:
-     * <p>{@code lit} = {{@code v}} ∪ {@code lit}
-     *
-     * @param v           int value
-     * @param explanation the explanation
-     * @apiNote This method is supposed to be called on <b>non-pivot</b> variables only.
-     * It can be called many times on the same variable while explaning a cause
-     * since it applies a union operation on signed literal.
-     */
-    default void unionLit(int v, ExplanationForSignedClause explanation) {
-        if (XParameters.FINE_PROOF) {
-            System.out.printf("%s: %s ∪ {%d}", getName(), getLit(), v);
-        }
-        this.getLit().add(v);
-        if (this.getLit().isEmpty()) {
-            if (XParameters.FINE_PROOF) {
-                System.out.print("skip\n");
-            }
-        } else {
-            if (XParameters.FINE_PROOF) {
-                System.out.print("\n");
-            }
-            explanation.addLit(this);
-        }
-    }
-
-    /**
-     * Perform the intersection of this internal signed literal and {@code set}:
-     * <p>{@code lit} = {@code set} ∩ {@code lit}
-     *
-     * @param set         set of ints to cross this signed literal with.
-     * @param explanation the explanation
-     * @implNote {@code set} is considered as <b>read-only</b> and is not intended to modified.
-     * Before this methods ends, {@code set} is recycled and <b>must no be used</b>.
-     * @apiNote This method is supposed to be called on <b>pivot</b> variables only.
-     * It can be called only once on the pivot variable while explaining a cause
-     * since it applies an intersection operation on signed literal.
-     */
-    default void intersectLit(IntIterableRangeSet set, ExplanationForSignedClause explanation) {
-        if (explanation.contains(this)) {
-            if (XParameters.FINE_PROOF) {
-                System.out.printf("%s: %s ∩ %s", getName(), getLit(), set);
-            }
-            this.getLit().retainAll(set);
-            if (this.getLit().isEmpty()) {
-                if (XParameters.FINE_PROOF) {
-                    System.out.print(" -- remove");
-                }
-                explanation.removeLit(this);
-            }
-            if (XParameters.FINE_PROOF) {
-                System.out.print("\n");
-            }
-            explanation.returnSet(set);
-        } else {
-            // this is the first occurrence of the variable during explanation
-            this.unionLit(set, explanation);
-        }
-    }
-
-    /**
-     * Perform the intersection of this internal signed literal and the range [{@code l}, {@code u}]:
-     * <p>{@code lit} = [{@code l}, {@code u}] ∩ {@code lit}
-     *
-     * @param l           inclusive lower bound
-     * @param u           inclusive upper bound
-     * @param explanation the explanation
-     * @apiNote This method is supposed to be called on <b>pivot</b> variables only.
-     * It can be called only once on the pivot variable while explaining a cause
-     * since it applies an intersection operation on signed literal.
-     */
-    default void intersectLit(int l, int u, ExplanationForSignedClause explanation) {
-        if (explanation.contains(this)) {
-            if (XParameters.FINE_PROOF) {
-                System.out.printf("%s: %s ∩ [%d,%d]", getName(), getLit(), l, u);
-            }
-            this.getLit().retainBetween(l, u);
-            if (this.getLit().isEmpty()) {
-                if (XParameters.FINE_PROOF) {
-                    System.out.print(" -- remove");
-                }
-                explanation.removeLit(this);
-            }
-            if (XParameters.FINE_PROOF) {
-                System.out.print("\n");
-            }
-        } else {
-            // this is the first occurrence of the variable during explanation
-            this.unionLit(l, u, explanation);
-        }
-    }
-
-    /**
-     * Perform the intersection of this internal signed literal and {{@code v}}:
-     * <p>{@code lit} = {{@code v}} ∩ {@code lit}
-     *
-     * @param v           int value
-     * @param explanation the explanation
-     * @apiNote This method is supposed to be called on <b>pivot</b> variables only.
-     * It can be called only once on the pivot variable while explaining a cause
-     * since it applies an intersection operation on signed literal.
-     */
-    default void intersectLit(int v, ExplanationForSignedClause explanation) {
-        if (explanation.contains(this)) {
-            if (XParameters.FINE_PROOF) {
-                System.out.printf("%s: %s ∩ {%d}", getName(), getLit(), v);
-            }
-            this.getLit().retain(v);
-            if (this.getLit().isEmpty()) {
-                if (XParameters.FINE_PROOF) {
-                    System.out.print(" -- remove");
-                }
-                explanation.removeLit(this);
-            }
-            if (XParameters.FINE_PROOF) {
-                System.out.print("\n");
-            }
-        } else {
-            // this is the first occurrence of the variable during explanation
-            this.unionLit(v, explanation);
-        }
-    }
-
     default IntStream stream() {
         Spliterators.AbstractIntSpliterator it = new Spliterators.AbstractIntSpliterator(IntVar.this.getDomainSize(),
                 Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL) {
@@ -861,4 +819,81 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
         };
         return StreamSupport.intStream(it, false);
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // FOR LAZY CLAUSE GENERATION ONLY
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Get the literal corresponding to the value v and the type t
+     *
+     * @param val the value
+     * @param type the corresponding type (NE, EQ, GE or LE)
+     * @return the literal
+     */
+    default int getLit(int val, int type) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Get the literal corresponding to [x != v]
+     * @param v the value
+     * @return the literal
+     * @implNote a literal <code>l</code> can be negated with <code>MiniSat.neg(l)</code>
+     */
+    default int getNELit(int v) {
+        return getLit(v, LR_NE);
+    }
+
+    /**
+     * Get the literal corresponding to [x = v]
+     * @param v the value
+     * @return the literal
+     * @implNote a literal <code>l</code> can be negated with <code>MiniSat.neg(l)</code>
+     */
+    default int getEQLit(int v) {
+        return getLit(v, LR_EQ);
+    }
+
+    /**
+     * Get the literal corresponding to [x >= v]
+     * @param v the value
+     * @return the literal
+     * @implNote a literal <code>l</code> can be negated with <code>MiniSat.neg(l)</code>
+     */
+    default int getGELit(int v) {
+        return getLit(v, LR_GE);
+    }
+
+    /**
+     * Get the literal corresponding to [x <= v]
+     * @param v the value
+     * @return the literal
+     * @implNote a literal <code>l</code> can be negated with <code>MiniSat.neg(l)</code>
+     */
+    default int getLELit(int v) {
+        return getLit(v, LR_LE);
+    }
+
+    /**
+     * @return the literal corresponding to current lower bound
+     */
+    default int getMinLit() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @return the literal corresponding to current upper bound
+     */
+    default int getMaxLit() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @return the literal corresponding to current instantiation value
+     */
+    default int getValLit() {
+        throw new UnsupportedOperationException();
+    }
+
 }

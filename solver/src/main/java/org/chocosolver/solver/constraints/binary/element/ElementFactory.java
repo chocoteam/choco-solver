@@ -65,12 +65,12 @@ public class ElementFactory {
      * @return an Element constraint
      */
     public static Constraint detect(IntVar VALUE, int[] TABLE, IntVar INDEX, int OFFSET) {
-        // first chech the variables match
+        // first check the variables match
         int st = sawtooth(TABLE);
         if (st == -1) { // all values from TABLE are the same OR TABLE only contains one value
             assert TABLE[0] == TABLE[TABLE.length - 1];
             return new Constraint("FAKE_ELMT",
-                    new PropMember(INDEX, new IntIterableRangeSet(OFFSET, OFFSET + TABLE.length - 1),false),
+                    new PropMember(INDEX, new IntIterableRangeSet(OFFSET, OFFSET + TABLE.length - 1), false),
                     new PropEqualXC(VALUE, TABLE[0])
             );
         }

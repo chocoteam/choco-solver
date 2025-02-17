@@ -7,7 +7,7 @@ import os
 import sys
 
 # THIS IS WHERE YOU NEED TO CHANGE THE PATH TO THE JAR FILE
-JAR_FILE='~/.m2/repository/org/choco-solver/choco-parsers/4.10.18/choco-parsers-4.10.18-light.jar'
+JAR_FILE='~/.m2/repository/org/choco-solver/choco-parsers/5.0.0-beta.1/choco-parsers-5.0.0-beta.1-light.jar'
 
 JVM_ARGS = '-server -Xss64M -Xms2G -Xmx8G -XX:NewSize=512M'
 LOG_LEVEL = 'COMPET'
@@ -63,6 +63,9 @@ parser.add_argument('-r', '--random-seed', type=int,
 parser.add_argument('--cp-profiler', type=parse_id_port,
                     help='enable the cp-profiler with the given id and port.')
 
+parser.add_argument('-lcg', '--lazy-clause-generation',  action='store_true',
+                    help='when invoked with this option the solver uses lazy clause generation.')
+
 parser.add_argument('--jvm-args', type=str,
                     default=JVM_ARGS,
                     help='JVM arguments to pass to the Java Virtual Machine.')
@@ -101,6 +104,8 @@ if args.random_seed:
     arguments += ' -r ' + str(args.random_seed)
 if args.cp_profiler:
     arguments += ' --cp-profiler ' + str(args.cp_profiler[0]) + ',' + str(args.cp_profiler[1])
+if args.lazy_clause_generation:
+    arguments += ' -lcg'
 
 cmd = f'java {args.jvm_args} -cp {args.jar_file} org.chocosolver.parser.flatzinc.ChocoFZN {args.fzn_file} {arguments}'
 

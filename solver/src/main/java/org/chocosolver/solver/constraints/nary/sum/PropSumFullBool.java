@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints.nary.sum;
 
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -25,6 +26,7 @@ import org.chocosolver.solver.variables.events.IntEventType;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
+@Explained
 public class PropSumFullBool extends PropSum {
 
     /**
@@ -32,10 +34,11 @@ public class PropSumFullBool extends PropSum {
      * Coefficients are induced by <code>pos</code>:
      * those before <code>pos</code> (included) are equal to 1,
      * the other ones are equal to -1.
-     * @param variables list of boolean variables
-     * @param pos position of the last positive (induced) coefficient
-     * @param o operator
-     * @param b bound to respect
+     *
+     * @param variables        list of boolean variables
+     * @param pos              position of the last positive (induced) coefficient
+     * @param o                operator
+     * @param b                bound to respect
      * @param reactOnFineEvent set to <tt>true</tt> to react on fine events
      */
     protected PropSumFullBool(BoolVar[] variables, int pos, Operator o, int b, boolean reactOnFineEvent) {
@@ -47,10 +50,11 @@ public class PropSumFullBool extends PropSum {
      * Coefficients are induced by <code>pos</code>:
      * those before <code>pos</code> (included) are equal to 1,
      * the other ones are equal to -1.
+     *
      * @param variables list of boolean variables
-     * @param pos position of the last positive (induced) coefficient
-     * @param o operator
-     * @param b bound to respect
+     * @param pos       position of the last positive (induced) coefficient
+     * @param o         operator
+     * @param b         bound to respect
      */
     public PropSumFullBool(BoolVar[] variables, int pos, Operator o, int b) {
         this(variables, pos, o, b, false);
@@ -74,7 +78,7 @@ public class PropSumFullBool extends PropSum {
                 ub++;
             }
         }
-        for (; i < l ; i++) { // then the negative ones
+        for (; i < l; i++) { // then the negative ones
             if (vars[i].isInstantiated()) {
                 k = vars[i].getLB();
                 lb -= k;
@@ -87,7 +91,6 @@ public class PropSumFullBool extends PropSum {
         sumUB = ub;
     }
 
-    @SuppressWarnings({"NullableProblems"})
     @Override
     protected void filterOnEq() throws ContradictionException {
         int F = b - sumLB;
@@ -97,11 +100,11 @@ public class PropSumFullBool extends PropSum {
             // positive coefficients first
             while (i < pos) {
                 lb = vars[i].getLB();
-                if (F <= 0 && vars[i].updateUpperBound(F + lb, this)) {
+                if (F <= 0 && vars[i].updateUpperBound(F + lb, this, explainByMin(i))) {
                     E++;
                 }
                 ub = vars[i].getUB();
-                if (E <= 0 && vars[i].updateLowerBound(ub - E, this)) {
+                if (E <= 0 && vars[i].updateLowerBound(ub - E, this, explainByMax(i))) {
                     F++;
                 }
                 i++;
@@ -109,11 +112,11 @@ public class PropSumFullBool extends PropSum {
             // then negative ones
             while (i < l) {
                 lb = vars[i].getUB();
-                if (F <= 0 && vars[i].updateLowerBound(-F + lb, this)) {
+                if (F <= 0 && vars[i].updateLowerBound(-F + lb, this, explainByMin(i))) {
                     E--;
                 }
                 ub = vars[i].getLB();
-                if (E <= 0 && vars[i].updateUpperBound(ub + E, this)) {
+                if (E <= 0 && vars[i].updateUpperBound(ub + E, this, explainByMax(i))) {
                     F--;
                 }
                 i++;
@@ -122,7 +125,6 @@ public class PropSumFullBool extends PropSum {
     }
 
 
-    @SuppressWarnings({"NullableProblems"})
     @Override
     protected void filterOnLeq() throws ContradictionException {
         int F = b - sumLB;
@@ -132,7 +134,7 @@ public class PropSumFullBool extends PropSum {
             // positive coefficients first
             while (i < pos) {
                 lb = vars[i].getLB();
-                if (vars[i].updateUpperBound(F + lb, this)) {
+                if (vars[i].updateUpperBound(F + lb, this, explainByMin(i))) {
                     E++;
                 }
                 i++;
@@ -140,7 +142,7 @@ public class PropSumFullBool extends PropSum {
             // then negative ones
             while (i < l) {
                 lb = vars[i].getUB();
-                if (vars[i].updateLowerBound(-F + lb, this)) {
+                if (vars[i].updateLowerBound(-F + lb, this, explainByMin(i))) {
                     E--;
                 }
                 i++;
@@ -151,7 +153,6 @@ public class PropSumFullBool extends PropSum {
         }
     }
 
-    @SuppressWarnings({"NullableProblems"})
     @Override
     protected void filterOnGeq() throws ContradictionException {
         int F = b - sumLB;
@@ -162,7 +163,7 @@ public class PropSumFullBool extends PropSum {
             // positive coefficients first
             while (i < pos) {
                 ub = vars[i].getUB();
-                if (vars[i].updateLowerBound(ub - E, this)) {
+                if (vars[i].updateLowerBound(ub - E, this, explainByMax(i))) {
                     F++;
                 }
                 i++;
@@ -170,7 +171,7 @@ public class PropSumFullBool extends PropSum {
             // then negative ones
             while (i < l) {
                 ub = vars[i].getLB();
-                if (vars[i].updateUpperBound(ub + E, this)) {
+                if (vars[i].updateUpperBound(ub + E, this, explainByMax(i))) {
                     F--;
                 }
                 i++;
@@ -197,7 +198,7 @@ public class PropSumFullBool extends PropSum {
     }
 
     @Override
-    protected PropSum opposite(){
+    protected PropSum opposite() {
         BoolVar[] bvars = new BoolVar[vars.length];
         //noinspection SuspiciousSystemArraycopy
         System.arraycopy(vars, 0, bvars, 0, bvars.length);

@@ -9,23 +9,21 @@
  */
 package org.chocosolver.solver.variables.view.bool;
 
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.AbstractVariable;
 import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
-import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
 import org.chocosolver.solver.variables.view.IntView;
 import org.chocosolver.solver.variables.view.ViewDeltaMonitor;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.EvtScheduler;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 /**
@@ -34,10 +32,12 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
  * @author Charles Prud'homme
  * @since 31/07/12
  */
+@Explained
 public final class BoolNotView<B extends BoolVar> extends IntView<B> implements BoolVar {
 
     /**
      * Create a not view based on <i>var<i/>
+     *
      * @param var a boolean variable
      */
     public BoolNotView(B var) {
@@ -50,8 +50,8 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
     }
 
     @Override
-    public boolean removeValue(int value, ICause cause) throws ContradictionException {
-        return contains(value) && instantiateTo(1 - value, cause);
+    public boolean removeValue(int value, ICause cause, Reason reason) throws ContradictionException {
+        return contains(value) && instantiateTo(1 - value, cause, reason);
     }
 
     @Override
@@ -87,7 +87,6 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
             } else if (to == 0) {
                 hasChanged = instantiateTo(1, cause);
             } else {
-                model.getSolver().getEventObserver().instantiateTo(this, 2, cause, 0, 1);
                 this.contradiction(cause, AbstractVariable.MSG_EMPTY);
             }
         }
@@ -95,13 +94,9 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
-        if (!this.contains(value)) {
-            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
-            this.contradiction(cause, MSG_INST);
-        } else if (!isInstantiated()) {
-            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
-            boolean done = var.instantiateTo(1 - value, this);
+    public boolean instantiateTo(int value, ICause cause, Reason reason) throws ContradictionException {
+        if (!isInstantiatedTo(value)) {
+            boolean done = var.instantiateTo(1 - value, this, reason);
             notifyPropagators(IntEventType.INSTANTIATE, cause);
             return done;
         }
@@ -109,13 +104,13 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
     }
 
     @Override
-    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
-        return value > 0 && instantiateTo(value, cause);
+    public boolean updateLowerBound(int value, ICause cause, Reason reason) throws ContradictionException {
+        return value > 0 && instantiateTo(value, cause, reason);
     }
 
     @Override
-    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
-        return value < 1 && instantiateTo(value, cause);
+    public boolean updateUpperBound(int value, ICause cause, Reason reason) throws ContradictionException {
+        return value < 1 && instantiateTo(value, cause, reason);
     }
 
     @Override
@@ -147,8 +142,8 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
     }
 
     @Override
-    public int getValue() throws IllegalStateException{
-        if(!isInstantiated()){
+    public int getValue() throws IllegalStateException {
+        if (!isInstantiated()) {
             throw new IllegalStateException("getValue() can be only called on instantiated variable. " +
                     name + " is not instantiated");
         }
@@ -272,37 +267,37 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
     }
 
     @Override
-    public void justifyEvent(IntEventType mask, int one, int two, int three) {
-        assert mask == IntEventType.INSTANTIATE;
-        model.getSolver().getEventObserver().instantiateTo(this, 1 - one, this, 0, 1);
+    public int getLit(int val, int t) {
+        if (val < 0) {
+            return 1 ^ (t & 1);  // true, false, true, false
+        }
+        if (val > 1) {
+            return t - 1 >> 1 & 1;  // true, false, false, true
+        }
+        if (t >= 2) {
+            assert 5 - t >= 0;
+            return var.getLit(1 - val, 5 - t);
+        }
+        return var.getLit(1 - val, t);
     }
 
     @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        IntVar pivot = explanation.readVar(p);
-        if(this == pivot){
-            this.intersectLit(getValue(), explanation);
-            var.unionLit(getValue(), explanation);
-        }else{
-            this.unionLit(1 - getValue(), explanation);
-            var.intersectLit(1 - getValue(), explanation);
-        }
+    public int getMinLit() {
+        return var.getMaxLit();
     }
 
     @Override
-    public void createLit(IntIterableRangeSet rootDomain) {
-        if(this.literal != null){
-            throw new IllegalStateException("createLit(Implications) called twice");
-        }
-        this.literal = new SignedLiteral.Boolean();
+    public int getMaxLit() {
+        return var.getMinLit();
     }
 
+    @Override
+    public int getValLit() {
+        return var.getValLit();
+    }
 
     @Override
-    public SignedLiteral getLit() {
-        if (this.literal == null) {
-            throw new NullPointerException("getLit() called on null, a call to createLit(Implications) is required");
-        }
-        return this.literal;
+    public int satVar() {
+        return (var.satVar() + 1) * -1; // for SatFactory
     }
 }

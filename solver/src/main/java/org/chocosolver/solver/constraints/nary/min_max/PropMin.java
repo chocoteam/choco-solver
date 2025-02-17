@@ -9,13 +9,13 @@
  */
 package org.chocosolver.solver.constraints.nary.min_max;
 
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 import static org.chocosolver.solver.constraints.PropagatorPriority.LINEAR;
 import static org.chocosolver.util.tools.ArrayUtils.concat;
@@ -26,6 +26,7 @@ import static org.chocosolver.util.tools.ArrayUtils.concat;
  * @author Jean-Guillaume Fages
  * @since 15/12/2013
  */
+@Explained
 public class PropMin extends Propagator<IntVar> {
 
     private final int n;
@@ -51,16 +52,19 @@ public class PropMin extends Propagator<IntVar> {
             int min = vars[n].getLB();
             // update min
             for (int i = 0; i < n; i++) {
-                filter |= vars[i].updateLowerBound(min, this);
+                filter |= vars[i].updateLowerBound(min, this,
+                        lcg() ? Reason.r(vars[n].getMinLit()) : Reason.undef());
                 lb = Math.min(lb, vars[i].getLB());
                 ub = Math.min(ub, vars[i].getUB());
             }
-            filter |= vars[n].updateLowerBound(lb, this);
-            filter |= vars[n].updateUpperBound(ub, this);
+            filter |= vars[n].updateLowerBound(lb, this,
+                    lcg() ? Propagator.lbounds(vars[n], vars) : Reason.undef());
+            filter |= vars[n].updateUpperBound(ub, this,
+                    lcg() ? Propagator.ubounds(vars[n], vars) : Reason.undef());
             ub = Math.min(ub, vars[n].getUB()); // to deal with holes in vars[n] or its instantiation
             // back-propagation
             int c = 0, idx = -1;
-            for (int i = 0; i < n; i++) {
+            for (int i = 0; i < n && c >= i - 1; i++) {
                 if (vars[i].getLB() > ub) {
                     c++;
                 } else {
@@ -68,17 +72,19 @@ public class PropMin extends Propagator<IntVar> {
                 }
             }
             if (c == vars.length - 2) {
-                filter = false;
-                vars[idx].updateBounds(vars[n].getLB(), vars[n].getUB(), this);
-                if (vars[n].isInstantiated()) {
-                    setPassive();
-                } else if (vars[idx].hasEnumeratedDomain()) {
-                    // for enumerated variables only
-                    while (vars[n].getLB() != vars[idx].getLB()
-                            || vars[n].getUB() != vars[idx].getUB()) {
-                        vars[n].updateBounds(vars[idx].getLB(), vars[idx].getUB(), this);
-                        vars[idx].updateBounds(vars[n].getLB(), vars[n].getUB(), this);
+                Reason r = Reason.undef();
+                if (lcg()) {
+                    int[] ps = new int[n + 1];
+                    for (int i = 0, m = 1; i < n; i++, m++) {
+                        ps[m] = vars[i].getMinLit();
                     }
+                    ps[idx + 1] = vars[n].getMaxLit();
+                    r = Reason.r(ps);
+                }
+                filter |= vars[idx].updateUpperBound(vars[n].getUB(), this, r);
+                if (vars[n].isInstantiated() && vars[idx].isInstantiatedTo(vars[n].getValue())) {
+                    setPassive();
+                    return;
                 }
             }
         } while (filter);
@@ -89,12 +95,12 @@ public class PropMin extends Propagator<IntVar> {
         int lb = vars[n].getLB();
         int minLb = vars[0].getLB();
         for (int i = 0; i < n; i++) {
-            minLb = Math.min(minLb,vars[i].getLB());
+            minLb = Math.min(minLb, vars[i].getLB());
             if (vars[i].getUB() < lb) {
                 return ESat.FALSE;
             }
         }
-        if(minLb>vars[n].getUB()){
+        if (minLb > vars[n].getUB()) {
             return ESat.FALSE;
         }
         for (int i = 0; i < n; i++) {
@@ -110,43 +116,6 @@ public class PropMin extends Propagator<IntVar> {
             }
         }
         return ESat.UNDEFINED;
-    }
-
-    @SuppressWarnings("Duplicates")
-    @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        IntVar pivot = explanation.readVar(p);
-        int mask = explanation.readMask(p);
-        int m = explanation.readValue(p);
-        if (pivot == vars[n]) {
-            if (IntEventType.isInclow(mask)) {
-                vars[n].intersectLit(m, IntIterableRangeSet.MAX, explanation);
-                for (int i = 0; i < n; i++) {
-                    if (explanation.readDom(vars[i]).min() == m) {
-                        IntIterableRangeSet seti = explanation.universe();
-                        seti.removeBetween(m, IntIterableRangeSet.MAX);
-                        vars[i].unionLit(seti, explanation);
-                    }
-                }
-            } else if (IntEventType.isDecupp(mask)) {
-                vars[n].intersectLit(IntIterableRangeSet.MIN, m, explanation);
-                for (int i = 0; i < n; i++) {
-                    if (explanation.readDom(vars[i]).max() == m) {
-                        IntIterableRangeSet seti = explanation.universe();
-                        seti.removeBetween(IntIterableRangeSet.MIN, m);
-                        vars[i].unionLit(seti, explanation);
-                    }
-                }
-            }
-        } else {
-            if (IntEventType.isInclow(mask)) {
-                vars[n].unionLit(IntIterableRangeSet.MIN, m - 1, explanation);
-                pivot.intersectLit(m, IntIterableRangeSet.MAX, explanation);
-            } else if (IntEventType.isDecupp(mask)) {
-                vars[n].unionLit(m + 1, IntIterableRangeSet.MAX, explanation);
-                pivot.intersectLit(IntIterableRangeSet.MIN, m, explanation);
-            }
-        }
     }
 
     @Override

@@ -9,28 +9,29 @@
  */
 package org.chocosolver.solver.constraints.nary.alldifferent;
 
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.stack.array.TIntArrayStack;
-
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
-
-import java.util.stream.IntStream;
 
 /**
  * Propagator for AllDifferent that only reacts on instantiation
  *
  * @author Charles Prud'homme
  */
+@Explained
 public class PropAllDiffInst extends Propagator<IntVar> {
 
-    protected static class FastResetArrayStack extends TIntArrayStack{
-        void resetQuick(){
+    protected static class FastResetArrayStack extends TIntArrayStack {
+        void resetQuick() {
             this._list.resetQuick();
         }
     }
@@ -51,6 +52,22 @@ public class PropAllDiffInst extends Propagator<IntVar> {
     public PropAllDiffInst(IntVar[] variables) {
         super(variables, PropagatorPriority.UNARY, true);
         n = vars.length;
+        if (lcg()) {
+            IntIterableRangeSet set = new IntIterableRangeSet();
+            for (IntVar var : vars) {
+                set.addAll(var);
+            }
+            if (set.size() == vars.length) { // there are no spare values
+                TIntList ps = new TIntArrayList();
+                for (int v : set) {
+                    for (int i = 0; i < vars.length; i++) {
+                        ps.add(vars[i].getLit(v, IntVar.LR_EQ));
+                    }
+                    getModel().getSolver().getSat().addClause(ps);
+                    ps.clear();
+                }
+            }
+        }
     }
 
 
@@ -93,12 +110,26 @@ public class PropAllDiffInst extends Propagator<IntVar> {
             int val = vars[vidx].getValue();
             for (int i = 0; i < n; i++) {
                 if (i != vidx) {
-                    if (vars[i].removeValue(val, this) && vars[i].isInstantiated()) {
-                        toCheck.push(i);
+                    if (!lcg()) {
+                        if (vars[i].removeValue(val, this) && vars[i].isInstantiated()) {
+                            toCheck.push(i);
+                        }
+                    } else {
+                        if (vars[i].isInstantiatedTo(val)) {
+                            this.fails(explain(i, vidx));
+                        }
+                        if (vars[i].removeValue(val, this, explain(vidx, -1))
+                                && vars[i].isInstantiated()) {
+                            toCheck.push(i);
+                        }
                     }
                 }
             }
         }
+    }
+
+    private Reason explain(int i, int j) {
+        return Reason.r(vars[i].getValLit(), j > -1 ? vars[j].getValLit() : 0);
     }
 
 
@@ -119,56 +150,5 @@ public class PropAllDiffInst extends Propagator<IntVar> {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
-    }
-
-    /**
-     * Find in the implication graph and add in the explanation one instantiation event to the value t
-     * @param t value
-     */
-    private void explainEqualExistit(ExplanationForSignedClause e, int[] indexes, int t){
-        for (int i : indexes)  {
-            if (vars[i].isInstantiatedTo(t)){
-                vars[i].unionLit(e.complement(vars[i]), e);
-                break;
-            }
-        }
-    }
-    /**
-     * @implSpec
-     * This version of alldiff algo only reacts on instantiation.
-     * So, the explaining algorithm should also be basic, and only infer on instantiation.
-     * <p>
-     *     First, from Dx and Dx', resp. the domain of x before and after propagation, deduce the values removed.
-     *     Then, scan other variables and store those that intersect the set of values.
-     *     Fill the clause with stored variables only.
-     * </p>
-     * <p>
-     *     Optionally, since this propagator can filter multiple variables in one loop, a good approach is to
-     *     go back in the implication graph as much as possible.
-     * </p>
-     *
-     */
-    @Override
-    public void explain(int p,ExplanationForSignedClause e) {
-        IntVar pivot = e.readVar(p);
-        int[] X = IntStream.rangeClosed(0, vars.length - 1).filter(i->vars[i]!=pivot).toArray();
-        switch (e.readMask(p)) {
-            case 1://REMOVE
-                IntIterableRangeSet dbef = e.domain(pivot);
-                dbef.removeAll(e.readDom(p));
-                int t = dbef.min();
-                explainEqualExistit(e, X, t);
-                IntIterableRangeSet set = e.universe();
-                set.remove(t);
-                pivot.intersectLit(set, e);
-                break;
-            case 2://INCLOW
-            case 4://DECUPP
-            case 8://INSTANTIATE
-            case 0://VOID
-            case 6://BOUND inclow+decup
-            default:
-                throw new UnsupportedOperationException("Unknown event type for explanation");
-        }
     }
 }

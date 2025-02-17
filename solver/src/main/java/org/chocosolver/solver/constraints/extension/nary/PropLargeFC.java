@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints.extension.nary;
 
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -21,6 +22,7 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet
  * @author Charles Prud'homme
  * @since 08/06/11
  */
+@Explained(ignored = true, comment = "Turned into clauses")
 public class PropLargeFC extends PropLargeCSP<LargeRelation> {
 
     private final int[] currentTuple;

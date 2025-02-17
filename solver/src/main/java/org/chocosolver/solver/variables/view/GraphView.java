@@ -11,13 +11,11 @@ package org.chocosolver.solver.variables.view;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.GraphVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.GraphDelta;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.solver.variables.events.IEventType;
-import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.GraphEvtScheduler;
 import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.graphs.IGraph;
@@ -170,16 +168,6 @@ public abstract class GraphView<V extends Variable, E extends IGraph> extends Ab
     @Override
     protected EvtScheduler createScheduler() {
         return new GraphEvtScheduler();
-    }
-
-    @Override
-    public void explain(int pivot, ExplanationForSignedClause explanation) {
-        throw new UnsupportedOperationException("GraphView does not support explanation.");
-    }
-
-    @Override
-    public void justifyEvent(IntEventType mask, int one, int two, int three) {
-        throw new UnsupportedOperationException("GraphView does not support explanation.");
     }
 
     @Override

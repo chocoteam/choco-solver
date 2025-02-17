@@ -19,6 +19,8 @@ package org.chocosolver.solver.constraints.nary.circuit;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -34,6 +36,7 @@ import java.util.BitSet;
  *
  * @author Jean-Guillaume Fages
  */
+@Explained
 public class PropNoSubtour extends Propagator<IntVar> {
 
     //***********************************************************************************
@@ -55,7 +58,7 @@ public class PropNoSubtour extends Propagator<IntVar> {
      * runs incrementally in O(1) per instantiation event
      *
      * @param variables array of integer variables
-     * @param offset offset
+     * @param offset    offset
      */
     public PropNoSubtour(IntVar[] variables, int offset) {
         super(variables, PropagatorPriority.UNARY, true);
@@ -80,8 +83,9 @@ public class PropNoSubtour extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         TIntArrayList fixedVar = new TIntArrayList();
         for (int i = 0; i < n; i++) {
-            vars[i].removeValue(i + offset, this);
-            vars[i].updateBounds(offset, n - 1 + offset, this);
+            vars[i].removeValue(i + offset, this, Reason.undef());
+            vars[i].updateLowerBound(offset, this, Reason.undef());
+            vars[i].updateUpperBound(n - 1 + offset, this, Reason.undef());
             if (vars[i].isInstantiated()) {
                 fixedVar.add(i);
             }
@@ -110,24 +114,28 @@ public class PropNoSubtour extends Propagator<IntVar> {
         int last = end[val].get(); // last in [0,n-1]
         int start = origin[var].get(); // start in [0,n-1]
         if (origin[val].get() != val) {
-            fails(); // TODO: could be more precise, for explanation purpose
+            fails(lcg() ? Propagator.reason(null, vars) : Reason.undef());
         }
         if (end[var].get() != var) {
-            fails(); // TODO: could be more precise, for explanation purpose
+            // should not happen
+            throw new UnsupportedOperationException("unexpected situation");
         }
         if (val == start) {
             if (size[start].get() != n) {
-                fails(); // TODO: could be more precise, for explanation purpose
+                // sub cycle detected ==> global failure
+                throw new UnsupportedOperationException("unexpected situation");
             }
         } else {
             size[start].add(size[val].get());
             if (size[start].get() == n) {
-                vars[last].instantiateTo(start + offset, this);
+                vars[last].instantiateTo(start + offset, this,
+                        lcg() ? Propagator.reason(vars[last], vars) : Reason.undef());
                 setPassive();
+//                throw new UnsupportedOperationException("unexpected situation");
             }
             boolean isInst = false;
-            if (size[start].get() < n) {
-                if (vars[last].removeValue(start + offset, this)) {
+            if (size[start].get() < n && vars[last].contains(start + offset)) {
+                if (vars[last].removeValue(start + offset, this, explainPrevent(start))) {
                     isInst = vars[last].isInstantiated();
                 }
             }
@@ -137,6 +145,21 @@ public class PropNoSubtour extends Propagator<IntVar> {
                 varInstantiated(last, vars[last].getValue() - offset);
             }
         }
+    }
+
+    private Reason explainPrevent(int start) {
+        if (lcg()) {
+            int[] ps = new int[size[start].get()];
+            int m = 1;
+            int var = origin[start].get();
+            while (m < ps.length) {
+                ps[m] = vars[var].getValLit();
+                m++;
+                var = vars[var].getValue() - offset;
+            }
+            return Reason.r(ps);
+        }
+        return Reason.undef();
     }
 
     @Override

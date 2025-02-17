@@ -10,6 +10,7 @@
 package org.chocosolver.util;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
 import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
@@ -123,7 +124,20 @@ public class ProblemMaker {
      */
     @SuppressWarnings("Duplicates")
     public static Model makeGolombRuler(int m) {
-        Model model = new Model();
+        return makeGolombRuler(m, false);
+    }
+
+    /**
+     * Creates a Golomb ruler problem of size m.
+     * The variables can be accessed though the hook name "ticks" and "diffs".
+     *
+     * @param m size of the rule
+     * @param lcg use LCG
+     * @return a solve-ready solver
+     */
+    @SuppressWarnings("Duplicates")
+    public static Model makeGolombRuler(int m, boolean lcg) {
+        Model model = new Model(Settings.dev().setLCG(lcg));
         IntVar[] ticks = model.intVarArray("a", m, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);
         model.addHook("ticks", ticks);
         IntVar[] diffs = model.intVarArray("d", (m * m - m) / 2, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, false);

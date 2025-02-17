@@ -9,12 +9,12 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
@@ -27,6 +27,7 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
  * @author Charles Prud'homme
  * @since 03/02/2016.
  */
+@Explained(partial = true, comment = "AC disabled due to lack of explanation")
 public class PropXplusYeqZ extends Propagator<IntVar> {
 
     private static final int THRESHOLD = 300;
@@ -72,7 +73,7 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
             loop = filterPlus(z, x, y);
             loop |= filterMinus(x, z, y);
             loop |= filterMinus(y, z, x);
-            loop &= allbounded; // loop only when BC is selected
+            loop &= (allbounded || lcg()); // loop only when BC is selected
         } while (loop);
     }
 
@@ -88,9 +89,12 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
     private boolean filterPlus(int vr, int v1, int v2) throws ContradictionException {
         int lb = vars[v1].getLB() + vars[v2].getLB();
         int ub = vars[v1].getUB() + vars[v2].getUB();
-        boolean change = vars[vr].updateBounds(lb, ub, this);
-        if ((long) vars[v1].getDomainSize() * vars[v2].getDomainSize() > THRESHOLD) return change;
+        boolean change = vars[vr].updateLowerBound(lb, this,
+                lcg() ? Reason.r(vars[v1].getMinLit(), vars[v2].getMinLit()) : Reason.undef());
+        change |= vars[vr].updateUpperBound(ub, this,
+                lcg() ? Reason.r(vars[v1].getMaxLit(), vars[v2].getMaxLit()) : Reason.undef());
         if (!allbounded) {
+            if ((long) vars[v1].getDomainSize() * vars[v2].getDomainSize() > THRESHOLD || lcg()) return change;
             set.clear();
             int ub1 = vars[v1].getUB();
             int ub2 = vars[v2].getUB();
@@ -107,7 +111,7 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
                 l1 = vars[v1].nextValue(u1);
                 u1 = vars[v1].nextValueOut(l1) - 1;
             }
-            change |= vars[vr].removeAllValuesBut(set, this);
+            vars[vr].removeAllValuesBut(set, this); // todo explain
         }
         return change;
     }
@@ -124,9 +128,12 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
     private boolean filterMinus(int vr, int v1, int v2) throws ContradictionException {
         int lb = vars[v1].getLB() - vars[v2].getUB();
         int ub = vars[v1].getUB() - vars[v2].getLB();
-        boolean change = vars[vr].updateBounds(lb, ub, this);
-        if ((long) vars[v1].getDomainSize() * vars[v2].getDomainSize() > THRESHOLD) return change;
+        boolean change = vars[vr].updateLowerBound(lb, this,
+                lcg() ? Reason.r(vars[v1].getMinLit(), vars[v2].getMaxLit()) : Reason.undef());
+        change |= vars[vr].updateUpperBound(ub, this,
+                lcg() ? Reason.r(vars[v1].getMaxLit(), vars[v2].getMinLit()) : Reason.undef());
         if (!allbounded) {
+            if ((long) vars[v1].getDomainSize() * vars[v2].getDomainSize() > THRESHOLD || lcg()) return change;
             set.clear();
             int ub1 = vars[v1].getUB();
             int ub2 = vars[v2].getUB();
@@ -143,7 +150,7 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
                 l1 = vars[v1].nextValue(u1);
                 u1 = vars[v1].nextValueOut(l1) - 1;
             }
-            change |= vars[vr].removeAllValuesBut(set, this);
+            vars[vr].removeAllValuesBut(set, this); // todo explain
         }
         return change;
     }
@@ -166,81 +173,5 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
             return ESat.FALSE;
         }
         return ESat.UNDEFINED;
-    }
-
-    @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-//        super.explain(explanation, front, ig, p);
-        int m = explanation.readMask(p);
-        IntVar pivot = explanation.readVar(p);
-        IntIterableRangeSet dx, dy, dz;
-        if (IntEventType.isInclow(m)) {
-            if (pivot == vars[z]) {
-                int a = explanation.readDom(vars[x]).min();
-                int b = explanation.readDom(vars[y]).min();
-                dx = explanation.universe();
-                dx.removeBetween(a, IntIterableRangeSet.MAX);
-                dy = explanation.universe();
-                dy.removeBetween(b, IntIterableRangeSet.MAX);
-                vars[x].unionLit(dx, explanation);
-                vars[y].unionLit(dy, explanation);
-                vars[z].intersectLit(a + b, IntIterableRangeSet.MAX, explanation);
-            } else if (pivot == vars[x]) {
-                int a = explanation.readDom(vars[y]).max();
-                int b = explanation.readDom(vars[z]).min();
-                dy = explanation.universe();
-                dy.removeBetween(IntIterableRangeSet.MIN, a);
-                dz = explanation.universe();
-                dz.removeBetween(b, IntIterableRangeSet.MAX);
-                vars[x].intersectLit(b - a, IntIterableRangeSet.MAX, explanation);
-                vars[y].unionLit(dy, explanation);
-                vars[z].unionLit(dz, explanation);
-            } else {
-                int a = explanation.readDom(vars[x]).max();
-                int b = explanation.readDom(vars[z]).min();
-                dx = explanation.universe();
-                dx.removeBetween(IntIterableRangeSet.MIN, a);
-                dz = explanation.universe();
-                dz.removeBetween(b, IntIterableRangeSet.MAX);
-                vars[x].unionLit(dx, explanation);
-                vars[y].intersectLit(b - a, IntIterableRangeSet.MAX, explanation);
-                vars[z].unionLit(dz, explanation);
-            }
-        } else if (IntEventType.isDecupp(m)) {
-            if (pivot == vars[z]) {
-                int a = explanation.readDom(vars[x]).max();
-                int b = explanation.readDom(vars[y]).max();
-                dx = explanation.universe();
-                dx.removeBetween(IntIterableRangeSet.MIN, a);
-                dy = explanation.universe();
-                dy.removeBetween(IntIterableRangeSet.MIN, b);
-                vars[x].unionLit(dx, explanation);
-                vars[y].unionLit(dy, explanation);
-                vars[z].intersectLit(IntIterableRangeSet.MIN, a + b, explanation);
-            } else if (pivot == vars[x]) {
-                int a = explanation.readDom(vars[y]).min();
-                int b = explanation.readDom(vars[z]).max();
-                dy = explanation.universe();
-                dy.removeBetween(a, IntIterableRangeSet.MAX);
-                dz = explanation.universe();
-                dz.removeBetween(IntIterableRangeSet.MIN, b);
-                vars[x].intersectLit(IntIterableRangeSet.MIN, b - a, explanation);
-                vars[y].unionLit(dy, explanation);
-                vars[z].unionLit(dz, explanation);
-            } else {
-                int a = explanation.readDom(vars[x]).min();
-                int b = explanation.readDom(vars[z]).max();
-                dx = explanation.universe();
-                dx.removeBetween(a, IntIterableRangeSet.MAX);
-                dz = explanation.universe();
-                dz.removeBetween(IntIterableRangeSet.MIN, b);
-                vars[x].unionLit(dx, explanation);
-                vars[y].intersectLit(IntIterableRangeSet.MIN, b - a, explanation);
-                vars[z].unionLit(dz, explanation);
-            }
-        } else { // remove
-            assert IntEventType.isRemove(m);
-            Propagator.defaultExplain(this, p, explanation);
-        }
     }
 }

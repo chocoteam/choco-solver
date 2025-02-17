@@ -10,12 +10,10 @@
 package org.chocosolver.solver;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
-import org.chocosolver.memory.EnvironmentBuilder;
 import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.sat.MiniSat;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.nary.clauses.ClauseBuilder;
-import org.chocosolver.solver.constraints.nary.clauses.ClauseConstraint;
 import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
 import org.chocosolver.solver.constraints.real.IbexHandler;
 import org.chocosolver.solver.constraints.unary.BooleanConstraint;
@@ -28,7 +26,9 @@ import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
 import org.ehcache.sizeof.SizeOf;
+import org.ehcache.sizeof.filters.SizeOfFilter;
 
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -50,11 +50,11 @@ import java.util.stream.StreamSupport;
  * @see org.chocosolver.solver.constraints.Constraint
  * @since 0.01
  */
-public class Model implements IModel {
+public final class Model implements IModel {
 
-    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// //////////////////////////////////// PRIVATE FIELDS /////////////////////////////////////////////////////////////
-    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////// PRIVATE FIELDS /////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static boolean MAXIMIZE = true;
     public static boolean MINIMIZE = false;
@@ -63,13 +63,7 @@ public class Model implements IModel {
      * Name of internal hook dedicated to store declared {@link org.chocosolver.solver.variables.Task}.
      */
     public static final String TASK_SET_HOOK_NAME = "H_TASKSET";
-
     public static final String MINISAT_HOOK_NAME = "H_MINISAT";
-
-    public static final String CLAUSES_HOOK_NAME = "H_CLAUSES";
-
-    public static final String CLAUSESBUILDER_HOOK_NAME = "H_CLAUSESBUILDER";
-
     public static final String IBEX_HOOK_NAME = "H_IBEX";
 
     /**
@@ -186,48 +180,28 @@ public class Model implements IModel {
 
     /**
      * Creates a Model object to formulate a decision problem by declaring variables and posting constraints.
-     * The model is named <code>name</code> and it uses a specific backtracking <code>environment</code>.
+     * The model is named <code>name</code> and is set up with paramaters defined in <code>settings</code>.
      *
-     * @param environment a backtracking environment to allow search
      * @param name        The name of the model (for logging purpose)
      * @param settings    settings to use
      */
-    public Model(IEnvironment environment, String name, Settings settings) {
+    public Model(String name, Settings settings) {
         this.name = name;
         this.vars = new Variable[32];
         this.vIdx = 0;
         this.cstrs = new Constraint[32];
         this.cIdx = 0;
-        this.environment = environment;
+        this.environment = settings.getEnvironmentSupplier().get();
         this.creationTime = System.nanoTime();
         this.cachedConstants = new TIntObjectHashMap<>(16, 1.5f, Integer.MAX_VALUE);
         this.objective = null;
         this.hooks = new HashMap<>();
         this.settings = settings;
         this.solver = settings.initSolver(this);
+        // to make sure MiniSat.C_Undef is not null, call it once
+        this.hooks.put("C_Undef", MiniSat.C_Undef);
+        this.hooks.clear();
         this.groups = new ArrayList<>();
-    }
-
-    /**
-     * Creates a Model object to formulate a decision problem by declaring variables and posting constraints.
-     * The model is named <code>name</code> and it uses a specific backtracking <code>environment</code>.
-     *
-     * @param environment a backtracking environment to allow search
-     * @param name        The name of the model (for logging purpose)
-     */
-    public Model(IEnvironment environment, String name) {
-        this(environment, name, Settings.init());
-    }
-
-    /**
-     * Creates a Model object to formulate a decision problem by declaring variables and posting constraints.
-     * The model is named <code>name</code> and it uses a specific backtracking <code>environment</code>.
-     *
-     * @param name     The name of the model (for logging purpose)
-     * @param settings settings to use
-     */
-    public Model(String name, Settings settings) {
-        this(new EnvironmentBuilder().fromFlat().build(), name, settings);
     }
 
     /**
@@ -235,10 +209,10 @@ public class Model implements IModel {
      * The model is named <code>name</code> and uses the default (trailing) backtracking environment.
      *
      * @param name The name of the model (for logging purpose)
-     * @see Model#Model(org.chocosolver.memory.IEnvironment, String, Settings)
+     * @see Model#Model(String, Settings)
      */
     public Model(String name) {
-        this(new EnvironmentBuilder().fromFlat().build(), name, Settings.init());
+        this(name, Settings.init());
     }
 
     /**
@@ -246,10 +220,10 @@ public class Model implements IModel {
      * The model is uses the default (trailing) backtracking environment.
      *
      * @param settings settings to use
-     * @see Model#Model(org.chocosolver.memory.IEnvironment, String, Settings)
+     * @see Model#Model(String, Settings)
      */
     public Model(Settings settings) {
-        this(new EnvironmentBuilder().fromFlat().build(), "Model-" + nextModelNum(), settings);
+        this("Model-" + nextModelNum(), settings);
     }
 
     /**
@@ -632,6 +606,20 @@ public class Model implements IModel {
         return new BooleanConstraint(this, false);
     }
 
+    /**
+     * Create a VOID constraint that cannot be reified --  for LCG mainly
+     * @return a void constraint
+     * todo: find a more elegant way to do that
+     */
+    public Constraint voidConstraint() {
+        return new Constraint("void") {
+            @Override
+            public void reifyWith(BoolVar bool) {
+                throw new SolverException("Cannot reify a void constraint");
+            }
+        };
+    }
+
 
     /**
      * Returns the unique constraint embedding a minisat model.
@@ -640,6 +628,9 @@ public class Model implements IModel {
      * @return the minisat constraint
      */
     public SatConstraint getMinisat() {
+        if(solver.isLCG()){
+            throw new UnsupportedOperationException("MiniSat is not supported with LCG");
+        }
         if (getHook(MINISAT_HOOK_NAME) == null) {
             SatConstraint minisat = new SatConstraint(this);
             minisat.post();
@@ -659,31 +650,6 @@ public class Model implements IModel {
         }
     }
 
-    /**
-     * Return a constraint embedding a signed-clauses store.
-     * A call to this method will create and post the constraint if it does not exist already.
-     *
-     * @return the signed-clauses store constraint
-     */
-    public ClauseConstraint getClauseConstraint() {
-        if (getHook(CLAUSES_HOOK_NAME) == null) {
-            ClauseConstraint clauses = new ClauseConstraint(this);
-            clauses.post();
-            addHook(CLAUSES_HOOK_NAME, clauses);
-        }
-        return (ClauseConstraint) getHook(CLAUSES_HOOK_NAME);
-    }
-
-    /**
-     * @return an instance of {@link ClauseBuilder} that helps creating clause <b>during</b> resolution.
-     */
-    public ClauseBuilder getClauseBuilder() {
-        if (getHook(CLAUSESBUILDER_HOOK_NAME) == null) {
-            ClauseBuilder builder = new ClauseBuilder(this);
-            addHook(CLAUSESBUILDER_HOOK_NAME, builder);
-        }
-        return (ClauseBuilder) getHook(CLAUSESBUILDER_HOOK_NAME);
-    }
 
     /**
      * Return a constraint embedding an instance of Ibex (continuous solver).
@@ -731,7 +697,17 @@ public class Model implements IModel {
     public long getEstimatedMemory() {
         long size = -1;
         try {
-            SizeOf sizeOf = SizeOf.newInstance();
+            SizeOf sizeOf = SizeOf.newInstance(new SizeOfFilter() {
+                        @Override
+                        public Collection<Field> filterFields(Class<?> klazz, Collection<Field> fields) {
+                            return fields;
+                        }
+
+                        @Override
+                        public boolean filterClass(Class<?> klazz) {
+                            return !klazz.getName().contains("Lambda");
+                        }
+                    });
             size = sizeOf.deepSizeOf(this);
         } catch (UnsupportedOperationException ignored) {
             // do nothing
@@ -892,10 +868,8 @@ public class Model implements IModel {
         if (variable.getNbProps() > 0) {
             throw new SolverException("Try to remove a variable (" + variable.getName() + ")which is still involved in at least one constraint");
         }
-        int idx = 0;
-        for (; idx < vIdx; idx++) {
-            if (variable == vars[idx]) break;
-        }
+        // to check if the variable is in the model (debug purpose only
+        int idx = Arrays.binarySearch(vars, 0, vIdx, variable, Comparator.comparingInt(Identity::getId));
         System.arraycopy(vars, idx + 1, vars, idx + 1 - 1, vIdx - (idx + 1));
         vars[--vIdx] = null;
         switch ((variable.getTypeAndKind() & Variable.KIND)) {
@@ -1064,7 +1038,10 @@ public class Model implements IModel {
     public String toString() {
         StringBuilder st = new StringBuilder(256);
         st.append(String.format("\n Model[%s]\n", name));
-        st.append(String.format("\n[ %d vars -- %d cstrs ]\n", vIdx, cIdx));
+        st.append(String.format("\n[ %d vars -- %d cstrs -- %d lits -- %d clauses ]\n",
+                vIdx, cIdx,
+                getSolver().getSat() == null ? 0 : getSolver().getSat().nVars(),
+                getSolver().getSat() == null ? 0 : getSolver().getSat().nClauses()));
         st.append(policy.name().toLowerCase()).append(" ");
         if (objective != null) {
             st.append(objective.getName()).append(" ");
@@ -1102,6 +1079,9 @@ public class Model implements IModel {
                 }
             }
         }
+        if (getSolver().getSat() != null && getSolver().getSat().nClauses() > 0) {
+            l.put("lits", getSolver().getSat().nVars());
+        }
         solver.log().bold().printf("== %d variables ==%n", cnt);
         l.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue())
@@ -1121,6 +1101,9 @@ public class Model implements IModel {
                 l.compute(p.getClass().getSimpleName(), (n, k) -> k == null ? 1 : k + 1);
                 cnt++;
             }
+        }
+        if (getSolver().getSat() != null && getSolver().getSat().nClauses() > 0) {
+            l.put("clauses", getSolver().getSat().nClauses());
         }
         solver.log().bold().printf("== %d propagators ==%n", cnt);
         l.entrySet().stream()

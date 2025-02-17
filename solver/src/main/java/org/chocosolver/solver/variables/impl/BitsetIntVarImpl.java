@@ -12,6 +12,7 @@ package org.chocosolver.solver.variables.impl;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateBitSet;
 import org.chocosolver.memory.IStateInt;
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -23,12 +24,10 @@ import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.delta.monitor.EnumDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
-import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.iterators.IntVarValueIterator;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 import org.chocosolver.util.tools.ArrayUtils;
 
@@ -90,11 +89,6 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
     private IntVarValueIterator _javaIterator;
 
     /**
-     * Signed Literal
-     */
-    private SignedLiteral.Set literal;
-
-    /**
      * Create an enumerated IntVar based on a bitset
      *
      * @param name         name of the variable
@@ -152,12 +146,11 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      * @throws ContradictionException if the domain become empty due to this action
      */
     @Override
-    public boolean removeValue(int value, ICause cause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         int aValue = value - OFFSET;
         boolean change = aValue >= 0 && aValue <= LENGTH && VALUES.get(aValue);
         if (change) {
-            model.getSolver().getEventObserver().removeValue(this, value, cause);
             if (SIZE.get() == 1) {
                 this.contradiction(cause, MSG_REMOVE);
             }
@@ -223,7 +216,6 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         while (value <= vub) {
             int aValue = value - OFFSET;
             if (aValue >= 0 && aValue <= LENGTH && VALUES.get(aValue)) {
-                model.getSolver().getEventObserver().removeValue(this, value, cause);
                 if (count == 1) {
                     this.contradiction(cause, MSG_REMOVE);
                 }
@@ -295,7 +287,6 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 if (k < t) {
                     value = k + OFFSET;
                     assert !values.contains(value);
-                    model.getSolver().getEventObserver().removeValue(this, value, cause);
                     if (count == 1) {
                         this.contradiction(cause, MSG_REMOVE);
                     }
@@ -343,7 +334,6 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 if (reactOnRemoval) {
                     delta.add(aValue, cause);
                 }
-                model.getSolver().getEventObserver().removeValue(this, aValue, cause);
             }
             if (anyChange) {
                 SIZE.set(count);
@@ -370,14 +360,12 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      * @throws ContradictionException if the domain become empty due to this action
      */
     @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause, Reason reason) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         assert cause != null;
         if (!contains(value)) {
-            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             this.contradiction(cause, MSG_INST);
         } else if (!isInstantiated()) {
-            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             int aValue = value - OFFSET;
             if (reactOnRemoval) {
                 int i = VALUES.nextSetBit(this.LB.get());
@@ -419,12 +407,11 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      * @throws ContradictionException if the domain become empty due to this action
      */
     @Override
-    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         int old = this.getLB();
         if (old < value) {
             int oub = this.getUB();
-            model.getSolver().getEventObserver().updateLowerBound(this, value, old, cause);
             if (oub < value) {
                 this.contradiction(cause, MSG_LOW);
             } else {
@@ -469,12 +456,11 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      * @throws ContradictionException if the domain become empty due to this action
      */
     @Override
-    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         int oub = this.getUB();
         if (oub > value) {
             int olb = this.getLB();
-            model.getSolver().getEventObserver().updateUpperBound(this, value, oub, cause);
             if (olb > value) {
                 this.contradiction(cause, MSG_UPP);
             } else {
@@ -509,10 +495,8 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         if (olb < lb || oub > ub) {
             IntEventType e = null;
             if (oub < lb) {
-                model.getSolver().getEventObserver().updateLowerBound(this, lb, olb, cause);
                 this.contradiction(cause, MSG_LOW);
             } else if (olb < lb) {
-                model.getSolver().getEventObserver().updateLowerBound(this, lb, olb, cause);
                 e = IntEventType.INCLOW;
                 int aLB = lb - OFFSET;
                 if (reactOnRemoval) {
@@ -528,10 +512,8 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 olb += OFFSET; // required because we will treat upper bound just after
             }
             if (olb > ub) {
-                model.getSolver().getEventObserver().updateUpperBound(this, ub, oub, cause);
                 this.contradiction(cause, MSG_UPP);
             } else if (oub > ub) {
-                model.getSolver().getEventObserver().updateUpperBound(this, ub, oub, cause);
                 e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
                 int aUB = ub - OFFSET;
                 if (reactOnRemoval) {
@@ -843,21 +825,5 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         }
         _javaIterator.reset();
         return _javaIterator;
-    }
-
-    @Override
-    public void createLit(IntIterableRangeSet rootDomain) {
-        if (this.literal != null) {
-            throw new IllegalStateException("createLit(Implications) called twice");
-        }
-        this.literal = new SignedLiteral.Set(rootDomain);
-    }
-
-    @Override
-    public SignedLiteral getLit() {
-        if (this.literal == null) {
-            throw new NullPointerException("getLit() called on null, a call to createLit(Implications) is required");
-        }
-        return this.literal;
     }
 }

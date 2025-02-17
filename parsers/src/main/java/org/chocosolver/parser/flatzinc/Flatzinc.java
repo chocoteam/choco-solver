@@ -101,10 +101,12 @@ public class Flatzinc extends RegParser {
     public void createSettings() {
         defaultSettings = Settings.prod()
                 .setMinCardinalityForSumDecomposition(256)
-                .setLearntClausesDominancePerimeter(0)
-                .setNbMaxLearntClauses(Integer.MAX_VALUE)
-                .setRatioForClauseStoreReduction(.66f)
-                .set("adhocReification", true);
+                .setLCG(lcg)
+                .setNbMaxLearntClauses(100_000)
+                //.setIntVarLazyLitWithWeakBounds(false)
+                .set("adhocReification", true)
+                .setWarnUser(false)
+        ;
     }
 
     @Override
@@ -126,7 +128,7 @@ public class Flatzinc extends RegParser {
     @Override
     public void createSolver() {
         if (level.isLoggable(Level.COMPET)) {
-            System.out.println("%% Choco 250127_16:13");
+            System.out.printf("%% Choco-solver%s (5.0.0-beta.1, 250217_17:45)\n", lcg? " with LCG" : "");
         }
         super.createSolver();
         datas = new Datas[nb_cores];

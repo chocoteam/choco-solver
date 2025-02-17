@@ -110,7 +110,7 @@ public class BoundSearch extends AbstractStrategy<IntVar> {
 
     private int bound(int val) {
         int cost;
-        model.getEnvironment().worldPush();
+        model.getSolver().pushTrail();
         try {
             variable.instantiateTo(val, Cause.Null);
             model.getSolver().getEngine().propagate();
@@ -126,7 +126,7 @@ public class BoundSearch extends AbstractStrategy<IntVar> {
             cost = Integer.MAX_VALUE;
         }
         model.getSolver().getEngine().flush();
-        model.getEnvironment().worldPop();
+        model.getSolver().cancelTrail();
         return cost;
     }
 

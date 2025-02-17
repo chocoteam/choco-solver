@@ -29,7 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Spliterator;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
@@ -264,11 +265,13 @@ public class ParallelPortfolio {
         if (!isPrepared) {
             prepare();
         }
-        ForkJoinPool forkJoinPool = new ForkJoinPool(models.size());
+        ExecutorService executorService = Executors.newFixedThreadPool(models.size());
         try {
-            forkJoinPool.submit(() -> models.parallelStream().forEach(m -> {
+            // run the solve() method of each model in parallel
+            executorService.submit(() -> models.parallelStream().forEach(m -> {
                 if (!getSolverTerminated().get()) {
                     boolean so = m.getSolver().solve();
+                    // if a solution is found, update the best model
                     if (!so || finder == m) {
                         getSolverTerminated().set(so || reliableness.get(m) || getSolverRunning().decrementAndGet() <= 0);
                     }
@@ -287,16 +290,17 @@ public class ParallelPortfolio {
                 e.printStackTrace();
             }
         }
-        forkJoinPool.shutdownNow();
+        executorService.shutdownNow();
         getSolverTerminated().set(false);// otherwise, solver.isStopCriterionMet() always returns true
         if (getSolutionFound().get() && models.get(0).getResolutionPolicy() != ResolutionPolicy.SATISFACTION) {
             int bestAll = getBestModel().getSolver().getBestSolutionValue().intValue();
             for (Model m : models) {
                 int mVal = m.getSolver().getBestSolutionValue().intValue();
+                // When LCG is on, the best solution might not have been considered yet
+                // Indeed, the bound is updated after a force restart on failure only
                 if (m.getResolutionPolicy() == ResolutionPolicy.MAXIMIZE) {
-                    assert mVal <= bestAll : mVal + " > " + bestAll;
-                } else
-                    assert m.getResolutionPolicy() != ResolutionPolicy.MINIMIZE || mVal >= bestAll : mVal + " < " + bestAll;
+                    assert mVal <= bestAll || m.getSolver().isLCG(): mVal + " > " + bestAll;
+                } else assert m.getResolutionPolicy() != ResolutionPolicy.MINIMIZE || mVal >= bestAll || m.getSolver().isLCG() : mVal + " < " + bestAll;
             }
         }
         return getSolutionFound().get();
@@ -412,7 +416,7 @@ public class ParallelPortfolio {
             if (solverVal == bestVal) {
                 getSolutionFound().set(true);
                 finder = m;
-                models.forEach(s1 -> s1.getSolver().getObjectiveManager().updateBestSolution(bestVal));
+                models.forEach(s1 -> s1.getSolver().onReceivingExternalCut(bestVal));
             }
         }
     }

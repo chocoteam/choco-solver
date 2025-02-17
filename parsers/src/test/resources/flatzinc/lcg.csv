@@ -1,0 +1,15 @@
+#year,name,solutions,best,nodes,fails
+## Testing CIRCUIT
+2019,vrp-s5-v2-c6_vrp-v2-c6_det.fzn,112,247,15248,9393
+2019,vrp-s3-v2-c7_vrp-v2-c7_det.fzn,35,230,29435,27157
+2020,p1f-pjs+10_new.fzn,27,300,6549,6003
+2020,p1f-pjs+17_new.fzn,0,_,4900,4901
+# time limit
+#2020,is+Ws5Q6fhGi5.fzn,28,180224,12860,3303
+2020,is+A3PZaPjnUz.fzn,33,103936,1683,168
+## Testing SUBCIRCUIT
+2016,tpp+tpp_4_5_20_1.fzn,70,115,7469,888
+2016,tpp+tpp_5_3_30_1.fzn,116,173,9306,939
+2016,tpp+tpp_6_3_20_1.fzn,65,131,5692,797
+2016,tpp+tpp_7_3_20_1.fzn,61,125,6561,1180
+2016,tpp+tpp_7_3_30_1.fzn,113,147,13337,1572
