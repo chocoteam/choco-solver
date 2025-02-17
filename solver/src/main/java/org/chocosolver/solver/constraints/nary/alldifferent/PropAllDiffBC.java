@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints.nary.alldifferent;
 
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.nary.alldifferent.algo.AlgoAllDiffBC;
@@ -27,6 +28,7 @@ import org.chocosolver.util.ESat;
  * @since 07/02/11
  * <p>
  */
+@Explained(partial = true, comment = "Explanation weaker yet correct than state of the art (for design reasons)")
 public class PropAllDiffBC extends Propagator<IntVar> {
 
     private final AlgoAllDiffBC filter;

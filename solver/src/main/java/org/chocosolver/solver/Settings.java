@@ -9,20 +9,19 @@
  */
 package org.chocosolver.solver;
 
+import org.chocosolver.memory.EnvironmentBuilder;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.ISatFactory;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.real.Ibex;
 import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
 import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.variables.impl.IntVarLazyLit;
 import org.chocosolver.util.ESat;
 
 import java.util.HashMap;
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.IntPredicate;
-import java.util.function.Predicate;
+import java.util.function.*;
 
 /**
  * Settings for Model and Solver.
@@ -80,13 +79,7 @@ public class Settings {
 
     private int nbMaxLearnt = 100_000;
 
-    private int maxLearntCardinlity = Integer.MAX_VALUE / 100;
-
-    private float clauseReductionRatio = .5f;
-
-    private int dominancePerimeter = 4;
-
-    private boolean explainGlobalFailureInSum = false;
+    private boolean intVarLazyLitWithWeakBounds = false;
 
     private double ibexContractionRatio = Ibex.RATIO;
 
@@ -95,6 +88,10 @@ public class Settings {
     private Function<Model, Solver> initSolver = Solver::new;
 
     private final HashMap<String, Object> additionalSettings = new HashMap<>();
+
+    private boolean lcg = false;
+
+    private Supplier<IEnvironment> environmentSupplier = () -> new EnvironmentBuilder().fromFlat().build();
 
     private Settings() {
     }
@@ -170,6 +167,24 @@ public class Settings {
     public Settings setModelChecker(Predicate<Solver> modelChecker) {
         this.modelChecker = modelChecker;
         return this;
+    }
+
+    /**
+     * Set the environment to be used
+     *
+     * @param environmentSupplier provide an environment
+     * @return the current instance
+     */
+    public Settings setEnvironmentSupplier(Supplier<IEnvironment> environmentSupplier) {
+        this.environmentSupplier = environmentSupplier;
+        return this;
+    }
+
+    /**
+     * @return the environment builder
+     */
+    public Supplier<IEnvironment> getEnvironmentSupplier() {
+        return environmentSupplier;
     }
 
     /**
@@ -337,7 +352,7 @@ public class Settings {
     /**
      * @return the maximum priority any propagators can have (default is 7)
      */
-    public int getMaxPropagatorPriority(){
+    public int getMaxPropagatorPriority() {
         return maxPropagatorPriority;
     }
 
@@ -348,7 +363,7 @@ public class Settings {
      * @param maxPropagatorPriority the new maximum prioirity any propagator can declare
      * @return the current instance
      */
-    public Settings setMaxPropagatorPriority(int maxPropagatorPriority){
+    public Settings setMaxPropagatorPriority(int maxPropagatorPriority) {
         this.maxPropagatorPriority = maxPropagatorPriority;
         return this;
     }
@@ -547,7 +562,7 @@ public class Settings {
     }
 
     /**
-     * This method is called in {@link Model#Model(IEnvironment, String, Settings)} to create the
+     * This method is called in {@link Model#Model(String, Settings)} to create the
      * solver to associate with a model.
      *
      * @param model a model to initialize with a solver
@@ -594,12 +609,27 @@ public class Settings {
 
 
     /**
+     * Set the solver to be in Lazy Clause Generation mode (in opposition to the full CP mode).
+     *
+     * @param isLCG true to set the solver in LCG mode
+     * @return the current instance
+     */
+    public Settings setLCG(boolean isLCG) {
+        this.lcg = isLCG;
+        this.setEnableSAT(lcg || enableSAT);
+        return this;
+    }
+
+    /**
+     * @return true if the solver is in Lazy Clause Generation mode (in opposition to the full CP mode).
+     */
+    public boolean isLCG() {
+        return this.lcg;
+    }
+
+    /**
      * @return maximum number of learnt clauses to store. When reached, a reduction is applied.
      * @see #setNbMaxLearntClauses(int)
-     * @see #setRatioForClauseStoreReduction(float)
-     * @see #getRatioForClauseStoreReduction()
-     * @see #setMaxLearntClauseCardinality(int)
-     * @see #getMaxLearntClauseCardinality()
      */
     public int getNbMaxLearntClauses() {
         return nbMaxLearnt;
@@ -611,10 +641,6 @@ public class Settings {
      * @param n maximum number of learnt clauses before reducing the store.
      * @return the current instance
      * @see #getNbMaxLearntClauses()
-     * @see #setRatioForClauseStoreReduction(float)
-     * @see #getRatioForClauseStoreReduction()
-     * @see #setMaxLearntClauseCardinality(int)
-     * @see #getMaxLearntClauseCardinality()
      */
     public Settings setNbMaxLearntClauses(int n) {
         this.nbMaxLearnt = n;
@@ -622,103 +648,30 @@ public class Settings {
     }
 
     /**
-     * when clauses store need to be reduced, 'ratio' of them are kept (between  0.1 and .99)
-     *
-     * @see #setRatioForClauseStoreReduction(float)
-     * @see #setNbMaxLearntClauses(int)
-     * @see #getNbMaxLearntClauses()
-     * @see #setMaxLearntClauseCardinality(int)
-     * @see #getMaxLearntClauseCardinality()
+     * @return <tt>true</tt> if the {@link IntVarLazyLit} propagator uses weak bounds.
+     * @see #setIntVarLazyLitWithWeakBounds(boolean)
      */
-    public float getRatioForClauseStoreReduction() {
-        return this.clauseReductionRatio;
+    public boolean intVarLazyLitWithWeakBounds() {
+        return intVarLazyLitWithWeakBounds;
     }
 
     /**
-     * when clauses store need to be reduced, 'ratio' of them are kept (between  0.1 and .99).
-     * A call to this defines 'ratio'.
+     * Set to <tt>true</tt> to use a weak chaining:
+     * when a bound is modified, the channeling is done only with the previous value.
+     * It provides smaller reasons, which are faster to compute but weaker in terms of explanation generation.
+     * <p>
+     * Set to <tt>false</tt> to use a strong chaining:
+     * when a bound is modified, the channeling is done with all known values between the previous and the new bound.
+     * It provides stronger reasons, which are slower to compute but more informative.
      *
-     * @param f ratio for clause store reduction
+     * @param intVarLazyLitWithWeakBounds
      * @return the current instance
-     * @see #getRatioForClauseStoreReduction()
-     * @see #setNbMaxLearntClauses(int)
-     * @see #getNbMaxLearntClauses()
-     * @see #setMaxLearntClauseCardinality(int)
-     * @see #getMaxLearntClauseCardinality()
      */
-    public Settings setRatioForClauseStoreReduction(float f) {
-        this.clauseReductionRatio = f;
+    public Settings setIntVarLazyLitWithWeakBounds(boolean intVarLazyLitWithWeakBounds) {
+        this.intVarLazyLitWithWeakBounds = intVarLazyLitWithWeakBounds;
         return this;
     }
 
-    /**
-     * @return maximum learnt clause cardinality, clauses beyond this value are ignored.
-     * @see #setMaxLearntClauseCardinality(int)
-     * @see #setNbMaxLearntClauses(int)
-     * @see #setRatioForClauseStoreReduction(float)
-     * @see #getRatioForClauseStoreReduction()
-     * @see #setRatioForClauseStoreReduction(float)
-     */
-    public int getMaxLearntClauseCardinality() {
-        return maxLearntCardinlity;
-    }
-
-
-    /**
-     * Set the maximum learnt clause cardinality, clauses beyond this value are ignored.
-     *
-     * @param n maximum learnt clause cardinality.
-     * @return the current instance
-     * @see #getMaxLearntClauseCardinality()
-     * @see #getNbMaxLearntClauses()
-     * @see #setRatioForClauseStoreReduction(float)
-     * @see #getRatioForClauseStoreReduction()
-     * @see #setRatioForClauseStoreReduction(float)
-     */
-    public Settings setMaxLearntClauseCardinality(int n) {
-        maxLearntCardinlity = n;
-        return this;
-    }
-
-    /**
-     * When a clause is learnt from a conflict, it may happen that it dominates previously learnt ones.
-     * The dominance will be evaluated with the <i>n</i> last learnt clauses.
-     * n = 0 means no dominance check, n = {@link Integer#MAX_VALUE} means checking all clauses with the last one.
-     *
-     * @return dominance perimeter
-     */
-    public int getLearntClausesDominancePerimeter() {
-        return dominancePerimeter;
-    }
-
-    /**
-     * When a clause is learnt from a conflict, it may happen that it dominates previously learnt ones.
-     * The dominance will be evaluated with the <i>n</i> last learnt clauses.
-     * n = 0 means no dominance check, n = {@link Integer#MAX_VALUE} means checking all clauses with the last one.
-     *
-     * @return dominance perimeter
-     */
-    public Settings setLearntClausesDominancePerimeter(int n) {
-        this.dominancePerimeter = n;
-        return this;
-    }
-
-
-    /**
-     * @return <i>true</i> if additional clauses can be learned from sum's global failure
-     */
-    public boolean explainGlobalFailureInSum() {
-        return explainGlobalFailureInSum;
-    }
-
-
-    /**
-     * Set to <i>true</i> to allow additional clauses to be learned from sum's global failure
-     */
-    public Settings explainGlobalFailureInSum(boolean b) {
-        this.explainGlobalFailureInSum = b;
-        return this;
-    }
 
     /**
      * @return the ratio that a domains must be contracted by ibex to compute the constraint.

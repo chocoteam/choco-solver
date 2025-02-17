@@ -201,7 +201,7 @@ public final class IntDomainBest implements IntValueSelector, Function<IntVar, O
                 || dop == DecisionOperatorFactory.makeIntReverseSplit() && val == var.getLB()) {
             return Integer.MAX_VALUE;
         }
-        model.getEnvironment().worldPush();
+        model.getSolver().pushTrail();
         try {
             dop.apply(var, val, Cause.Null);
             model.getSolver().getEngine().propagate();
@@ -217,7 +217,7 @@ public final class IntDomainBest implements IntValueSelector, Function<IntVar, O
             cost = Integer.MAX_VALUE;
         }
         model.getSolver().getEngine().flush();
-        model.getEnvironment().worldPop();
+        model.getSolver().cancelTrail();
         return cost;
     }
 }

@@ -9,18 +9,15 @@
  */
 package org.chocosolver.solver.constraints.nary.sum;
 
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
-import org.chocosolver.solver.constraints.nary.clauses.ClauseBuilder;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
-
-import static org.chocosolver.solver.constraints.Operator.*;
 
 /**
  * A propagator for SUM(x_i) o b
@@ -32,6 +29,7 @@ import static org.chocosolver.solver.constraints.Operator.*;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
+@Explained(partial = true, comment = "NQ (!=) is not explained")
 public class PropSum extends Propagator<IntVar> {
 
     /**
@@ -74,6 +72,8 @@ public class PropSum extends Propagator<IntVar> {
      */
     protected final Operator o;
 
+    protected final int[] ps;
+
 
     /**
      * Creates a sum propagator: SUM(x_i) o b
@@ -82,16 +82,16 @@ public class PropSum extends Propagator<IntVar> {
      * the other ones are equal to -1.
      *
      * @param variables list of integer variables
-     * @param pos position of the last positive coefficient
-     * @param o operator amng EQ, LE, GE and NE
-     * @param b bound to respect
+     * @param pos       position of the last positive coefficient
+     * @param o         operator amng EQ, LE, GE and NE
+     * @param b         bound to respect
      */
     public PropSum(IntVar[] variables, int pos, Operator o, int b) {
         this(variables, pos, o, b, computePriority(variables.length), false);
     }
 
 
-    PropSum(IntVar[] variables, int pos, Operator o, int b, PropagatorPriority priority, boolean reactOnFineEvent){
+    PropSum(IntVar[] variables, int pos, Operator o, int b, PropagatorPriority priority, boolean reactOnFineEvent) {
         super(variables, priority, reactOnFineEvent);
         this.pos = pos;
         this.o = o;
@@ -99,10 +99,12 @@ public class PropSum extends Propagator<IntVar> {
         l = variables.length;
         I = new int[l];
         maxI = 0;
+        ps = new int[!lcg() ? 0 : l + 1];
     }
 
     /**
      * Compute the priority of the propagator wrt the number of involved variables
+     *
      * @param nbvars number of variables
      * @return the priority
      */
@@ -124,15 +126,15 @@ public class PropSum extends Propagator<IntVar> {
             case NQ:
                 return IntEventType.instantiation();
             case LE:
-                if(vIdx < pos){
+                if (vIdx < pos) {
                     return IntEventType.lowerBoundAndInst();
-                }else{
+                } else {
                     return IntEventType.upperBoundAndInst();
                 }
             case GE:
-                if(vIdx < pos){
+                if (vIdx < pos) {
                     return IntEventType.upperBoundAndInst();
-                }else{
+                } else {
                     return IntEventType.lowerBoundAndInst();
                 }
             default:
@@ -155,7 +157,7 @@ public class PropSum extends Propagator<IntVar> {
             sumLB += lb;
             sumUB += ub;
             I[i] = (ub - lb);
-            if(maxI < I[i])maxI = I[i];
+            if (maxI < I[i]) maxI = I[i];
         }
         for (; i < l; i++) { // then the negative ones
             lb = -vars[i].getUB();
@@ -163,7 +165,7 @@ public class PropSum extends Propagator<IntVar> {
             sumLB += lb;
             sumUB += ub;
             I[i] = (ub - lb);
-            if(maxI < I[i])maxI = I[i];
+            if (maxI < I[i]) maxI = I[i];
         }
     }
 
@@ -175,6 +177,7 @@ public class PropSum extends Propagator<IntVar> {
 
     /**
      * Execute filtering wrt the operator
+     *
      * @throws ContradictionException if contradiction is detected
      */
     protected void filter() throws ContradictionException {
@@ -197,6 +200,7 @@ public class PropSum extends Propagator<IntVar> {
 
     /**
      * Apply filtering when operator is EQ
+     *
      * @throws ContradictionException if contradiction is detected
      */
     protected void filterOnEq() throws ContradictionException {
@@ -206,8 +210,13 @@ public class PropSum extends Propagator<IntVar> {
         do {
             anychange = false;
             // When explanations are on, no global failure allowed
-            if (model.getSolver().isLearnOff() && (F < 0 || E < 0)) {
+            /*if (!lcg() && (F < 0 || E < 0)) {
                 fails();
+            }*/
+            if (F < 0) {
+                fails(explainByMin(-1));
+            } else if (E < 0) {
+                fails(explainByMax(-1));
             }
             if (maxI > F || maxI > E) {
                 int lb, ub, i = 0;
@@ -217,7 +226,8 @@ public class PropSum extends Propagator<IntVar> {
                     if (I[i] - F > 0) {
                         lb = vars[i].getLB();
                         ub = lb + I[i];
-                        if (vars[i].updateUpperBound(F + lb, this)) {
+                        int bnd = F + lb;
+                        if (vars[i].getUB() > bnd && vars[i].updateUpperBound(bnd, this, explainByMin(i))) {
                             int nub = vars[i].getUB();
                             E += nub - ub;
                             I[i] = nub - lb;
@@ -227,14 +237,15 @@ public class PropSum extends Propagator<IntVar> {
                     if (I[i] - E > 0) {
                         ub = vars[i].getUB();
                         lb = ub - I[i];
-                        if (vars[i].updateLowerBound(ub - E, this)) {
+                        int bnd = ub - E;
+                        if (vars[i].getLB() < bnd && vars[i].updateLowerBound(ub - E, this, explainByMax(i))) {
                             int nlb = vars[i].getLB();
                             F -= nlb - lb;
                             I[i] = ub - nlb;
                             anychange = true;
                         }
                     }
-                    if(maxI < I[i])maxI = I[i];
+                    if (maxI < I[i]) maxI = I[i];
                     i++;
                 }
                 // then negative ones
@@ -242,7 +253,8 @@ public class PropSum extends Propagator<IntVar> {
                     if (I[i] - F > 0) {
                         lb = -vars[i].getUB();
                         ub = lb + I[i];
-                        if (vars[i].updateLowerBound(-F - lb, this)) {
+                        int bnd = -F - lb;
+                        if (vars[i].getLB() < bnd && vars[i].updateLowerBound(bnd, this, explainByMin(i))) {
                             int nub = -vars[i].getLB();
                             E += nub - ub;
                             I[i] = nub - lb;
@@ -252,14 +264,15 @@ public class PropSum extends Propagator<IntVar> {
                     if (I[i] - E > 0) {
                         ub = -vars[i].getLB();
                         lb = ub - I[i];
-                        if (vars[i].updateUpperBound(-ub + E, this)) {
+                        int bnd = -ub + E;
+                        if (vars[i].getUB() > bnd && vars[i].updateUpperBound(bnd, this, explainByMax(i))) {
                             int nlb = -vars[i].getUB();
                             F -= nlb - lb;
                             I[i] = ub - nlb;
                             anychange = true;
                         }
                     }
-                    if(maxI < I[i])maxI = I[i];
+                    if (maxI < I[i]) maxI = I[i];
                     i++;
                 }
             }
@@ -268,19 +281,20 @@ public class PropSum extends Propagator<IntVar> {
                 this.setPassive();
                 return;
             }
-        }while (anychange) ;
+        } while (anychange);
     }
 
     /**
      * Apply filtering when operator is LE
+     *
      * @throws ContradictionException if contradiction is detected
      */
     protected void filterOnLeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
         // When explanations are on, no global failure allowed
-        if (model.getSolver().isLearnOff() && F < 0) {
-            fails();
+        if (F < 0) {
+            fails(explainByMin(-1));
         }
         if (maxI > F) {
             maxI = 0;
@@ -290,13 +304,13 @@ public class PropSum extends Propagator<IntVar> {
                 if (I[i] - F > 0) {
                     lb = vars[i].getLB();
                     ub = lb + I[i];
-                    if (vars[i].updateUpperBound(F + lb, this)) {
+                    if (vars[i].updateUpperBound(F + lb, this, explainByMin(i))) {
                         int nub = vars[i].getUB();
                         E += nub - ub;
                         I[i] = nub - lb;
                     }
                 }
-                if(maxI < I[i])maxI = I[i];
+                if (maxI < I[i]) maxI = I[i];
                 i++;
             }
             // then negative ones
@@ -304,13 +318,13 @@ public class PropSum extends Propagator<IntVar> {
                 if (I[i] - F > 0) {
                     lb = -vars[i].getUB();
                     ub = lb + I[i];
-                    if (vars[i].updateLowerBound(-F - lb, this)) {
+                    if (vars[i].updateLowerBound(-F - lb, this, explainByMin(i))) {
                         int nub = -vars[i].getLB();
                         E += nub - ub;
                         I[i] = nub - lb;
                     }
                 }
-                if(maxI < I[i])maxI = I[i];
+                if (maxI < I[i]) maxI = I[i];
                 i++;
             }
         }
@@ -321,16 +335,17 @@ public class PropSum extends Propagator<IntVar> {
 
     /**
      * Apply filtering when operator is GE
+     *
      * @throws ContradictionException if contradiction is detected
      */
     protected void filterOnGeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
         // When explanations are on, no global failure allowed
-        if (model.getSolver().isLearnOff() && E < 0) {
-            fails();
+        if (E < 0) {
+            fails(explainByMax(-1));
         }
-        if(maxI > E) {
+        if (maxI > E) {
             maxI = 0;
             int lb, ub, i = 0;
             // positive coefficients first
@@ -338,13 +353,13 @@ public class PropSum extends Propagator<IntVar> {
                 if (I[i] - E > 0) {
                     ub = vars[i].getUB();
                     lb = ub - I[i];
-                    if (vars[i].updateLowerBound(ub - E, this)) {
+                    if (vars[i].updateLowerBound(ub - E, this, explainByMax(i))) {
                         int nlb = vars[i].getLB();
                         F -= nlb - lb;
                         I[i] = ub - nlb;
                     }
                 }
-                if(maxI < I[i])maxI = I[i];
+                if (maxI < I[i]) maxI = I[i];
                 i++;
             }
             // then negative ones
@@ -352,13 +367,13 @@ public class PropSum extends Propagator<IntVar> {
                 if (I[i] - E > 0) {
                     ub = -vars[i].getLB();
                     lb = ub - I[i];
-                    if (vars[i].updateUpperBound(-ub + E, this)) {
+                    if (vars[i].updateUpperBound(-ub + E, this, explainByMax(i))) {
                         int nlb = -vars[i].getUB();
                         F -= nlb - lb;
                         I[i] = ub - nlb;
                     }
                 }
-                if(maxI < I[i])maxI = I[i];
+                if (maxI < I[i]) maxI = I[i];
                 i++;
             }
         }
@@ -367,8 +382,39 @@ public class PropSum extends Propagator<IntVar> {
         }
     }
 
+    Reason explainByMax(int i) {
+        if (lcg()) {
+            int m = 1;
+            int j = 0;
+            for (; j < pos; j++) {
+                ps[m++] = vars[j].getMaxLit();
+            }
+            for (; j < l; j++) {
+                ps[m++] = vars[j].getMinLit();
+            }
+            if (i > -1) ps[i + 1] = ps[0] = 0;
+            return Reason.r(ps);
+        } else return Reason.undef();
+    }
+
+    Reason explainByMin(int i) {
+        if (lcg()) {
+            int m = 1;
+            int j = 0;
+            for (; j < pos; j++) {
+                ps[m++] = vars[j].getMinLit();
+            }
+            for (; j < l; j++) {
+                ps[m++] = vars[j].getMaxLit();
+            }
+            if (i > -1) ps[i + 1] = ps[0] = 0;
+            return Reason.r(ps);
+        } else return Reason.undef();
+    }
+
     /**
      * Apply filtering when operator is NE
+     *
      * @throws ContradictionException if contradiction is detected
      */
     protected void filterOnNeq() throws ContradictionException {
@@ -389,10 +435,12 @@ public class PropSum extends Propagator<IntVar> {
         }
         if (w == -1) {
             if (sum == b) {
+                // default reason is ok
                 this.fails();
             }
         } else {
-            vars[w].removeValue(w < pos ? b - sum : sum - b, this);
+            vars[w].removeValue(w < pos ? b - sum : sum - b, this,
+                    lcg() ? this.defaultReason(vars[w]) : Reason.undef());
         }
     }
 
@@ -412,11 +460,12 @@ public class PropSum extends Propagator<IntVar> {
 
     /**
      * Whether the current state of the scalar product is entailed
+     *
      * @param sumLB sum of lower bounds
      * @param sumUB sum of upper bounds
      * @return the entailment check
      */
-    public ESat check(int sumLB, int sumUB){
+    public ESat check(int sumLB, int sumUB) {
         switch (o) {
             case NQ:
                 if (sumUB < b || sumLB > b) {
@@ -454,217 +503,6 @@ public class PropSum extends Propagator<IntVar> {
     }
 
     @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        if (o == Operator.NQ) {
-            Propagator.defaultExplain(this, p, explanation);
-        } else {
-            doExplain(explanation, p);
-        }
-    }
-
-    void doExplain(ExplanationForSignedClause explanation, int p){
-        IntIterableRangeSet dom_before;
-        IntVar pivot = explanation.readVar(p);
-        // first, compute F and E
-        int sumLB = 0;
-        int sumUB = 0;
-        int i = 0, lb, ub, la = 0, ua = 0, a = 0, ca = 0;
-        for (; i < pos; i++) { // first the positive coefficients
-            dom_before = explanation.readDom(vars[i]);
-            lb = dom_before.min();
-            ub = dom_before.max();
-            if (vars[i] == pivot) {
-                la = dom_before.min();
-                ua = dom_before.max();
-                a = i;
-                ca = 1;
-            }
-            sumLB += lb;
-            sumUB += ub;
-        }
-        for (; i < l; i++) { // then the negative ones
-            dom_before = explanation.readDom(vars[i]);
-            lb = -dom_before.max();
-            ub = -dom_before.min();
-            if (vars[i] == pivot) {
-                la = dom_before.min();
-                ua = dom_before.max();
-                a = i;
-                ca = -1;
-            }
-            sumLB += lb;
-            sumUB += ub;
-        }
-        int F = b - sumLB;
-        int E = sumUB - b;
-
-        if(explanation.readDom(p).isEmpty()){
-            doExplainGlobalFailure(explanation, F, E);
-            return;
-        }
-
-
-        IntIterableRangeSet domain;
-        int la2 = IntIterableRangeSet.MIN, ua2 = IntIterableRangeSet.MAX;
-        if (a < pos) {
-            if (!o.equals(GE)) { // ie, LE or EQ
-                ua2 = F + la;
-            }
-            if (!o.equals(LE)) { // ie, GE or EQ
-                la2 = ua - E;
-            }
-        } else {
-            if (!o.equals(GE)) { // ie, LE or EQ
-                la2 = -F + ua;
-            }
-            if (!o.equals(LE)) { // ie, GE or EQ
-                ua2 = la + E;
-            }
-        }
-        domain = explanation.empty();
-        if(la2 <= ua2){
-            domain.addBetween(la2, ua2);
-        }
-        vars[a].intersectLit(domain, explanation);
-
-        i = 0;
-        for (; i < pos; i++) {
-            int min = IntIterableRangeSet.MIN;
-            int max = IntIterableRangeSet.MAX;
-            if (vars[i] != pivot) {
-                dom_before = explanation.readDom(vars[i]);
-                if (!o.equals(GE)) { // ie, LE or EQ
-                    max = F + dom_before.min() - ca * (ca > 0 ? (ua2 + 1 - la) : (la2 - 1 - ua));
-                }
-                if (!o.equals(LE)) { // ie, GE or EQ
-                    min = -E + dom_before.max() - ca * (ca > 0 ? la2 - 1 - ua : ua2 + 1 - la);
-                }
-                domain = explanation.complement(vars[i]);
-                if(o.equals(EQ)) {
-                    assert max+1 <= min-1 : "empty range";
-                    domain.removeBetween(max + 1, min - 1);
-                }else {
-                    domain.retainBetween(min, max);
-                }
-                vars[i].unionLit(domain, explanation);
-            }
-        }
-        for (; i < l; i++) {
-            int min = IntIterableRangeSet.MIN;
-            int max = IntIterableRangeSet.MAX;
-            if (vars[i] != pivot) {
-                dom_before = explanation.readDom(vars[i]);
-                if (!o.equals(GE)) { // ie, LE or EQ
-                    min = -(F - dom_before.max() - ca * (ca > 0 ? ua2 + 1 - la : la2 - 1 - ua));
-                }
-                if (!o.equals(LE)) { // ie, GE or EQ
-                    max = -(-E - dom_before.min() - ca * (ca > 0 ? la2 - 1 - ua : ua2 + 1 - la));
-                }
-                domain = explanation.complement(vars[i]);
-                if(o.equals(EQ)) {
-                    assert max+1 <= min-1 : "empty range";
-                    domain.removeBetween(max + 1, min - 1);
-                }else {
-                    domain.retainBetween(min, max);
-                }
-                vars[i].unionLit(domain, explanation);
-            }
-        }
-    }
-
-    void doExplainGlobalFailure(ExplanationForSignedClause explanation, int F, int E) {
-        assert (F < 0) ^ (E < 0);
-        IntIterableRangeSet dom_before, domain;
-        int i = 0;
-        for (; i < pos; i++) {
-            int min = IntIterableRangeSet.MIN;
-            int max = IntIterableRangeSet.MAX;
-            dom_before = explanation.readDom(vars[i]);
-            if (F < 0) {
-                max = dom_before.min() - 1;
-            }else /*E < 0*/{
-                min = dom_before.max() + 1;
-            }
-            domain = explanation.complement(vars[i]);
-            domain.retainBetween(min, max);
-            vars[i].unionLit(domain, explanation);
-        }
-        for (; i < l; i++) {
-            int min = IntIterableRangeSet.MIN;
-            int max = IntIterableRangeSet.MAX;
-            dom_before = explanation.readDom(vars[i]);
-            if (F < 0) { // ie, LE or EQ
-                min = dom_before.max() + 1;
-            }else /*E < 0*/{ // ie, GE or EQ
-                max = dom_before.min() - 1;
-            }
-            domain = explanation.complement(vars[i]);
-            domain.retainBetween(min, max);
-            vars[i].unionLit(domain, explanation);
-        }
-        if(model.getSettings().explainGlobalFailureInSum() && !this.isReified()){
-            explainGlobal(explanation, F, E);
-        }
-    }
-
-    protected void explainGlobal(ExplanationForSignedClause explanation, int F, int E) {
-        assert (F < 0)^(E < 0);
-        IntIterableRangeSet dom_before;
-        IntIterableRangeSet domain;
-        int i = 0;
-        ClauseBuilder ngb = model.getClauseBuilder();
-        for (; i < l; i++) {
-            int min = IntIterableRangeSet.MIN;
-            int max = IntIterableRangeSet.MAX;
-            dom_before = explanation.readDom(vars[i]);
-            if (F < 0) {
-                // BEWARE // second part of the equation differs from non-global-fail case
-                if(i < pos) {
-                    max = F + dom_before.min();
-                }else{
-                    min = -(F - dom_before.max());
-                }
-            }else /*if (E <  0)*/ {
-                // BEWARE // second part of the equation differs from non-global-fail case
-                if(i < pos) {
-                    min = -E + dom_before.max();
-                }else{
-                    max = -(-E - dom_before.min());
-                }
-            }
-            domain = explanation.root(vars[i]);
-            domain.retainBetween(min, max);
-            ngb.put(vars[i], domain);
-            int k = 0;
-            for (; k < l; k++) {
-                if (k != i) {
-                    min = IntIterableRangeSet.MIN;
-                    max = IntIterableRangeSet.MAX;
-                    dom_before = explanation.readDom(vars[k]);
-                    if (F < 0) {
-                        if(k < pos) {
-                            min = dom_before.min();
-                        }else{
-                            max = dom_before.max();
-                        }
-                    }else /*if (E <  0)*/ {
-                        if(k < pos) {
-                            max = dom_before.max();
-                        }else{
-                            min = dom_before.min();
-                        }
-                    }
-                    domain = explanation.root(vars[k]);
-                    domain.removeBetween(min, max);
-                    ngb.put(vars[k], domain);
-                }
-            }
-            ngb.buildNogood(model);
-            if(E == -1 || F == -1)return; // the same nogood will be learned all the time
-        }
-    }
-
-    @Override
     public String toString() {
         StringBuilder linComb = new StringBuilder(20);
         linComb.append(pos == 0 ? "-" : "").append(vars[0].getName());
@@ -680,8 +518,8 @@ public class PropSum extends Propagator<IntVar> {
         return linComb.toString();
     }
 
-    public static int nb(Operator co){
-        switch (co){
+    public static int nb(Operator co) {
+        switch (co) {
             case LE:
                 return 1;
             case GE:
@@ -691,8 +529,8 @@ public class PropSum extends Propagator<IntVar> {
         }
     }
 
-    public static Operator nop(Operator co){
-        switch (co){
+    public static Operator nop(Operator co) {
+        switch (co) {
             case LE:
                 return Operator.GE;
             case GE:
@@ -702,7 +540,7 @@ public class PropSum extends Propagator<IntVar> {
         }
     }
 
-    protected PropSum opposite(){
+    protected PropSum opposite() {
         return new PropSum(vars, pos, nop(o), b + nb(o));
     }
 }

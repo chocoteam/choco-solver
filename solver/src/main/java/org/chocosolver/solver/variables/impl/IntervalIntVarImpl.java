@@ -11,6 +11,7 @@ package org.chocosolver.solver.variables.impl;
 
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -22,9 +23,7 @@ import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.delta.monitor.IntervalDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
-import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
 import org.chocosolver.util.iterators.*;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 import java.util.Iterator;
@@ -69,11 +68,6 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     private IntVarValueIterator _javaIterator;
 
     /**
-     * Signed Literal
-     */
-    private SignedLiteral.Set literal;
-
-    /**
      * Create a bounded domain IntVar : [min,max]
      *
      * @param name  name of the variable
@@ -112,7 +106,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * Any other value removals will be ignored.
      */
     @Override
-    public boolean removeValue(int value, ICause cause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         if (value == getLB()) {
             return updateLowerBound(value + 1, cause);
@@ -199,15 +193,13 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * @throws ContradictionException if the domain become empty due to this action
      */
     @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         if (!this.contains(value)) {
-            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             this.contradiction(cause, MSG_INST);
         } else if (!isInstantiated()) {
             int lb = this.getLB();
             int ub = this.getUB();
-            model.getSolver().getEventObserver().instantiateTo(this, value, cause, lb, ub);
             IntEventType e = IntEventType.INSTANTIATE;
             if (reactOnRemoval) {
                 if (lb <= value - 1) delta.add(lb, value - 1, cause);
@@ -239,11 +231,10 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * @throws ContradictionException if the domain become empty due to this action
      */
     @Override
-    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         int old = this.getLB();
         if (old < value) {
-            model.getSolver().getEventObserver().updateLowerBound(this, value, old, cause);
             int oub = this.getUB();
             if (oub < value) {
                 this.contradiction(cause, MSG_LOW);
@@ -281,11 +272,10 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * @throws ContradictionException if the domain become empty due to this action
      */
     @Override
-    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         int old = this.getUB();
         if (old > value) {
-            model.getSolver().getEventObserver().updateUpperBound(this, value, old, cause);
             int olb = this.getLB();
             if (olb > value) {
                 this.contradiction(cause, MSG_UPP);
@@ -314,30 +304,23 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         boolean update = false;
         if (olb < lb || ub < oub) {
             IntEventType e = null;
-            int d = 0;
             if (oub < lb) {
-                model.getSolver().getEventObserver().updateLowerBound(this, lb, olb, cause);
                 this.contradiction(cause, MSG_LOW);
             } else if (olb < lb) {
-                model.getSolver().getEventObserver().updateLowerBound(this, lb, olb, cause);
                 e = IntEventType.INCLOW;
                 if (reactOnRemoval) {
                     delta.add(olb, lb - 1, cause);
                 }
-                d += olb - lb;
                 LB.set(lb);
                 olb = lb;
             }
             if (olb > ub) {
-                model.getSolver().getEventObserver().updateUpperBound(this, ub, oub, cause);
                 this.contradiction(cause, MSG_UPP);
             } else if (oub > ub) {
-                model.getSolver().getEventObserver().updateUpperBound(this, ub, oub, cause);
                 e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
                 if (reactOnRemoval) {
                     delta.add(ub + 1, oub, cause);
                 }
-                d += ub - oub;
                 UB.set(ub);
             }
             if (isInstantiated()) {
@@ -532,19 +515,4 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         return _javaIterator;
     }
 
-    @Override
-    public void createLit(IntIterableRangeSet rootDomain) {
-        if (this.literal != null) {
-            throw new IllegalStateException("createLit(Implications) called twice");
-        }
-        this.literal = new SignedLiteral.Set(rootDomain);
-    }
-
-    @Override
-    public SignedLiteral getLit() {
-        if (this.literal == null) {
-            throw new NullPointerException("getLit() called on null, a call to createLit(Implications) is required");
-        }
-        return this.literal;
-    }
 }

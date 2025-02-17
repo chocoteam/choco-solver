@@ -24,7 +24,6 @@ module org.chocosolver.solver {
     
     exports org.chocosolver.sat;
     exports org.chocosolver.solver;
-    exports org.chocosolver.solver.learn;
     exports org.chocosolver.solver.constraints;
     exports org.chocosolver.solver.constraints.binary;
     exports org.chocosolver.solver.constraints.binary.element;
@@ -47,7 +46,6 @@ module org.chocosolver.solver {
     exports org.chocosolver.solver.constraints.nary.binPacking;
     exports org.chocosolver.solver.constraints.nary.channeling;
     exports org.chocosolver.solver.constraints.nary.circuit;
-    exports org.chocosolver.solver.constraints.nary.clauses;
     exports org.chocosolver.solver.constraints.nary.cnf;
     exports org.chocosolver.solver.constraints.nary.count;
     exports org.chocosolver.solver.constraints.nary.cumulative;
@@ -102,7 +100,6 @@ module org.chocosolver.solver {
     //exports org.chocosolver.solver.variables.delta.monitor;
     exports org.chocosolver.solver.variables.events;
     exports org.chocosolver.solver.variables.impl;
-    exports org.chocosolver.solver.variables.impl.siglit;
     //exports org.chocosolver.solver.variables.impl.scheduler;
     exports org.chocosolver.solver.variables.view;
     exports org.chocosolver.solver.trace;

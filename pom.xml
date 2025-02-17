@@ -15,7 +15,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.choco-solver</groupId>
     <artifactId>choco</artifactId>
-    <version>4.10.19-SNAPSHOT</version>
+    <version>5.0.0-beta.1</version>
     <packaging>pom</packaging>
     <name>choco</name>
     <url>http://choco-solver.org/</url>
@@ -44,7 +44,7 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>7.5</version>
+            <version>7.5.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

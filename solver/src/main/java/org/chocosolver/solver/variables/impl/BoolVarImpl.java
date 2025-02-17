@@ -10,6 +10,7 @@
 package org.chocosolver.solver.variables.impl;
 
 import org.chocosolver.memory.structure.IOperation;
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -21,10 +22,8 @@ import org.chocosolver.solver.variables.delta.OneValueDelta;
 import org.chocosolver.solver.variables.delta.monitor.OneValueDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
-import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.*;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 import java.util.Iterator;
@@ -77,11 +76,6 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     private boolean isNot = false;
 
     /**
-     * Signed Literal
-     */
-    private SignedLiteral.Boolean literal = null;
-
-    /**
      * Create a BoolVar {0,1} or {true, false}
      *
      * @param name  name of the variable
@@ -112,7 +106,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
      * @throws ContradictionException if the domain become empty due to this action
      */
     @Override
-    public boolean removeValue(int value, ICause cause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         if (value == kFALSE)
             return instantiateTo(kTRUE, cause);
@@ -154,7 +148,6 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
             } else if (to == kFALSE) {
                 hasChanged = instantiateTo(kTRUE, cause);
             } else {
-                model.getSolver().getEventObserver().instantiateTo(this, 2, cause, kFALSE, kTRUE);
                 this.contradiction(cause, MSG_UNKNOWN);
             }
         }
@@ -178,11 +171,10 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
      * @throws ContradictionException if the domain become empty due to this action
      */
     @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause, Reason reason) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         assert cause != null;
         if ((mValue < kUNDEF && mValue != value) || (value < kFALSE || value > kTRUE)) {
-            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             this.contradiction(cause, mValue < kUNDEF ? MSG_INST : (value > kTRUE ? MSG_LOW : MSG_UPP));
         } else if (mValue == kUNDEF) {
             IntEventType e = IntEventType.INSTANTIATE;
@@ -191,7 +183,6 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
                 delta.add(kTRUE - value, cause);
             }
             mValue = value;
-            model.getSolver().getEventObserver().instantiateTo(this, value, cause, kFALSE, kTRUE);
             this.notifyPropagators(e, cause);
             return true;
         }
@@ -216,7 +207,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
      * @throws ContradictionException if the domain become empty due to this action
      */
     @Override
-    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         return value > kFALSE && instantiateTo(value, cause);
     }
@@ -239,7 +230,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
      * @throws ContradictionException if the domain become empty due to this action
      */
     @Override
-    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         return value < kTRUE && instantiateTo(value, cause);
     }
@@ -248,7 +239,6 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
         boolean hasChanged = false;
         if (lb > kTRUE || ub < kFALSE) {
-            model.getSolver().getEventObserver().instantiateTo(this, 2, cause, kFALSE, kTRUE);
             this.contradiction(cause, lb > kTRUE ? MSG_LOW : MSG_UPP);
         } else {
             if (lb == kTRUE) {
@@ -495,19 +485,4 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
         this.isNot = isNot;
     }
 
-    @Override
-    public void createLit(IntIterableRangeSet rootDomain) {
-        if (this.literal != null) {
-            throw new IllegalStateException("createLit(Implications) called twice");
-        }
-        this.literal = new SignedLiteral.Boolean();
-    }
-
-    @Override
-    public SignedLiteral getLit() {
-        if (this.literal == null) {
-            throw new NullPointerException("getLit() called on null, a call to createLit(Implications) is required");
-        }
-        return this.literal;
-    }
 }

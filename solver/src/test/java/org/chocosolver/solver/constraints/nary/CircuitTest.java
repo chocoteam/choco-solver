@@ -71,13 +71,31 @@ public class CircuitTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public static void test4bis() {
-        for (int n = 2; n < 8; n++) {
+        int o = 2;
+        for (int n = 3; n < 8; n++) {
             Model model = new Model();
-            IntVar[] x = model.intVarArray("x", n, 0, n - 1, true);
-            model.circuitDec(x, 0);
+            IntVar[] x = model.intVarArray("x", n, o, n - 1 + o);
+            model.circuitDec(x, o);
             while (model.getSolver().solve()) ;
-            assertEquals(factorial(n - 1), model.getSolver().getSolutionCount());
+            assertEquals(model.getSolver().getSolutionCount(), factorial(n - 1));
         }
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public static void test4ter() {
+        int n = 4;
+        int o = 1;
+        Model model = new Model();
+        IntVar[] x = new IntVar[n];
+        x[0] = model.intVar("x0", 1 + o);
+        x[1] = model.intVar("x1", 2 + o);
+        x[2] = model.intVar("x2", 3 + o);
+        x[3] = model.intVar("x3", 0 + o);
+        model.circuitDec(x, o);
+        System.out.println(model);
+        model.getSolver().showSolutions();
+        while (model.getSolver().solve()) ;
+        assertEquals(model.getSolver().getSolutionCount(), 1);
     }
 
     private static int factorial(int n) {

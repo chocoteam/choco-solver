@@ -9,12 +9,13 @@
  */
 package org.chocosolver.solver.constraints.unary;
 
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ConstraintsName;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
@@ -39,6 +40,7 @@ public class BooleanConstraint extends Constraint {
         return b ? propagators[0].getModel().falseConstraint() : propagators[0].getModel().trueConstraint();
     }
 
+    @Explained
     public static class PropBoolean extends Propagator<BoolVar> {
         public final boolean bool;
 
@@ -52,7 +54,7 @@ public class BooleanConstraint extends Constraint {
             if (bool) {
                 setPassive();
             } else {
-                fails();
+                fails(Reason.undef());
             }
         }
 
@@ -69,11 +71,6 @@ public class BooleanConstraint extends Constraint {
         @Override
         public ESat isEntailed() {
             return ESat.eval(bool);
-        }
-
-        @Override
-        public void explain(int p, ExplanationForSignedClause explanation) {
-            // nothing to do
         }
     }
 }

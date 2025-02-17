@@ -10,7 +10,6 @@
 package org.chocosolver.solver.constraints.reification;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
-
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -19,7 +18,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
 
 import java.util.BitSet;
 
@@ -136,7 +134,7 @@ public class PropLocalConDis extends Propagator<IntVar> {
     private boolean propagate(Propagator<IntVar>[] props, int cidx) {
         boolean fails = false;
         // make a backup world
-        model.getEnvironment().worldPush();
+        model.getSolver().pushTrail();
 //        System.out.printf("%sTry %s for %s\n", pad("", solver.getEnvironment().getWorldIndex(), "."), vars[b].getName(), this);
         try {
             for(int i  = 0; i < props.length; i++) {
@@ -152,7 +150,7 @@ public class PropLocalConDis extends Propagator<IntVar> {
         }
         model.getSolver().getEngine().ignoreModifications();
         // restore backup world
-        model.getEnvironment().worldPop();
+        model.getSolver().cancelTrail();
         return fails;
     }
 

@@ -59,10 +59,10 @@ public class MoveBinaryDFS implements Move {
     @Override
     public boolean extend(Solver solver) {
         boolean extended = false;
-        Decision current = strategy.getDecision();
+        Decision<?> current = strategy.getDecision();
         if (current != null) { // null means there is no more decision
             solver.getDecisionPath().pushDecision(current);
-            solver.getEnvironment().worldPush();
+            solver.pushTrail();
             extended = true;
         }
         return extended;
@@ -71,7 +71,7 @@ public class MoveBinaryDFS implements Move {
     @Override
     public boolean repair(Solver solver) {
         solver.getMeasures().incBackTrackCount();
-        solver.getEnvironment().worldPop();
+        solver.cancelTrail();
         return rewind(solver);
     }
 
@@ -106,11 +106,11 @@ public class MoveBinaryDFS implements Move {
      */
     protected boolean rewind(Solver solver) {
         boolean repaired = false;
-        Decision head = solver.getDecisionPath().getLastDecision();
+        Decision<?> head = solver.getDecisionPath().getLastDecision();
         while (!repaired && head.getPosition() != topDecisionPosition) {
             solver.setJumpTo(solver.getJumpTo()-1);
             if (solver.getJumpTo() <= 0 && head.hasNext()) {
-                solver.getEnvironment().worldPush();
+                solver.pushTrail();
                 repaired = true;
             } else {
                 prevDecision(solver);
@@ -129,7 +129,7 @@ public class MoveBinaryDFS implements Move {
         // goes up in the search tree and makes sure search monitors are correctly informed
         solver.getSearchMonitors().afterUpBranch();
         solver.getMeasures().incBackTrackCount();
-        solver.getEnvironment().worldPop();
+        solver.cancelTrail();
         solver.getSearchMonitors().beforeUpBranch();
     }
 
@@ -140,7 +140,7 @@ public class MoveBinaryDFS implements Move {
 
     @Override
     public void setChildMoves(List<Move> someMoves) {
-        if(someMoves.size() > 0) {
+        if(!someMoves.isEmpty()) {
             throw new UnsupportedOperationException("This is a terminal Move. No child move can be attached to it.");
         }
     }

@@ -9,10 +9,8 @@
  */
 package org.chocosolver.solver.constraints.reification;
 
-import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.PropagatorPriority;
-import org.chocosolver.solver.constraints.ReificationConstraint;
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.*;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.Variable;
@@ -26,6 +24,7 @@ import org.chocosolver.util.ESat;
  * @author Jean-Guillaume Fages
  * @since 02/2013
  */
+@Explained
 public class PropReif extends Propagator<Variable> {
 
     //***********************************************************************************
@@ -78,11 +77,11 @@ public class PropReif extends Propagator<Variable> {
         } else {
             ESat sat = trueCons.isSatisfied();
             if (sat == ESat.TRUE) {
-                bVar.setToTrue(this);
+                bVar.setToTrue(this, lcg() ? Propagator.reason(bVar, vars) : Reason.undef());
                 setPassive();
                 reifCons.activate(0);
             } else if (sat == ESat.FALSE) {
-                bVar.setToFalse(this);
+                bVar.setToFalse(this, lcg() ? Propagator.reason(bVar, vars) : Reason.undef());
                 setPassive();
                 reifCons.activate(1);
             }

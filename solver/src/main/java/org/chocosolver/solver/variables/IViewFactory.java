@@ -12,10 +12,7 @@ package org.chocosolver.solver.variables;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.view.RealView;
-import org.chocosolver.solver.variables.view.bool.BoolEqView;
-import org.chocosolver.solver.variables.view.bool.BoolLeqView;
-import org.chocosolver.solver.variables.view.bool.BoolNotView;
-import org.chocosolver.solver.variables.view.bool.BoolSetView;
+import org.chocosolver.solver.variables.view.bool.*;
 import org.chocosolver.solver.variables.view.graph.directed.DirectedEdgeInducedSubgraphView;
 import org.chocosolver.solver.variables.view.graph.directed.DirectedGraphUnionView;
 import org.chocosolver.solver.variables.view.graph.directed.DirectedNodeInducedSubgraphView;
@@ -138,7 +135,7 @@ public interface IViewFactory extends ISelf<Model> {
                 int bv = a * view.b + b;
                 if (av == 1 && bv == 0) {
                     return view.getVariable();
-                }else{
+                } else {
                     return intView(av, view.getVariable(), bv);
                 }
             } else {
@@ -267,11 +264,11 @@ public interface IViewFactory extends ISelf<Model> {
                 return bvar;
             }
             if (ref().getSettings().enableViews()) {
-                int p = checkDeclaredView(var, v - 1, BoolLeqView.class, ref().getSettings().checkDeclaredViews());
+                int p = checkDeclaredView(var, v, BoolGeqView.class, ref().getSettings().checkDeclaredViews());
                 if (p >= 0) {
-                    return var.getView(p).asBoolVar().not();
+                    return var.getView(p).asBoolVar();
                 } else {
-                    return new BoolLeqView<>(var, v - 1).not();
+                    return new BoolGeqView<>(var, v);
                 }
             } else {
                 BoolVar b = ref().boolVar();
@@ -289,24 +286,7 @@ public interface IViewFactory extends ISelf<Model> {
      * @return a boolean view
      */
     default BoolVar isLeq(IntVar var, int v) {
-        if (var.getUB() <= v) {
-            return ref().boolVar(true);
-        } else if (var.getLB() > v) {
-            return ref().boolVar(false);
-        } else {
-            if (ref().getSettings().enableViews()) {
-                int p = checkDeclaredView(var, v, BoolLeqView.class, ref().getSettings().checkDeclaredViews());
-                if (p >= 0) {
-                    return var.getView(p).asBoolVar();
-                } else {
-                    return new BoolLeqView<>(var, v);
-                }
-            } else {
-                BoolVar b = ref().boolVar();
-                ref().reifyXltC(var, v + 1, b);
-                return b;
-            }
-        }
+        return isGeq(var, v + 1).not();
     }
 
     /**
@@ -423,8 +403,8 @@ public interface IViewFactory extends ISelf<Model> {
      * @param x an integer variable.
      * @param c a constant
      * @return a BoolVar that reifies <i>x = c</i>
-     * @deprecated
      * @see #isEq(IntVar, int)
+     * @deprecated
      */
     @Deprecated
     default BoolVar intEqView(IntVar x, int c) {
@@ -438,8 +418,8 @@ public interface IViewFactory extends ISelf<Model> {
      * @param x an integer variable.
      * @param c a constant
      * @return a BoolVar that reifies <i>x != c</i>
-     * @deprecated
      * @see #isNeq(IntVar, int)
+     * @deprecated
      */
     @Deprecated
     default BoolVar intNeView(IntVar x, int c) {
@@ -453,8 +433,8 @@ public interface IViewFactory extends ISelf<Model> {
      * @param x an integer variable.
      * @param c a constant
      * @return a BoolVar that reifies <i>x &le; c</i>
-     * @deprecated
      * @see #isLeq(IntVar, int)
+     * @deprecated
      */
     @Deprecated
     default BoolVar intLeView(IntVar x, int c) {
@@ -485,8 +465,8 @@ public interface IViewFactory extends ISelf<Model> {
                     if (v.cste == c) {
                         return i;
                     }
-                } else if (clazz == BoolLeqView.class) {
-                    BoolLeqView v = (BoolLeqView) x.getView(i);
+                } else if (clazz == BoolGeqView.class) {
+                    BoolGeqView v = (BoolGeqView) x.getView(i);
                     if (v.cste == c) {
                         return i;
                     }

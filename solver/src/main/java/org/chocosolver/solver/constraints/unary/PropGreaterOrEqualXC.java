@@ -9,14 +9,14 @@
  */
 package org.chocosolver.solver.constraints.unary;
 
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 /**
  * X >= C
@@ -25,6 +25,7 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
  * @author Charles Prud'homme
  * @since 16/06/11
  */
+@Explained
 public class PropGreaterOrEqualXC extends Propagator<IntVar> {
 
     private final int constant;
@@ -41,7 +42,7 @@ public class PropGreaterOrEqualXC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        vars[0].updateLowerBound(constant, this);
+        vars[0].updateLowerBound(constant, this, Reason.undef());
         assert vars[0].getLB() >= constant;
         this.setPassive();
     }
@@ -54,29 +55,6 @@ public class PropGreaterOrEqualXC extends Propagator<IntVar> {
             return ESat.FALSE;
         }
         return ESat.UNDEFINED;
-    }
-
-    /**
-     * @implSpec
-     * <p>
-     *     Consider that v1 has been modified by propagation of this.
-     *     Before the propagation, the domains were like:
-     * <pre>
-     *         (v1 &isin; D1)
-     *     </pre>
-     * Then this propagates v1 &ge; c, then:
-     * <pre>
-     *         (v1 &isin; D1) &rarr; v1 &ge; c
-     *     </pre>
-     * Converting to DNF:
-     * <pre>
-     *         (v1 &isin; (U \ D1) &cup; [c, +&infin;))
-     *     </pre>
-     * </p>
-     */
-    @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        vars[0].intersectLit(constant, IntIterableRangeSet.MAX, explanation);
     }
 
     @Override

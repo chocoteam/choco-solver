@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.variables.impl;
 
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -20,13 +21,11 @@ import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
-import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
 import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.iterators.IntVarValueIterator;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 import java.util.Iterator;
@@ -64,11 +63,6 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     private final IntVarValueIterator _javaIterator = new IntVarValueIterator(this);
 
     /**
-     * Signed Literal
-     */
-    protected SignedLiteral literal;
-
-    /**
      * Creates a variable whom domain is natively reduced to the singleton {<code>constante</code>}.
      *
      * @param name      name of the variable
@@ -81,10 +75,9 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public boolean removeValue(int value, ICause cause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause, Reason reason) throws ContradictionException {
         if (value == constante) {
             assert cause != null;
-            model.getSolver().getEventObserver().removeValue(this, constante, cause);
             this.contradiction(cause, "unique value removal");
         }
         return false;
@@ -94,7 +87,6 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
         if (values.contains(constante)) {
             assert cause != null;
-            model.getSolver().getEventObserver().removeValue(this, constante, cause);
             this.contradiction(cause, "unique value removal");
         }
         return false;
@@ -104,7 +96,6 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     public boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
         if (!values.contains(constante)) {
             assert cause != null;
-            model.getSolver().getEventObserver().removeValue(this, constante, cause);
             this.contradiction(cause, "unique value removal");
         }
         return false;
@@ -114,37 +105,33 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         if (from <= constante && constante <= to) {
             assert cause != null;
-            model.getSolver().getEventObserver().removeValue(this, constante, cause);
             this.contradiction(cause, "unique value removal");
         }
         return false;
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause, Reason reason) throws ContradictionException {
         if (value != constante) {
             assert cause != null;
-            model.getSolver().getEventObserver().instantiateTo(this, value, cause, constante, constante);
             this.contradiction(cause, "outside domain instantitation");
         }
         return false;
     }
 
     @Override
-    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause, Reason reason) throws ContradictionException {
         if (value > constante) {
             assert cause != null;
-            model.getSolver().getEventObserver().updateLowerBound(this, value, constante, cause);
             this.contradiction(cause, "outside domain update bound");
         }
         return false;
     }
 
     @Override
-    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause, Reason reason) throws ContradictionException {
         if (value < constante) {
             assert cause != null;
-            model.getSolver().getEventObserver().updateUpperBound(this, value, constante, cause);
             this.contradiction(cause, "outside domain update bound");
         }
         return false;
@@ -154,10 +141,8 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
         if (lb > constante) {
             assert cause != null;
-            model.getSolver().getEventObserver().updateLowerBound(this, lb, constante, cause);
             this.contradiction(cause, "outside domain update bound");
         } else if (ub < constante) {
-            model.getSolver().getEventObserver().updateUpperBound(this, ub, constante, cause);
             this.contradiction(cause, "outside domain update bound");
         }
         return false;
@@ -418,19 +403,4 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
         return _javaIterator;
     }
 
-    @Override
-    public void createLit(IntIterableRangeSet rootDomain) {
-        if (this.literal != null) {
-            throw new IllegalStateException("createLit(Implications) called twice");
-        }
-        this.literal = new SignedLiteral.Set(rootDomain);
-    }
-
-    @Override
-    public SignedLiteral getLit() {
-        if (this.literal == null) {
-            throw new NullPointerException("getLit() called on null, a call to createLit(Implications) is required");
-        }
-        return this.literal;
-    }
 }

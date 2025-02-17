@@ -10,14 +10,16 @@
 package org.chocosolver.solver.constraints;
 
 
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.memory.structure.IOperation;
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Identity;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Priority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
@@ -27,17 +29,16 @@ import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.IntCircularQueue;
 import org.chocosolver.util.objects.queues.CircularQueue;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 import java.util.Arrays;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
 import static org.chocosolver.solver.constraints.PropagatorPriority.LINEAR;
 import static org.chocosolver.solver.variables.events.IEventType.ALL_EVENTS;
 import static org.chocosolver.solver.variables.events.PropagatorEventType.CUSTOM_PROPAGATION;
-import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils.unionOf;
 
 
 /**
@@ -70,6 +71,7 @@ import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterabl
  * this prevents from wrong references when a variable occurs more than once in the scope (See {@link org.chocosolver.solver.constraints.nary.count.PropCount_AC} for instance).
  * <br/>- //to complete
  *
+ * @param <V> type of variables involved in this propagator
  * @author Xavier Lorca
  * @author Charles Prud'homme
  * @author Jean-Guillaume Fages
@@ -77,7 +79,6 @@ import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterabl
  * @see org.chocosolver.solver.variables.Variable
  * @see Constraint
  * @since 0.01
- * @param <V> type of variables involved in this propagator
  */
 public abstract class Propagator<V extends Variable> implements ICause, Identity, Comparable<Propagator<V>> {
 
@@ -105,17 +106,6 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * Ignore propagation during execution.
      */
     private boolean enabled = true;
-
-    /**
-     * For debugging purpose only, set to true to use default explanation schema, false to fail
-     */
-    @SuppressWarnings("WeakerAccess")
-    public static boolean DEFAULT_EXPL = true;
-    /**
-     * Set to true to output the name of the constraint that use the default explanation schema
-     */
-    @SuppressWarnings("WeakerAccess")
-    public static boolean OUTPUT_DEFAULT_EXPL = false;
 
 
     /**
@@ -197,14 +187,15 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     /**
      * A bi-int-consumer
      */
-    private interface IntIntConsumer{
+    private interface IntIntConsumer {
         void accept(int a, int b);
     }
 
     /**
      * Default action to do on fine event : nothing
      */
-    private IntIntConsumer fineevt = (i, m) -> {};
+    private IntIntConsumer fineevt = (i, m) -> {
+    };
 
     /**
      * Denotes the reifying variable when this propagator is reified, null otherwise.
@@ -222,7 +213,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      *                        filtering
      * @param priority        priority of this propagator (lowest priority propagators are called
      *                        first)
-     * @param reactToFineEvt  indicates whether or not this propagator must be informed of every
+     * @param reactToFineEvt  indicates whether this propagator must be informed of every
      *                        variable modification, i.e. if it should be incremental or not
      * @param swapOnPassivate indicates if, on propagator passivation, the propagator should be
      *                        ignored in its variables' propagators list.
@@ -304,7 +295,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      */
     @SafeVarargs
     protected final void addVariable(V... nvars) {
-        assert !swapOnPassivate:"Cannot add variable to a propagator that allows being swapped on passivate";
+        assert !swapOnPassivate : "Cannot add variable to a propagator that allows being swapped on passivate";
         V[] tmp = vars;
         vars = copyOf(vars, vars.length + nvars.length);
         arraycopy(nvars, 0, vars, tmp.length, nvars.length);
@@ -314,7 +305,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         for (int v = tmp.length; v < vars.length; v++) {
             vars[v].link(this, v);
         }
-        if(reactToFineEvt) {
+        if (reactToFineEvt) {
             itmp = this.eventmasks;
             eventmasks = new int[vars.length];
             arraycopy(itmp, 0, eventmasks, 0, itmp.length);
@@ -378,7 +369,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * <pre>
      *     int mask = IntEvtType.combine(IntEventType.INCLOW,IntEventType.INSTANTIATE);
      * </pre>
-     *
+     * <p>
      * That indicates the following behavior:
      * <ol>
      *     <li>if X is instantiated, this propagator will be executed,</li>
@@ -386,7 +377,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      *     <li>if the lower bound of X is removed, the event is promoted from REMOVE to INCLOW and this propagator will NOT be executed,</li>
      *     <li>otherwise, this propagator will NOT be executed</li>
      * </ol>
-     *
+     * <p>
      * Some combinations are valid.
      * For example, a propagator which reacts on REMOVE and INSTANTIATE should also declare INCLOW and DECUPP as conditions.
      * Indeed, INCLOW (resp. DECUPP), for efficiency purpose, removing the lower bound (resp. upper bound) of an integer variable
@@ -459,24 +450,23 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
 
     /**
      * informs that this propagator is now active. Should not be called by the user.
+     *
      * @throws SolverException if the propagator cannot be activated due to its current state
      */
     public void setActive() throws SolverException {
         if (isStateLess()) {
             state = ACTIVE;
             model.getEnvironment().save(operations[NEW]);
+            assert eventsets == null || eventsets.isEmpty();
         } else {
             throw new SolverException("Try to activate a propagator already active, passive or reified.\n" +
                     this + " of " + this.getConstraint());
         }
     }
 
-    protected void setActive0() {
-        state = ACTIVE;
-    }
-
     /**
      * informs that this reified propagator must hold. Should not be called by the user.
+     *
      * @throws SolverException if the propagator cannot be activated due to its current state
      */
     public void setReifiedTrue() throws SolverException {
@@ -491,6 +481,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
 
     /**
      * informs that this reified propagator may not hold. Should not be called by the user.
+     *
      * @param boolVar the reifying variable
      * @throws SolverException if the propagator cannot be reified due to its current state
      */
@@ -507,6 +498,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     /**
      * informs that this propagator is now passive : it holds but no further filtering can occur,
      * so it is useless to propagate it. Should not be called by the user.
+     *
      * @throws SolverException if the propagator cannot be set passive due to its current state
      */
     public void setPassive() throws SolverException {
@@ -586,6 +578,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * Return the dynamic priority of this propagator.
      * It excludes from the arity variables instantiated.
      * But may be time consuming.
+     *
      * @return a more accurate priority excluding instantiated variables.
      */
     @SuppressWarnings("unused")
@@ -605,18 +598,17 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * @throws org.chocosolver.solver.exception.ContradictionException expected behavior
      */
     public void fails() throws ContradictionException {
-        model.getSolver().throwsException(this, null, null);
+        fails(defaultReason(null));
     }
 
     /**
-     * Throws a contradiction exception with a specific message
+     * Throws a contradiction exception
      *
-     * @param message the message associated with the failure
      * @throws org.chocosolver.solver.exception.ContradictionException expected behavior
      */
-    public void fails(String message) throws ContradictionException {
-         model.getSolver().throwsException(this, null, message);
-     }
+    public void fails(Reason reason) throws ContradictionException {
+        model.getSolver().throwsException(this, null, null, reason);
+    }
 
     @Override
     public int compareTo(Propagator<V> o) {
@@ -624,18 +616,23 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     }
 
     /**
-     * @return the boolean variable that reifies this propagator, null otherwise.
+     * @return <i>true</i> if this is reified.
      */
-    public BoolVar reifiedWith() {
-        return reifVar;
+    public boolean isReified() {
+        return reifVar != null;
     }
 
-    /**
-     * @return <i>true</i> if this is reified.
-     * Call {@link #reifiedWith()} to get the reifying variable.
-     */
-    public boolean isReified(){
-        return reifVar != null;
+    @Override
+    public Function<Reason, Reason> manageReification() {
+        if (isReified() && reifVar.isInstantiated()) {
+            return r -> Reason.gather(r, reifVar.isInstantiated() ? reifVar.getValLit() : 1);
+        } else {
+            return ICause.super.manageReification();
+        }
+    }
+
+    public final boolean lcg() {
+        return getModel().getSolver().isLCG();
     }
 
     //***********************************************************************************
@@ -792,63 +789,89 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         return st.toString();
     }
 
-    /**
-     * @implSpec
-     * Based on the scope of this propagator, domains of variables are extracted as they
-     * were just before propagation that leads to node <i>p</i>.
-     * <p>
-     *     Consider that v_1 has been modified by propagation of this.
-     *     Before the propagation, the domains were like:
-     * <pre>
-     *         (v1 &isin; D1 &and; v2 &isin; D2 &and; .... &and; vn &isin; D_n)
-     *     </pre>
-     * Then this propagates v1 &isin; D1', then:
-     * <pre>
-     *         (v1 &isin; D1 &and; v2 &isin; D2 &and; .... &and; vn &isin; D_n) &rarr; v1 &isin; D1'
-     *     </pre>
-     * Converting to DNF:
-     * <pre>
-     *         (v1 &isin; (U \ D1) &cup; D'1  &or; v2 &isin; (U \ D2) &or; .... &or; vn &isin; (U \ Dn))
-     *     </pre>
-     * </p>
-     */
-    @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        if (DEFAULT_EXPL) {
-            if(OUTPUT_DEFAULT_EXPL)model.getSolver().log().bold().printf("-- default explain for %s \n",this.getClass().getSimpleName());
-            defaultExplain(this, p, explanation);
-        } else {
-            ICause.super.explain(p, explanation);
-        }
-    }
-
-    public static void defaultExplain(Propagator<?> prop, int p, ExplanationForSignedClause explanation) {
-        IntVar pivot = p > -1 ? explanation.readVar(p) : null;
-        IntIterableRangeSet dom;
-        IntVar var;
-        boolean found = false;
-        for (int i = 0; i < prop.vars.length; i++) {
-            var = (IntVar) prop.vars[i];
-            if (var == pivot) {
-                if (!found) {
-                    dom = explanation.complement(var);
-                    // when a variable appears more than once AND is pivot : should be treated only once
-                    unionOf(dom, explanation.readDom(p));
-                    found = true;
-                    var.intersectLit(dom, explanation);
-                }
-            }else{
-                var.unionLit(explanation.complement(var), explanation);
-            }
-        }
-        assert found || p == -1 : pivot + " not declared in scope of " + prop;
-    }
-
     @Override
     public void forEachIntVar(Consumer<IntVar> action) {
         for (int i = 0; i < vars.length; i++) {
             action.accept((IntVar) vars[i]);
         }
+    }
+
+    /**
+     * @implSpec by default, all variables but the pivot are the reason of the modification
+     */
+    public Reason defaultReason(Variable pivot) {
+        if (lcg()) {
+            return reason(pivot, vars);
+        } else return Reason.undef();
+    }
+
+    public static Reason reason(Variable pivot, Variable... variables) {
+        assert variables.length > 0 : "A propagator should have at least one variable";
+        assert variables[0].getModel().getSolver().isLCG() : "This method should not be called if the LCG is not enabled";
+        TIntList ps = new TIntArrayList();
+        ps.add(0); // place for the modified literal
+        for (int i = 0; i < variables.length; i++) {
+            IntVar var = (IntVar) variables[i];
+            if (var != pivot) {
+                if (var.isInstantiated()) {
+                    ps.add(var.getValLit());
+                } else {
+                    ps.add(var.getMinLit());
+                    ps.add(var.getMaxLit());
+                    int j = var.nextValueOut(var.getLB());
+                    int to = var.previousValueOut(var.getUB());
+                    while (j <= to) {
+                        ps.add(var.getLit(j, 1));
+                        j = var.nextValueOut(j);
+                    }
+                }
+            }
+        }
+        return Reason.r(ps.toArray());
+    }
+
+    public static Reason bounds(Variable pivot, Variable... variables) {
+        assert variables.length > 0 : "A propagator should have at least one variable";
+        assert variables[0].getModel().getSolver().isLCG() : "This method should not be called if the LCG is not enabled";
+        TIntList ps = new TIntArrayList();
+        ps.add(0); // place for the modified literal
+        for (int i = 0; i < variables.length; i++) {
+            IntVar var = (IntVar) variables[i];
+            if (var != pivot) {
+                ps.add(var.getMinLit());
+                ps.add(var.getMaxLit());
+            }
+        }
+        return Reason.r(ps.toArray());
+    }
+
+    public static Reason lbounds(Variable pivot, Variable... variables) {
+        assert variables.length > 0 : "A propagator should have at least one variable";
+        assert variables[0].getModel().getSolver().isLCG() : "This method should not be called if the LCG is not enabled";
+        TIntList ps = new TIntArrayList();
+        ps.add(0); // place for the modified literal
+        for (int i = 0; i < variables.length; i++) {
+            IntVar var = (IntVar) variables[i];
+            if (var != pivot) {
+                ps.add(var.getMinLit());
+            }
+        }
+        return Reason.r(ps.toArray());
+    }
+
+
+    public static Reason ubounds(Variable pivot, Variable... variables) {
+        assert variables.length > 0 : "A propagator should have at least one variable";
+        assert variables[0].getModel().getSolver().isLCG() : "This method should not be called if the LCG is not enabled";
+        TIntList ps = new TIntArrayList();
+        ps.add(0); // place for the modified literal
+        for (int i = 0; i < variables.length; i++) {
+            IntVar var = (IntVar) variables[i];
+            if (var != pivot) {
+                ps.add(var.getMaxLit());
+            }
+        }
+        return Reason.r(ps.toArray());
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -858,62 +881,58 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     /**
      * @return the position of this in the propagation engine
      */
-    public int getPosition(){
+    public int getPosition() {
         return position;
     }
 
     /**
      * Set the position of this in the propagation engine or -1 if removed.
+     *
      * @param p position of this in the propagation engine or -1 if removed.
      */
-    public void setPosition(int p){
+    public void setPosition(int p) {
         this.position = p;
     }
 
     /**
      * Set this as unscheduled
      */
-    public final void unschedule(){
+    public final void unschedule() {
         scheduled = false;
     }
 
-    private void schedule(){
+    private void schedule() {
         scheduled = true;
-    }
-
-    /**
-     * @return true if scheduled for propagation
-     */
-    public final boolean isScheduled() {
-        return scheduled;
     }
 
 
     /**
      * Apply scheduling instruction
+     *
      * @param queues array of queues in which this can be scheduled
      * @return propagator priority
      */
-    public int doSchedule(CircularQueue<Propagator<?>>[] queues){
+    public int doSchedule(CircularQueue<Propagator<?>>[] queues) {
         int prio = priority.getValue();
-        if(!scheduled) {
+        if (!scheduled) {
             queues[prio].addLast(this);
             schedule();
         }
         return prio;
     }
 
-    public void doScheduleEvent(int pindice, int mask){
+    public void doScheduleEvent(int pindice, int mask) {
         fineevt.accept(pindice, mask);
     }
 
     /**
      * Apply fine event propagation of this.
      * It iterates over pending modified variables and run propagation on each of them.
+     *
      * @throws ContradictionException if a contradiction occurred.
      */
     public void doFinePropagation() throws ContradictionException {
-        while (eventsets.size() > 0) {
+        while (!eventsets.isEmpty()) {
             int v = eventsets.pollFirst();
             assert isActive() : "propagator is not active:" + this.getClass();
             // clear event
@@ -927,9 +946,9 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     /**
      * Flush pending events
      */
-    public void doFlush(){
+    public void doFlush() {
         if (reactToFineEvent()) {
-            while (eventsets.size() > 0) {
+            while (!eventsets.isEmpty()) {
                 int v = eventsets.pollLast();
                 eventmasks[v] = 0;
             }

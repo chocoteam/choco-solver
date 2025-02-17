@@ -12,9 +12,7 @@ package org.chocosolver.solver.objective;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -104,8 +102,8 @@ public abstract class AbstractIntObjManager implements IObjectiveManager<IntVar>
     }
 
     public final void setCutComputer(IntUnaryOperator cutComputer) {
-            this.cutComputer = cutComputer;
-        }
+        this.cutComputer = cutComputer;
+    }
 
     @Override
     public void setStrictDynamicCut() {
@@ -189,19 +187,14 @@ class MinIntObjManager extends AbstractIntObjManager {
 
     @Override
     public void postDynamicCut() throws ContradictionException {
-        objective.updateBounds(bestProvedLB, cutComputer.applyAsInt(bestProvedUB), this);
+        objective.updateUpperBound(cutComputer.applyAsInt(bestProvedUB), this);
+        objective.updateLowerBound(bestProvedLB, this);
     }
 
     @Override
     public Number getBestSolutionValue() {
         return bestProvedUB;
     }
-
-    @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        objective.intersectLit(IntIterableRangeSet.MIN, bestProvedUB - 1, explanation);
-    }
-
 }
 
 class MaxIntObjManager extends AbstractIntObjManager {
@@ -224,16 +217,12 @@ class MaxIntObjManager extends AbstractIntObjManager {
 
     @Override
     public void postDynamicCut() throws ContradictionException {
-        objective.updateBounds(cutComputer.applyAsInt(bestProvedLB), bestProvedUB, this);
+        objective.updateLowerBound(cutComputer.applyAsInt(bestProvedLB), this);
+        objective.updateUpperBound(bestProvedUB, this);
     }
 
     @Override
     public Number getBestSolutionValue() {
         return bestProvedLB;
-    }
-
-    @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        objective.intersectLit(bestProvedLB + 1, IntIterableRangeSet.MAX, explanation);
     }
 }

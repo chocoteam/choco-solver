@@ -10,11 +10,14 @@
 package org.chocosolver.solver;
 
 import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.sat.MiniSat;
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Explained;
+import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.InvalidSolutionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.learn.AbstractEventObserver;
 import org.chocosolver.solver.objective.IBoundsManager;
 import org.chocosolver.solver.objective.IObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveFactory;
@@ -22,6 +25,7 @@ import org.chocosolver.solver.propagation.PropagationEngine;
 import org.chocosolver.solver.search.SearchState;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.loop.Reporting;
+import org.chocosolver.solver.search.loop.learn.LazyClauseGeneration;
 import org.chocosolver.solver.search.loop.learn.Learn;
 import org.chocosolver.solver.search.loop.learn.LearnNothing;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
@@ -34,6 +38,7 @@ import org.chocosolver.solver.search.loop.propagate.Propagate;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.measure.MeasuresRecorder;
 import org.chocosolver.solver.search.restart.AbstractRestart;
+import org.chocosolver.solver.search.restart.ForceRestartBeforeCut;
 import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -51,6 +56,7 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.logger.ANSILogger;
 import org.chocosolver.util.logger.Logger;
 
+import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -84,7 +90,7 @@ import static org.chocosolver.util.ESat.*;
  * @author Charles Prud'homme
  * @since 01/09/15.
  */
-public class Solver implements ISolver, IMeasures, IOutputFactory {
+public final class Solver implements ISolver, IMeasures, IOutputFactory {
 
     /**
      * Define the possible actions of SearchLoop
@@ -98,10 +104,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
          * propagation step
          */
         propagate,
-        /**
-         * fixpoint step
-         */
-        fixpoint,
         /**
          * extension step
          */
@@ -123,40 +125,44 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     /**
      * The learning component of this search loop
      */
-    protected Learn L;
+    private Learn L;
 
     /**
      * The moving component of this search loop
      */
-    protected Move M;
+    private Move M;
 
     /**
      * The declaring model
      */
-    protected Model mModel;
+    private final Model mModel;
 
+    /**
+     * SAT solver, only for LCG
+     */
+    private final MiniSat mSat;
     /**
      * The objective manager declare
      */
     @SuppressWarnings({"WeakerAccess", "rawtypes"})
-    protected IObjectiveManager objectivemanager;
+    private IObjectiveManager objectivemanager;
 
     /**
      * The next action to execute in the search <u>loop</u>
      */
-    protected Action action;
+    private Action action;
 
     /**
      * The measure recorder to keep up to date
      */
     @SuppressWarnings("WeakerAccess")
-    protected MeasuresRecorder mMeasures;
+    private final MeasuresRecorder mMeasures;
 
     /**
      * The current decision
      */
     @SuppressWarnings("WeakerAccess")
-    protected DecisionPath dpath;
+    private final DecisionPath dpath;
     /**
      * Index of the initial world, before initialization.
      * May be different from 0 if some external backups have been made.
@@ -171,7 +177,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * List of stopping criteria.
      * When at least one is satisfied, the search loop ends.
      */
-    protected List<Criterion> criteria;
+    private final List<Criterion> criteria;
 
     /**
      * Indicates if the default search loop is in use (set to <tt>true</tt> in that case).
@@ -184,31 +190,26 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     private boolean completeSearch = false;
 
     /**
-     * An events observer
-     */
-    private AbstractEventObserver eventObserver;
-
-    /**
      * List of search monitors attached to this search loop
      */
     @SuppressWarnings("WeakerAccess")
-    protected SearchMonitorList searchMonitors;
+    private final SearchMonitorList searchMonitors;
 
     /**
      * The propagation engine to use
      */
-    protected PropagationEngine engine;
+    private PropagationEngine engine;
     /**
      * Internal unique contradiction exception, used on propagation failures
      */
-    protected final ContradictionException exception;
+    private final ContradictionException exception;
     /**
      * Problem feasbility:
      * - UNDEFINED if unknown,
      * - TRUE if satisfiable,
      * - FALSE if unsatisfiable
      */
-    protected ESat feasible = ESat.UNDEFINED;
+    private ESat feasible = ESat.UNDEFINED;
 
     /**
      * Counter that indicates how many world should be rolled back when backtracking
@@ -218,7 +219,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     /**
      * Set to <tt>true</tt> to stop the search loop
      **/
-    protected boolean stop;
+    private boolean stop;
 
     /**
      * Set to <tt>true</tt> when no more reparation can be achieved, ie entire search tree explored.
@@ -254,11 +255,9 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      *
      * @param aModel the target model
      */
-    protected Solver(Model aModel) {
+    Solver(Model aModel) {
         mModel = aModel;
-        engine = new PropagationEngine(mModel);
         exception = new ContradictionException();
-        eventObserver = AbstractEventObserver.SILENT_OBSERVER;
         objectivemanager = ObjectiveFactory.SAT();
         dpath = new DecisionPath(aModel.getEnvironment());
         action = initialize;
@@ -267,13 +266,27 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         mMeasures.setSearchState(SearchState.NEW);
         mMeasures.setBoundsManager(objectivemanager);
         searchMonitors = new SearchMonitorList();
-        setMove(new MoveBinaryDFS());
-        setNoLearning();
+        M = new MoveBinaryDFS();
+        L = new LearnNothing();
         restarter = AbstractRestart.NO_RESTART;
+        if (mModel.getSettings().isLCG()) {
+            mSat = new MiniSat(true);
+            setLearner(new LazyClauseGeneration(this, mSat));
+        } else {
+            mSat = null;
+        }
+        engine = new PropagationEngine(mModel, mSat);
     }
 
     public void throwsException(ICause c, Variable v, String s) throws ContradictionException {
         throw exception.set(c, v, s);
+    }
+
+    public void throwsException(ICause c, Variable v, String s, Reason reason) throws ContradictionException {
+        if (isLCG()) {
+            mSat.cEnqueue(0, c.manageReification().apply(reason));
+        }
+        throwsException(c, v, s);
     }
 
     public ContradictionException getContradictionException() {
@@ -342,9 +355,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
                 case propagate:
                     propagate(left);
                     break;
-                case fixpoint:
-                    fixpoint();
-                    break;
                 case extend:
                     left = true;
                     extend();
@@ -371,32 +381,15 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * Preparation of the search:
      * - start time recording,
      * - store root world
-     * - push a back up world,
+     * - push a backup world,
      * - run the initial propagation,
      * - initialize the Move and the search strategy
      */
-    protected boolean initialize() {
+    private boolean initialize() {
         boolean ok = true;
-        if (mModel.getSettings().checkDeclaredConstraints()) {
-            //noinspection unchecked
-            Set<Constraint> instances = (Set<Constraint>) mModel.getHook("cinstances");
-            if (instances != null) {
-                Optional<Constraint> undeclared = instances
-                        .stream()
-                        .filter(c -> (c.getStatus() == FREE))
-                        .findFirst();
-                if (undeclared.isPresent()) {
-                    logger.white().println(
-                            "At least one constraint is free, i.e., neither posted or reified. ).");
-                    instances
-                            .stream()
-                            .filter(c -> c.getStatus() == FREE)
-                            .limit(mModel.getSettings().printAllUndeclaredConstraints() ? Integer.MAX_VALUE
-                                    : 1)
-                            .forEach(c -> logger.white().printf(String.format("%s is free\n", c)));
-                }
-            }
-        }
+        checkDeclaredConstraints();
+        checkExplainedVariables();
+        checkExplainedConstraints();
         engine.initialize();
         getMeasures().setReadingTimeCount(System.nanoTime() - mModel.getCreationTime());
         // end note
@@ -406,28 +399,25 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         // Indicates which decision was previously applied before selecting the move.
         // Always sets to ROOT for the first move
         M.setTopDecisionPosition(0);
-        mModel.getEnvironment().worldPush(); // store state before initial propagation; w = 0 -> 1
+        pushTrail(); // store state before initial propagation; w = 0 -> 1
         try {
-            if (mModel.getHook(Model.TASK_SET_HOOK_NAME) != null) {
-                //noinspection unchecked
-                ArrayList<Task> tset = (ArrayList<Task>) mModel.getHook(Model.TASK_SET_HOOK_NAME);
-                for (int i = 0; i < tset.size(); i++) {
-                    tset.get(i).ensureBoundConsistency();
-                }
-            }
+            checkTasks();
             mMeasures.incFixpointCount();
+            // check sat
+            if (isLCG() && !getSat().ok_) {
+                this.throwsException(Cause.Sat, null, null);
+            }
             doPropagate();
             action = extend;
-            mModel.getEnvironment().worldPush(); // store state after initial propagation; w = 1 -> 2
+            pushTrail(); // store state after initial propagation; w = 1 -> 2
             searchWorldIndex = mModel.getEnvironment().getWorldIndex(); // w = 2
-            mModel.getEnvironment().worldPush(); // store another time for restart purpose: w = 2 -> 3
+            pushTrail(); // store another time for restart purpose: w = 2 -> 3
+            L.init();
         } catch (ContradictionException ce) {
             engine.flush();
             mMeasures.incFailCount();
             searchMonitors.onContradiction(ce);
-            L.record(this);
-            L.forget(this);
-            mModel.getEnvironment().worldPop();
+            cancelTrail();
             stop = true;
             ok = false;
         }
@@ -450,9 +440,12 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             warmStart.setStrategy(declared);
             setSearch(warmStart);
         }
+        if (isLCG() && getObjectiveManager().isOptimization()) {
+            setRestartOnSolutions();
+        }
         restarter.init();
         if (!M.init()) { // the initialisation of the Move and strategy can detect inconsistency
-            mModel.getEnvironment().worldPop();
+            cancelTrail();
             feasible = FALSE;
             engine.flush();
             getMeasures().incFailCount();
@@ -462,15 +455,163 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         return ok;
     }
 
+    private void checkDeclaredConstraints() {
+        if (mModel.getSettings().checkDeclaredConstraints()) {
+            //noinspection unchecked
+            Set<Constraint> instances = (Set<Constraint>) mModel.getHook("cinstances");
+            if (instances != null) {
+                Optional<Constraint> undeclared = instances
+                        .stream()
+                        .filter(c -> (c.getStatus() == FREE))
+                        .findFirst();
+                if (undeclared.isPresent()) {
+                    logger.white().println(
+                            "At least one constraint is free, i.e., neither posted or reified. ).");
+                    instances
+                            .stream()
+                            .filter(c -> c.getStatus() == FREE)
+                            .limit(mModel.getSettings().printAllUndeclaredConstraints() ? Integer.MAX_VALUE
+                                    : 1)
+                            .forEach(c -> logger.white().printf(String.format("%s is free\n", c)));
+                }
+            }
+        }
+    }
+
+    /**
+     * Check the number of explained propagators
+     */
+    private void checkExplainedVariables() {
+        if (isLCG()) {
+            HashSet<String> warned = new HashSet<>();
+            int c = 0, e = 0;
+            for (Variable var : getModel().getVars()) {
+                boolean isExplained = false;
+                boolean isPartial = false;
+                // Check if the instance supports annotations
+                Annotation[] annotations = var.getClass().getAnnotations();
+                String comment = "";
+                for (Annotation annotation : annotations) {
+                    if (Objects.equals(annotation.annotationType(), Explained.class)) {
+                        isExplained = true;
+                        isPartial |= ((Explained) annotation).partial();
+                        comment = ((Explained) annotation).comment();
+                        e++;
+                    }
+                }
+                c++;
+                if (!isExplained) {
+                    if (getModel().getSettings().warnUser() && !warned.contains(var.getClass().getSimpleName())) {
+                        warned.add(var.getClass().getSimpleName());
+                        logger.white().println(
+                                "Warning: " + var.getClass().getSimpleName() + " is not explained.");
+                    }
+                } else if (isPartial) {
+                    if (getModel().getSettings().warnUser() && !warned.contains(var.getClass().getSimpleName())) {
+                        warned.add(var.getClass().getSimpleName());
+                        logger.white().println(
+                                "Warning: " + var.getClass().getSimpleName() + " is partially explained" +
+                                        (!comment.isEmpty() ? " (" + comment + ".)" : "."));
+                    }
+                }
+            }
+            if (getModel().getSettings().warnUser() && e < c) {
+                logger.printf(
+                        "%.2f%% variables are explained\n", e * 100. / c);
+            }
+            warned.clear();
+        }
+    }
+
+    /**
+     * Check the number of explained propagators
+     */
+    private void checkExplainedConstraints() {
+        if (isLCG()) {
+            HashSet<String> warned = new HashSet<>();
+            int c = 0, e = 0;
+            for (Constraint cstr : getModel().getCstrs()) {
+                for (Propagator<?> propagator : cstr.getPropagators()) {
+                    boolean isExplained = false;
+                    boolean isPartial = false;
+                    // Check if the instance supports annotations
+                    Annotation[] annotations = propagator.getClass().getAnnotations();
+                    String comment = "";
+                    for (Annotation annotation : annotations) {
+                        if (Objects.equals(annotation.annotationType(), Explained.class)) {
+                            isExplained = true;
+                            isPartial |= ((Explained) annotation).partial();
+                            comment = ((Explained) annotation).comment();
+                            e++;
+                        }
+                    }
+                    c++;
+                    if (!isExplained) {
+                        if (getModel().getSettings().warnUser() && !warned.contains(propagator.getClass().getSimpleName())) {
+                            warned.add(propagator.getClass().getSimpleName());
+                            logger.white().println(
+                                    "Warning: " + propagator.getClass().getSimpleName() + " is not explained.");
+                        }
+                    } else if (isPartial) {
+                        if (getModel().getSettings().warnUser() && !warned.contains(propagator.getClass().getSimpleName())) {
+                            warned.add(propagator.getClass().getSimpleName());
+                            logger.white().println(
+                                    "Warning: " + propagator.getClass().getSimpleName() + " is partially explained" +
+                                            (!comment.isEmpty() ? " (" + comment + ".)" : "."));
+                        }
+                    }
+                }
+            }
+            if (getModel().getSettings().warnUser() && e < c) {
+                logger.printf(
+                        "%.2f%% propagators are explained\n", e * 100. / c);
+            }
+            warned.clear();
+        }
+    }
+
+    private void checkTasks() throws ContradictionException {
+        if (mModel.getHook(Model.TASK_SET_HOOK_NAME) != null) {
+            //noinspection unchecked
+            ArrayList<Task> tset = (ArrayList<Task>) mModel.getHook(Model.TASK_SET_HOOK_NAME);
+            for (int i = 0; i < tset.size(); i++) {
+                tset.get(i).ensureBoundConsistency();
+            }
+        }
+    }
+
+    /**
+     * Push a world on the environment's stack, and same for MiniSat if relevant
+     */
+    public void pushTrail() {
+        mModel.getEnvironment().worldPush();
+        if (isLCG()) {
+            mSat.pushTrailMarker();
+        }
+    }
+
+    /**
+     * Cancel the last pushed world, and same for MiniSat if relevant
+     */
+    public void cancelTrail() {
+        mModel.getEnvironment().worldPop();
+        if (isLCG() && mSat.trailMarker() > mModel.getEnvironment().getWorldIndex()) {
+            // the second condition is required because of LCG
+            // (more precisely LazyClauseGeneration.analyse() -> findConflictLevel())
+            mSat.cancel();
+        }
+    }
+
     /**
      * This method is called after the initial propagation and before the search loop starts.
      * It sequentially applies Arc Consistency on every combination of (variable, value).
      * If a value is not supported by any other variable, it is removed from the domain of the variable.
      * The method ends when the time limit is reached or when all combination have been checked.
+     *
      * @implSpec A first propagation must have been done before calling this method.
      */
     public void preprocessing(long timeLimitInMS) {
-        if(!getEngine().isInitialized()){
+        if (!getEngine().isInitialized()) {
             throw new SolverException("A call to solver.propagate() must be done before calling solver.preprocessing()");
         }
         if (timeLimitInMS > 0 && getModel().getSettings().warnUser()) {
@@ -488,7 +629,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
                         break loop;
                     }
                     int a = it.next();
-                    if(!hasSupport(v, a)){
+                    if (!hasSupport(v, a)) {
                         try {
                             v.removeValue(a, Cause.Null);
                             if (getModel().getSettings().warnUser()) {
@@ -548,7 +689,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      *
      * @param left true if we are branching on the left false otherwise
      */
-    protected void propagate(boolean left) {
+    private void propagate(boolean left) {
         searchMonitors.beforeDownBranch(left);
         try {
             mMeasures.incFixpointCount();
@@ -564,31 +705,18 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         searchMonitors.afterDownBranch(left);
     }
 
-    private void fixpoint() {
-        try {
-            mMeasures.incFixpointCount();
-            objectivemanager.postDynamicCut();
-            engine.propagate();
-            action = propagate;
-        } catch (ContradictionException ce) {
-            engine.flush();
-            //            mMeasures.incFailCount();
-            jumpTo = 1;
-            action = repair;
-            searchMonitors.onContradiction(ce);
-        }
-    }
-
     /**
      * Search loop extend phase
      */
-    protected void extend() {
+    private void extend() {
         searchMonitors.beforeOpenNode();
         mMeasures.incNodeCount();
         action = propagate;
         if (restarter.mustRestart(this)) {
             this.restart();
-        } else if (!M.extend(this)) {
+            L.forget();
+        } else
+            if (!M.extend(this)) {
             action = validate;
         }
         searchMonitors.afterOpenNode();
@@ -597,16 +725,11 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     /**
      * Search loop repair phase
      */
-    protected void repair() {
-        if (L.record(this)) {
-            // this is done before the reparation,
-            // since restart is a move which can stop the search if the cut fails
-            action = fixpoint;
-        } else {
-            // this is done before the reparation,
-            // since restart is a move which can stop the search if the cut fails
-            action = propagate;
-        }
+    private void repair() {
+        L.record();
+        // this is done before the reparation,
+        // since restart is a move which can stop the search if the cut fails
+        action = propagate;
         searchMonitors.beforeUpBranch();
         if (restarter.mustRestart(this)) {
             canBeRepaired = true;
@@ -618,7 +741,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         if (!canBeRepaired) {
             stop = true;
         } else {
-            L.forget(this);
+            L.forget();
         }
     }
 
@@ -766,13 +889,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         if (!engine.isInitialized()) {
             engine.initialize();
         }
-        if (mModel.getHook(Model.TASK_SET_HOOK_NAME) != null) {
-            //noinspection unchecked
-            ArrayList<Task> tset = (ArrayList<Task>) mModel.getHook(Model.TASK_SET_HOOK_NAME);
-            for (int i = 0; i < tset.size(); i++) {
-                tset.get(i).ensureBoundConsistency();
-            }
-        }
+        checkTasks();
         try {
             engine.propagate();
         } finally {
@@ -801,7 +918,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     public void restart() {
         searchMonitors.beforeRestart();
         restoreRootNode();
-        mModel.getEnvironment().worldPush();
+        pushTrail();
         getMeasures().incRestartCount();
         try {
             objectivemanager.postDynamicCut();
@@ -823,11 +940,55 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         IEnvironment environment = mModel.getEnvironment();
         while (environment.getWorldIndex() > searchWorldIndex) {
             getMeasures().incBackTrackCount();
-            environment.worldPop();
+            cancelTrail();
         }
         dpath.synchronize();
     }
 
+    /**
+     * Actions to perform when a cut is injected in the search loop from an external source.
+     * This typically occurs when a solver is declared in a portfolio of solvers.
+     * The cut is posted while the search is running.
+     *
+     * @param newBestVal the new best value found
+     */
+    public void onReceivingExternalCut(int newBestVal) {
+        if (isLCG()) {
+            // When LCG is plugged-in, injecting the cut will lead to error.
+            // Actually, the current bound of the objective variable could
+            // have been as part of reasons for domain reduction. So adding a cut could
+            // lead to chronological inconsistency.
+            // To prevent such a situation, the search should restart then the cut can be injected.
+            ForceRestartBeforeCut rbc = getRestartBeforeCut();
+            rbc.storeCut(newBestVal);
+        } else {
+            // The cut can be injected as soon as it is received.
+            this.getObjectiveManager().updateBestSolution(newBestVal);
+        }
+    }
+
+    /**
+     * Return or declare and return the restart strategy that manages the cut injection.
+     *
+     * @return the restart strategy that manages the cut injection
+     */
+    private ForceRestartBeforeCut getRestartBeforeCut() {
+        AbstractRestart rst = this.getRestarter();
+        while (rst != null && !(rst instanceof ForceRestartBeforeCut)) {
+            rst = rst.getNext();
+        }
+        ForceRestartBeforeCut rbc;
+        if (rst == null) {
+            // create a new instance of ForceRestartBeforeCut
+            rbc = new ForceRestartBeforeCut(this);
+            // define it as the first restart strategy
+            rbc.setNext(restarter);
+            this.restarter = rbc;
+        } else {
+            rbc = (ForceRestartBeforeCut) rst;
+        }
+        return rbc;
+    }
 
     /**
      * <p>
@@ -987,6 +1148,17 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
+     * @return <i>true</i> if LCG is on, <i>false</i> otherwise
+     */
+    public boolean isLCG() {
+        return mSat != null;
+    }
+
+    public MiniSat getSat() {
+        return mSat;
+    }
+
+    /**
      * @return the current learn.
      */
     public Learn getLearner() {
@@ -1099,15 +1271,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
-     * Return the events observer plugged into {@code this}.
-     *
-     * @return this events observer
-     */
-    public AbstractEventObserver getEventObserver() {
-        return eventObserver;
-    }
-
-    /**
      * @return the propagation engine used in {@code this}.
      */
     public PropagationEngine getEngine() {
@@ -1172,13 +1335,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     public int getJumpTo() {
         return jumpTo;
-    }
-
-    /**
-     * @return <i>true</i> when learning algorithm is not plugged in
-     */
-    public boolean isLearnOff() {
-        return L instanceof LearnNothing;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1288,15 +1444,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
                 M.setStrategy(Search.sequencer(strategies));
             }
         }
-    }
-
-    /**
-     * Overrides the explanation engine.
-     *
-     * @param explainer the explanation to use
-     */
-    public void setEventObserver(AbstractEventObserver explainer) {
-        this.eventObserver = explainer;
     }
 
     /**
@@ -1556,6 +1703,11 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     @Override
     public long getFixpointCount() {
         return getMeasures().getFixpointCount();
+    }
+
+    @Override
+    public long getPropagationCount() {
+        return getMeasures().getPropagationCount();
     }
 
     @Override

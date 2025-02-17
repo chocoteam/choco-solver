@@ -9,7 +9,6 @@
  */
 package org.chocosolver.sat;
 
-import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import org.chocosolver.memory.IStateInt;
@@ -48,13 +47,25 @@ public class SatDecorator extends MiniSat {
     /**
      * List of early deduction literals
      */
-    private final TIntList early_deductions_;
+    private final TIntArrayList early_deductions_;
+
+    private final TIntArrayList touched_variables_;
 
     public SatDecorator(Model model) {
-        super();
-        early_deductions_ = new TIntArrayList();
+        super(false);
         sat_trail_ = model.getEnvironment().makeInt();
+        early_deductions_ = new TIntArrayList();
+        touched_variables_ = new TIntArrayList();
     }
+
+    public void beforeAddingClauses() {
+        this.synchro();
+    }
+
+    public void afterAddingClauses() {
+        this.storeEarlyDeductions();
+    }
+
 
     /**
      * Add a clause during resolution
@@ -69,7 +80,8 @@ public class SatDecorator extends MiniSat {
                 return;
             case 1:
                 dynUncheckedEnqueue(ps[0]);
-                ok_ = (propagate() == CR_Undef);
+                propagate();
+                ok_ = (confl == C_Undef);
                 return;
             default:
                 Clause cr = new Clause(ps);
@@ -143,22 +155,24 @@ public class SatDecorator extends MiniSat {
     public boolean propagateOneLiteral(int lit) {
         assert ok_;
         touched_variables_.resetQuick();
-        if (propagate() != CR_Undef) {
+        propagate();
+        if (confl != C_Undef) {
             return false;
         }
-        if (valueLit(lit) == Boolean.lTrue) {
+        if (valueLit(lit) == lTrue) {
             // Dummy decision level:
             pushTrailMarker();
             return true;
-        } else if (valueLit(lit) == Boolean.lFalse) {
+        } else if (valueLit(lit) == lFalse) {
             return false;
         }
         pushTrailMarker();
         // Unchecked enqueue
-        assert valueLit(lit) == Boolean.lUndef;
+        assert valueLit(lit) == lUndef;
         assignment_.set(var(lit), makeBoolean(sgn(lit)));
         trail_.add(lit);
-        return propagate() == CR_Undef;
+        propagate();
+        return confl == C_Undef;
     }
 
     public void bound(Variable cpvar, ICause cause) throws ContradictionException {
@@ -168,10 +182,10 @@ public class SatDecorator extends MiniSat {
                 assert (sat_trail_.get() == trailMarker());
             }
             toCheck.addFirst(cpvar);
-            while (toCheck.size() > 0) {
+            while (!toCheck.isEmpty()) {
                 Variable cvar = toCheck.pollFirst();
                 List<Literalizer> myLits = vars.get(cvar);
-                for (int i  = 0; i < myLits.size(); i++) {
+                for (int i = 0; i < myLits.size(); i++) {
                     Literalizer ltz = myLits.get(i);
                     if (ltz.canReact()) {
                         int lit = ltz.toLit();
@@ -213,6 +227,11 @@ public class SatDecorator extends MiniSat {
 
     public void cancelUntil(int level) {
         super.cancelUntil(level);
+    }
+
+    @Override
+    public void onLiteralPushed(int l) {
+        touched_variables_.add(l);
     }
 
     /**

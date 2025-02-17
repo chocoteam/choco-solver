@@ -9,12 +9,13 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
 import org.chocosolver.util.tools.MathUtils;
 
 /**
@@ -26,6 +27,7 @@ import org.chocosolver.util.tools.MathUtils;
  * @author Jean-Guillaume Fages
  * @since 08/04/2014
  */
+@Explained(partial = true, comment = "not tested yet")
 public class PropScale extends Propagator<IntVar> {
 
     protected static final int MAX = Integer.MAX_VALUE - 1, MIN = Integer.MIN_VALUE + 1;
@@ -33,7 +35,6 @@ public class PropScale extends Propagator<IntVar> {
     private final IntVar X, Z;
     private final int Y;
     private final boolean enumerated;
-    private final IntIterableBitSet values;
 
     /**
      * Scale propagator : ensures x * y = z
@@ -49,31 +50,32 @@ public class PropScale extends Propagator<IntVar> {
         this.Y = y;
         assert y > 1;
         this.enumerated = X.hasEnumeratedDomain() && Z.hasEnumeratedDomain();
-        this.values = enumerated?new IntIterableBitSet():null;
     }
 
     @Override
     public final void propagate(int evtmask) throws ContradictionException {
-        X.updateBounds(MathUtils.divCeil(Z.getLB(), Y), MathUtils.divFloor(Z.getUB(), Y), this);
+        X.updateLowerBound(MathUtils.divCeil(Z.getLB(), Y), this, lcg() ? Reason.r(Z.getMinLit()) : Reason.undef());
+        X.updateUpperBound(MathUtils.divFloor(Z.getUB(), Y), this, lcg() ? Reason.r(Z.getMaxLit()) : Reason.undef());
         boolean hasChanged;
-        hasChanged = Z.updateBounds(X.getLB() *  Y, X.getUB() *  Y, this);
+        hasChanged = Z.updateLowerBound(X.getLB() * Y, this, lcg() ? Reason.r(X.getMinLit()) : Reason.undef());
+        hasChanged |= Z.updateUpperBound(X.getUB() * Y, this, lcg() ? Reason.r(X.getMaxLit()) : Reason.undef());
         if (enumerated) {
-            int ub = X.getUB();
-            for (int v = X.getLB(); v <= ub; v = X.nextValue(v)) {
+            int zub = X.getUB();
+            for (int v = X.getLB(); v <= zub; v = X.nextValue(v)) {
                 if (!Z.contains(v * Y)) {
-                    X.removeValue(v, this);
+                    X.removeValue(v, this, lcg() ? Reason.r(Z.getLit(v * Y, IntVar.LR_NE)) : Reason.undef());
                 }
             }
             int v = Z.getLB();
-            this.values.clear();
-            this.values.setOffset(v);
-            ub = Z.getUB();
-            for (; v <= ub; v = Z.nextValue(v)) {
-                if ((v / Y) * Y != v || !X.contains(v / Y)) {
-                    this.values.add(v);
+            zub = Z.getUB();
+            for (; v <= zub; v = Z.nextValue(v)) {
+                if ((v / Y) * Y != v) {
+                    Z.removeValue(v, this, Reason.undef());
+                }
+                if (!X.contains(v / Y)) {
+                    Z.removeValue(v, this, lcg() ? Reason.r(X.getLit(v / Y, IntVar.LR_NE)) : Reason.undef());
                 }
             }
-            Z.removeValues(values, this);
         } else if (hasChanged && Z.hasEnumeratedDomain()) {
             if (Z.getLB() > X.getLB() * Y || Z.getUB() < X.getUB() * Y) {
                 propagate(evtmask);

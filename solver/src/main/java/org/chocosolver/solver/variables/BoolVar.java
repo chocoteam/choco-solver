@@ -10,6 +10,7 @@
 package org.chocosolver.solver.variables;
 
 import org.chocosolver.sat.Literalizer;
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.nary.cnf.ILogical;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -34,16 +35,24 @@ public interface BoolVar extends IntVar, ILogical, ReExpression {
     ESat getBooleanValue();
 
     default boolean setToTrue(ICause cause) throws ContradictionException {
-        return instantiateTo(kTRUE, cause);
+        return instantiateTo(kTRUE, cause, cause.defaultReason(this));
+    }
+
+    default boolean setToTrue(ICause cause, Reason reason) throws ContradictionException {
+        return instantiateTo(kTRUE, cause, reason);
     }
 
     default boolean setToFalse(ICause cause) throws ContradictionException {
-        return instantiateTo(kFALSE, cause);
+        return instantiateTo(kFALSE, cause, cause.defaultReason(this));
+    }
+
+    default boolean setToFalse(ICause cause, Reason reason) throws ContradictionException {
+        return instantiateTo(kFALSE, cause, reason);
     }
 
     BoolVar not();
 
-	boolean hasNot();
+    boolean hasNot();
 
     void _setNot(BoolVar not);
 
@@ -53,17 +62,18 @@ public interface BoolVar extends IntVar, ILogical, ReExpression {
     }
 
     @Override
-    default BoolVar boolVar(){
+    default BoolVar boolVar() {
         return this;
     }
 
     @Override
-    default void extractVar(HashSet<IntVar> variables){
+    default void extractVar(HashSet<IntVar> variables) {
         variables.add(this);
     }
 
     /**
      * Creates, or returns if already existing, the SAT variable twin of this.
+     *
      * @return the SAT variable of this
      */
     default int satVar() {

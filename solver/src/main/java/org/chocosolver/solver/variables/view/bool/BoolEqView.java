@@ -9,14 +9,15 @@
  */
 package org.chocosolver.solver.variables.view.bool;
 
+import org.chocosolver.sat.MiniSat;
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.view.BoolIntView;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 
 /**
@@ -27,7 +28,9 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
  * @author Charles Prud'homme
  * @since 04/02/11
  */
+@Explained
 public final class BoolEqView<I extends IntVar> extends BoolIntView<I> {
+
 
     /**
      * A boolean view based on <i>var<i/> such that <i>var<i/> = <i>cste<i/>
@@ -36,45 +39,46 @@ public final class BoolEqView<I extends IntVar> extends BoolIntView<I> {
      * @param cste an int
      */
     public BoolEqView(final I var, final int cste) {
-        super(var, "=", cste);
+        super("(" + var.getName() + "=" + cste + ")", var, cste);
     }
 
     @Override
     public ESat getBooleanValue() {
-        if (var.isInstantiated()) {
-            return var.getValue() == cste ? ESat.TRUE : ESat.FALSE;
-        } else if (var.contains(cste)) {
-            return ESat.UNDEFINED;
+        if (!var.contains(cste)) {
+            return ESat.FALSE;
         }
-        return ESat.FALSE;
+        return var.isInstantiatedTo(cste) ? ESat.TRUE : ESat.UNDEFINED;
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         boolean done = false;
-        if (!this.contains(value)) {
-            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
+        if (value < 0 || value > 1) {
+            if (getModel().getSolver().isLCG()) {
+                getModel().getSolver().getSat().cEnqueue(0, reason);
+            }
             this.contradiction(cause, MSG_EMPTY);
-        } else if (!isInstantiated()) {
-            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
+        } else {
             if (reactOnRemoval) {
                 delta.add(1 - value, cause);
             }
             if (value == 1) {
-                done = var.instantiateTo(cste, this);
+                done = var.instantiateTo(cste, this, reason);
             } else {
-                done = var.removeValue(cste, this);
+                done = var.removeValue(cste, this, reason);
             }
-            this.fixed.set(done);
-            notifyPropagators(IntEventType.INSTANTIATE, cause);
+            if (done) {
+                this.fixed.set(done);
+                notifyPropagators(IntEventType.INSTANTIATE, cause);
+            }
         }
         return done;
     }
 
     @Override
     public int getDomainSize() {
-        return isInstantiated()?1:2;
+        return isInstantiated() ? 1 : 2;
     }
 
     @Override
@@ -167,64 +171,52 @@ public final class BoolEqView<I extends IntVar> extends BoolIntView<I> {
     }
 
     @Override
-    public void justifyEvent(IntEventType mask, int one, int two, int three) {
-        if (this.isInstantiated()) return;
-        switch (mask) {
-            case DECUPP:
-                if (one < cste) {
-                    model.getSolver().getEventObserver().instantiateTo(this, 0, this, 0, 1);
-                } else if (this.var.getLB() == cste && (one == cste || this.var.previousValue(one + 1) == cste)) {
-                    model.getSolver().getEventObserver().instantiateTo(this, 1, this, 0, 1);
-                }
-                break;
-            case INCLOW:
-                if (cste < one) {
-                    model.getSolver().getEventObserver().instantiateTo(this, 0, this, 0, 1);
-                } else if (this.var.getUB() == cste && (one == cste || this.var.nextValue(one - 1) == cste)) {
-                    model.getSolver().getEventObserver().instantiateTo(this, 1, this, 0, 1);
-                }
-                break;
-            case REMOVE:
-                if (one == cste) {
-                    model.getSolver().getEventObserver().instantiateTo(this, 0, this, 0, 1);
-                } else if (this.var.getDomainSize() == 2 && this.var.contains(cste)) {
-                    model.getSolver().getEventObserver().instantiateTo(this, 1, this, 0, 1);
-                }
-                break;
-            case INSTANTIATE:
-                if (one == cste) {
-                    model.getSolver().getEventObserver().instantiateTo(this, 1, this, 0, 1);
-                } else {
-                    model.getSolver().getEventObserver().instantiateTo(this, 0, this, 0, 1);
-                }
-                break;
+    public int getLit(int val, int type) {
+        if (val < 0) {
+            return 1 ^ (type & 1);  // true, false, true, false
+        }
+        if (val > 1) {
+            return type - 1 >> 1 & 1;  // true, false, false, true
+        }
+        switch (type) {
+            case LR_NE:
+                return var.getLit(cste, LR_EQ) - val;
+            case LR_EQ:
+                return var.getLit(cste, LR_EQ) - 1 + val;
+            case LR_GE:
+                return val == 1 ? var.getLit(cste, LR_EQ) - 1 + val : 1;
+            case LR_LE:
+                return val == 0 ? var.getLit(cste, LR_EQ) - 1 + val : 1;
+            default:
+                throw new UnsupportedOperationException("BoolEqView#getLit");
         }
     }
 
     @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        IntVar pivot = explanation.readVar(p);
-        int value = getValue();
-        if (value == 1) { // b is true and X = c holds
-            if (pivot == this) { // b is the pivot
-                this.intersectLit(1, explanation);
-                IntIterableRangeSet dom0 = explanation.universe();
-                dom0.remove(cste);
-                var.unionLit(dom0, explanation);
-            } else if (pivot == var) { // x is the pivot
-                this.unionLit(0, explanation);
-                var.intersectLit(cste, explanation);
-            }
-        } else if (value == 0) {
-            if (pivot == this) { // b is the pivot
-                this.intersectLit(0, explanation);
-                var.unionLit(cste, explanation);
-            } else if (pivot == var) { // x is the pivot, case e. in javadoc
-                this.unionLit(1, explanation);
-                IntIterableRangeSet dom0 = explanation.universe();
-                dom0.remove(cste);
-                var.intersectLit(dom0, explanation);
-            }
+    public int getMinLit() {
+        return MiniSat.neg(getLit(getLB(), LR_GE));
+    }
+
+    @Override
+    public int getMaxLit() {
+        return MiniSat.neg(getLit(getUB(), LR_LE));
+    }
+
+    @Override
+    public int getValLit() {
+        assert (isInstantiated()) : this + " is not instantiated";
+        return getLit(getLB(), LR_NE);
+    }
+
+    /**
+     * Creates, or returns if already existing, the SAT variable twin of this.
+     *
+     * @return the SAT variable of this
+     */
+    public int satVar() {
+        if (getModel().getSolver().isLCG()) {
+            return MiniSat.var(getLit(1, LR_EQ));
         }
+        return super.satVar();
     }
 }

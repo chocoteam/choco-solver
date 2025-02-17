@@ -148,7 +148,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
         // as we observe the number of backtracks, no limit can be reached on extend()
         if (current < copen.length) {
             solver.getDecisionPath().pushDecision(copen[current++]);
-            solver.getEnvironment().worldPush();
+            solver.pushTrail();
             extend = true;
         } else /*cut will checker with propagation */ {
             extend = super.extend(solver);
@@ -243,7 +243,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
 //        Decision stopAt = solver.getDecisionPath().getDecision(_unkopen.get(i).getPosition()-1);
         int stopAt = _unkopen.get(i).getPosition()-1;
         // then, goes up in the search tree, and detect open nodes
-        solver.getEnvironment().worldPop();
+        solver.cancelTrail();
         DecisionPath dp = solver.getDecisionPath();
         int bound;
         Decision decision = dp.getLastDecision();
@@ -256,7 +256,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
             }
             dp.synchronize();
             decision = dp.getLastDecision();
-            solver.getEnvironment().worldPop();
+            solver.cancelTrail();
         }
     }
 

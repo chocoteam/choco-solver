@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints.nary.alldifferent;
 
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.nary.alldifferent.algo.AlgoAllDiffAC;
@@ -29,6 +30,7 @@ import org.chocosolver.util.ESat;
  *
  * @author Jean-Guillaume Fages
  */
+@Explained(partial = true, comment = "Fast algorithm not explained")
 public class PropAllDiffAC extends Propagator<IntVar> {
 
     //***********************************************************************************

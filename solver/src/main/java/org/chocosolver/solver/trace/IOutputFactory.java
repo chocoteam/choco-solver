@@ -21,6 +21,7 @@ import org.chocosolver.util.tools.StringUtils;
 import java.io.Closeable;
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 /**
  * This aims at simplifying resolution trace output by providing
@@ -37,7 +38,7 @@ public interface IOutputFactory extends ISelf<Solver> {
      * Default welcome message
      */
     String WELCOME_MESSAGE =
-        "** Choco 4.10.18 (2025-01) : Constraint Programming Solver, Copyright (c) 2010-2025";
+        "** Choco 5.0.0-beta.1 (2025-02) : Constraint Programming Solver, Copyright (c) 2010-2025";
 
     /**
      * Print the version message.
@@ -52,6 +53,7 @@ public interface IOutputFactory extends ISelf<Solver> {
     default void printFeatures() {
         ref().getMeasures().setReadingTimeCount(System.nanoTime() - ref().getModel().getCreationTime());
         ref().log().printf("- Model[%s] features:\n", ref().getModel().getName());
+        ref().log().printf("\tLCG : %s\n", ref().isLCG());
         ref().log().printf("\tVariables : %d\n", ref().getModel().getNbVars());
         ref().log().printf("\tConstraints : %d\n", ref().getModel().getNbCstrs());
         ref().log().printf("\tBuilding time : %.3fs\n", ref().getMeasures().getReadingTimeCount());
@@ -451,7 +453,7 @@ public interface IOutputFactory extends ISelf<Solver> {
         @Override
         public String print() {
             if (vars == null) {
-                vars = solver.getSearch().getVariables();
+                vars = Arrays.stream(solver.getSearch().getVariables()).distinct().toArray(Variable[]::new);
             }
             return String.format("- Solution #%s found. %s \n\t%s.",
                     solver.getSolutionCount(),

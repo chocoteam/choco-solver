@@ -9,20 +9,23 @@
  */
 package org.chocosolver.solver.search.loop.learn;
 
-import org.chocosolver.solver.Solver;
-
 /**
  * Created by cprudhom on 02/09/15.
  * Project: choco.
  */
 public class LearnNothing implements Learn {
     @Override
-    public boolean record(Solver solver) {
+    public void init() {
+        // nothing to do by default
+    }
+
+    @Override
+    public boolean record() {
         return false;
     }
 
     @Override
-    public void forget(Solver solver) {
+    public void forget() {
         // nothing to do by default
     }
 }

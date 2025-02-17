@@ -10,6 +10,8 @@
 package org.chocosolver.solver.constraints.nary;
 
 import gnu.trove.list.array.TIntArrayList;
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -27,6 +29,7 @@ import org.chocosolver.util.tools.ArrayUtils;
  * @author Jean-Guillaume Fages
  * @since 31/01/13
  */
+@Explained
 public class PropDiffN extends Propagator<IntVar> {
 
     //***********************************************************************************
@@ -92,9 +95,9 @@ public class PropDiffN extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         boolean hasFiltered = true;
-        while(hasFiltered) {
+        while (hasFiltered) {
             hasFiltered = false;
-            if(PropagatorEventType.isFullPropagation(evtmask)) {
+            if (PropagatorEventType.isFullPropagation(evtmask)) {
                 boxesToCompute.resetQuick();
                 for (int i = 0; i < n; i++) {
                     boxesToCompute.add(i);
@@ -111,13 +114,13 @@ public class PropDiffN extends Propagator<IntVar> {
                 }
             }
             pruneList.resetQuick();
-            for(int k = 0; k<boxesToCompute.size(); k++)  {
+            for (int k = 0; k < boxesToCompute.size(); k++) {
                 int i = boxesToCompute.getQuick(k);
-                energyCheck(i);
+                if (!lcg()) energyCheck(i);
                 hasFiltered |= prune(i);
             }
             boxesToCompute.resetQuick();
-            for(int k = 0; k< pruneList.size(); k++) {
+            for (int k = 0; k < pruneList.size(); k++) {
                 prop(pruneList.getQuick(k));
             }
         }
@@ -128,10 +131,10 @@ public class PropDiffN extends Propagator<IntVar> {
         ISetIterator iter = overlappingBoxes.getNeighborsOf(j).iterator();
         while (iter.hasNext()) {
             int i = iter.nextInt();
-            if(doOverlap(i, j, true)) {
+            if (doOverlap(i, j, true)) {
                 hasFiltered |= filter(i, j, false);
             }
-            if(doOverlap(i, j, false)) {
+            if (doOverlap(i, j, false)) {
                 hasFiltered |= filter(i, j, true);
             }
         }
@@ -163,7 +166,7 @@ public class PropDiffN extends Propagator<IntVar> {
 
         if (xLengthMin > 0 && yLengthMin > 0) {
             int maxNumberRectangles = ((xM - xm) / xLengthMin) * ((yM - ym) / yLengthMin);
-            if (maxNumberRectangles < overlappingBoxes.getNeighborsOf(i).size()+1) {
+            if (maxNumberRectangles < overlappingBoxes.getNeighborsOf(i).size() + 1) {
                 fails();
             }
         }
@@ -176,7 +179,7 @@ public class PropDiffN extends Propagator<IntVar> {
     private boolean isNotDisjoint(int i, int j, boolean horizontal) {
         int off = (horizontal) ? 0 : n;
         return (vars[i + off].getLB() < vars[j + off].getUB() + vars[j + off + 2 * n].getUB())
-            && (vars[j + off].getLB() < vars[i + off].getUB() + vars[i + off + 2 * n].getUB());
+                && (vars[j + off].getLB() < vars[i + off].getUB() + vars[i + off + 2 * n].getUB());
     }
 
     private boolean doOverlap(int i, int j, boolean hori) {
@@ -186,44 +189,54 @@ public class PropDiffN extends Propagator<IntVar> {
         int s_j = vars[j + offSet].getUB();
         int e_j = vars[j + offSet].getLB() + vars[j + 2 * n + offSet].getLB();
         return (s_i < e_i && e_j > s_i && s_j < e_i)
-            || (s_j < e_j && e_i > s_j && s_i < e_j);
+                || (s_j < e_j && e_i > s_j && s_i < e_j);
     }
 
     private boolean filter(int i, int j, boolean hori) throws ContradictionException {
         boolean hasFiltered = false;
         int offSet = hori ? 0 : n;
-        int s_i = vars[i + offSet].getUB();
-        int e_i = vars[i + offSet].getLB() + vars[i + 2 * n + offSet].getLB();
-        int s_j = vars[j + offSet].getUB();
-        int e_j = vars[j + offSet].getLB() + vars[j + 2 * n + offSet].getLB();
-        if (s_i < e_i || s_j < e_j) {
-            if (e_j > s_i) {
-                if(vars[j + offSet].updateLowerBound(e_i, this)) {
-                    if(!pruneList.contains(j)) {
+        int s_i = vars[i + offSet].getUB(); // latest start of i
+        int e_i = vars[i + offSet].getLB() + vars[i + 2 * n + offSet].getLB(); // earliest end of i
+        int s_j = vars[j + offSet].getUB(); // latest start of j
+        int e_j = vars[j + offSet].getLB() + vars[j + 2 * n + offSet].getLB(); // earliest end of j
+        if (s_i < e_i || s_j < e_j) { // if at least one mandatory part is not empty
+            if (e_j > s_i) { // if j ends after i starts
+                // then update the start of j to the end of i
+                if (vars[j + offSet].updateLowerBound(e_i, this, explainFilter(j, i))) {
+                    if (!pruneList.contains(j)) {
                         pruneList.add(j);
                     }
                     hasFiltered = true;
                 }
-                boolean filtPrun1 = vars[i + offSet].updateUpperBound(s_j - vars[i + 2 * n + offSet].getLB(), this);
-                boolean filtPrun2 = vars[i + offSet + 2 * n].updateUpperBound(s_j - vars[i + offSet].getLB(), this);
-                if(filtPrun1 || filtPrun2) {
-                    if(!pruneList.contains(i)) {
+                // and update the start of i to the end of j
+                boolean filtPrun1 = vars[i + offSet].updateUpperBound(s_j - vars[i + 2 * n + offSet].getLB(), this,
+                        explainFilter(i, j));
+                // and update the size of i to the space between the earliest start of j and the earliest start of i
+                boolean filtPrun2 = vars[i + offSet + 2 * n].updateUpperBound(s_j - vars[i + offSet].getLB(), this,
+                        explainFilter(i, j));
+                if (filtPrun1 || filtPrun2) {
+                    if (!pruneList.contains(i)) {
                         pruneList.add(i);
                     }
                     hasFiltered = true;
                 }
             }
-            if (s_j < e_i) {
-                if(vars[i + offSet].updateLowerBound(e_j, this)) {
-                    if(!pruneList.contains(i)) {
+            if (s_j < e_i) { // if j starts before i ends
+                // then update the start of i to the end of j
+                if (vars[i + offSet].updateLowerBound(e_j, this, explainFilter(i, j))) {
+                    if (!pruneList.contains(i)) {
                         pruneList.add(i);
                     }
                     hasFiltered = true;
                 }
-                boolean filtPrun1 = vars[j + offSet].updateUpperBound(s_i - vars[j + 2 * n + offSet].getLB(), this);
-                boolean filtPrun2 = vars[j + offSet + 2 * n].updateUpperBound(s_i - vars[j + offSet].getLB(), this);
-                if(filtPrun1 || filtPrun2) {
-                    if(!pruneList.contains(j)) {
+                // and update the start of j to the end of i
+                boolean filtPrun1 = vars[j + offSet].updateUpperBound(s_i - vars[j + 2 * n + offSet].getLB(), this,
+                        explainFilter(j, i));
+                // and update the size of j to the space between the earliest start of i and the earliest start of j
+                boolean filtPrun2 = vars[j + offSet + 2 * n].updateUpperBound(s_i - vars[j + offSet].getLB(), this,
+                        explainFilter(j, i));
+                if (filtPrun1 || filtPrun2) {
+                    if (!pruneList.contains(j)) {
                         pruneList.add(j);
                     }
                     hasFiltered = true;
@@ -232,6 +245,33 @@ public class PropDiffN extends Propagator<IntVar> {
         }
         return hasFiltered;
     }
+
+    private Reason explainFilter(int o1, int o2) {
+        if (lcg()) {
+            int[] ps = new int[13];
+            int m = 1;
+            // start of o1 in dimension 1
+            ps[m++] = vars[o1].getMinLit();
+            ps[m++] = vars[o1].getMaxLit();
+            ps[m++] = vars[o1 + 2 * n].getMinLit();
+            // start of o1 in dimension 2
+            ps[m++] = vars[o1 + n].getMinLit();
+            ps[m++] = vars[o1 + n].getMaxLit();
+            ps[m++] = vars[o1 + 2 * n + n].getMinLit();
+            // start of o2 in dimension 1
+            ps[m++] = vars[o2].getMinLit();
+            ps[m++] = vars[o2].getMaxLit();
+            ps[m++] = vars[o2 + 2 * n].getMinLit();
+            // start of o2 in dimension 2
+            ps[m++] = vars[o2 + n].getMinLit();
+            ps[m++] = vars[o2 + n].getMaxLit();
+            ps[m] = vars[o2 + 2 * n + n].getMinLit();
+            return Reason.r(ps);
+        }
+        return Reason.undef();
+    }
+
+
 
     @Override
     public ESat isEntailed() {
@@ -253,7 +293,7 @@ public class PropDiffN extends Propagator<IntVar> {
 
     private boolean boxInstantiated(int i) {
         return vars[i].isInstantiated() && vars[i + n].isInstantiated()
-            && vars[i + 2 * n].isInstantiated() && vars[i + 3 * n].isInstantiated();
+                && vars[i + 2 * n].isInstantiated() && vars[i + 3 * n].isInstantiated();
     }
 
     @Override

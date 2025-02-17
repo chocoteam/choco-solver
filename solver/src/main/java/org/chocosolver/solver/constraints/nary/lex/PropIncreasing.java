@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints.nary.lex;
 
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -24,6 +25,7 @@ import org.chocosolver.util.ESat;
  * @author Charles Prud'homme
  * @since 28/01/2022
  */
+@Explained(ignored = true, comment = "Decomposed into arithmetic constraints")
 public class PropIncreasing extends Propagator<IntVar> {
     private final int strict;
     private int left, right;
