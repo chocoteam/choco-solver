@@ -7,7 +7,7 @@ import os
 import sys
 
 # THIS IS WHERE YOU NEED TO CHANGE THE PATH TO THE JAR FILE
-JAR_FILE='~/.m2/repository/org/choco-solver/choco-parsers/4.10.18/choco-parsers-4.10.18-light.jar'
+JAR_FILE='~/.m2/repository/org/choco-solver/choco-parsers/5.0.0-beta.1/choco-parsers-5.0.0-beta.1-light.jar'
 
 JVM_ARGS = '-server -Xss64M -Xms2G -Xmx8G -XX:NewSize=512M'
 LOG_LEVEL = 'COMPET'
