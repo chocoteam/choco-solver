@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.choco-solver</groupId>
         <artifactId>choco</artifactId>
-        <version>5.0.0-beta.1</version>
+        <version>5.0.0-beta.2</version>
     </parent>
     <artifactId>choco-solver</artifactId>
     <packaging>jar</packaging>
