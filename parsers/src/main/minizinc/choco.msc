@@ -2,9 +2,9 @@
   "id": "org.choco.choco",
   "name": "Choco-solver",
   "description": "Choco FlatZinc executable",
-  "version" : "4.10.15",
-  "mznlib" : "/Users/kyzrsoze/Sources/CHOCO/continuous-branch/parsers/src/main/minizinc/mzn_lib/",
-  "executable" : "/Users/kyzrsoze/Sources/CHOCO/continuous-branch/parsers/src/main/minizinc/fzn-choco.sh",
+  "version": "5.0.0-beta.1",
+  "mznlib": "/Users/kyzrsoze/Sources/CHOCO/continuous-branch/parsers/src/main/minizinc/mzn_lib/",
+  "executable": "/Users/kyzrsoze/Sources/CHOCO/continuous-branch/parsers/src/main/minizinc/fzn-choco.sh",
   "tags": ["cp","int"],
   "stdFlags": ["-a","-f","-n","-p","-r","-s","-t","--cp-profiler"],
   "extraFlags": [

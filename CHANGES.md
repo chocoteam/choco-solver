@@ -4,20 +4,38 @@ Choco Solver ChangeLog
 This file is dedicated to sum up the new features added and bugs fixed in Choco-solver since the version, 4.0.0.
 **Note**: double-space is replaced by "\t" character on release process. Make sure the format is ok.
 
-NEXT MILESTONE
----------------------
+5.0.0-beta.1 - 17 Feb 2025
+--------------------------
 
 ### Major features:
 
-### Deprecated API (to be removed in next release):
+This version introduces CP-SAT in Choco-solver which 
+replaces the previous explanation framework.
+The Lazy Clause Generation (LCG) is a technique that allows the solver to generate clauses during search.
+The current implementation is inspired by Chuffed 
+and "Lazy Clause Generation Reengineered" - Feydy, T., Stuckey, P.J. (2009).
+This new version has necessitated a rather intrusive revision of the way propagators filter.                                         
+
+By default, LCG is not enabled. The following code shows how to enable it:
+```java
+Model model = new Model(Settings.init().setLCG(true));
+```
+
+At this stage, this is a [beta version](https://github.com/orgs/chocoteam/projects/1).
+First, only integer and boolean variables are supported. 
+Second, some constraints are explained with dedicated functions and 
+others are decomposed into explained ones.
+More importantly, others are neither explained nor decomposed (for the moment). 
+In the latter case, an exception is raised to inform the user of the situation. 
+
 
 ### Other closed issues and pull requests:
-See [milestone 4.10.19](https://github.com/chocoteam/choco-solver/milestone/xx)
+See [milestone 5.0.0](https://github.com/chocoteam/choco-solver/milestone/40)
 
 #### Contributors to this release:
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
 
-
-**Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v4.10.18...v4.10.19
+**Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v4.10.18...v5.0.0-beta.1
 
 4.10.18 - 27 Jan 2025
 ---------------------

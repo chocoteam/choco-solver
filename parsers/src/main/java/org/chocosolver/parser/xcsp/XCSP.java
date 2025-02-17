@@ -70,7 +70,7 @@ public class XCSP extends RegParser {
     public void createSolver() {
         super.createSolver();
         if (level.isLoggable(Level.COMPET)) {
-            System.out.printf("c Choco%s 250127_16:13\n", lcg? " with LCG" : "");
+            System.out.printf("c Choco-solver%s (5.0.0-beta.1, 250217_17:45)\n", lcg? " with LCG" : "");
         }
         String iname = Paths.get(instance).getFileName().toString();
         parsers = new XCSPParser[nb_cores];
