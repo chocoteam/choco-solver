@@ -133,7 +133,7 @@ public class RestartTest {
         );
         while (solver.solve()) ;
         assertEquals(solver.getRestartCount(), 2);
-        assertEquals(solver.getSolutionCount(), 9);
+        assertEquals(solver.getSolutionCount(), 10);
     }
 
     @Test(groups = "lcg",dataProvider = "random", dataProviderClass = Providers.class)

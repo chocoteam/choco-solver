@@ -11,6 +11,8 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ternary.PropXplusYeqZ;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.Search;
@@ -687,5 +689,22 @@ public class SumTest {
             cp.getSolver().setSearch(Search.randomSearch(xs, i));
             Assert.assertNotNull(cp.getSolver().findSolution());
         }
+    }
+
+    @Test(groups = "1s")
+    public void testNathan1() throws ContradictionException {
+        Model m = new Model();
+        IntVar x = m.intView(5, m.intVar("x", 46, 259, true), 0);
+        IntVar y = m.intView(11, m.intVar("y", 0, 15, true), 0);
+        IntVar z = m.intVar("z", 230, 234, true);
+        //m.sum(new IntVar[]{x, y}, "=", z).post();
+        new Constraint("sum", new PropXplusYeqZ(x, y, z)).post();
+        m.getSolver().propagate();
+        Assert.assertEquals(x.getLB(), 230);
+        Assert.assertEquals(x.getUB(), 230);
+        Assert.assertEquals(y.getLB(), 0);
+        Assert.assertEquals(y.getUB(), 0);
+        Assert.assertEquals(z.getLB(), 230);
+        Assert.assertEquals(z.getUB(), 230);
     }
 }
