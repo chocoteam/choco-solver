@@ -1,6 +1,6 @@
 #dir;name;solutions;best;nodes;fails
 basics;Allergy.xml.lzma;1;_;1;0
-basics;AllInterval-005.xml.lzma;1;_;13;9
+basics;AllInterval-005.xml.lzma;1;_;15;12
 basics;Auction-cnt-example_c18.xml.lzma;2;54;7;4
 basics;Auction-sum-example_c18.xml.lzma;2;54;6;3
 basics;Bacp-m1-06_c18.xml.lzma;3;10;38111;37700
@@ -19,12 +19,12 @@ basics;CryptoPuzzle-cross-roads-danger.xml.lzma;1;_;6;1
 basics;Cutstock-small.xml.lzma;1;4;10;9
 basics;Domino-300-300.xml.lzma;1;_;1;0
 basics;driverlogw-09.xml.lzma;1;_;2738;2649
-basics;Fapp-m2s-ex2_c18.xml.lzma;5;13871;167;158
+basics;Fapp-m2s-ex2_c18.xml.lzma;6;13871;170;159
 basics;Filters-dct_2_3.xml.lzma;17;16;55552;53838
 basics;FlexibleJobshop-easy01.xml.lzma;94;253;768;565
 basics;FlexibleJobshop-easy02.xml.lzma;28;11;3174;2811
 basics;Furniture.xml.lzma;1;603;21;20
-basics;GracefulGraph-K02-P04.xml.lzma;1;_;73;64
+basics;GracefulGraph-K02-P04.xml.lzma;1;_;100;91
 basics;GraphColoring-3-fullins-4.xml.lzma;1;6;22854;22403
 basics;GraphColoring-qwhdec-o5-h10-1.xml.lzma;1;4;1;0
 basics;Hanoi-05.xml.lzma;1;_;31;0
