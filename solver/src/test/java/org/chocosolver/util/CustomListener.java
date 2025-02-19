@@ -9,6 +9,7 @@
  */
 package org.chocosolver.util;
 
+import org.testng.ITestContext;
 import org.testng.ITestResult;
 import org.testng.TestListenerAdapter;
 
@@ -24,6 +25,7 @@ import java.io.PrintStream;
  */
 public class CustomListener extends TestListenerAdapter {
 
+    String className = "";
     PrintStream original = System.out;
     PrintStream fake = new PrintStream(new OutputStream() {
         public void write(int b) {
@@ -31,32 +33,24 @@ public class CustomListener extends TestListenerAdapter {
         }
     });
 
-
     @Override
-    public void onTestStart(ITestResult tr) {
-        System.out.printf("\t%s.%s ..", tr.getTestClass().getName(), tr.getName());
+    public void onStart(ITestContext testContext) {
         original = System.out;
         System.setOut(fake);
     }
 
     @Override
+    public void onTestStart(ITestResult tr) {
+        if (!className.equals(tr.getTestClass().getName())) {
+            original.printf("\t%s\n", tr.getTestClass().getName());
+            className = tr.getTestClass().getName();
+        }
+    }
+
+
+    @Override
     public void onTestFailure(ITestResult tr) {
-        log(tr, "FAILURE");
+        original.printf("\t%s.%s ... FAILURE (%dms)\n",
+                tr.getTestClass().getName(), tr.getName(), tr.getEndMillis() - tr.getStartMillis());
     }
-
-    @Override
-    public void onTestSkipped(ITestResult tr) {
-        log(tr, "SKIP");
-    }
-
-    @Override
-    public void onTestSuccess(ITestResult tr) {
-        log(tr, "SUCCESS");
-    }
-
-    private void log(ITestResult tr, String RESULT) {
-        System.setOut(original);
-        System.out.printf(".. %s (%dms)\n", RESULT, tr.getEndMillis() - tr.getStartMillis());
-    }
-
 }
