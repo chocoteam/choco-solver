@@ -150,10 +150,10 @@ public class PropAbsolute extends Propagator<IntVar> {
                 X.updateLowerBound(Math.min(mP, mN), this);
             }
             if(max >= -min){
-                X.updateLowerBound(-max, this,
+                X.updateUpperBound(max, this,
                         lcg() ? Reason.r(Y.getMaxLit()) : Reason.undef());
             }else{
-                X.updateLowerBound(min, this,
+                X.updateUpperBound(-min, this,
                         lcg() ? Reason.r(Y.getMinLit()) : Reason.undef());
             }
         }
