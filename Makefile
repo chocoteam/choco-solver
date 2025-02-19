@@ -49,8 +49,8 @@ compile:
 
 tests : 1s 10s ibex checker mzn xcsp mps dimacs expl lcg
 
-1s 10s ibex checker mzn xcsp mps dimacs lcg: compile
-	mvn -q test -DtestFailureIgnore=true -Dgroups="$@"
+1s 10s ibex checker mzn xcsp mps dimacs lcg:
+	mvn test -DtestFailureIgnore=true -Dgroups="$@"
 
 update_date:
 	@sed -i '' 's|\s*System.out.printf("c Choco.*|System.out.printf("c Choco%s ($(PRETTY_DATE))\\n", lcg? " with LCG" : "");|' parsers/src/main/java/org/chocosolver/parser/xcsp/XCSP.java
