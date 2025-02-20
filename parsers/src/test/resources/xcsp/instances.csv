@@ -13,7 +13,7 @@ basics;CarSequencing-dingbas.xml.lzma;1;_;23;16
 basics;ChessboardColoration-07-07.xml.lzma;2;2;1958;1909
 basics;ColouredQueens-07.xml.lzma;1;_;90;78
 basics;CostasArray-12.xml.lzma;1;_;47;39
-basics;Crossword-lex-vg-5-6.xml.lzma;1;_;10701;10543
+basics;Crossword-lex-vg-5-6.xml.lzma;1;_;9742;9593
 basics;CrosswordDesign-03-4-rom_c18.xml.lzma;2;12;20;17
 basics;CryptoPuzzle-cross-roads-danger.xml.lzma;1;_;6;1
 basics;Cutstock-small.xml.lzma;1;4;10;9
@@ -88,8 +88,7 @@ basics;Sudoku-s01a-alldiff.xml.lzma;1;_;1;0
 basics;SumColoring-myciel4_c18.xml.lzma;5;22;27017;26883
 basics;Taillard-os-04-04-0.xml.lzma;19;193;15620;15434
 basics;Tal-01_c18.xml.lzma;1;6;4;3
-basics;TeamAssignment-data1_4_6.xml.lzma;19;2948;5684;5599
-basics;TeamAssignment-data1_4_6.xml.lzma;19;2948;5684;5599
+basics;TeamAssignment-data1_4_6.xml.lzma;12;2948;5508;5441
 basics;TemplateDesign-m1-1_c18.xml.lzma;1;2;10;9
 basics;TemplateDesign-m1s-1_c18.xml.lzma;1;2;12;11
 basics;TemplateDesign-m2-1_c18.xml.lzma;1;2;10;9
