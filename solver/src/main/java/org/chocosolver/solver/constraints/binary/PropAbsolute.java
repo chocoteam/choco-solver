@@ -112,7 +112,7 @@ public class PropAbsolute extends Propagator<IntVar> {
             if (IntEventType.isBound(mask)) {
                 setBounds();
             }
-            if (IntEventType.isRemove(mask) && bothEnumerated) {
+            if (bothEnumerated) {
                 enumeratedFiltering();
             }
         }
@@ -149,13 +149,8 @@ public class PropAbsolute extends Propagator<IntVar> {
                 int mN = -Y.previousValue(1);
                 X.updateLowerBound(Math.min(mP, mN), this);
             }
-            if(max >= -min){
-                X.updateUpperBound(max, this,
-                        lcg() ? Reason.r(Y.getMaxLit()) : Reason.undef());
-            }else{
-                X.updateUpperBound(-min, this,
-                        lcg() ? Reason.r(Y.getMinLit()) : Reason.undef());
-            }
+                X.updateUpperBound(Math.max(-min, max), this,
+                        lcg() ? Reason.r(Y.getMinLit(), Y.getMaxLit()) : Reason.undef());
         }
         if (prevLB != X.getLB() || prevUB != X.getUB()) setBounds();
     }
