@@ -98,7 +98,7 @@ public class PropElement extends Propagator<Variable> {
             ub = index.getUB();
             // filter set (constructive disjunction)
             if (noEmptyKer) {// from ker
-                constructiveDisjunction.clear();
+                constructiveDisjunction.resetQuick();
                 ISetIterator iter = array[index.getLB() - offSet].getLB().iterator();
                 while (iter.hasNext()){
                     int j = iter.nextInt();

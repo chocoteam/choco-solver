@@ -152,7 +152,7 @@ public class PropLagrOneTree extends Propagator<Variable> implements GraphLagran
     //***********************************************************************************
 
     protected void rebuild() {
-        mandatoryArcsList.clear();
+        mandatoryArcsList.resetQuick();
         ISet nei;
         for (int i = 0; i < n; i++) {
             nei = gV.getMandatoryNeighborsOf(i);

@@ -90,7 +90,7 @@ public class PropNValue extends Propagator<IntVar> {
 
     private void selectRandomWitness(int idxConcernedValue) {
         int value = concernedValues[idxConcernedValue];
-        listForRandomPick.clear();
+        listForRandomPick.resetQuick();
         for(int i = 0; i < n; i++) {
             if(vars[i].isInstantiatedTo(value)) {
                 mandatoryValues.add(value);

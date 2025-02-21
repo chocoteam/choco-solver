@@ -9,7 +9,6 @@
  */
 package org.chocosolver.solver.search.loop.monitors;
 
-import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.sat.MiniSat;
 import org.chocosolver.solver.constraints.nary.sat.PropSat;
@@ -30,7 +29,7 @@ public class NogoodFromSolutions implements IMonitorSolution {
 
     private final PropSat png;
     private final IntVar[] decisionVars;
-    private final TIntList ps;
+    private final TIntArrayList ps;
 
     /**
      * Avoid exploring same solutions (useful with restart on solution)
@@ -52,7 +51,7 @@ public class NogoodFromSolutions implements IMonitorSolution {
     @Override
     public void onSolution() {
         int n = decisionVars.length;
-        ps.clear();
+        ps.resetQuick();
         for (int i = 0; i < n; i++) {
             ps.add(MiniSat.makeLiteral(
                     png.makeIntEq(decisionVars[i], decisionVars[i].getValue()),
