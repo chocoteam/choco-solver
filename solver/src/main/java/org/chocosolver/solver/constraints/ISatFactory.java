@@ -672,10 +672,10 @@ public interface ISatFactory extends ISelf<Model> {
         MiniSat sat = sat();
         sat.beforeAddingClauses();
         if (!tuples.isFeasible()) {
-            TIntList c = new TIntArrayList();
+            TIntArrayList c = new TIntArrayList();
             for (int i = 0; i < tuples.nbTuples(); i++) {
                 int[] t = tuples.get(i);
-                c.clear();
+                c.resetQuick();
                 for (int j = 0; j < vars.length; j++) {
                     c.add(vars[j].getLit(t[j], IntVar.LR_NE));
                 }

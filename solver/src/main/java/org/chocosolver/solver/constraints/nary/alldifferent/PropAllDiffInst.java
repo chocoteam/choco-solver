@@ -58,13 +58,13 @@ public class PropAllDiffInst extends Propagator<IntVar> {
                 set.addAll(var);
             }
             if (set.size() == vars.length) { // there are no spare values
-                TIntList ps = new TIntArrayList();
+                TIntArrayList ps = new TIntArrayList();
                 for (int v : set) {
                     for (int i = 0; i < vars.length; i++) {
                         ps.add(vars[i].getLit(v, IntVar.LR_EQ));
                     }
                     getModel().getSolver().getSat().addClause(ps);
-                    ps.clear();
+                    ps.resetQuick();
                 }
             }
         }

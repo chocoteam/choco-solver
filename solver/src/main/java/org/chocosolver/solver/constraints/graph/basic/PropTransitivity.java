@@ -79,10 +79,10 @@ public class PropTransitivity<V extends GraphVar<?>> extends Propagator<V> {
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        rT.clear();
-        rF.clear();
-        eT.clear();
-        eF.clear();
+        rT.resetQuick();
+        rF.resetQuick();
+        eT.resetQuick();
+        eF.resetQuick();
         gdm.forEachEdge(arcEnforced, GraphEventType.ADD_EDGE);
         gdm.forEachEdge(arcRemoved, GraphEventType.REMOVE_EDGE);
         filter();
