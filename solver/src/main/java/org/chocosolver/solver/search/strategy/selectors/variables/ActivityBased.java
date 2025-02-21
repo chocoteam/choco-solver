@@ -9,8 +9,6 @@
  */
 package org.chocosolver.solver.search.strategy.selectors.variables;
 
-
-import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
@@ -124,7 +122,7 @@ public final class ActivityBased extends AbstractStrategy<IntVar> implements IMo
 
     private int currentVar = -1, currentVal = -1;
 
-    private final TIntList bests = new TIntArrayList();
+    private final TIntArrayList bests = new TIntArrayList();
 
     private boolean restartAfterEachLeaf = true;
 
@@ -241,14 +239,14 @@ public final class ActivityBased extends AbstractStrategy<IntVar> implements IMo
     @Override
     public Decision<IntVar> getDecision() {
         IntVar best = null;
-        bests.clear();
+        bests.resetQuick();
         double bestVal = -1.0d;
         for (int i = 0; i < vars.length; i++) {
             int ds = vars[i].getDomainSize();
             if (ds > 1) {
                 double a = A[v2i.get(vars[i].getId())] / ds;
                 if (a > bestVal) {
-                    bests.clear();
+                    bests.resetQuick();
                     bests.add(i);
                     bestVal = a;
                 } else if (a == bestVal) {
@@ -412,14 +410,14 @@ public final class ActivityBased extends AbstractStrategy<IntVar> implements IMo
                 }
             } else {
                 if (variable.hasEnumeratedDomain()) {
-                    bests.clear();
+                    bests.resetQuick();
                     double bestVal = Double.MAX_VALUE;
                     DisposableValueIterator it = variable.getValueIterator(true);
                     while (it.hasNext()) {
                         int value = it.next();
                         double current = vAct[currentVar].activity(value);
                         if (current < bestVal) {
-                            bests.clear();
+                            bests.resetQuick();
                             bests.add(value);
                             bestVal = current;
                         } else {

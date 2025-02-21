@@ -28,8 +28,8 @@ public class GraphRandomEdge implements GraphEdgeSelector {
     }
 
     public int[] selectEdge(GraphVar g) {
-        pFrom.clear();
-        pTo.clear();
+        pFrom.resetQuick();
+        pTo.resetQuick();
         ISet envSuc, kerSuc;
         for (int i : g.getPotentialNodes()) {
             envSuc = g.getPotentialSuccessorsOf(i);

@@ -170,7 +170,7 @@ public class IntHeap {
     public void clear() {
         for (int i = 0; i < heap.size(); i++)
             indices.set(heap.get(i), -1);
-        heap.clear();
+        heap.resetQuick();
     }
 
 

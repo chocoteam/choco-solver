@@ -9,7 +9,6 @@
  */
 package org.chocosolver.sat;
 
-import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 
 import java.io.*;
@@ -56,7 +55,7 @@ public interface Dimacs {
                     break;
                 }
             }
-            TIntList lits = new TIntArrayList();
+            TIntArrayList lits = new TIntArrayList();
             while ((line = br.readLine()) != null) {
                 if (line.startsWith(TAG_COMM)) continue;
                 int[] ls = Arrays.stream(line.split("\\s+"))
@@ -79,7 +78,7 @@ public interface Dimacs {
                 if (i == 0 && !lits.isEmpty()) {
                     nclauses--;
                     _me().addClause(lits);
-                    lits.clear();
+                    lits.resetQuick();
                 }
             }
             if (nclauses != 0) {
