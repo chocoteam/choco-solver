@@ -100,7 +100,8 @@ public class LazyClauseGeneration implements Learn {
             }
         } else {
             nbRestarts = mSolver.getRestartCount();
-            if(mSolver.getSearchWorldIndex() == mSolver.getEnvironment().getWorldIndex() -1){ // TODO check condition
+            if(mSolver.getSearchWorldIndex() == mSolver.getEnvironment().getWorldIndex()){
+                // TODO check condition. It seems that the condition is never met.
                 mSat.topLevelCleanUp();
             }
         }
