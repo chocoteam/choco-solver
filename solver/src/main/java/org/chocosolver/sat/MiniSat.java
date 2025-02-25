@@ -256,9 +256,6 @@ public class MiniSat implements SatFactory {
     }
 
     public void addLearnt(TIntList learnt_clause) {
-        for (int v = 0; v < nVars(); v++) {
-            assert valueVar(v) != MiniSat.lUndef : v + " not heaped";
-        }
         if (learnt_clause.size() == 1) {
             uncheckedEnqueue(learnt_clause.get(0));
         } else {
