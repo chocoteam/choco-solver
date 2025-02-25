@@ -125,8 +125,8 @@ public final class MiniSatSolver extends MiniSat implements Dimacs {
      * {@code ESat.UNDEFINED} if a limit was reached.
      */
     public ESat solve() {
-        model.clear();
-        conflict.clear();
+        model.resetQuick();
+        conflict.resetQuick();
         if (!ok_) return ESat.FALSE;
         max_learnts = nClauses() * learntsize_factor;
         learntsize_adjust_confl = 100;
@@ -187,7 +187,7 @@ public final class MiniSatSolver extends MiniSat implements Dimacs {
                 conflictC++;
                 if (trailMarker() == 0) return ESat.FALSE;
 
-                learnt_clause.clear();
+                learnt_clause.resetQuick();
                 backtrack_level = analyze(confl, learnt_clause);
                 cancelUntil(backtrack_level);
                 addLearnt(learnt_clause);
