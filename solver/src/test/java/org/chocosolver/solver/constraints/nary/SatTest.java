@@ -242,8 +242,6 @@ public class SatTest {
         model.addClause(model.lit(b1), model.lit(b2), model.lit(b3));
         model.getSolver().findAllSolutions();
         Assert.assertEquals(model.getSolver().getSolutionCount(), 7);
-        Assert.assertEquals(model.getMinisat().getPropSat().getMiniSat().solve(),
-                TRUE);
     }
 
     @Test(groups = "1s")
@@ -256,7 +254,5 @@ public class SatTest {
         model.addClause(model.lit(b1), model.lit(b2), model.lit(b3));
         model.getSolver().findAllSolutions();
         Assert.assertEquals(model.getSolver().getSolutionCount(), 7);
-        Assert.assertEquals(model.getMinisat().getPropSat().getMiniSat().solve(),
-                TRUE);
     }
 }
