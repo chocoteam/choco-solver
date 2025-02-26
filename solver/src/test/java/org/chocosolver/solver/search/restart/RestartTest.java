@@ -16,6 +16,7 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.limits.NodeCounter;
 import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ProblemMaker;
 import org.testng.annotations.Test;
@@ -136,7 +137,7 @@ public class RestartTest {
         assertEquals(solver.getSolutionCount(), 10);
     }
 
-    @Test(groups = "lcg",dataProvider = "random", dataProviderClass = Providers.class)
+    @Test(groups = "lcg", dataProvider = "random", dataProviderClass = Providers.class)
     @Providers.Arguments(values = {"0", "20", "1"})
     public void testGolombRulerWithLCG(long seed) {
         Model model = ProblemMaker.makeGolombRuler(8, true);
@@ -146,5 +147,81 @@ public class RestartTest {
         solver.setSearch(randomSearch(ticks, seed));
         while (solver.solve()) ;
         assertEquals(solver.getBestSolutionValue(), 34);
+    }
+
+    @Test(groups = "1s")
+    public void testGolombRulerWithReset() {
+        Model model = ProblemMaker.makeGolombRuler(8);
+        IntVar[] ticks = (IntVar[]) model.getHook("ticks");
+        Solver solver = model.getSolver();
+        solver.setGeometricalRestart(10, 1.05, new FailCounter(model, 2), 2);
+        solver.setNoGoodRecordingFromRestarts();
+        solver.setSearch(domOverWDegSearch(ticks));
+        while (solver.solve()) ;
+        assertEquals(solver.getRestartCount(), 2);
+        assertEquals(solver.getSolutionCount(), 3);
+        assertEquals(solver.getObjectiveManager().getBestSolutionValue(), 34);
+        solver.hardReset();
+        while (solver.solve()) ;
+        assertEquals(solver.getRestartCount(), 0);
+        assertEquals(solver.getSolutionCount(), 10);
+        assertEquals(solver.getObjectiveManager().getBestSolutionValue(), 34);
+    }
+
+    @Test(groups = "1s")
+    public void testClausesWithReset() {
+        Model model = new Model("quinn.cnf");
+        // p cnf 16 18
+        BoolVar[] bs = model.boolVarArray("b", 16);
+        //  1    2  0
+        model.addClauses(new BoolVar[]{bs[0], bs[1]}, new BoolVar[0]);
+        // -2   -4  0
+        model.addClauses(new BoolVar[]{bs[1].not(), bs[3].not()}, new BoolVar[0]);
+        //  3    4  0
+        model.addClauses(new BoolVar[]{bs[2], bs[3]}, new BoolVar[0]);
+        // -4   -5  0
+        model.addClauses(new BoolVar[]{bs[3].not(), bs[4].not()}, new BoolVar[0]);
+        //  5   -6  0
+        model.addClauses(new BoolVar[]{bs[4], bs[5].not()}, new BoolVar[0]);
+        //  6   -7  0
+        model.addClauses(new BoolVar[]{bs[5], bs[6].not()}, new BoolVar[0]);
+        //  6    7  0
+        model.addClauses(new BoolVar[]{bs[5], bs[6]}, new BoolVar[0]);
+        //  7  -16  0
+        model.addClauses(new BoolVar[]{bs[6], bs[15].not()}, new BoolVar[0]);
+        //  8   -9  0
+        model.addClauses(new BoolVar[]{bs[7], bs[8].not()}, new BoolVar[0]);
+        // -8  -14  0
+        model.addClauses(new BoolVar[]{bs[7].not(), bs[13].not()}, new BoolVar[0]);
+        //  9   10  0
+        model.addClauses(new BoolVar[]{bs[8], bs[9]}, new BoolVar[0]);
+        //  9  -10  0
+        model.addClauses(new BoolVar[]{bs[8], bs[9].not()}, new BoolVar[0]);
+        //-10  -11  0
+        model.addClauses(new BoolVar[]{bs[9].not(), bs[10].not()}, new BoolVar[0]);
+        // 10   12  0
+        model.addClauses(new BoolVar[]{bs[9], bs[11]}, new BoolVar[0]);
+        // 11   12  0
+        model.addClauses(new BoolVar[]{bs[10], bs[11]}, new BoolVar[0]);
+        // 13   14  0
+        model.addClauses(new BoolVar[]{bs[12], bs[13]}, new BoolVar[0]);
+        // 14  -15  0
+        model.addClauses(new BoolVar[]{bs[13], bs[14].not()}, new BoolVar[0]);
+        // 15   16  0
+        model.addClauses(new BoolVar[]{bs[14], bs[15]}, new BoolVar[0]);
+        Solver solver = model.getSolver();
+        solver.setRestartOnSolutions();
+        solver.setNoGoodRecordingFromRestarts();
+        solver.setNoGoodRecordingFromSolutions(bs);
+        solver.setSearch(inputOrderLBSearch(bs));
+        while (solver.solve()) ;
+        assertEquals(solver.getRestartCount(), 9);
+        assertEquals(solver.getSolutionCount(), 9);
+
+        solver.hardReset();
+        while (solver.solve()) ;
+        assertEquals(solver.getRestartCount(), 0);
+        assertEquals(solver.getSolutionCount(), 9);
+
     }
 }

@@ -211,4 +211,14 @@ public class PropSat extends Propagator<Variable> {
 
     }
 
+    /**
+     * Reset the underlying SAT decorator.
+     * <p>
+     *     This method removes all learnt clauses and literals from the SAT solver.
+     */
+    public void reset(){
+        sat_.reset();
+    }
+
+
 }
