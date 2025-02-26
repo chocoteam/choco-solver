@@ -26,12 +26,12 @@ public interface Dimacs {
     String TAG_PROB = "p";
     String TAG_CNF = "cnf";
 
-    MiniSat _me();
+    MiniSatSolver _me();
 
     /**
      * A call to this method parses {@code pathToFile}, a CNF file, and populates this {@code MiniSat} pathToFile
      * with variables and clauses defined in the file.
-     * Then, a call to {@link MiniSat#solve()} is required.
+     * Then, a call to {@link MiniSatSolver#solve()} is required.
      * @param pathToFile path to the CNF file to parse
      * @throws FileNotFoundException if no file is found at
      */
@@ -40,7 +40,7 @@ public interface Dimacs {
         Reader reader = new FileReader(pathToFile);
         try (BufferedReader br = new BufferedReader(reader)) {
             String line;
-            int nvars, nclauses = 0;
+            int nclauses = 0;
             while ((line = br.readLine()) != null) {
                 if (line.startsWith(TAG_COMM)) continue;
                 if (line.startsWith(TAG_PROB)) {
@@ -50,7 +50,7 @@ public interface Dimacs {
                     if (!values[1].equals(TAG_CNF)) {
                         throw new IllegalStateException("Not a CNF file");
                     }
-                    nvars = Integer.parseInt(values[2]);
+//                    nvars = Integer.parseInt(values[2]);
                     nclauses = Integer.parseInt(values[3]);
                     break;
                 }

@@ -63,6 +63,11 @@ public final class MiniSatSolver extends MiniSat implements Dimacs {
         rand = new Random(random_seed);
     }
 
+    @Override
+    public MiniSatSolver _me() {
+        return this;
+    }
+
     /**
      * Create and return a new variable
      *
