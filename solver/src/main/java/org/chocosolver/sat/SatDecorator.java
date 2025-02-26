@@ -32,6 +32,8 @@ public class SatDecorator extends MiniSat {
 
     // store clauses dynamically added from outside
     public ArrayList<Clause> dynClauses = new ArrayList<>();
+    // store literals dynamically added from outside
+    public TIntArrayList dynLits = new TIntArrayList();
     private final TIntObjectHashMap<Literalizer> lits = new TIntObjectHashMap<>();
     private final HashMap<Variable, List<Literalizer>> vars = new HashMap<>();
     /**
@@ -79,6 +81,7 @@ public class SatDecorator extends MiniSat {
                 ok_ = false;
                 return;
             case 1:
+                dynLits.add(ps[0]);
                 dynUncheckedEnqueue(ps[0]);
                 propagate();
                 ok_ = (confl == C_Undef);
@@ -119,10 +122,30 @@ public class SatDecorator extends MiniSat {
         }
     }
 
-    public void detachLearnt(int ci) {
+    private void detachLearnt(int ci) {
         Clause cr = dynClauses.get(ci);
         detachClause(cr);
         dynClauses.remove(ci);
+    }
+
+    public void reset() {
+        deleteLearntLits();
+        deleteLearntClauses();
+    }
+
+    private void deleteLearntClauses() {
+        for (int i = dynClauses.size() - 1; i >= 0; i--) {
+            detachClause(dynClauses.get(i));
+        }
+        dynClauses.clear();
+    }
+
+
+    private void deleteLearntLits() {
+        for (int i = 0; i < dynLits.size(); i++) {
+            this.early_deductions_.remove(dynLits.get(i));
+        }
+        dynLits.resetQuick();
     }
 
     private void dynUncheckedEnqueue(int l) {

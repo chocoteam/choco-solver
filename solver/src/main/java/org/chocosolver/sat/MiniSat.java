@@ -763,9 +763,9 @@ public class MiniSat implements SatFactory {
         int i, j;
         for (i = j = 0; i < cs.size(); i++) {
             Clause c = cs.get(i);
-            if (satisfied(c)){
+            if (satisfied(c)) {
                 removeClause(cs.get(i));
-            }else{
+            } else {
                 cs.set(j++, cs.get(i));
 
             }
@@ -779,9 +779,17 @@ public class MiniSat implements SatFactory {
     boolean satisfied(Clause c) {
         for (int i = 0; i < c.size(); i++)
             if (valueLit(c._g(i)) == lTrue) {
-            return true;
-        }
+                return true;
+            }
         return false;
+    }
+
+    public void deleteAllLearnedClauses() {
+        for (int i = 0; i < learnts.size(); i++) {
+            Clause c = learnts.get(i);
+            removeClause(c);
+        }
+        learnts.clear();
     }
 
     public void doReduceDB() {

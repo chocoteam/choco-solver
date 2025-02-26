@@ -715,8 +715,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         if (restarter.mustRestart(this)) {
             this.restart();
             L.forget();
-        } else
-            if (!M.extend(this)) {
+        } else if (!M.extend(this)) {
             action = validate;
         }
         searchMonitors.afterOpenNode();
@@ -815,6 +814,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      *     <li>flush {@link #engine}</li>
      *     <li>synchronize {@link #dpath} to erase out-dated decisions, presumably all of them</li>
      *     <li>reset bounds of {@link #objectivemanager} (calling {@link IObjectiveManager#resetBestBounds()}</li>
+     *     <li>clear learnt clauses, if any</li>
      *     <li>remove all stop criteria {@link #removeAllStopCriteria()}</li>
      *     <li>set {@link #feasible} to {@link ESat#UNDEFINED}</li>
      * </ul>
@@ -831,6 +831,11 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         engine.reset();
         dpath.synchronize();
         objectivemanager.resetBestBounds();
+        if (isLCG()) {
+            mSat.deleteAllLearnedClauses();
+        } else if (mModel.getMinisat() != null) {
+            mModel.getMinisat().getPropSat().reset();
+        }
         removeAllStopCriteria();
         feasible = UNDEFINED;
         jumpTo = 0;
@@ -851,9 +856,9 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * <ul>
      *     <li>replace {@link #M} by {@link MoveBinaryDFS}</li>
      *     <li>call {@link Solver#setNoLearning()}</li>
+     *     <li>call {@link Solver#clearRestarter()}</li>
      *     <li>remove warm start hints</li>
      *     <li>clear {@link #searchMonitors}, that forget any declared one</li>
-     *     <li>call {@link Model#removeMinisat()}</li>
      * </ul>
      * </p>
      *
@@ -864,6 +869,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         this.M.removeStrategy();
         setMove(new MoveBinaryDFS());
         setNoLearning();
+        clearRestarter();
         //no need to unplug, done by searchMonitors.reset()
         this.lastSol = null;
         if (this.warmStart != null) {
@@ -873,7 +879,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         searchMonitors.reset();
         defaultSearch = false;
         completeSearch = false;
-        mModel.removeMinisat();
     }
 
     /**
@@ -1382,6 +1387,10 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * @implNote replace the declared restart policy by {@link AbstractRestart#NO_RESTART}
      */
     public void clearRestarter() {
+        if (restarter != AbstractRestart.NO_RESTART) {
+            restarter.setNext(this.restarter);
+            this.restarter = restarter;
+        }
         this.restarter = AbstractRestart.NO_RESTART;
     }
 
@@ -1614,18 +1623,18 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         return lastSol != null;
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////       FACTORY         //////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////       FACTORY         //////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public Solver ref() {
         return this;
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////       MEASURES        //////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////       MEASURES        //////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public String getModelName() {
