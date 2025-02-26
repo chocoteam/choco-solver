@@ -920,6 +920,9 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         restoreRootNode();
         pushTrail();
         getMeasures().incRestartCount();
+        if(isLCG()) {
+            mSat.topLevelCleanUp();
+        }
         try {
             objectivemanager.postDynamicCut();
             mMeasures.incFixpointCount();
@@ -1159,13 +1162,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
-     * @return the current learn.
-     */
-    public Learn getLearner() {
-        return L;
-    }
-
-    /**
      * @return the current move.
      */
     public Move getMove() {
@@ -1250,13 +1246,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
             ismet = criteria.get(i).isMet();
         }
         return ismet;
-    }
-
-    /**
-     * @return the index of the world where the search starts, after initialization.
-     */
-    public int getSearchWorldIndex() {
-        return searchWorldIndex;
     }
 
     /**
@@ -1363,13 +1352,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         } else {
             this.M = new MoveSeq(getModel(), m);
         }
-    }
-
-    /**
-     * @deprecated
-     */
-    @Deprecated
-    public void setPropagate(Propagate p) {
     }
 
     /**

@@ -20,7 +20,6 @@ import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactor
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.Arrays;
@@ -100,10 +99,6 @@ public class LazyClauseGeneration implements Learn {
             }
         } else {
             nbRestarts = mSolver.getRestartCount();
-            if(mSolver.getSearchWorldIndex() == mSolver.getEnvironment().getWorldIndex()){
-                // TODO check condition. It seems that the condition is never met.
-                mSat.topLevelCleanUp();
-            }
         }
         if (mSat.nLearnts() >= max_learnts) {
             mSat.doReduceDB();
@@ -147,6 +142,7 @@ public class LazyClauseGeneration implements Learn {
         }
     }
 
+    @SuppressWarnings("unused")
     private void extractFromDecisions() {
         //todo deal with LazyLit
         DecisionPath path = mSolver.getDecisionPath();
@@ -160,7 +156,6 @@ public class LazyClauseGeneration implements Learn {
             // build a 'fake' explanation that is able to refute the right decision
             for (; i > 0 /*0 is ROOT */ ; i--) {
                 dec = (IntDecision) path.getDecision(i);
-                IntIterableRangeSet dom = null;
                 IntVar var = dec.getDecisionVariable();
                 if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntEq())) {
                     if (dec.hasNext() || dec.getArity() == 1) {
