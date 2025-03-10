@@ -9,16 +9,15 @@
  */
 package org.chocosolver.lp;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Optional;
+import java.io.*;
+import java.util.*;
 
 /**
  * <p>A linear program, equipped with a Simplex method.</p>
  * <p>This is based on "Introduction to Algorithms, Third Edition",
  * By Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest and Clifford Stein,
  * 29.3 The simplex algorithm.</p>
- * <p>There are various ways to declare a LP.
+ * <p>There are various ways to declare an LP.
  * Either, by giving it as a standard form providing the A nxm-matrix, the m-vector b and the n-vector c.
  * <pre> {@code
  * double[] c = {5, 7};
@@ -28,7 +27,7 @@ import java.util.Optional;
  * }</pre>
  * <p>
  * Or, by declaring the variables first and then adding some constraints and the objective function.
- * In that case, all the variables must be declared first and have to be nonnegative (&ge; 0).
+ * In that case, all the variables must be declared first and have to be non-negative (&ge; 0).
  * <pre> {@code
  *  LinearProgram lp = new LinearProgram(false);
  *  lp.makeVariables(2);
@@ -49,23 +48,25 @@ import java.util.Optional;
  */
 public class LinearProgram {
 
-    private static class Slack {
+    private static final double EPSILON = 1.0E-8;
+
+    static class Slack {
         // number of non-basic variables
         private final int n;
         // number of basic variables
         private final int m;
         // a mxn matrix
-        private final double[][] A;
+        final double[][] A;
         // an m-vector
-        private final double[] b;
+        final double[] b;
         // an n-vector
-        private final double[] c;
+        final double[] c;
         // an m-vector, the basic variables
-        private final int[] B;
+        final int[] B;
         // an n-vector, the non-basic variables
-        private final int[] N;
+        final int[] N;
         // an integer
-        private double v;
+        double v;
 
         /**
          * Slack form of a linear program
@@ -78,7 +79,7 @@ public class LinearProgram {
             this.m = b.length;
             this.n = c.length;
             this.A = new double[a.length][];
-            for(int i = 0; i < a.length; i++){
+            for (int i = 0; i < a.length; i++) {
                 this.A[i] = a[i].clone();
             }
             this.b = b.clone();
@@ -125,13 +126,13 @@ public class LinearProgram {
         }
 
         /**
-         * The method takes as input a slack form and it modifies in-place A, b, c, v, N and B.
+         * The method takes as input a slack form, and it modifies in-place A, b, c, v, N and B.
          *
          * @param l index of the leaving variable
          * @param e index of the entering variable
          */
         void pivot(int l, int e, boolean trace) {
-            if (trace) System.out.printf("[pivot] e: x%d, l: x%d\n", B[l], N[e]);
+            if (trace) System.out.printf("[pivot] l: x%d, e: x%d, v: %.4f\n", B[l], N[e], v);
             // Compute the coefficients of the equation for new basic variable x_e
             b[l] /= A[l][e];
             for (int j = 0; j < n; j++) {
@@ -169,7 +170,10 @@ public class LinearProgram {
 
         private void setValues(double[] x) {
             for (int i = 0; i < m; ++i) {
-                if (B[i] < n) x[B[i]] = b[i];
+                if (B[i] < n) {
+                    // round to 0 if close enough
+                    x[B[i]] = almost0(b[i]);
+                }
             }
         }
 
@@ -204,13 +208,15 @@ public class LinearProgram {
         UNKNOWN,
         FEASIBLE,
         INFEASIBLE,
-        UNBOUNDED
+        UNBOUNDED,
+        INF_OR_UNBD,
     }
 
     // number of variables
-    int n;
+    protected int n;
     // number of constraints
-    int m;
+    protected int m;
+
     // a mxn matrix
     private double[][] A;
     // an m-vector
@@ -218,10 +224,10 @@ public class LinearProgram {
     // an n-vector
     private double[] c;
     // an n-vector
-    double[] x;
-    double z;
+    protected double[] x;
+    protected double z;
     // feasibility of the LP
-    Status status = Status.UNKNOWN;
+    protected Status status = Status.UNKNOWN;
     // trace the resolution
     final boolean trace;
 
@@ -275,8 +281,36 @@ public class LinearProgram {
     }
 
     /**
+     * @return the matrix A of the linear program
+     */
+    public double[][] getA() {
+        return A;
+    }
+
+    /**
+     * @return the right-hand side vector b of the linear program
+     */
+    public double[] getB() {
+        return b;
+    }
+
+    /**
+     * @return the coefficients vector c of the linear program
+     */
+    public double[] getC() {
+        return c;
+    }
+
+    /**
+     * @return the status of the resolution
+     */
+    public Status getStatus() {
+        return status;
+    }
+
+    /**
      * Declare a new variable.
-     * A variable is supposed to be nonnegative (&ge; 0).
+     * A variable is supposed to be non-negative (&ge; 0).
      *
      * @return the index of the variable
      */
@@ -299,9 +333,9 @@ public class LinearProgram {
 
     private void checkLength(double[] a) {
         if (a.length != n) {
-            throw new UnsupportedOperationException("" +
+            throw new UnsupportedOperationException(
                     "The number of coefficients in the objective function differs from " +
-                    "the number of variables declared.");
+                            "the number of variables declared.");
         }
     }
 
@@ -316,9 +350,20 @@ public class LinearProgram {
         this.c = Arrays.copyOf(ci, n);
         if (!maximize) {
             for (int i = 0; i < n; i++) {
-                c[i] *= -1;
+                c[i] = negate(c[i]);
             }
         }
+    }
+
+    /**
+     * Set the objective function to optimize
+     *
+     * @param maximize set to <i>true</i> for maximization, <i>false</i> otherwise
+     * @param map      coefficients of the linear inequality, as a map
+     */
+    public void setObjective(boolean maximize, HashMap<Integer, Double> map) {
+        this.c = new double[n];
+        map.forEach((v, c) -> this.c[v] = (maximize ? c : negate(c)));
     }
 
     /**
@@ -328,7 +373,7 @@ public class LinearProgram {
         // decrease capacity of A
         double[][] At = this.A;
         A = new double[this.m - 1][this.n];
-        System.arraycopy(At, 0, this.A, 0, m -1);
+        System.arraycopy(At, 0, this.A, 0, m - 1);
         // decrease capacity of b
         double[] bt = this.b;
         this.b = new double[this.m - 1];
@@ -337,7 +382,7 @@ public class LinearProgram {
     }
 
     /**
-     * Add a linear inequality (&le;) to the system.
+     * Add a linear inequality (&le; ) to the system.
      *
      * @param ci coefficients of the linear inequality, respecting variable indices
      * @param b  the right-hand side value
@@ -360,7 +405,7 @@ public class LinearProgram {
     }
 
     /**
-     * Add a linear inequality (&le;) to the system.
+     * Add a linear inequality (&le; ) to the system.
      *
      * @param map coefficients of the linear inequality, as a map
      * @param b   the right-hand side value
@@ -378,22 +423,22 @@ public class LinearProgram {
     }
 
     /**
-     * Add a linear inequality (&ge;) to the system.
+     * Add a linear inequality (&ge; ) to the system.
      *
      * @param ci coefficients of the linear inequality, respecting variable indices
      * @param b  the right-hand side value
-     * @implNote the (&ge;)-inequality is turned into a (&le;)-inequality constraint
+     * @implNote the (&ge;)-inequality is turned into a (&le; )-inequality constraint
      */
     public void addGeq(double[] ci, double b) {
         addLeq(ci, b);
         for (int i = 0; i < n; i++) {
-            this.A[m - 1][i] *= -1;
+            this.A[m - 1][i] = negate(this.A[m - 1][i]);
         }
-        this.b[m - 1] *= -1;
+        this.b[m - 1] = negate(this.b[m - 1]);
     }
 
     /**
-     * Add a linear inequality (&ge;) to the system.
+     * Add a linear inequality (&ge; ) to the system.
      *
      * @param map coefficients of the linear inequality, as a map
      * @param b   the right-hand side value
@@ -439,6 +484,20 @@ public class LinearProgram {
         double[] ci = new double[n];
         ci[var] = c;
         addEq(ci, b);
+    }
+
+    /**
+     * Overwrite the value of the ith b coefficient.
+     * <p>
+     * This method is unsafe and should be used with caution.
+     * It is used to update the value of the right-hand side of a constraint,
+     * for instance, to handle new bounds on a variable.
+     *
+     * @param i index of the constraint
+     * @param v new value
+     */
+    public void unsafeOverwriteB(int i, double v) {
+        this.b[i] = v;
     }
 
     /**
@@ -493,7 +552,7 @@ public class LinearProgram {
      *
      * @return optional slack form of the linear program defined is this
      */
-    private Optional<Slack> initialize() {
+    Optional<Slack> initialize() {
         this.status = Status.UNKNOWN;
         Arrays.fill(this.x, 0.);
         this.z = 0.;
@@ -521,7 +580,7 @@ public class LinearProgram {
                         // using any e in N such that a0e != 0
                         int e = -1;
                         for (int j = 0; j < laux.n; j++) {
-                            if (laux.A[i][j] != 0) {
+                            if (almost0(laux.A[i][j]) != 0.) {
                                 e = j;
                                 break;
                             }
@@ -656,10 +715,24 @@ public class LinearProgram {
     }
 
     /**
+     * Return the values of the variables in the linear program.
+     * <p>
+     * If this is infeasible, return {@code null}, otherwise the values are returned.
+     * </p>
+     *
+     * @return the value assigned the ith variable in this linear program.
+     */
+    public double[] values() {
+        if (isFeasible()) {
+            return x;
+        } else return null;
+    }
+
+    /**
      * Return the value of the objective function defined in this linear program.
      * <p>
      * If this is not feasible, returns {@link Double#NEGATIVE_INFINITY},
-     * otherwise, the optimal value is returnd.
+     * otherwise, the optimal value is returned.
      * </p>
      *
      * @return the value of the objective function.
@@ -677,10 +750,10 @@ public class LinearProgram {
      *
      * @return a value between [0, n) if an entering variable is found, {@link Integer#MAX_VALUE} otherwise.
      */
-    private static int enteringVariable(Slack s) {
+    static int enteringVariable(Slack s) {
         int j = Integer.MAX_VALUE;
         for (int i = 0; i < s.n; i++) {
-            if (s.c[i] > 0. && s.N[i] < j) {
+            if (s.c[i] > EPSILON && s.N[i] < j) {
                 j = i;
             }
         }
@@ -696,30 +769,52 @@ public class LinearProgram {
      * @param e index of the entering variable
      * @return index of the leaving variable
      */
-    private static int leavingVariable(Slack s, int e) {
-        double min_v = Double.POSITIVE_INFINITY;
+    static int leavingVariable(Slack s, int e) {
         int l = -1;
         for (int i = 0; i < s.m; i++) {
-            if (s.A[i][e] > 0) {
-                double d = s.b[i] / s.A[i][e];
-                if (min_v > d) {
+            if (s.A[i][e] > EPSILON) {
+                if (l == -1) {
                     l = i;
-                    min_v = d;
+                } else if (s.b[i] / s.A[i][e] < s.b[l] / s.A[l][e]) {
+                    l = i;
                 }
             }
         }
         return l;
     }
 
-    @Override
-    public String toString() {
-        return toLP(A, b, c, 0.);
+    /**
+     * Negate a double value.
+     * This method is used to avoid -0.0.
+     *
+     * @param v a double value
+     * @return -v
+     * @see <a href="https://stackoverflow.com/a/8153449/5426468">For more details</a>
+     */
+    private static double negate(double v) {
+        return -1 * v + 0.;
     }
 
-    private static String toLP(double[][] A, double[] b, double[] c, double v) {
+    /**
+     * Check if a double value is almost 0.
+     * The threshold is defined by {@link #EPSILON}.
+     * Every value smaller between -EPSILON and EPSILON is considered as 0.
+     *
+     * @param v a double value
+     * @return 0 if v is almost 0, v otherwise
+     */
+    private static double almost0(double v) {
+        return Math.abs(v) < EPSILON ? 0. : v;
+    }
+
+    @Override
+    public String toString() {
+        return toLP(A, b, c);
+    }
+
+    private static String toLP(double[][] A, double[] b, double[] c) {
         StringBuilder st = new StringBuilder();
-        st.append("Maximize").append('\n');
-        st.append("\\ v = ").append(v).append("\n");
+        st.append("Maximize");
         st.append(" obj:");
         for (int i = 0; i < c.length; i++) {
             st.append(c[i] >= 0 ? " +" : " ")
@@ -732,7 +827,7 @@ public class LinearProgram {
             st.append(" c").append(j + 1).append(": ");
             st.append(A[j][0]).append(" x1");
             for (int i = 1; i < c.length; i++) {
-                st.append(A[j][i] >= 0 ? " +" : " ")
+                st.append(A[j][i] >= 0. ? " +" : " ")
                         .append(A[j][i])
                         .append(" x")
                         .append(i + 1);
@@ -742,4 +837,83 @@ public class LinearProgram {
         st.append("End");
         return st.toString();
     }
+
+    /**
+     * Read a linear program from a file.
+     * This parser is not complete and does not handle all the possible cases,
+     * but it should be sufficient to parse models obtained from the {@link #toString()} method.
+     *
+     * @param lpFile the path to the file
+     * @return a linear program
+     */
+    public static LinearProgram parseLPFromFile(String lpFile) throws IOException {
+        return parseLP(new FileReader(lpFile));
+    }
+
+
+    /**
+     * Read a linear program from a file.
+     * This parser is not complete and does not handle all the possible cases,
+     * but it should be sufficient to parse models obtained from the {@link #toString()} method.
+     *
+     * @param lp the file
+     * @return a linear program
+     */
+    public static LinearProgram parseLPFromString(String lp) throws IOException {
+        return parseLP(new StringReader(lp));
+    }
+
+    /**
+     * Read a linear program from a file.
+     * This parser is not complete and does not handle all the possible cases,
+     * but it should be sufficient to parse models obtained from the {@link #toString()} method.
+     *
+     * @param in reader
+     * @return a linear program
+     */
+    private static LinearProgram parseLP(Reader in) throws IOException {
+        try (BufferedReader br = new BufferedReader(in)) {
+            String line;
+            boolean readingConstraints = false;
+
+            List<Double> c = new ArrayList<>();
+            List<List<Double>> A = new ArrayList<>();
+            List<Double> b = new ArrayList<>();
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty() || line.startsWith("\\") || line.startsWith("*")) {
+                    continue; // Ignore empty lines and comments
+                }
+
+                if (line.startsWith("Maximize") || line.startsWith("Minimize")) {
+                    readingConstraints = false;
+                    String[] parts = line.split(":")[1].trim().split("\\s+");
+                    for (int i = 0; i < parts.length; i += 2) {
+                        double coefficient = Double.parseDouble(parts[i]);
+                        c.add(coefficient);
+                    }
+
+                } else if (line.startsWith("Subject to")) {
+                    readingConstraints = true;
+                } else if (line.equalsIgnoreCase("End")) {
+                    break;
+                } else if (readingConstraints && line.contains(":")) {
+                    String[] parts = line.split(":");
+                    String[] constraintParts = parts[1].trim().split("\\s+");
+                    List<Double> a = new ArrayList<>();
+                    for (int i = 0; i < constraintParts.length - 2; i += 2) {
+                        double coefficient = Double.parseDouble(constraintParts[i]);
+                        a.add(coefficient);
+                    }
+                    A.add(a);
+                    double rhs = Double.parseDouble(constraintParts[constraintParts.length - 1]);
+                    b.add(rhs);
+                }
+            }
+            return new LinearProgram(A.stream().map(l -> l.stream().mapToDouble(Double::doubleValue).toArray()).toArray(double[][]::new),
+                    b.stream().mapToDouble(Double::doubleValue).toArray(),
+                    c.stream().mapToDouble(Double::doubleValue).toArray());
+        }
+    }
+
 }
