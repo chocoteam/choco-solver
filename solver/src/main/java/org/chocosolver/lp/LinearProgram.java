@@ -48,7 +48,7 @@ import java.util.*;
  */
 public class LinearProgram {
 
-    private static final double EPSILON = 1.0E-8;
+    static final double EPSILON = 1.0E-8;
 
     static class Slack {
         // number of non-basic variables

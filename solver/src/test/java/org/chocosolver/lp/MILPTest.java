@@ -23,7 +23,7 @@ import java.util.HashMap;
  */
 public class MILPTest {
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut = 60000)
     public void testFeasible01() {
         // 29.3-7
         double[] c = {-1, -1, -1};
@@ -43,7 +43,7 @@ public class MILPTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut = 60000)
     public void testFeasible2() {
         // 29.5-5
         double[] c = {1, 3};
@@ -62,7 +62,7 @@ public class MILPTest {
         Assert.assertEquals(lp.objective(), 20., 1e-8);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut = 60000)
     public void testFeasible3() {
         // https://en.wikipedia.org/wiki/Branch_and_bound
         MILP milp = new MILP();
@@ -77,7 +77,7 @@ public class MILPTest {
         Assert.assertEquals(milp.objective(), 276., 1e-8);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", timeOut = 60000)
     public void testDiffn1() {
         MILP milp = new MILP(false);
         // 7 taches
@@ -102,12 +102,14 @@ public class MILPTest {
                 int _j = j;
                 int _k = k;
                 // ti + di <= tj + M.(1-y)
+                //noinspection Convert2Diamond
                 milp.addLeq(new HashMap<Integer, Double>() {{
                     put(_i, 1.);
                     put(_j, -1.);
                     put(_k, M);
                 }}, -d[i] + M);
                 // tj + dj <= ti + M.y
+                //noinspection Convert2Diamond
                 milp.addLeq(new HashMap<Integer, Double>() {{
                     put(_j, 1.);
                     put(_i, -1.);
@@ -121,17 +123,18 @@ public class MILPTest {
         }
         milp.setObjective(true, c);
         LinearProgram.Status status = milp.branchAndBound();
-        if (status.equals(LinearProgram.Status.FEASIBLE)) {
-            for (int i = 0; i < 7; i++) {
-                System.out.printf("task %d starts at %.2f, for %d\n", i, milp.value(i), d[i]);
-            }
-            for (int k = 7; k < 28; k++) {
-                System.out.printf("b_%d %.4f\n", k, milp.value(k));
-            }
-            System.out.printf("Cost=: %.4f", milp.objective());
-        } else {
-            System.out.printf("%s\n", status);
-        }
+//        if (status.equals(LinearProgram.Status.FEASIBLE)) {
+//            for (int i = 0; i < 7; i++) {
+//                System.out.printf("task %d starts at %.2f, for %d\n", i, milp.value(i), d[i]);
+//            }
+//            for (int k = 7; k < 28; k++) {
+//                System.out.printf("b_%d %.4f\n", k, milp.value(k));
+//            }
+//            System.out.printf("Cost=: %.4f", milp.objective());
+//        } else {
+//            System.out.printf("%s\n", status);
+//        }
+        Assert.assertEquals(status, LinearProgram.Status.INFEASIBLE);
     }
 
 }
