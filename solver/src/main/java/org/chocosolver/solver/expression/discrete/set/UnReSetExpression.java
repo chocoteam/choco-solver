@@ -75,7 +75,7 @@ public class UnReSetExpression implements ReExpression {
 
     @Override
     public void extractVar(HashSet<IntVar> variables) {
-
+        throw new UnsupportedOperationException("extractVar() is not supported for UnReSetExpression.");
     }
 
     @Override

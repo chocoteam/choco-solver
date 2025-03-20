@@ -1,6 +1,5 @@
 package org.chocosolver.solver.expression.discrete.set;
 
-
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
@@ -9,8 +8,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 
 import java.util.HashSet;
-
-import static org.chocosolver.solver.constraints.real.Ibex.TRUE;
 
 /**
  * BiReSetExpression - Binary Relational Set Expression
@@ -53,19 +50,19 @@ public class BiReSetExpression implements ReExpression {
         if (result == null) {
             switch (op) {
                 case SUBSET:
-                    result = model.subsetEq(xSet, ySet).reify().eq(TRUE).boolVar();
+                    result = model.subsetEq(xSet, ySet).reify();
                     break;
                 case EQ:
-                    result = model.allEqual(xSet, ySet).reify().eq(TRUE).boolVar();
+                    result = model.allEqual(xSet, ySet).reify();
                     break;
                 case NE:
-                    result = model.allDifferent(xSet, ySet).reify().eq(TRUE).boolVar();
+                    result = model.allDifferent(xSet, ySet).reify();
                     break;
                 case CONTAINS:
-                    result = model.subsetEq(ySet, xSet).reify().eq(TRUE).boolVar();
+                    result = model.subsetEq(ySet, xSet).reify();
                     break;
                 case NC:
-                    result = model.disjoint(ySet, xSet).reify().eq(TRUE).boolVar();
+                    result = model.disjoint(ySet, xSet).reify();
                     break;
                 default:
                     throw new UnsupportedOperationException("Unsupported SetOperator: " + op);
@@ -76,6 +73,7 @@ public class BiReSetExpression implements ReExpression {
 
     @Override
     public void extractVar(HashSet<IntVar> variables) {
+        throw new UnsupportedOperationException("extractVar() is not supported for BiReSetExpression.");
     }
 
     @Override
