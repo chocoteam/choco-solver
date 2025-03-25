@@ -92,7 +92,7 @@ public class FullyRandom extends AbstractStrategy<Variable> {
                         dop = intdops[2 + rnd.nextInt(2)];
                     }
                 }
-                return variable.getModel().getSolver().getDecisionPath().makeIntDecision(ivar, dop, value);
+                return decisionPath.makeIntDecision(ivar, dop, value);
             case Variable.SET:
                 SetVar svar = (SetVar) variable;
                 ISetIterator iter = svar.getUB().newIterator();
@@ -110,7 +110,7 @@ public class FullyRandom extends AbstractStrategy<Variable> {
                     }
                     i--;
                 }
-                return variable.getModel().getSolver().getDecisionPath().makeSetDecision(svar, setdops[rnd.nextInt(2)], elt);
+                return decisionPath.makeSetDecision(svar, setdops[rnd.nextInt(2)], elt);
             default:
                 throw new UnsupportedOperationException("Unknown variable type: " + variable.getTypeAndKind());
         }
