@@ -9,17 +9,12 @@
  */
 package org.chocosolver.solver.search.strategy.strategy;
 
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.Variable;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Last Conflict heuristic
@@ -34,11 +29,6 @@ public class LastConflict<V extends Variable> extends AbstractStrategy<V> implem
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
-
-    /**
-     * The target solver
-     */
-    protected Model model;
 
     /**
      * The main strategy declared in the solver
@@ -60,26 +50,22 @@ public class LastConflict<V extends Variable> extends AbstractStrategy<V> implem
      */
     private final V[] conflictingVariables;
 
-    protected Set<Variable> scope;
-
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
     /**
      * Creates a last conflict heuristic
-     * @param model the solver to attach this to
+     *
      * @param mainStrategy the main strategy declared
-     * @param k the maximum number of conflicts to store
+     * @param k            the maximum number of conflicts to store
      */
-    public LastConflict(Model model, AbstractStrategy<V> mainStrategy, int k) {
+    public LastConflict(AbstractStrategy<V> mainStrategy, int k) {
         super(mainStrategy.vars);
         assert k > 0 : "parameter K of last conflict must be strictly positive!";
-        this.model = model;
         this.mainStrategy = mainStrategy;
-        this.scope = new HashSet<>(Arrays.asList(mainStrategy.vars));
         //noinspection unchecked
-        conflictingVariables = (V[])new Variable[k];
+        conflictingVariables = (V[]) new Variable[k];
         nbCV = 0;
         active = false;
     }
@@ -89,8 +75,8 @@ public class LastConflict<V extends Variable> extends AbstractStrategy<V> implem
     //***********************************************************************************
 
     @Override
-    public boolean init(){
-        if(!model.getSolver().getSearchMonitors().contains(this)) {
+    public boolean init() {
+        if (!model.getSolver().getSearchMonitors().contains(this)) {
             model.getSolver().plugMonitor(this);
         }
 
@@ -100,7 +86,7 @@ public class LastConflict<V extends Variable> extends AbstractStrategy<V> implem
     @Override
     public void remove() {
         this.mainStrategy.remove();
-        if(model.getSolver().getSearchMonitors().contains(this)) {
+        if (model.getSolver().getSearchMonitors().contains(this)) {
             model.getSolver().unplugMonitor(this);
         }
     }
@@ -129,9 +115,9 @@ public class LastConflict<V extends Variable> extends AbstractStrategy<V> implem
     @Override
     public void onContradiction(ContradictionException cex) {
         //noinspection unchecked
-        V curDecVar = (V) model.getSolver().getDecisionPath().getLastDecision().getDecisionVariable();
+        V curDecVar = (V) decisionPath.getLastDecision().getDecisionVariable();
         if (nbCV > 0 && conflictingVariables[nbCV - 1] == curDecVar) return;
-        if (scope.contains(curDecVar)) {
+        if (isVarInScope(curDecVar)) {
             if (nbCV < conflictingVariables.length) {
                 conflictingVariables[nbCV++] = curDecVar;
             } else {
