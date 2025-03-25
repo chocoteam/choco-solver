@@ -111,7 +111,7 @@ public class GraphCostBasedSearch extends GraphStrategy {
             return null;
         }
         computeNextArc();
-        GraphDecision dec = g.getModel().getSolver().getDecisionPath().makeGraphEdgeDecision(g, decisionType, from, to);
+        GraphDecision dec = decisionPath.makeGraphEdgeDecision(g, decisionType, from, to);
         lastFrom = from;
         return dec;
     }

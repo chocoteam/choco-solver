@@ -233,7 +233,7 @@ public final class ActivityBased extends AbstractStrategy<IntVar> implements IMo
             assert vars[currentVar] == variable;
         }
         currentVal = valueSelector.selectValue(variable);
-        return model.getSolver().getDecisionPath().makeIntDecision(variable, DecisionOperatorFactory.makeIntEq(), currentVal);
+        return decisionPath.makeIntDecision(variable, DecisionOperatorFactory.makeIntEq(), currentVal);
     }
 
     @Override

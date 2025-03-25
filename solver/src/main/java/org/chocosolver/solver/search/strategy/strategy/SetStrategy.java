@@ -86,6 +86,6 @@ public class SetStrategy extends AbstractStrategy<SetVar> {
             return null;
         }
         assert !s.isInstantiated();
-        return s.getModel().getSolver().getDecisionPath().makeSetDecision(s, operator, valSelector.selectValue(s));
+        return decisionPath.makeSetDecision(s, operator, valSelector.selectValue(s));
     }
 }
