@@ -117,7 +117,7 @@ public class LastConflict<V extends Variable> extends AbstractStrategy<V> implem
         //noinspection unchecked
         V curDecVar = (V) decisionPath.getLastDecision().getDecisionVariable();
         if (nbCV > 0 && conflictingVariables[nbCV - 1] == curDecVar) return;
-        if (isVarInScope(curDecVar)) {
+        if (curDecVar != null && isVarInScope(curDecVar)) {
             if (nbCV < conflictingVariables.length) {
                 conflictingVariables[nbCV++] = curDecVar;
             } else {
