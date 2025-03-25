@@ -91,7 +91,7 @@ public class RealStrategy extends AbstractStrategy<RealVar> {
             return null;
         }
         double value = valueIterator.selectValue(variable);
-        return variable.getModel().getSolver().getDecisionPath().makeRealDecision(variable, value, epsilon, leftFirst);
+        return decisionPath.makeRealDecision(variable, value, epsilon, leftFirst);
     }
 
     @SuppressWarnings({"unchecked"})

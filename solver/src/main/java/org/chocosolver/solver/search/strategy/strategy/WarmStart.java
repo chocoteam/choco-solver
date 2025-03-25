@@ -134,7 +134,7 @@ public class WarmStart extends AbstractStrategy<Variable> implements IMonitorSol
                     for (int v : values) {
                         if (iv.contains(v)) {
                             dec.free();
-                            dec = solver.getDecisionPath().makeIntDecision(
+                            dec = decisionPath.makeIntDecision(
                                     iv,
                                     DecisionOperatorFactory.makeIntEq(),
                                     v

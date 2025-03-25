@@ -11,12 +11,10 @@ package org.chocosolver.solver.search.strategy;
 
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
@@ -33,8 +31,6 @@ import java.util.Random;
  */
 public class BoundSearch extends AbstractStrategy<IntVar> {
 
-    private final Model model;
-    private final DecisionPath decisionPath;
     private final AbstractStrategy<IntVar> definedSearch; // int search into which this is plugged
     private final TIntIntHashMap vb = new TIntIntHashMap(); // value-bound map
     private IntVar variable; // current variable, on which this branches
@@ -45,9 +41,7 @@ public class BoundSearch extends AbstractStrategy<IntVar> {
     @SuppressWarnings("WeakerAccess")
     public BoundSearch(AbstractStrategy<IntVar> mainSearch) {
         super(mainSearch.getVariables());
-        model = vars[0].getModel();
         definedSearch = mainSearch;
-        decisionPath = model.getSolver().getDecisionPath();
     }
 
     @Override
