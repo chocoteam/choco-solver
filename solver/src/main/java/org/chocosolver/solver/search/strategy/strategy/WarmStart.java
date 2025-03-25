@@ -48,7 +48,7 @@ public class WarmStart extends AbstractStrategy<Variable> implements IMonitorSol
     private final Solver solver;
 
     public WarmStart(Solver solver) {
-        super(new Variable[]{});
+        super(solver.getModel());
         this.solver = solver;
         this.hints = new HashMap<>();
     }
