@@ -14,7 +14,12 @@ NEXT MILESTONE
 ### Other closed issues and pull requests:
 See [milestone 5.0.0-beta.2](https://github.com/chocoteam/choco-solver/milestone/41)
 
+- Fix bug in ConflictOrderingSearch (monitor not plugged)
+- Performance improvement for LastConflict, ConflictOrderingSearch and StrategySequencer.
+
 #### Contributors to this release:
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
+- [Jean-Guillaume Fages](https://github.com/jgFages) (@jgFages)
 
 
 **Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v5.0.0-beta.1...v5.0.0-beta.2
