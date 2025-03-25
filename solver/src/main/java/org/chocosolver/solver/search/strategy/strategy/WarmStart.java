@@ -11,6 +11,7 @@ package org.chocosolver.solver.search.strategy.strategy;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
@@ -48,7 +49,7 @@ public class WarmStart extends AbstractStrategy<Variable> implements IMonitorSol
     private final Solver solver;
 
     public WarmStart(Solver solver) {
-        super(solver.getModel());
+        super();
         this.solver = solver;
         this.hints = new HashMap<>();
     }
@@ -134,7 +135,7 @@ public class WarmStart extends AbstractStrategy<Variable> implements IMonitorSol
                     for (int v : values) {
                         if (iv.contains(v)) {
                             dec.free();
-                            dec = decisionPath.makeIntDecision(
+                            dec = mainStrategy.decisionPath.makeIntDecision(
                                     iv,
                                     DecisionOperatorFactory.makeIntEq(),
                                     v
@@ -151,6 +152,11 @@ public class WarmStart extends AbstractStrategy<Variable> implements IMonitorSol
     @Override
     public Variable[] getVariables() {
         return mainStrategy.getVariables();
+    }
+
+    @Override
+    public Model getModel() {
+        return solver.getModel();
     }
 
     @Override
