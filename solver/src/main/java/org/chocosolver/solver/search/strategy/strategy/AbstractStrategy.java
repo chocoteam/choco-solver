@@ -35,12 +35,8 @@ public abstract class AbstractStrategy<V extends Variable> {
     protected final BitSet idScope; // bitset representing the indexes of the variables in the scope
 
     protected AbstractStrategy(V... variables) {
-        this(variables[0].getModel(), variables);
-    }
-
-    protected AbstractStrategy(Model model, V... variables) {
-        this.model = model;
-        this.decisionPath = model.getSolver().getDecisionPath();
+        this.model = variables.length > 0 ? variables[0].getModel() : null;
+        this.decisionPath = model != null ? model.getSolver().getDecisionPath() : null;
         this.vars = variables.clone();
         this.idScope = new BitSet(variables.length);
         for (V v : variables) {
