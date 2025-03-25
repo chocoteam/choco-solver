@@ -12,7 +12,6 @@ package org.chocosolver.solver.search.strategy.strategy;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
-
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
@@ -20,7 +19,8 @@ import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.variables.Variable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Conflict Ordering Search
@@ -58,8 +58,6 @@ public class ConflictOrderingSearch<V extends Variable> extends MetaStrategy<V> 
      */
     int pcft;
 
-    protected Set<V> scope;
-
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
@@ -78,8 +76,6 @@ public class ConflictOrderingSearch<V extends Variable> extends MetaStrategy<V> 
         prev = new TIntArrayList();
         next = new TIntArrayList();
         pcft = -1;
-        this.scope = new HashSet<>(Arrays.asList(mainStrategy.vars));
-        active = true;
     }
 
 
@@ -95,9 +91,9 @@ public class ConflictOrderingSearch<V extends Variable> extends MetaStrategy<V> 
     @Override
     public void onContradiction(ContradictionException cex) {
         //noinspection unchecked
-        Decision<V> dec = model.getSolver().getDecisionPath().getLastDecision();
+        Decision<V> dec = decisionPath.getLastDecision();
         if (dec != RootDecision.ROOT) {
-            if (scope.contains(dec.getDecisionVariable())) {
+            if (isVarInScope(dec.getDecisionVariable())) {
                 stampIt(dec.getDecisionVariable());
             }
         }
@@ -168,5 +164,4 @@ public class ConflictOrderingSearch<V extends Variable> extends MetaStrategy<V> 
         }
         return ok;
     }
-
 }

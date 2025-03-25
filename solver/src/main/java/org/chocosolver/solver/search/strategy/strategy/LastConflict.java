@@ -15,10 +15,6 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.Variable;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * Last Conflict heuristic
  * Composite heuristic which hacks a mainStrategy by forcing the
@@ -43,8 +39,6 @@ public class LastConflict<V extends Variable> extends MetaStrategy<V> implements
      */
     private final V[] conflictingVariables;
 
-    protected Set<Variable> scope;
-
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
@@ -59,7 +53,6 @@ public class LastConflict<V extends Variable> extends MetaStrategy<V> implements
     public LastConflict(Model model, AbstractStrategy<V> mainStrategy, int k) {
         super(model, mainStrategy);
 //        assert k > 0 : "parameter K of last conflict must be strictly positive!";
-        this.scope = new HashSet<>(Arrays.asList(mainStrategy.vars));
         //noinspection unchecked
         conflictingVariables = (V[]) new Variable[k];
         nbCV = 0;
@@ -84,9 +77,9 @@ public class LastConflict<V extends Variable> extends MetaStrategy<V> implements
     @Override
     public void onContradiction(ContradictionException cex) {
         //noinspection unchecked
-        V curDecVar = (V) model.getSolver().getDecisionPath().getLastDecision().getDecisionVariable();
+        V curDecVar = (V) decisionPath.getLastDecision().getDecisionVariable();
         if (nbCV > 0 && conflictingVariables[nbCV - 1] == curDecVar) return;
-        if (scope.contains(curDecVar)) {
+        if (curDecVar != null && isVarInScope(curDecVar)) {
             if (nbCV < conflictingVariables.length) {
                 conflictingVariables[nbCV++] = curDecVar;
             } else {
