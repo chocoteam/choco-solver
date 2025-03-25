@@ -80,7 +80,7 @@ public class Search {
             throw new UnsupportedOperationException(
                     "the search strategy in parameter cannot be null! Consider using Search.defaultSearch(model)");
         }
-        return new LastConflict<>(formerSearch.getVariables()[0].getModel(), formerSearch, k);
+        return new LastConflict<>(formerSearch, k);
     }
 
     /**
@@ -91,8 +91,7 @@ public class Search {
      */
     public static <V extends Variable> AbstractStrategy<V> conflictOrderingSearch(
             AbstractStrategy<V> formerSearch) {
-        return new ConflictOrderingSearch<>(formerSearch.getVariables()[0].getModel(),
-                formerSearch);
+        return new ConflictOrderingSearch<>(formerSearch);
     }
 
     /**
