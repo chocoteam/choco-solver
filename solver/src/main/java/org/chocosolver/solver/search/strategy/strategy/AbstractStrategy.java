@@ -34,6 +34,15 @@ public abstract class AbstractStrategy<V extends Variable> {
     protected final V[] vars;
     protected final BitSet idScope; // bitset representing the indexes of the variables in the scope
 
+    /**
+     * Create a search strategy based on an array of variables
+     *
+     * @param variables array of variables
+     * @implNote the first variable is used to get the model and the decision path.
+     * If the first variable is null, the model and decision path are null.
+     * @implNote the variables are cloned to avoid side effects
+     */
+    @SafeVarargs
     protected AbstractStrategy(V... variables) {
         this.model = variables.length > 0 ? variables[0].getModel() : null;
         this.decisionPath = model != null ? model.getSolver().getDecisionPath() : null;
