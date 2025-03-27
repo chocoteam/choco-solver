@@ -26,10 +26,8 @@ import org.chocosolver.solver.variables.IVariableMonitor;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.iterators.DisposableValueIterator;
-import org.chocosolver.util.objects.ArrayVal;
 import org.chocosolver.util.objects.IVal;
 import org.chocosolver.util.objects.IntMap;
-import org.chocosolver.util.objects.MapVal;
 
 import java.util.BitSet;
 import java.util.Comparator;
@@ -180,9 +178,9 @@ public final class ActivityBased extends AbstractStrategy<IntVar> implements IMo
             //TODO handle large domain size
             int ampl = vars[i].getUB() - vars[i].getLB() + 1;
             if (ampl > 512) {
-                vAct[i] = new MapVal(vars[i].getLB());
+                vAct[i] = new IVal.MapVal(vars[i].getLB());
             } else {
-                vAct[i] = new ArrayVal(ampl, vars[i].getLB());
+                vAct[i] = new IVal.ArrayVal(ampl, vars[i].getLB());
             }
         }
         if (restartAfterEachLeaf) {
