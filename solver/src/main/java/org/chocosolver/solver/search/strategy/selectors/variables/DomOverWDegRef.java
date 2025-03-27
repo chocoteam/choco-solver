@@ -61,7 +61,7 @@ public class DomOverWDegRef<V extends Variable> extends DomOverWDeg<V> {
             if (prop.getVar(i).isAConstant() || !VariableUtils.isInt(prop.getVar(i))) continue;
             IntVar ivar = (IntVar) prop.getVar(i);
             inc[0] = 1.0 / (futvars * (ivar.getDomainSize() == 0 ? 0.5 : ivar.getDomainSize()));
-            weights.adjustOrPutValue(ivar, inc[0], inc[0]);
+            weights.inc(ivar, inc[0]);
             ws[i] += inc[0];
         }
     }
