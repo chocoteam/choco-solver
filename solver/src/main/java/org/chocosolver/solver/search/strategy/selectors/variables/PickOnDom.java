@@ -10,7 +10,6 @@
 package org.chocosolver.solver.search.strategy.selectors.variables;
 
 import gnu.trove.list.array.TLongArrayList;
-import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.propagation.PropagationInsight;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
@@ -72,12 +71,12 @@ public class PickOnDom<V extends Variable> extends AbstractCriterionBasedVariabl
         switch (variant) {
             case 0:
                 for (Variable lvar : Lvars) {
-                    weights.adjustOrPutValue(lvar, 1, 1);
+                    weights.inc(lvar,1);
                 }
                 break;
             case 1:
                 for (int i = 0; i < Lvars.size(); i++) {
-                    weights.adjustOrPutValue(Lvars.get(i), Ldeltas.get(i), Ldeltas.get(i));
+                    weights.inc(Lvars.get(i), Ldeltas.get(i));
                 }
                 break;
             case 2:
@@ -85,7 +84,7 @@ public class PickOnDom<V extends Variable> extends AbstractCriterionBasedVariabl
                 r = 100. / sum;
                 for (int i = 0; i < Lvars.size(); i++) {
                     double amnt = r * Ldeltas.get(i);
-                    weights.adjustOrPutValue(Lvars.get(i), amnt, amnt);
+                    weights.inc(Lvars.get(i), amnt);
                 }
                 break;
             case 3:
@@ -95,20 +94,15 @@ public class PickOnDom<V extends Variable> extends AbstractCriterionBasedVariabl
                 r = (n - d) / n * 100. / sum;
                 for (int i = 0; i < Lvars.size(); i++) {
                     double amnt = r * Ldeltas.get(i);
-                    weights.adjustOrPutValue(Lvars.get(i), amnt, amnt);
+                    weights.inc(Lvars.get(i), amnt);
                 }
                 break;
 
         }
     }
 
-    @Override
-    void increase(Propagator<?> prop, Element elt, double[] ws) {
-        // ignore
-    }
-
     public void afterRestart() {
-        if (flushWeights(weights)) {
+        if (flushWeights()) {
             weights.clear();
         }
     }
