@@ -280,7 +280,7 @@ public interface SearchParams {
                     return (vars, vsel) -> new ActivityBased(vars[0].getModel(), vars, vsel,
                             0.999d, 0.2d, 8, 1, 0);
                 case CHS:
-                    return (vars, vsel) -> Search.intVarSearch(new ConflictHistorySearch<>(vars, 0, flushRate), vsel, vars);
+                    return (vars, vsel) -> Search.intVarSearch(new ConflictHistorySearch<>(vars, 0), vsel, vars);
                 case DOM:
                 case FIRST_FAIL:
                     return (vars, vsel) -> Search.intVarSearch(new FirstFail(vars[0].getModel()), vsel, vars);

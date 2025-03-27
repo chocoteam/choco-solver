@@ -14,6 +14,7 @@ import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.variables.Variable;
 
@@ -53,16 +54,22 @@ public class ConflictHistorySearch<V extends Variable>
      */
     private double alpha = .4d;
     /**
+     * The number of conflicts which have occurred since the beginning of the search.
+     */
+    int conflicts = 0;
+
+    /**
      * Last {@link #conflicts} value where a propagator led to a failure.
      */
     private final TObjectIntMap<Propagator> conflict = new TObjectIntHashMap<>(10, 0.5f, 0);
 
+    /**
+     * Create a Conflict History Search variable selector.
+     * @param vars decision variables
+     * @param seed seed for breaking ties randomly
+     */
     public ConflictHistorySearch(V[] vars, long seed) {
-        this(vars, seed, Integer.MAX_VALUE);
-    }
-
-    public ConflictHistorySearch(V[] vars, long seed, int flushThs) {
-        super(vars, seed, flushThs);
+        super(vars, seed, Integer.MAX_VALUE);
     }
 
     @Override
@@ -83,44 +90,48 @@ public class ConflictHistorySearch<V extends Variable>
     @Override
     protected double weight(Variable v) {
         double[] w = {0.};
-        v.streamPropagators().forEach(prop ->{
+        v.streamPropagators().forEach(prop -> {
             long fut = Stream.of(prop.getVars())
-                    .filter(Variable::isInstantiated)
+                    .filter(var -> !var.isInstantiated())
                     .limit(2)
                     .count();
             if (fut > 1) {
-                w[0] += refinedWeights.getOrDefault(prop, rw)[0] + D;
+                w[0] += q.get(prop) + D;
             }
         });
         return w[0];
     }
 
     @Override
-    void increase(Propagator<?> prop, Element elt, double[] ws) {
-        // for CHS, 0 stores the scoring
-        // compute the reward
-        double r = 1d / (conflicts - elt.ws[2] + 1);
-        // update q
-        ws[0] = (1 - alpha) * ws[0] + alpha * r;
-        // decrease a
-        alpha = Math.max(ALPHA_LIMIT, alpha - STEP);
-        elt.ws[2] = conflicts;
+    public void onContradiction(ContradictionException cex) {
+        conflicts++;
+        if (cex.c instanceof Propagator) {
+            Propagator p = (Propagator) cex.c;
+            double qj = q.get(p);
+            // compute the reward
+            double r = 1d / (conflicts - conflict.get(p) + 1);
+            // update q
+            double qcj = (1 - alpha) * qj + alpha * r;
+            q.adjustOrPutValue(p, qcj - qj, qcj);
+            // decrease a
+            alpha = Math.max(ALPHA_LIMIT, alpha - STEP);
+            // update conflicts
+            conflict.put(p, conflicts);
+        }
     }
 
     @Override
+    void increase(Propagator<?> prop, Element elt, double[] ws) {
+        // ignore
+    }
+
+
+    @Override
     public void afterRestart() {
-        if (flushWeights(q)) {
-            q.clear();
-            conflict.forEachEntry((a1, b) -> {
-                conflict.put(a1, conflicts);
-                return true;
-            });
-        } else {
-            for (Propagator p : q.keySet()) {
-                double qj = q.get(p);
-                q.put(p, qj * Math.pow(DECAY, (conflicts - conflict.get(p))));
-            }
-            alpha = .4d;
+        for (Propagator p : q.keySet()) {
+            double qj = q.get(p);
+            q.put(p, qj * Math.pow(DECAY, (conflicts - conflict.get(p))));
         }
+        alpha = .4d;
     }
 }
