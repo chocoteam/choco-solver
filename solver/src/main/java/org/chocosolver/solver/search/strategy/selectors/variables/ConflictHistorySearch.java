@@ -121,12 +121,6 @@ public class ConflictHistorySearch<V extends Variable>
     }
 
     @Override
-    void increase(Propagator<?> prop, Element elt, double[] ws) {
-        // ignore
-    }
-
-
-    @Override
     public void afterRestart() {
         for (Propagator p : q.keySet()) {
             double qj = q.get(p);

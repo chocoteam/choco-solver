@@ -74,7 +74,7 @@ public class PickOnFil<V extends Variable> extends AbstractCriterionBasedVariabl
                 for (int i = 0; i < Lcstrs.size(); i++) {
                     Propagator<?> lc = Lcstrs.get(i);
                     for (Variable lv : lc.getVars()) {
-                        weights.adjustOrPutValue(lv, 1, 1);
+                        weights.inc(lv, 1);
                     }
                 }
                 break;
@@ -82,7 +82,7 @@ public class PickOnFil<V extends Variable> extends AbstractCriterionBasedVariabl
                 for (int i = 0; i < Lcstrs.size(); i++) {
                     Propagator<?> lc = Lcstrs.get(i);
                     for (Variable lv : lc.getVars()) {
-                        weights.adjustOrPutValue(lv, Ldeltas.get(i), Ldeltas.get(i));
+                        weights.inc(lv, Ldeltas.get(i));
                     }
                 }
                 break;
@@ -93,7 +93,7 @@ public class PickOnFil<V extends Variable> extends AbstractCriterionBasedVariabl
                     double amnt = r * Ldeltas.get(i);
                     Propagator<?> lc = Lcstrs.get(i);
                     for (Variable lv : lc.getVars()) {
-                        weights.adjustOrPutValue(lv, amnt, amnt);
+                        weights.inc(lv, amnt);
                     }
                 }
                 break;
@@ -106,7 +106,7 @@ public class PickOnFil<V extends Variable> extends AbstractCriterionBasedVariabl
                     double amnt = r * Ldeltas.get(i);
                     Propagator<?> lc = Lcstrs.get(i);
                     for (Variable lv : lc.getVars()) {
-                        weights.adjustOrPutValue(lv, amnt, amnt);
+                        weights.inc(lv, amnt);
                     }
                 }
                 break;
@@ -114,13 +114,8 @@ public class PickOnFil<V extends Variable> extends AbstractCriterionBasedVariabl
         }
     }
 
-    @Override
-    void increase(Propagator<?> prop, Element elt, double[] ws) {
-        // ignore
-    }
-
     public void afterRestart() {
-        if (flushWeights(weights)) {
+        if (flushWeights()) {
             weights.clear();
         }
     }
