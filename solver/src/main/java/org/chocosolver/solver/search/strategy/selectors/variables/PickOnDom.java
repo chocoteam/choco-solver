@@ -9,45 +9,53 @@
  */
 package org.chocosolver.solver.search.strategy.selectors.variables;
 
-import gnu.trove.list.array.TLongArrayList;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.propagation.PropagationInsight;
-import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
+import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
+import org.chocosolver.solver.variables.IVariableMonitor;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.IEventType;
 
 import java.util.ArrayList;
 
 /**
  * Implementation of "Guiding Backtrack Search by Tracking Variables During Constraint Propagation", C. Lecoutre et al., CP 2023.
  * <br/>
+ * This implementation is not exactly the same as the one described in the paper.
+ * It is a simplified version, which does not require to store the number of values removed from the domain of each variable.
+ * It is based on the number of times a variable is involved in a propagation.
+ * The weight of a variable is increased by the number of variables that have been involved in the same propagation
+ * and takes into account the number of variables that have been involved in the same propagation
+ * and the position of the variable in the list of variables involved in the propagation.
  *
  * @author Charles Prud'homme
+ * @implNote <code>lVars</code> is defined as an <code>ArrayList</code>.
+ * This means that a variable can be added multiple times in the list.
+ * Changing this to a <code>LinkedHashSet</code> would ensure that a variable is added only once but
+ * it leads to poorer performance.
  * @since 14/02/2023
  */
-public class PickOnDom<V extends Variable> extends AbstractCriterionBasedVariableSelector<V> implements IMonitorContradiction {
+public class PickOnDom<V extends Variable> extends AbstractCriterionBasedVariableSelector<V>
+        implements IMonitorDownBranch, IVariableMonitor<V> {
 
-    private ArrayList<Variable> Lvars;
-    private TLongArrayList Ldeltas;
-
-    private final int variant;
+    private final ArrayList<Variable> lVars;
 
     public PickOnDom(V[] vars) {
-        this(vars, 0, 32);
+        this(vars, 32);
     }
 
-    public PickOnDom(V[] vars, int variant, int flushRate) {
+    public PickOnDom(V[] vars, int flushRate) {
         super(vars, 0, flushRate);
-        this.variant = variant;
+        this.lVars = new ArrayList<>(vars.length);
     }
 
     @Override
     public boolean init() {
-        PropagationInsight.PickOnDom pi = new PropagationInsight.PickOnDom();
-        solver.getEngine().setInsight(pi);
-        Lvars = pi.getLvars();
-        Ldeltas = pi.getLdeltas();
         if (!solver.getSearchMonitors().contains(this)) {
             solver.plugMonitor(this);
+            Variable[] vars = solver.getModel().getVars();
+            for (Variable var : vars) {
+                var.addMonitor(this);
+            }
         }
         return true;
     }
@@ -56,6 +64,10 @@ public class PickOnDom<V extends Variable> extends AbstractCriterionBasedVariabl
     public final void remove() {
         if (solver.getSearchMonitors().contains(this)) {
             solver.unplugMonitor(this);
+            Variable[] vars = solver.getModel().getVars();
+            for (Variable var : vars) {
+                var.removeMonitor(this);
+            }
         }
     }
 
@@ -65,39 +77,21 @@ public class PickOnDom<V extends Variable> extends AbstractCriterionBasedVariabl
     }
 
     @Override
-    public void onContradiction(ContradictionException cex) {
-        long sum;
-        double r;
-        switch (variant) {
-            case 0:
-                for (Variable lvar : Lvars) {
-                    weights.inc(lvar,1);
-                }
-                break;
-            case 1:
-                for (int i = 0; i < Lvars.size(); i++) {
-                    weights.inc(Lvars.get(i), Ldeltas.get(i));
-                }
-                break;
-            case 2:
-                sum = Ldeltas.sum();
-                r = 100. / sum;
-                for (int i = 0; i < Lvars.size(); i++) {
-                    double amnt = r * Ldeltas.get(i);
-                    weights.inc(Lvars.get(i), amnt);
-                }
-                break;
-            case 3:
-                double n = solver.getModel().getNbVars() * 1.;
-                double d = solver.getCurrentDepth() * 1.;
-                sum = Ldeltas.sum();
-                r = (n - d) / n * 100. / sum;
-                for (int i = 0; i < Lvars.size(); i++) {
-                    double amnt = r * Ldeltas.get(i);
-                    weights.inc(Lvars.get(i), amnt);
-                }
-                break;
+    public void beforeDownBranch(boolean left) {
+        lVars.clear();
+    }
 
+    @Override
+    public void onUpdate(V var, IEventType evt) {
+        lVars.add(var);
+    }
+
+    @Override
+    public void onContradiction(ContradictionException cex) {
+        int l = lVars.size();
+        for(int i = 0; i < l; i++){
+            weights.inc(lVars.get(i), (l - i) * 1. / l);
+            i++;
         }
     }
 
