@@ -232,7 +232,7 @@ public class DomOverWDeg<V extends Variable>
             observed.put(var, 1);
             var.addMonitor(this);
         } else {
-            observed.computeIfPresent(var, inc);
+            observed.compute(var, inc);
         }
     }
 
@@ -240,7 +240,7 @@ public class DomOverWDeg<V extends Variable>
 
     private void unplug(Variable var) {
         assert observed.containsKey(var);
-        Integer obs = observed.computeIfPresent(var, dec);
+        Integer obs = observed.compute(var, dec);
         if (obs != null && obs == 0) {
             var.removeMonitor(this);
             observed.remove(var);
