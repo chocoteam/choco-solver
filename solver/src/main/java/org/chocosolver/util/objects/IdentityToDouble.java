@@ -56,8 +56,14 @@ public class IdentityToDouble<I extends Identity> {
      * @return the weight associated with {@code i}
      */
     public double get(I i) {
-        ensureCapacity(i.getId() + 1);
-        return values[i.getId()];
+        // if the id is greater than the length of the array,
+        // then the variable has not been set yet, so return 0.
+        if (values.length < i.getId() + 1) {
+            return 0.;
+        } else {
+            // otherwise, return the value at the index of the id.
+            return values[i.getId()];
+        }
     }
 
     /**
@@ -67,6 +73,7 @@ public class IdentityToDouble<I extends Identity> {
      * @param weight the weight to set
      */
     public void set(I i, double weight) {
+        // ensure that the array has a capacity of at least i.getId() + 1
         ensureCapacity(i.getId() + 1);
         values[i.getId()] = weight;
     }
@@ -78,6 +85,7 @@ public class IdentityToDouble<I extends Identity> {
      * @param delta the value to add
      */
     public void inc(I i, double delta) {
+        // ensure that the array has a capacity of at least i.getId() + 1
         ensureCapacity(i.getId() + 1);
         values[i.getId()] += delta;
     }
