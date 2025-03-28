@@ -61,10 +61,7 @@ public interface SearchParams {
         FLBA,
         FRBA,
         INPUT,
-        PICKONDOM0,
-        PICKONDOM1,
-        PICKONDOM2,
-        PICKONDOM3,
+        PICKONDOM,
         RAND,
         ROUND_ROBIN,
     }
@@ -139,9 +136,6 @@ public interface SearchParams {
          */
         public Function<Solver, AbstractRestart> make() {
             switch (pol) {
-                default:
-                case NONE:
-                    return s -> AbstractRestart.NO_RESTART;
                 case LUBY:
                     return (s) -> new Restarter(new LubyCutoff(cutoff),
                             c -> s.getFailCount() >= c, offset, resetOnSolution);
@@ -154,6 +148,9 @@ public interface SearchParams {
                 case ARITHMETIC:
                     return (s) -> new Restarter(new LinearCutoff(cutoff),
                             c -> s.getFailCount() >= c, offset, resetOnSolution);
+                case NONE:
+                default:
+                    return s -> AbstractRestart.NO_RESTART;
             }
         }
 
@@ -288,14 +285,8 @@ public interface SearchParams {
                     return (vars, vsel) -> Search.intVarSearch(new FailureBased<>(vars, 0, 2), vsel, vars);
                 case INPUT:
                     return (vars, vsel) -> Search.intVarSearch(new InputOrder<>(vars[0].getModel()), vsel, vars);
-                case PICKONDOM0:
-                    return (vars, vsel) -> Search.intVarSearch(new PickOnDom<>(vars, 0, flushRate), vsel, vars);
-                case PICKONDOM1:
-                    return (vars, vsel) -> Search.intVarSearch(new PickOnDom<>(vars, 1, flushRate), vsel, vars);
-                case PICKONDOM2:
-                    return (vars, vsel) -> Search.intVarSearch(new PickOnDom<>(vars, 2, flushRate), vsel, vars);
-                case PICKONDOM3:
-                    return (vars, vsel) -> Search.intVarSearch(new PickOnDom<>(vars, 3, flushRate), vsel, vars);
+                case PICKONDOM:
+                    return (vars, vsel) -> Search.intVarSearch(new PickOnDom<>(vars, flushRate), vsel, vars);
                 case ROUND_ROBIN:
                     return (vars, vsel) -> Search.roundRobinSearch(vars);
                 case RAND:
@@ -350,10 +341,6 @@ public interface SearchParams {
         public Function<Model, IntValueSelector> make() {
             final Function<Model, IntValueSelector> fn0;
             switch (valsel) {
-                default:
-                case MIN:
-                    fn0 = m -> new IntDomainMin();
-                    break;
                 case MAX:
                     fn0 = m -> new IntDomainMax();
                     break;
@@ -368,6 +355,10 @@ public interface SearchParams {
                     break;
                 case RAND:
                     fn0 = m -> new IntDomainRandom(m.getSeed());
+                    break;
+                case MIN:
+                default:
+                    fn0 = m -> new IntDomainMin();
                     break;
             }
             final Function<Model, IntValueSelector> fn1;

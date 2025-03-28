@@ -649,7 +649,7 @@ public class Search {
                 new VariableSelector[]{
                         new DomOverWDegRef<>(vars, seed),
                         new DomOverWDeg<>(vars, seed),
-                        new PickOnDom<>(vars, 2, 32),
+                        new PickOnDom<>(vars, 32),
                         new FailureBased<>(vars, seed, 4)
                 },
                 new IntValueSelector[]{

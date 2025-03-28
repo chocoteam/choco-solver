@@ -75,7 +75,6 @@ public abstract class AbstractCriterionBasedVariableSelector<V extends Variable>
         this.environment = vars[0].getModel().getEnvironment();
         this.last = environment.makeInt(vars.length - 1);
         this.flushThs = flush;
-//        this.weights = new Weightable.Map<>();
         this.weights = new Weightable.Array<>();
     }
 
