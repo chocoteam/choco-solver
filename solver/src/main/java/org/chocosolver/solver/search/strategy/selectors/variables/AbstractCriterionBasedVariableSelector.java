@@ -16,7 +16,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.util.objects.Weightable;
+import org.chocosolver.util.objects.IdentityToDouble;
 
 import java.util.HashSet;
 import java.util.List;
@@ -61,7 +61,7 @@ public abstract class AbstractCriterionBasedVariableSelector<V extends Variable>
     /**
      * Scoring for each variable, is updated dynamically.
      */
-    final Weightable<Variable> weights;
+    final IdentityToDouble<Variable> weights;
 
     /**
      * Create a variable selector based on a criterion
@@ -75,7 +75,7 @@ public abstract class AbstractCriterionBasedVariableSelector<V extends Variable>
         this.environment = vars[0].getModel().getEnvironment();
         this.last = environment.makeInt(vars.length - 1);
         this.flushThs = flush;
-        this.weights = new Weightable.Array<>();
+        this.weights = new IdentityToDouble<>();
     }
 
     @Override
