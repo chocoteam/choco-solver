@@ -10,6 +10,7 @@
 package org.chocosolver.solver.search.strategy.selectors.variables;
 
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TIntDoubleHashMap;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.ACounter;
@@ -26,7 +27,6 @@ import org.chocosolver.solver.variables.IVariableMonitor;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.iterators.DisposableValueIterator;
-import org.chocosolver.util.objects.IVal;
 import org.chocosolver.util.objects.IntMap;
 
 import java.util.BitSet;
@@ -103,7 +103,7 @@ public final class ActivityBased extends AbstractStrategy<IntVar> implements IMo
     private final double[] A; // activity of all variables
     private final double[] mA; // the mean -- maintained incrementally
     private final double[] sA; // the variance -- maintained incrementally -- std dev = sqrt(sA/path-1)
-    private final IVal[] vAct; // activity of each value of all variables
+    private final ValueActivity[] vAct; // activity of each value of all variables
 
     private final BitSet affected; // store affected variables
 
@@ -137,7 +137,7 @@ public final class ActivityBased extends AbstractStrategy<IntVar> implements IMo
         A = new double[vars.length];
         mA = new double[vars.length];
         sA = new double[vars.length];
-        vAct = new IVal[vars.length];
+        vAct = new ValueActivity[vars.length];
         affected = new BitSet(vars.length);
 
         this.v2i = new IntMap(vars.length);
@@ -177,10 +177,10 @@ public final class ActivityBased extends AbstractStrategy<IntVar> implements IMo
         for (int i = 0; i < vars.length; i++) {
             //TODO handle large domain size
             int ampl = vars[i].getUB() - vars[i].getLB() + 1;
-            if (ampl > 512) {
-                vAct[i] = new IVal.MapVal(vars[i].getLB());
+            if (ampl > 8192) {
+                vAct[i] = new ValueActivity.Map(vars[i].getLB());
             } else {
-                vAct[i] = new IVal.ArrayVal(ampl, vars[i].getLB());
+                vAct[i] = new ValueActivity.Array(ampl, vars[i].getLB());
             }
         }
         if (restartAfterEachLeaf) {
@@ -434,4 +434,134 @@ public final class ActivityBased extends AbstractStrategy<IntVar> implements IMo
         }
     }
 
+    /**
+     * An interface to manage the activity of values
+     * <p>
+     * Project: choco-solver.
+     * @author Charles Prud'homme
+     * @since 30/10/2018.
+     */
+    public interface ValueActivity {
+
+        /**
+         * Return the activity of a value
+         * @param value a value
+         * @return its activity
+         */
+        double activity(int value);
+
+        /**
+         * Set the activity of a value
+         * @param value a value
+         * @param activity its activity
+         */
+        void setactivity(int value, double activity);
+
+        /**
+         * Update the activity of all values
+         * @param nb_probes number of probes
+         */
+        void update(int nb_probes);
+
+        /**
+         * Transfer the activity of all values
+         */
+        void transfer();
+
+        /**
+         *
+         * <p>
+         * Project: choco-solver.
+         * @author Charles Prud'homme
+         * @since 30/10/2018.
+         */
+        class Map implements ValueActivity {
+
+            private final TIntDoubleHashMap Av;
+            private final TIntDoubleHashMap mAv;
+            private final int os;  // offset
+
+            public Map(int os) {
+                this.os = os;
+                this.Av = new TIntDoubleHashMap(32, 0.5f, 0, 0);
+                this.mAv = new TIntDoubleHashMap(32, 0.5f, 0, 0);
+            }
+
+            @Override
+            public double activity(int value) {
+                return Av.get(value - os);
+            }
+
+            @Override
+            public void setactivity(int value, double activity) {
+                Av.put(value - os, activity);
+            }
+
+            @Override
+            public void update(int nb_probes) {
+                double activity, oldmA, U;
+                for (int k : Av.keys()) {
+                    activity = Av.get(k);
+                    oldmA = mAv.get(k);
+                    U = activity - oldmA;
+                    mAv.adjustValue(k, U / nb_probes);
+                }
+            }
+
+            @Override
+            public void transfer() {
+                Av.clear();
+                Av.putAll(mAv);
+            }
+        }
+
+        /**
+         * <p>
+         * Project: choco-solver.
+         *
+         * @author Charles Prud'homme
+         * @since 30/10/2018.
+         */
+        class Array implements ValueActivity {
+
+            private final double[] Av;
+            private final double[] mAv;
+            private final int size;
+            private final int os;  // offset
+
+            public Array(int size, int os) {
+                this.size = size;
+                this.os = os;
+                this.Av = new double[size];
+                this.mAv = new double[size];
+            }
+
+            @Override
+            public double activity(int value) {
+                return Av[value - os];
+            }
+
+
+            @Override
+            public void setactivity(int value, double activity) {
+                Av[value - os] = activity;
+            }
+
+            @Override
+            public void update(int nb_probes) {
+                double activity, oldmA, U;
+                for (int j = 0; j < Av.length; j++) {
+                    activity = Av[j];
+                    oldmA = mAv[j];
+                    U = activity - oldmA;
+                    mAv[j] += (U / nb_probes);
+                }
+            }
+
+            @Override
+            public void transfer() {
+                System.arraycopy(mAv, 0, Av, 0, size);
+            }
+        }
+    }
 }
