@@ -587,19 +587,6 @@ public class Search {
     }
 
     /**
-     * Assignment strategy which selects a variable according to <code>PickOnDom</code> and assign.
-     * This version is based on the constraints involved in the propagation.
-     *
-     * @param vars list of variables
-     * @return assignment strategy
-     * @implNote Based on "Guiding Backtrack Search by Tracking Variables During Constraint Propagation", C. Lecoutre et al., CP 2023.
-     * <br/>[DOI]:<a href="https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.CP.2023.9">10.4230/LIPIcs.CP.2023.9</a>
-     */
-    public static AbstractStrategy<IntVar> pickOnFil(IntVar... vars) {
-        return intVarSearch(new PickOnFil<>(vars), new IntDomainMin(), vars);
-    }
-
-    /**
      * Randomly selects a variable and assigns it to a value randomly taken in - the domain in case
      * the variable has an enumerated domain - {LB,UB} (one of the two bounds) in case the domain is
      * bounded
