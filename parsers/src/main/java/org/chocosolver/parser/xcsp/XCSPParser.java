@@ -1095,24 +1095,26 @@ public class XCSPParser implements XCallbacks2 {
 
     @Override
     public void buildCtrMDD(String id, XVariables.XVarInteger[] list, Transition[] transitions) {
-        HashMap<String, List<Transition>> layers = new HashMap<>();
-        HashSet<String> possibleRoots = new HashSet<>(), notRoots = new HashSet<>();
-        Set<String> possibleWells = new HashSet<>(), notWells = new HashSet<>();
-        for (int t = 0; t < transitions.length; t++) {
-            String src = transitions[t].start, tgt = transitions[t].end;
-            notWells.add(src);
-            notRoots.add(tgt);
-            if (!notRoots.contains(src)) {
-                possibleRoots.add(src);
+        int[][] mtransitions = (int[][]) weakHashMap.get(transitions);
+        if (mtransitions == null) {
+            HashMap<String, List<Transition>> layers = new HashMap<>();
+            HashSet<String> possibleRoots = new HashSet<>(), notRoots = new HashSet<>();
+            Set<String> possibleWells = new HashSet<>(), notWells = new HashSet<>();
+            for (int t = 0; t < transitions.length; t++) {
+                String src = transitions[t].start, tgt = transitions[t].end;
+                notWells.add(src);
+                notRoots.add(tgt);
+                if (!notRoots.contains(src)) {
+                    possibleRoots.add(src);
+                }
+                if (!notWells.contains(tgt)) {
+                    possibleWells.add(tgt);
+                }
+                possibleRoots.remove(tgt);
+                possibleWells.remove(src);
+                List<Transition> succs = layers.computeIfAbsent(src, k -> new ArrayList<>());
+                succs.add(transitions[t]);
             }
-            if (!notWells.contains(tgt)) {
-                possibleWells.add(tgt);
-            }
-            possibleRoots.remove(tgt);
-            possibleWells.remove(src);
-            List<Transition> succs = layers.computeIfAbsent(src, k -> new ArrayList<>());
-            succs.add(transitions[t]);
-        }
 
         String first = possibleRoots.toArray(new String[1])[0];
         String last = possibleWells.toArray(new String[1])[0];
@@ -1139,6 +1141,25 @@ public class XCSPParser implements XCallbacks2 {
                 }
                 mtransitions[k++] = new int[]{map.get(src), ((Long) t.value).intValue(), map.get(tgt)};
             }
+            mtransitions = new int[transitions.length][3];
+            int k = 0;
+            CircularQueue<String> queue = new CircularQueue<>(layers.size());
+            queue.addLast(first);
+            while (!queue.isEmpty()) {
+                String src = queue.pollFirst();
+                List<Transition> succs = layers.get(src);
+                if (succs == null) continue;
+                for (Transition t : succs) {
+                    String tgt = t.end;
+                    if (!possibleRoots.contains(tgt)) {
+                        queue.addLast(tgt);
+                        possibleRoots.add(tgt);
+                        map.put(tgt, n++);
+                    }
+                    mtransitions[k++] = new int[]{map.get(src), ((Long) t.value).intValue(), map.get(tgt)};
+                }
+            }
+            weakHashMap.put(transitions, mtransitions);
         }
         IntVar[] mVars = vars(list);
         MultivaluedDecisionDiagram mdd = new MultivaluedDecisionDiagram(mVars, mtransitions);
