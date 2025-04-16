@@ -917,7 +917,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             return ref().voidConstraint();
         }
         final IntIterableRangeSet svalues = new IntIterableRangeSet(values);
-        return allDifferentUnderCondition(vars, svalues::intersect, true);
+        if(svalues.size()==1){
+            return allDifferentUnderCondition(vars, v -> !v.contains(svalues.min()), true);
+        }
+        return allDifferentUnderCondition(vars, v -> !svalues.intersect(v), true);
     }
 
     /**
