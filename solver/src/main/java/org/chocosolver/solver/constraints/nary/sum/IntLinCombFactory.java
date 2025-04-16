@@ -13,7 +13,6 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Operator;
-import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.ternary.PropXplusYeqZ;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
@@ -371,10 +370,6 @@ public class IntLinCombFactory {
             if (COEFFS[1] == -1) {
                 return s.times(VARS[0], COEFFS[0], VARS[1]);
             }
-        }
-        if (Operator.EQ == OPERATOR && VARS[VARS.length - 1].hasEnumeratedDomain() && TuplesFactory.canBeTupled(Arrays.copyOf(VARS, VARS.length - 1))) {
-            return s.table(VARS, TuplesFactory.scalar(Arrays.copyOf(VARS, VARS.length - 1), Arrays.copyOf(COEFFS, COEFFS.length - 1),
-                    OPERATOR.toString(), VARS[VARS.length - 1], -COEFFS[COEFFS.length - 1], RESULT));
         }
         int b = 0, e = VARS.length;
         IntVar[] tmpV = new IntVar[e];
