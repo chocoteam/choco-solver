@@ -52,7 +52,7 @@ public class PropTableStr2 extends Propagator<IntVar> {
     //***********************************************************************************
 
     public PropTableStr2(IntVar[] vars_, Tuples tuplesObject) {
-        super(vars_, PropagatorPriority.LINEAR, false);
+        super(vars_, PropagatorPriority.QUADRATIC , false);
         this.table = tuplesObject.toMatrix();
 
         int size = 0;
@@ -134,6 +134,11 @@ public class PropTableStr2 extends Propagator<IntVar> {
      * Initialize the supports of all values of all variables
      */
     private void initializeSupports() {
+        prepare();
+        checkTuples();
+    }
+
+    private void prepare() {
         for (int i = 0; i < str2vars.length; i++) {
             Str2_var tmp = str2vars[i];
             ssup.add(tmp);
@@ -143,6 +148,9 @@ public class PropTableStr2 extends Propagator<IntVar> {
                 tmp.last_size.set(tmp.cnt);
             }
         }
+    }
+
+    private void checkTuples() {
         for (int tuple : tuples) {
             if (is_tuple_supported(tuple)) {
                 for (int var = 0; var < ssup.size(); var++) {
