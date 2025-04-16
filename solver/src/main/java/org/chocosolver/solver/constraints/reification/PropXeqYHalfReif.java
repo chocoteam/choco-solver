@@ -48,7 +48,7 @@ public class PropXeqYHalfReif extends Propagator<IntVar> {
         if (vIdx < 2) {
             return IntEventType.all();
         }
-        return IntEventType.INCLOW.getMask();
+        return IntEventType.INSTANTIATE.getMask();
     }
 
     @Override
