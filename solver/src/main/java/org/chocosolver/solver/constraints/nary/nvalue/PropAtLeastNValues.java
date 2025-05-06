@@ -91,6 +91,7 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
             }
         }
         // filtering cardinality variable
+        vars[n].updateLowerBound(count, this);
         vars[n].updateUpperBound(countMax, this);
         // filtering decision variables
         boolean again = false;
