@@ -97,7 +97,7 @@ public class NaReExpression implements ReExpression {
                 for(int i = 1; i < vs.length; i++) {
                     model.reifyXeqY(vs[0], vs[i], reifs[i-1]);
                 }
-                model.addClausesSumBoolArrayGreaterEqVar(reifs,me);
+                model.addClausesBoolOrArrayEqVar(reifs,me);
             } else if (op == Operator.NIN) {
                 BoolVar[] reifs = model.boolVarArray(vs.length - 1);
                 for (int i = 1; i < vs.length; i++) {

@@ -10,6 +10,8 @@
 package org.chocosolver.solver.expression.discrete;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solution;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
@@ -523,6 +525,22 @@ public class ExpressionTest {
         IntVar z = model.intVar("z", 1, 3);
         model.getSolver().showSolutions();
         eval(model, x.in(y, z), p, 22);
+    }
+
+    @Test(groups = "1s", timeOut = 600000)
+    public void test511() {
+        Model model = new Model();
+        int[] marginDomain = new int[]{4}; // id slot in margin
+        IntVar slotAssigned = model.intVar(0, 4);
+        BoolVar inMarginVars = slotAssigned.in(marginDomain).boolVar(); // works with notin()
+        Solver solver = model.getSolver();
+        IntVar[] objectives = new IntVar[2];
+        objectives[0] = inMarginVars./*neg().*/intVar(); // (if notin() l.17)
+        objectives[1] = slotAssigned.neg().intVar();
+        // Lexico Objective : 1. Minimize Id slot in margin; 2. Maximize Id Slot
+        Solution sol = solver.findLexOptimalSolution(objectives, Model.MINIMIZE);
+        Assert.assertEquals(sol.getIntVal(inMarginVars), 0);
+        Assert.assertEquals(sol.getIntVal(slotAssigned), 3);
     }
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
