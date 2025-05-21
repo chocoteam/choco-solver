@@ -873,7 +873,7 @@ public class TableTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
     public void testMany1(String a) {
-        for(int i = 0; i < 200; i++) {
+        for (int i = 0; i < 200; i++) {
             Model model = new Model();
             IntVar x = model.intVar("x", new int[]{-4, -1, 2});
             IntVar y = model.intVar("y", -2, -1);
@@ -892,7 +892,7 @@ public class TableTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "balgos")
     public void testMany2(String a) {
-        for(int i = 0; i < 200; i++) {
+        for (int i = 0; i < 200; i++) {
             Model model = new Model();
             IntVar x = model.intVar("x", new int[]{1, 2, 4, 7, 18});
             Tuples t = new Tuples();
@@ -909,6 +909,29 @@ public class TableTest {
                 out.printf("%d - %d\n", x.getValue(), x.getValue());
             }
             Assert.assertEquals(model.getSolver().getSolutionCount(), 2);
+        }
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "balgos")
+    public void testMany3(String a) {
+        if (a.contains("+")) return;
+        for (int i = 0; i < 200; i++) {
+            Model model = new Model();
+            IntVar x = model.intVar("x", new int[]{1, 2, 4, 7, 18});
+            Tuples t = new Tuples(false);
+            t.add(1, 4);
+            t.add(2, 1);
+            t.add(4, 7);
+            t.add(7, 2);
+            t.add(7, 7);
+            t.add(18, 18);
+            model.table(x, x, t, a).post();
+            Solver solver = model.getSolver();
+            solver.setSearch(new FullyRandom(new IntVar[]{x}, i));
+            while (model.getSolver().solve()) {
+                out.printf("%d - %d\n", x.getValue(), x.getValue());
+            }
+            Assert.assertEquals(model.getSolver().getSolutionCount(), 3);
         }
     }
 
