@@ -483,9 +483,8 @@ public interface IDecompositionFactory extends ISelf<Model> {
      * @implNote This is encoded thanks to a table constraint.
      */
     default void ifThenElseDec(BoolVar[] c, int[] x, IntVar y) {
-        Tuples tuples = new Tuples();
         int star = Math.max(2, y.getUB() + 1);
-        tuples.setUniversalValue(star);
+        Tuples tuples = new Tuples(star);
         int[] t = new int[c.length + 1];
         Arrays.fill(t, 0);
         t[c.length] = star;
@@ -528,9 +527,8 @@ public interface IDecompositionFactory extends ISelf<Model> {
             //y.eq(x[i]).decompose().impliedBy(c[i].and(d[i]).boolVar());
             c[i].and(d[i]).imp(y.eq(x[i])).post();
         }/*/
-        Tuples tuples = new Tuples();
         int univ = Math.max(2, y.getUB() + 1);
-        tuples.setUniversalValue(univ);
+        Tuples tuples = new Tuples(univ);
         int[] t = new int[c.length + 1];
         Arrays.fill(t, 0);
         t[c.length] = c.length;

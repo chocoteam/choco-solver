@@ -14,10 +14,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 
 import java.lang.ref.SoftReference;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * A unique interface to declare tuples for table constraints.
@@ -37,8 +34,8 @@ public class Tuples {
     protected final List<int[]> tuples;
     private int arity;
     private int[] ranges;
-    private boolean allowStar;
-    private int star;
+    private final boolean allowStar;
+    private final int star;
     private SoftReference<int[][]> cachedMatrix;
 
     //***********************************************************************************
@@ -48,18 +45,32 @@ public class Tuples {
     /**
      * Create a list of tuples which represents all allowed tuples if feasible=true
      * or a set of forbidden tuples if feasible=false.
-     * Lately, one can allow the presence of universal values, calling {@link #setUniversalValue(int)},
-     * meaning that some variables can take any values from their domain.
      *
      * @param values   list of tuples
      * @param feasible indicates whether the tuples are allowed or forbidden
+     * @param universalValue the value of the symbol which denotes that some variables can take any values from their domain
      */
-    public Tuples(int[][] values, boolean feasible) {
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    public Tuples(int[][] values, boolean feasible, OptionalInt universalValue) {
+        if(!feasible && universalValue.isPresent()) {
+            throw new SolverException("A universal value cannot be used with forbidden tuples");
+        }
         this.feasible = feasible;
         tuples = new ArrayList<>();
+        this.allowStar = universalValue.isPresent();
+        this.star = universalValue.orElse(0);
         for (int[] t : values) {
             add(t);
         }
+    }
+
+    /**
+     * Create an empty tuples which represents all allowed tuples with universal value.
+     *
+     * @param universalValue the value of the symbol which denotes that some variables can take any values from their domain
+     */
+    public Tuples(int universalValue) {
+        this(new int[0][], true, OptionalInt.of(universalValue));
     }
 
     /**
@@ -69,8 +80,7 @@ public class Tuples {
      * @param feasible indicates whether the tuples are allowed or forbidden
      */
     public Tuples(boolean feasible) {
-        this.feasible = feasible;
-        tuples = new ArrayList<>();
+        this(new int[0][], feasible, OptionalInt.empty());
     }
 
     /**
@@ -85,14 +95,10 @@ public class Tuples {
     //***********************************************************************************
 
     /**
-     * One can allow the presence of universal values,
-     * meaning that some variables can take any values from their domain.
-     *
-     * @param star the universal value that can appear in any tuple.
+     * @deprecated the universal value is now set in the constructor
      */
+    @Deprecated
     public void setUniversalValue(int star) {
-        this.star = star;
-        this.allowStar = true;
     }
 
     /**
@@ -152,7 +158,7 @@ public class Tuples {
      * @throws org.chocosolver.solver.exception.SolverException if the size of the tuple added does not correspond to a the previous ones (if any).
      */
     public void add(int... tuple) {
-        if (tuples.size() == 0) {
+        if (tuples.isEmpty()) {
             arity = tuple.length;
             ranges = new int[2 * arity];
             Arrays.fill(ranges, 0, arity, Integer.MAX_VALUE);
@@ -162,8 +168,10 @@ public class Tuples {
         }
         tuples.add(tuple.clone());
         for (int i = 0; i < arity; i++) {
-            ranges[i] = Math.min(ranges[i], tuple[i]);
-            ranges[i + arity] = Math.max(ranges[i + arity], tuple[i]);
+            if(tuple[i] != star) {
+                ranges[i] = Math.min(ranges[i], tuple[i]);
+                ranges[i + arity] = Math.max(ranges[i + arity], tuple[i]);
+            }
         }
     }
 

@@ -533,9 +533,8 @@ public class TableTest {
         IntVar x = model.intVar(1, 3);
         IntVar y = model.intVar(1, 3);
         IntVar z = model.intVar(1, 3);
-        Tuples ts = new Tuples(true);
         int ST = 99;
-        ts.setUniversalValue(ST);
+        Tuples ts = new Tuples(ST);
         ts.add(3, ST, 1);
         ts.add(1, 2, 3);
         ts.add(2, 3, 2);
@@ -554,9 +553,8 @@ public class TableTest {
         IntVar x = model.intVar(1, 3);
         IntVar y = model.intVar(1, 3);
         IntVar z = model.intVar(1, 3);
-        Tuples ts = new Tuples(true);
         int ST = 99;
-        ts.setUniversalValue(ST);
+        Tuples ts = new Tuples(ST);
         ts.add(ST, ST, ST);
         model.table(new IntVar[]{x, y, z}, ts, staralgo).post();
 
@@ -573,9 +571,8 @@ public class TableTest {
         IntVar x = model.intVar("x", 0, 1);
         IntVar y = model.intVar("y", 0, 1);
         IntVar z = model.intVar("z", 0, 1);
-        Tuples ts = new Tuples(true);
         int ST = 99;
-        ts.setUniversalValue(ST);
+        Tuples ts = new Tuples(ST);
         ts.add(1, ST, ST);
         ts.add(ST, 1, ST);
         ts.add(ST, ST, 1);
@@ -595,9 +592,8 @@ public class TableTest {
         IntVar cp = model.intVar("y", 2, 2);
         IntVar t = model.intVar("z", 0, 999);
         IntVar l = model.intVar("z", 1, 70_000, true);
-        Tuples ts = new Tuples(true);
         int ST = -1;
-        ts.setUniversalValue(ST);
+        Tuples ts = new Tuples(ST);
         ts.add(1, 2, ST, 3500);
         ts.add(2, 2, ST, 3500);
         model.table(new IntVar[]{st, cp, t, l}, ts, staralgo).post();
