@@ -764,7 +764,6 @@ public interface ArExpression {
 
         @Override
         public void extractVar(HashSet<IntVar> variables) {
-            variables.add(this.intVar());
         }
 
         @Override
