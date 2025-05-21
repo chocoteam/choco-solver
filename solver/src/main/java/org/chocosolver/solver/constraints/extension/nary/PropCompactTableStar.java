@@ -58,7 +58,7 @@ public class PropCompactTableStar extends PropCompactTable {
             int var, off;
 
             @Override
-            public UnaryIntProcedure set(Integer o) {
+            public UnaryIntProcedure<Integer> set(Integer o) {
                 var = o;
                 off = offset[var];
                 return this;

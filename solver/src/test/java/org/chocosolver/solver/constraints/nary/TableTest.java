@@ -20,6 +20,7 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.extension.hybrid.HybridTuples;
 import org.chocosolver.solver.constraints.extension.hybrid.ISupportable;
+import org.chocosolver.solver.constraints.extension.nary.PropCompactTableNeg;
 import org.chocosolver.solver.constraints.extension.nary.TuplesLargeTable;
 import org.chocosolver.solver.constraints.extension.nary.TuplesTable;
 import org.chocosolver.solver.constraints.extension.nary.TuplesVeryLargeTable;
@@ -50,7 +51,7 @@ public class TableTest {
 
     private static final String[] ALGOS = {"CT+", "FC", "GAC2001", "GACSTR+", "GAC2001+", "GAC3rm+", "GAC3rm", "STR2+", "MDD+"};
 
-    private static final String[] BIN_ALGOS = {"FC", "AC2001", "AC3", "AC3rm", "AC3bit+rm", "CT+"};
+    private static final String[] BIN_ALGOS = {"FC", "AC2001", "AC3", "AC3rm", "AC3bit+rm", "CT", "CT+"};
 
     @DataProvider(name = "algos")
     public Object[][] algos() {
@@ -964,4 +965,20 @@ public class TableTest {
         }
     }
 
+    @Test
+    public void testNegCT() {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 2);
+        IntVar y = model.intVar("y", 0, 2);
+        IntVar z = model.intVar("z", 0, 2);
+        Tuples t = new Tuples(false);
+        t.add(0, 0, 0);
+        t.add(1, 1, 1);
+        t.add(2, 2, 2);
+        new Constraint("TABLE", new PropCompactTableNeg(new IntVar[]{x, y, z}, t)).post();
+        while (model.getSolver().solve()) {
+            out.printf("%d - %d - %d\n", x.getValue(), y.getValue(), z.getValue());
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), (int) Math.pow(3, 3) - 3);
+    }
 }

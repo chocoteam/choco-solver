@@ -20,8 +20,13 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
+import org.chocosolver.solver.variables.view.IntView;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.procedure.UnaryIntProcedure;
+import org.chocosolver.util.tools.VariableUtils;
+
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 /**
  * Propagator for table constraint based on "Compact-Table: Efficiently Filtering Table Constraints
@@ -44,11 +49,35 @@ public class PropCompactTable extends Propagator<IntVar> {
     int[][] residues;
     protected int[] offset;
     protected IIntDeltaMonitor[] monitors;
-    private final UnaryIntProcedure<Integer> onValRem;
+    protected final UnaryIntProcedure<Integer> onValRem;
+    protected final boolean uniqueness;
 
     //***********************************************************************************
     // CONSTRUCTOR
     //***********************************************************************************
+
+    /**
+     * This method ensures that among the variables, there is no duplicate variable nor
+     * views of scope's variables .
+     *
+     * @param vars scope
+     * @return true if all variables are unique and not views of each other
+     */
+    private static boolean uniqueness(IntVar[] vars) {
+        HashSet<IntVar> set = new LinkedHashSet<>();
+        for (IntVar var : vars) {
+            if (VariableUtils.isView(var)) {
+                //noinspection unchecked
+                IntView<IntVar> view = (IntView<IntVar>) var;
+                var = view.getVariables()[0];
+            }
+            if (set.contains(var)) {
+                return false;
+            }
+            set.add(var);
+        }
+        return true;
+    }
 
     /**
      * Create a propagator for table constraint Only for feasible Tuples
@@ -57,7 +86,7 @@ public class PropCompactTable extends Propagator<IntVar> {
      * @param tuples list of feasible tuples
      */
     public PropCompactTable(IntVar[] vars, Tuples tuples) {
-        super(vars, PropagatorPriority.QUADRATIC, true);
+        super(vars, PropagatorPriority.QUADRATIC, true, true);
         this.tuples = tuples;
         this.currTable = new RSparseBitSet(model.getEnvironment(), this.tuples.nbTuples());
         computeSupports(tuples);
@@ -66,6 +95,7 @@ public class PropCompactTable extends Propagator<IntVar> {
             monitors[i] = vars[i].monitorDelta(this);
         }
         onValRem = makeProcedure();
+        uniqueness = uniqueness(vars);
     }
 
     //***********************************************************************************
@@ -105,7 +135,7 @@ public class PropCompactTable extends Propagator<IntVar> {
             residues[i] = new int[ub - lb + 1];
         }
         int wI = 0;
-        byte bI = 63;
+        byte bI = 0;
         top:
         for (int ti = 0; ti < tuples.nbTuples(); ti++) {
             int[] tuple = tuples.get(ti);
@@ -118,8 +148,8 @@ public class PropCompactTable extends Propagator<IntVar> {
                 tmp = supports[i][tuple[i] - offset[i]];
                 tmp[wI] |= 1L << (bI);
             }
-            if (--bI < 0) {
-                bI = 63;
+            if (++bI > 63) {
+                bI = 0;
                 wI++;
             }
         }
@@ -150,7 +180,9 @@ public class PropCompactTable extends Propagator<IntVar> {
     @Override
     public void propagate(int vIdx, int mask) throws ContradictionException {
         currTable.clearMask();
-        if (vars[vIdx].getDomainSize() > monitors[vIdx].sizeApproximation()) {
+        if (vars[vIdx].isInstantiated()) {
+            currTable.addToMask(supports[vIdx][vars[vIdx].getValue() - offset[vIdx]]);
+        } else if (vars[vIdx].getDomainSize() > monitors[vIdx].sizeApproximation()) {
             monitors[vIdx].forEachRemVal(onValRem.set(vIdx));
             currTable.reverseMask();
         } else {
@@ -166,15 +198,24 @@ public class PropCompactTable extends Propagator<IntVar> {
         forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
     }
 
-    private void filterDomains() throws ContradictionException {
-        if (currTable.isEmpty()) {// to keep as we skip instantiated vars
+    protected void filterDomains() throws ContradictionException {
+        long count = currTable.nb1s();
+        if (count == 0) { // Invariant 3.4
             fails();
-        }
-        for (int i = 0; i < vars.length; i++) {
-            if (vars[i].hasEnumeratedDomain()) {
-                enumFilter(i);
-            } else {
-                boundFilter(i);
+        } else {
+            long initthreshold = VariableUtils.domainCardinality(vars);
+            if (uniqueness && count == initthreshold) { // Invariant 3.3
+                // --> does not work with views
+                setPassive();
+                return;
+            }
+            for (int i = 0; i < vars.length; i++) {
+                if (uniqueness && vars[i].isInstantiated()) continue; // --> does not work with views
+                if (vars[i].hasEnumeratedDomain()) {
+                    enumFilter(i);
+                } else {
+                    boundFilter(i);
+                }
             }
         }
     }
@@ -239,6 +280,14 @@ public class PropCompactTable extends Propagator<IntVar> {
 // RSparseBitSet
 //***********************************************************************************
 
+    /**
+     * A reversible sparse bitset.
+     *
+     * @implNote An equivalent implementation of this class but relying on IStateBitSet was evaluated
+     * but the bottleneck was the calls to nextSetBit and nextClearBit which are called a lot in
+     * the #clearMask and #intersectWithMask methods.
+     */
+
     protected static class RSparseBitSet {
         protected IStateLong[] words;
         private final int[] index;
@@ -258,7 +307,7 @@ public class PropCompactTable extends Propagator<IntVar> {
             }
         }
 
-        private boolean isEmpty() {
+        protected boolean isEmpty() {
             return limit.get() == -1;
         }
 
@@ -283,29 +332,73 @@ public class PropCompactTable extends Propagator<IntVar> {
             }
         }
 
-        private void intersectWithMask() {
-            for (int i = limit.get(); i >= 0; i--) {
+        protected void intersectWithMask() {
+            int l = this.limit.get();
+            for (int i = l; i >= 0; i--) {
                 int offset = index[i];
-                long w = words[offset].get() & mask[offset];
-                if (words[offset].get() != w) {
+                long wo = words[offset].get();
+                long w = wo & mask[offset];
+                if (wo != w) {
                     words[offset].set(w);
                     if (w == 0L) {
-                        index[i] = index[limit.get()];
-                        index[limit.get()] = offset;
-                        limit.add(-1);
+                        index[i] = index[l];
+                        index[l] = offset;
+                        l--;
                     }
                 }
             }
+            limit.set(l);
         }
 
-        private int intersectIndex(long[] m) {
-            for (int i = limit.get(); i >= 0; i--) {
+        protected void intersectWithNotMask() {
+            int l = this.limit.get();
+            for (int i = l; i >= 0; i--) {
+                int offset = index[i];
+                long w = words[offset].get() & ~mask[offset];
+                if (words[offset].get() != w) {
+                    words[offset].set(w);
+                    if (w == 0L) {
+                        index[i] = index[l];
+                        index[l] = offset;
+                        l--;
+                    }
+                }
+            }
+            limit.set(l);
+        }
+
+        protected int intersectIndex(long[] m) {
+            int i = this.limit.get();
+            while (i >= 0) {
                 int offset = index[i];
                 if ((words[offset].get() & m[offset]) != 0L) {
                     return offset;
                 }
+                i--;
             }
             return -1;
+        }
+
+        protected int nb1s() {
+            int cnt = 0;
+            int i = this.limit.get();
+            while (i >= 0) {
+                int offset = index[i];
+                cnt += Long.bitCount(words[offset].get());
+                i--;
+            }
+            return cnt;
+        }
+
+        protected long nb1s(long[] m) {
+            long cnt = 0;
+            int i = limit.get();
+            while (i >= 0) {
+                int offset = index[i];
+                cnt += Long.bitCount(words[offset].get() & m[offset]);
+                i--;
+            }
+            return cnt;
         }
     }
 }
