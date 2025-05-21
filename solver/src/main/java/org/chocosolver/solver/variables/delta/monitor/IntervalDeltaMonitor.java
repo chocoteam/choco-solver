@@ -103,6 +103,6 @@ public class IntervalDeltaMonitor extends TimeStampedObject implements IIntDelta
 
     @Override
     public int sizeApproximation() {
-        return last - first;
+        return delta.size() - (needReset()? 0 : this.last);
     }
 }
