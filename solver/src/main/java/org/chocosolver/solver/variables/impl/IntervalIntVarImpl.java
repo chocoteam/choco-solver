@@ -383,6 +383,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
 
     @Override
     public int getRange() {
+        // For bounded variables, the range is always equal to the domain size
         return getDomainSize();
     }
 
