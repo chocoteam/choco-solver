@@ -79,6 +79,15 @@ public class UnArExpression implements ArExpression {
     @Override
     public IntVar intVar() {
         if (me == null) {
+            if(op == Operator.ABS && e instanceof BiArExpression && ((BiArExpression)e).getOp() == Operator.SUB){
+                BiArExpression be = (BiArExpression) e;
+                IntVar v1 = be.getExpressionChild()[0].intVar();
+                IntVar v2 = be.getExpressionChild()[1].intVar();
+                me = model.intVar(model.generateName("abs_exp_"), Math.min(v1.getLB(), v2.getLB()), Math.max(v1.getUB(), v2.getUB()));
+                model.distance(v1, v2, "=", me).post();
+                return me;
+            }
+
             IntVar v = e.intVar();
             switch (op){
                 case NEG:
