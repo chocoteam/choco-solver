@@ -981,4 +981,37 @@ public class TableTest {
         }
         Assert.assertEquals(model.getSolver().getSolutionCount(), (int) Math.pow(3, 3) - 3);
     }
+
+    @Test(groups = "1s", dataProvider = "algos")
+    public void testExp1(String a) {
+        Model model = new Model();
+        BoolVar x = model.boolVar("x");
+        IntVar y = model.intVar("y", 0, 121);
+        IntVar z = model.intVar("z", 0, 121);
+        x.ne(0).or(y.dist(z).eq(1)).extension(a).post();
+        x.eq(0).post();
+        y.eq(0).post();
+        while (model.getSolver().solve()) {
+            out.printf("%d - %d - %d\n", x.getValue(), y.getValue(), z.getValue());
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
+    }
+
+    @Test(groups = "1s", dataProvider = "algos")
+    public void testExp2(String a) {
+        Model model = new Model();
+        BoolVar x = model.boolVar("x");
+        int n = 122;
+        IntVar y = model.intVar("y", 0, n);
+        IntVar z = model.intVar("z", 0, n);
+        x.ne(1).or(y.dist(z).eq(1)).extension(a).post();
+        x.eq(0).post();
+        y.eq(0).post();
+//        model.getSolver().showDecisions(128);
+        while (model.getSolver().solve()) {
+            out.printf("%d - %d - %d\n", x.getValue(), y.getValue(), z.getValue());
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), n+1);
+    }
+
 }
