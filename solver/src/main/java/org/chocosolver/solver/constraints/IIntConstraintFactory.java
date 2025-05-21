@@ -44,8 +44,6 @@ import org.chocosolver.solver.constraints.nary.channeling.PropInverseChannelBC;
 import org.chocosolver.solver.constraints.nary.circuit.*;
 import org.chocosolver.solver.constraints.nary.count.PropCountVar;
 import org.chocosolver.solver.constraints.nary.count.PropCount_AC;
-import org.chocosolver.solver.constraints.nary.cumulative.CumulFilter;
-import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
 import org.chocosolver.solver.constraints.nary.element.PropElementV_fast;
 import org.chocosolver.solver.constraints.nary.globalcardinality.GlobalCardinality;
 import org.chocosolver.solver.constraints.nary.knapsack.PropKnapsack;
@@ -432,15 +430,19 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param var2 second variable
      */
     default Constraint table(IntVar var1, IntVar var2, Tuples tuples) {
-        if (!var1.hasEnumeratedDomain() || !var2.hasEnumeratedDomain()) {
+        /*if (!var1.hasEnumeratedDomain() || !var2.hasEnumeratedDomain()) {
             return table(var1, var2, tuples, "CT+");
         } else {
             return table(var1, var2, tuples, "AC3bit+rm");
-        }
+        } */
+        return table(var1, var2, tuples, "CT");
     }
 
     /**
      * Creates a table constraint over a couple of variables var1 and var2:<br/>
+     *
+     * - <b>CT</b>: table constraint which applies the Compact-Table algorithm,<br/>
+     * - <b>CT+</b>: table constraint which applies the Compact-Table algorithm on allowed tuples,<br/>
      * - <b>AC2001</b>: table constraint which applies the AC2001 algorithm,<br/>
      * - <b>AC3</b>: table constraint which applies the AC3 algorithm,<br/>
      * - <b>AC3rm</b>: table constraint which applies the AC3 rm algorithm,<br/>
@@ -449,7 +451,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      *
      * @param var1   first variable
      * @param var2   second variable
-     * @param tuples the relation between the two variables, among {"AC3", "AC3rm", "AC3bit+rm", "AC2001", "CT+", "FC"}
+     * @param tuples the relation between the two variables, among {"AC3", "AC3rm", "AC3bit+rm", "AC2001", "CT+", "CT", "FC"}
      */
     default Constraint table(IntVar var1, IntVar var2, Tuples tuples, String algo) {
         Object[] args = variableUniqueness(new IntVar[]{var1, var2});
@@ -463,13 +465,27 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             ref().addTable(new IntVar[]{var1, var2}, tuples);
             return ref().voidConstraint();
         }
+        if (algo.endsWith("+") && !tuples.isFeasible()) {
+            throw new SolverException(algo + " table algorithm cannot be used with forbidden tuples.");
+        }
+        if (tuples.allowUniversalValue() && !(algo.contains("CT+") || algo.contains("STR2+"))) {
+            throw new SolverException(algo + " table algorithm cannot be used with short tuples.");
+        }
+
         Propagator<IntVar> p;
         if (tuples.allowUniversalValue()) {
             p = new PropCompactTableStar(new IntVar[]{var1, var2}, tuples);
         } else {
             switch (algo) {
+                case "CT":
                 case "CT+":
-                    p = new PropCompactTable(new IntVar[]{var1, var2}, tuples);
+                    if (tuples.allowUniversalValue()) {
+                        p = new PropCompactTableStar(new IntVar[]{var1, var2}, tuples);
+                    } else if (tuples.isFeasible()) {
+                        p = new PropCompactTable(new IntVar[]{var1, var2}, tuples);
+                    } else {
+                        p = new PropCompactTableNeg(new IntVar[]{var1, var2}, tuples);
+                    }
                     break;
                 case "AC2001":
                     p = new PropBinAC2001(var1, var2, tuples);
@@ -917,7 +933,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             return ref().voidConstraint();
         }
         final IntIterableRangeSet svalues = new IntIterableRangeSet(values);
-        if(svalues.size()==1){
+        if (svalues.size() == 1) {
             return allDifferentUnderCondition(vars, v -> !v.contains(svalues.min()), true);
         }
         return allDifferentUnderCondition(vars, v -> !svalues.intersect(v), true);
@@ -1465,143 +1481,143 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         }
     }
 
-    /**
-     * Creates a cumulative constraint: Enforces that at each point in time,
-     * the cumulated height of the set of tasks that overlap that point
-     * does not exceed a given limit.
-     * <p>
-     * Task duration and height should be >= 0
-     * Discards tasks whose duration or height is equal to zero
-     *
-     * @param tasks    Task objects containing start, duration and end variables
-     * @param heights  integer variables representing the resource consumption of each task
-     * @param capacity integer variable representing the resource capacity
-     * @return a cumulative constraint
-     */
-    default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity) {
-        return cumulative(tasks, heights, capacity, true);
-    }
-
-    /**
-     * Creates a cumulative constraint: Enforces that at each point in time,
-     * the cumulated height of the set of tasks that overlap that point
-     * does not exceed a given limit.
-     * <p>
-     * Task duration and height should be >= 0
-     * Discards tasks whose duration or height is equal to zero
-     *
-     * @param tasks       Task objects containing start, duration and end variables
-     * @param heights     integer variables representing the resource consumption of each task
-     * @param capacity    integer variable representing the resource capacity
-     * @param incremental specifies if an incremental propagation should be applied
-     * @return a cumulative constraint
-     */
-    default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean incremental) {
-        return cumulative(tasks, heights, capacity, incremental, Cumulative.Filter.DEFAULT.make(tasks.length));
-    }
-
-    /**
-     * Creates a cumulative constraint: Enforces that at each point in time,
-     * the cumulated height of the set of tasks that overlap that point
-     * does not exceed a given limit.
-     * <p>
-     * Task duration and height should be >= 0
-     * Discards tasks whose duration or height is equal to zero
-     *
-     * @param tasks       Task objects containing start, duration and end variables
-     * @param heights     integer variables representing the resource consumption of each task
-     * @param capacity    integer variable representing the resource capacity
-     * @param incremental specifies if an incremental propagation should be applied
-     * @param filters     specifies which filtering algorithms to apply
-     * @return a cumulative constraint
-     */
-    default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean incremental, Cumulative.Filter... filters) {
-        return cumulative(tasks, heights, capacity, incremental, Arrays.stream(filters).map(f -> f.make(tasks.length)).toArray(CumulFilter[]::new));
-    }
-
-    /**
-     * Creates a cumulative constraint: Enforces that at each point in time,
-     * the cumulated height of the set of tasks that overlap that point
-     * does not exceed a given limit.
-     * <p>
-     * Task duration and height should be >= 0
-     * Discards tasks whose duration or height is equal to zero
-     *
-     * @param tasks       Task objects containing start, duration and end variables
-     * @param heights     integer variables representing the resource consumption of each task
-     * @param capacity    integer variable representing the resource capacity
-     * @param incremental specifies if an incremental propagation should be applied
-     * @param filters     specifies which filtering algorithms to apply
-     * @return a cumulative constraint
-     */
-    default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean incremental, CumulFilter... filters) {
-        if (ref().getSolver().isLCG()) {
-            if (ref().getSettings().warnUser()) {
-                ref().getSolver().log().white().println(
-                        "Warning: cumulative constraint is decomposed (due to LCG).");
-            }
-            ref().cumulativeDec(tasks, heights, capacity);
-            return ref().voidConstraint();
-        }
-        if (tasks.length != heights.length) {
-            throw new SolverException("Tasks and heights arrays should have same size");
-        }
-        int nbUseFull = 0;
-        for (int h = 0; h < heights.length; h++) {
-            if (heights[h].getUB() > 0 && tasks[h].getDuration().getUB() > 0) {
-                nbUseFull++;
-            }
-        }
-        // remove tasks that have no impact on resource consumption
-        if (nbUseFull < tasks.length) {
-            if (nbUseFull == 0) return arithm(capacity, ">=", 0);
-            Task[] T2 = new Task[nbUseFull];
-            IntVar[] H2 = new IntVar[nbUseFull];
-            int idx = 0;
-            for (int h = 0; h < heights.length; h++) {
-                if (heights[h].getUB() > 0 && tasks[h].getDuration().getUB() > 0) {
-                    T2[idx] = tasks[h];
-                    H2[idx] = heights[h];
-                    idx++;
-                }
-            }
-            tasks = T2;
-            heights = H2;
-        }
-        return new Cumulative(tasks, heights, capacity, incremental, filters);
-    }
-
-    /**
-     * Creates and <b>posts</b> a decomposition of a cumulative constraint:
-     * Enforces that at each point in time,
-     * the cumulated height of the set of tasks that overlap that point
-     * does not exceed a given limit.
-     * <p>
-     * Task duration and height should be >= 0
-     * Discards tasks whose duration or height is equal to zero
-     *
-     * @param starts    starting time of each task
-     * @param durations processing time of each task
-     * @param heights   resource consumption of each task
-     * @param capacity  resource capacity
-     */
-    default Constraint cumulative(IntVar[] starts, int[] durations, int[] heights, int capacity) {
-        int n = starts.length;
-        final IntVar[] d = new IntVar[n];
-        final IntVar[] h = new IntVar[n];
-        final IntVar[] e = new IntVar[n];
-        Task[] tasks = new Task[n];
-        for (int i = 0; i < n; i++) {
-            d[i] = ref().intVar(durations[i]);
-            h[i] = ref().intVar(heights[i]);
-            e[i] = ref().intVar(starts[i].getName() + "_e",
-                    starts[i].getLB() + durations[i],
-                    starts[i].getUB() + durations[i],
-                    true);
-            tasks[i] = new Task(starts[i], d[i], e[i]);
-        }
-        return ref().cumulative(tasks, h, ref().intVar(capacity), false, Cumulative.Filter.NAIVETIME);
-    }
+//    /**
+//     * Creates a cumulative constraint: Enforces that at each point in time,
+//     * the cumulated height of the set of tasks that overlap that point
+//     * does not exceed a given limit.
+//     * <p>
+//     * Task duration and height should be >= 0
+//     * Discards tasks whose duration or height is equal to zero
+//     *
+//     * @param tasks    Task objects containing start, duration and end variables
+//     * @param heights  integer variables representing the resource consumption of each task
+//     * @param capacity integer variable representing the resource capacity
+//     * @return a cumulative constraint
+//     */
+//    default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity) {
+//        return cumulative(tasks, heights, capacity, true);
+//    }
+//
+//    /**
+//     * Creates a cumulative constraint: Enforces that at each point in time,
+//     * the cumulated height of the set of tasks that overlap that point
+//     * does not exceed a given limit.
+//     * <p>
+//     * Task duration and height should be >= 0
+//     * Discards tasks whose duration or height is equal to zero
+//     *
+//     * @param tasks       Task objects containing start, duration and end variables
+//     * @param heights     integer variables representing the resource consumption of each task
+//     * @param capacity    integer variable representing the resource capacity
+//     * @param incremental specifies if an incremental propagation should be applied
+//     * @return a cumulative constraint
+//     */
+//    default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean incremental) {
+//        return cumulative(tasks, heights, capacity, incremental, Cumulative.Filter.DEFAULT.make(tasks.length));
+//    }
+//
+//    /**
+//     * Creates a cumulative constraint: Enforces that at each point in time,
+//     * the cumulated height of the set of tasks that overlap that point
+//     * does not exceed a given limit.
+//     * <p>
+//     * Task duration and height should be >= 0
+//     * Discards tasks whose duration or height is equal to zero
+//     *
+//     * @param tasks       Task objects containing start, duration and end variables
+//     * @param heights     integer variables representing the resource consumption of each task
+//     * @param capacity    integer variable representing the resource capacity
+//     * @param incremental specifies if an incremental propagation should be applied
+//     * @param filters     specifies which filtering algorithms to apply
+//     * @return a cumulative constraint
+//     */
+//    default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean incremental, Cumulative.Filter... filters) {
+//        return cumulative(tasks, heights, capacity, incremental, Arrays.stream(filters).map(f -> f.make(tasks.length)).toArray(CumulFilter[]::new));
+//    }
+//
+//    /**
+//     * Creates a cumulative constraint: Enforces that at each point in time,
+//     * the cumulated height of the set of tasks that overlap that point
+//     * does not exceed a given limit.
+//     * <p>
+//     * Task duration and height should be >= 0
+//     * Discards tasks whose duration or height is equal to zero
+//     *
+//     * @param tasks       Task objects containing start, duration and end variables
+//     * @param heights     integer variables representing the resource consumption of each task
+//     * @param capacity    integer variable representing the resource capacity
+//     * @param incremental specifies if an incremental propagation should be applied
+//     * @param filters     specifies which filtering algorithms to apply
+//     * @return a cumulative constraint
+//     */
+//    default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean incremental, CumulFilter... filters) {
+//        if (ref().getSolver().isLCG()) {
+//            if (ref().getSettings().warnUser()) {
+//                ref().getSolver().log().white().println(
+//                        "Warning: cumulative constraint is decomposed (due to LCG).");
+//            }
+//            ref().cumulativeDec(tasks, heights, capacity);
+//            return ref().voidConstraint();
+//        }
+//        if (tasks.length != heights.length) {
+//            throw new SolverException("Tasks and heights arrays should have same size");
+//        }
+//        int nbUseFull = 0;
+//        for (int h = 0; h < heights.length; h++) {
+//            if (heights[h].getUB() > 0 && tasks[h].getDuration().getUB() > 0) {
+//                nbUseFull++;
+//            }
+//        }
+//        // remove tasks that have no impact on resource consumption
+//        if (nbUseFull < tasks.length) {
+//            if (nbUseFull == 0) return arithm(capacity, ">=", 0);
+//            Task[] T2 = new Task[nbUseFull];
+//            IntVar[] H2 = new IntVar[nbUseFull];
+//            int idx = 0;
+//            for (int h = 0; h < heights.length; h++) {
+//                if (heights[h].getUB() > 0 && tasks[h].getDuration().getUB() > 0) {
+//                    T2[idx] = tasks[h];
+//                    H2[idx] = heights[h];
+//                    idx++;
+//                }
+//            }
+//            tasks = T2;
+//            heights = H2;
+//        }
+//        return new Cumulative(tasks, heights, capacity, incremental, filters);
+//    }
+//
+//    /**
+//     * Creates and <b>posts</b> a decomposition of a cumulative constraint:
+//     * Enforces that at each point in time,
+//     * the cumulated height of the set of tasks that overlap that point
+//     * does not exceed a given limit.
+//     * <p>
+//     * Task duration and height should be >= 0
+//     * Discards tasks whose duration or height is equal to zero
+//     *
+//     * @param starts    starting time of each task
+//     * @param durations processing time of each task
+//     * @param heights   resource consumption of each task
+//     * @param capacity  resource capacity
+//     */
+//    default Constraint cumulative(IntVar[] starts, int[] durations, int[] heights, int capacity) {
+//        int n = starts.length;
+//        final IntVar[] d = new IntVar[n];
+//        final IntVar[] h = new IntVar[n];
+//        final IntVar[] e = new IntVar[n];
+//        Task[] tasks = new Task[n];
+//        for (int i = 0; i < n; i++) {
+//            d[i] = ref().intVar(durations[i]);
+//            h[i] = ref().intVar(heights[i]);
+//            e[i] = ref().intVar(starts[i].getName() + "_e",
+//                    starts[i].getLB() + durations[i],
+//                    starts[i].getUB() + durations[i],
+//                    true);
+//            tasks[i] = new Task(starts[i], d[i], e[i]);
+//        }
+//        return ref().cumulative(tasks, h, ref().intVar(capacity), false, Cumulative.Filter.NAIVETIME);
+//    }
 
     /**
      * <p>
@@ -1672,9 +1688,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             return Constraint.merge(ConstraintsName.DIFFNWITHCUMULATIVE,
                     diffNCons,
                     min(minX, X), max(maxX, EX), scalar(new IntVar[]{maxX, minX}, new int[]{1, -1}, "=", diffX),
-                    cumulative(TX, height, diffY),
+                    model.cumulative(TX, height, diffY),
                     min(minY, Y), max(maxY, EY), scalar(new IntVar[]{maxY, minY}, new int[]{1, -1}, "=", diffY),
-                    cumulative(TY, width, diffX)
+                    model.cumulative(TY, width, diffX)
             );
         } else {
             return diffNCons;
@@ -2747,19 +2763,18 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param tuples the relation between the variables (list of allowed/forbidden tuples)
      */
     default Constraint table(IntVar[] vars, Tuples tuples) {
-        String algo = "GAC3rm";
+        String algo = "CT";
         if (tuples.isFeasible()) {
+//            algo = "CT";
             //noinspection OptionalGetWithoutIsPresent
-            if (tuples.nbTuples() > 512 &&
+            if (//tuples.nbTuples() > 512 &&
                     (IntStream.range(0, vars.length)
                             .map(i -> tuples.max(i) - tuples.min(i))
                             .max().getAsInt()) < 512) {
                 algo = "CT+";
             } else if (tuples.allowUniversalValue()) {
-                // STR2+ or CT+, depending on dom size
+                // STR2+ or CT+, depending on dom size?
                 algo = "STR2+";
-            } else {
-                algo = "GACSTR+";
             }
         }
         return table(vars, tuples, algo);
@@ -2768,7 +2783,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     /**
      * Creates a table constraint, with the specified algorithm defined algo
      * <p>
-     * - <b>CT+</b>: Compact-Table algorithm (AC),
+     * - <b>CT</b>: Compact-Table algorithm (AC),
+     * <br/>
+     * <p>
+     * - <b>CT+</b>: Compact-Table algorithm for allowed tuples only (AC),
      * <br/>
      * - <b>GAC2001</b>: Arc Consistency version 2001 for tuples,
      * <br/>
@@ -2788,11 +2806,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      *
      * @param vars   variables forming the tuples
      * @param tuples the relation between the variables (list of allowed/forbidden tuples). Should not be modified once passed to the constraint.
-     * @param algo   to choose among {"CT+", "GAC3rm", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC", "STR2+"}
+     * @param algo   to choose among {"CT", "CT+", "AC3rm", "GAC3rm", "AC2001", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC", "STR2+"}
      */
     default Constraint table(IntVar[] vars, Tuples tuples, String algo) {
         // if some variables appears more than one time, the filtering algorithm can be not correct
         vars = (IntVar[]) variableUniqueness(vars)[0];
+        // check views too
+
         if (ref().getSolver().isLCG()) {
             if (ref().getSettings().warnUser()) {
                 ref().getSolver().log().white().println(
@@ -2805,6 +2825,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             switch (algo) {
                 case "FC":
                     return table(vars[0], vars[1], tuples, algo);
+                case "AC2001":
                 case "GAC2001":
                     return table(vars[0], vars[1], tuples, "AC2001");
                 case "CT+":
@@ -2815,7 +2836,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                     return table(vars[0], vars[1], tuples);
             }
         }
-        if (algo.contains("+") && !tuples.isFeasible()) {
+        if (algo.endsWith("+") && !tuples.isFeasible()) {
             throw new SolverException(algo + " table algorithm cannot be used with forbidden tuples.");
         }
         if (tuples.allowUniversalValue() && !(algo.contains("CT+") || algo.contains("STR2+"))) {
@@ -2823,11 +2844,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         }
         Propagator<IntVar> p;
         switch (algo) {
+            case "CT":
             case "CT+": {
                 if (tuples.allowUniversalValue()) {
                     p = new PropCompactTableStar(vars, tuples);
-                } else {
+                } else if (tuples.isFeasible()) {
                     p = new PropCompactTable(vars, tuples);
+                } else {
+                    p = new PropCompactTableNeg(vars, tuples);
                 }
             }
             break;
@@ -2837,9 +2861,11 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             case "FC":
                 p = new PropLargeFC(vars, tuples);
                 break;
+            case "AC3rm":
             case "GAC3rm":
                 p = new PropLargeGAC3rm(vars, tuples);
                 break;
+            case "AC2001":
             case "GAC2001":
                 p = new PropLargeGAC2001(vars, tuples);
                 break;

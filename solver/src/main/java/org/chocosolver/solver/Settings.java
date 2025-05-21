@@ -118,7 +118,7 @@ public class Settings {
                 .setModelChecker(s -> true)
                 .setWarnUser(false)
                 .setCheckDeclaredConstraints(false)
-                .setCheckDeclaredViews(false)
+                .setCheckDeclaredViews(true)
                 .setCheckDeclaredMonitors(false)
                 .setPrintAllUndeclaredConstraints(false);
     }
