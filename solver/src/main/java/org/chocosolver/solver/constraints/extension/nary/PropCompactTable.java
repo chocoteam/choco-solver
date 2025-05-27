@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints.extension.nary;
 
+import gnu.trove.map.hash.TIntObjectHashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.memory.IStateLong;
@@ -39,19 +40,92 @@ import java.util.LinkedHashSet;
 @Explained(ignored = true, comment = "Turned into clauses")
 public class PropCompactTable extends Propagator<IntVar> {
 
+    /**
+     * This interface is used to create a support structure for the table constraint.
+     */
+    protected interface ISupport {
+
+        /**
+         * Factory method to create a support structure.
+         * The choice of the support structure depends on the range and the number of values.
+         * @param range the range of the variable, that is the difference between the upper and lower bounds.
+         * @param nValues the number of values in the domain of the variable.
+         * @param nWords the number of words in the bitset.
+         * @return a support structure.
+         */
+        static ISupport make(int range, int nValues, int nWords){
+            if(range > 256 && range >= 1.1 * nValues){
+                // If the variable seems to be sparse, we use a sparse support structure
+                return new SparseSupport(nValues, nWords);
+            } else {
+                // If the variable seems to be dense, we use a dense support structure
+                return new DenseSupport(range, nWords);
+            }
+        }
+
+        /**
+         * Get the support for a given value.
+         * @param val the value for which we want the support.
+         * @return the support for the given value.
+         */
+        long[] get(int val);
+    }
+
+    /**
+     * Dense support structure.
+     * It is used when the variable is dense, that is when the range is equal to the number of values.
+     * In that case, we use a simple array of long arrays to store the supports.
+     */
+    protected final static class DenseSupport implements ISupport {
+        private final long[][] supports;
+
+        public DenseSupport(int range, int nWords) {
+            this.supports = new long[range][nWords];
+        }
+
+        @Override
+        public long[] get(int val) {
+            return supports[val];
+        }
+    }
+
+    /**
+     * Sparse support structure.
+     * It is used when the variable is sparse, that is when the range is greater than the number of values.
+     * In that case, we use a hash map to store the supports.
+     */
+    protected final static class SparseSupport implements ISupport {
+        private final TIntObjectHashMap<long[]> map;
+        private final int nWords;
+
+        public SparseSupport(int nValues, int nWords) {
+            this.nWords = nWords;
+            this.map = new TIntObjectHashMap<>(nValues, 1.1f, -1);
+        }
+
+        @Override
+        public long[] get(int val) {
+            long[] m = map.get(val);
+            if(m == null){
+                m = new long[nWords];
+                map.put(val, m);
+            }
+            return m;
+        }
+    }
+
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
     RSparseBitSet currTable;
     protected Tuples tuples; // only for checker
-    protected long[][][] supports;
+    protected ISupport[] supports;
     int[][] residues;
     protected int[] offset;
     protected IIntDeltaMonitor[] monitors;
     protected final UnaryIntProcedure<Integer> onValRem;
     protected final boolean uniqueness;
-
     //***********************************************************************************
     // CONSTRUCTOR
     //***********************************************************************************
@@ -86,7 +160,7 @@ public class PropCompactTable extends Propagator<IntVar> {
      * @param tuples list of feasible tuples
      */
     public PropCompactTable(IntVar[] vars, Tuples tuples) {
-        super(vars, PropagatorPriority.QUADRATIC, true, true);
+        super(vars, PropagatorPriority.QUADRATIC, true, tuples.allowUniversalValue());
         this.tuples = tuples;
         this.currTable = new RSparseBitSet(model.getEnvironment(), this.tuples.nbTuples());
         computeSupports(tuples);
@@ -116,7 +190,7 @@ public class PropCompactTable extends Propagator<IntVar> {
 
             @Override
             public void execute(int i) {
-                currTable.addToMask((supports[var][i - off]));
+                currTable.addToMask((supports[var].get(i - off)));
             }
         };
     }
@@ -124,14 +198,14 @@ public class PropCompactTable extends Propagator<IntVar> {
     protected void computeSupports(Tuples tuples) {
         int n = vars.length;
         offset = new int[n];
-        supports = new long[n][][];
+        supports = new ISupport[n];
         residues = new int[n][];
         long[] tmp;
         for (int i = 0; i < n; i++) {
             int lb = vars[i].getLB();
             int ub = vars[i].getUB();
             offset[i] = lb;
-            supports[i] = new long[ub - lb + 1][currTable.words.length];
+            supports[i] = ISupport.make(vars[i].getRange(), vars[i].getDomainSize(), currTable.words.length);
             residues[i] = new int[ub - lb + 1];
         }
         int wI = 0;
@@ -145,7 +219,7 @@ public class PropCompactTable extends Propagator<IntVar> {
                 }
             }
             for (int i = 0; i < tuple.length; i++) {
-                tmp = supports[i][tuple[i] - offset[i]];
+                tmp = supports[i].get(tuple[i] - offset[i]);
                 tmp[wI] |= 1L << (bI);
             }
             if (++bI > 63) {
@@ -166,7 +240,7 @@ public class PropCompactTable extends Propagator<IntVar> {
                 currTable.clearMask();
                 int ub = vars[i].getUB();
                 for (int v = vars[i].getLB(); v <= ub; v = vars[i].nextValue(v)) {
-                    currTable.addToMask(supports[i][v - offset[i]]);
+                    currTable.addToMask(supports[i].get(v - offset[i]));
                 }
                 currTable.intersectWithMask();
             }
@@ -181,14 +255,16 @@ public class PropCompactTable extends Propagator<IntVar> {
     public void propagate(int vIdx, int mask) throws ContradictionException {
         currTable.clearMask();
         if (vars[vIdx].isInstantiated()) {
-            currTable.addToMask(supports[vIdx][vars[vIdx].getValue() - offset[vIdx]]);
-        } else if (vars[vIdx].getDomainSize() > monitors[vIdx].sizeApproximation()) {
-            monitors[vIdx].forEachRemVal(onValRem.set(vIdx));
-            currTable.reverseMask();
+            currTable.addToMask(supports[vIdx].get(vars[vIdx].getValue() - offset[vIdx]));
         } else {
-            int ub = vars[vIdx].getUB();
-            for (int v = vars[vIdx].getLB(); v <= ub; v = vars[vIdx].nextValue(v)) {
-                currTable.addToMask(supports[vIdx][v - offset[vIdx]]);
+            if (vars[vIdx].getDomainSize() > monitors[vIdx].sizeApproximation()) {
+                monitors[vIdx].forEachRemVal(onValRem.set(vIdx));
+                currTable.reverseMask();
+            } else {
+                int ub = vars[vIdx].getUB();
+                for (int v = vars[vIdx].getLB(); v <= ub; v = vars[vIdx].nextValue(v)) {
+                    currTable.addToMask(supports[vIdx].get(v - offset[vIdx]));
+                }
             }
         }
         currTable.intersectWithMask();
@@ -203,9 +279,9 @@ public class PropCompactTable extends Propagator<IntVar> {
         if (count == 0) { // Invariant 3.4
             fails();
         } else {
+            // --> does not work with views
             long initthreshold = VariableUtils.domainCardinality(vars);
             if (uniqueness && count == initthreshold) { // Invariant 3.3
-                // --> does not work with views
                 setPassive();
                 return;
             }
@@ -225,8 +301,8 @@ public class PropCompactTable extends Propagator<IntVar> {
         int ub = vars[i].getUB();
         for (int v = lb; v <= ub; v++) {
             int index = residues[i][v - offset[i]];
-            if ((currTable.words[index].get() & supports[i][v - offset[i]][index]) == 0L) {
-                index = currTable.intersectIndex(supports[i][v - offset[i]]);
+            if ((currTable.words[index].get() & supports[i].get(v - offset[i])[index]) == 0L) {
+                index = currTable.intersectIndex(supports[i].get(v - offset[i]));
                 if (index == -1) {
                     lb++;
                 } else {
@@ -240,8 +316,8 @@ public class PropCompactTable extends Propagator<IntVar> {
         vars[i].updateLowerBound(lb, this);
         for (int v = ub; v >= lb; v--) {
             int index = residues[i][v - offset[i]];
-            if ((currTable.words[index].get() & supports[i][v - offset[i]][index]) == 0L) {
-                index = currTable.intersectIndex(supports[i][v - offset[i]]);
+            if ((currTable.words[index].get() & supports[i].get(v - offset[i])[index]) == 0L) {
+                index = currTable.intersectIndex(supports[i].get(v - offset[i]));
                 if (index == -1) {
                     ub--;
                 } else {
@@ -259,8 +335,8 @@ public class PropCompactTable extends Propagator<IntVar> {
         int ub = vars[i].getUB();
         for (int v = vars[i].getLB(); v <= ub; v = vars[i].nextValue(v)) {
             int index = residues[i][v - offset[i]];
-            if ((currTable.words[index].get() & supports[i][v - offset[i]][index]) == 0L) {
-                index = currTable.intersectIndex(supports[i][v - offset[i]]);
+            if ((currTable.words[index].get() & supports[i].get(v - offset[i])[index]) == 0L) {
+                index = currTable.intersectIndex(supports[i].get(v - offset[i]));
                 if (index == -1) {
                     vars[i].removeValue(v, this);
                 } else {
@@ -354,8 +430,9 @@ public class PropCompactTable extends Propagator<IntVar> {
             int l = this.limit.get();
             for (int i = l; i >= 0; i--) {
                 int offset = index[i];
-                long w = words[offset].get() & ~mask[offset];
-                if (words[offset].get() != w) {
+                long wo = words[offset].get();
+                long w = wo & ~mask[offset];
+                if (wo != w) {
                     words[offset].set(w);
                     if (w == 0L) {
                         index[i] = index[l];
@@ -364,39 +441,33 @@ public class PropCompactTable extends Propagator<IntVar> {
                     }
                 }
             }
-            limit.set(l);
+            this.limit.set(l);
         }
 
         protected int intersectIndex(long[] m) {
-            int i = this.limit.get();
-            while (i >= 0) {
+            for (int i = limit.get(); i >= 0; i--) {
                 int offset = index[i];
                 if ((words[offset].get() & m[offset]) != 0L) {
                     return offset;
                 }
-                i--;
             }
             return -1;
         }
 
         protected int nb1s() {
             int cnt = 0;
-            int i = this.limit.get();
-            while (i >= 0) {
+            for (int i = limit.get(); i >= 0; i--) {
                 int offset = index[i];
                 cnt += Long.bitCount(words[offset].get());
-                i--;
             }
             return cnt;
         }
 
         protected long nb1s(long[] m) {
             long cnt = 0;
-            int i = limit.get();
-            while (i >= 0) {
+            for (int i = limit.get(); i >= 0; i--) {
                 int offset = index[i];
                 cnt += Long.bitCount(words[offset].get() & m[offset]);
-                i--;
             }
             return cnt;
         }

@@ -26,7 +26,7 @@ import org.chocosolver.util.tools.VariableUtils;
  * @since 05/05/2025
  */
 @Explained(ignored = true, comment = "Turned into clauses")
-public class PropCompactTableNeg extends PropCompactTable {
+public final class PropCompactTableNeg extends PropCompactTable {
 
     //***********************************************************************************
     // CONSTRUCTOR
@@ -51,14 +51,14 @@ public class PropCompactTableNeg extends PropCompactTable {
     public void propagate(int vIdx, int mask) throws ContradictionException {
         currTable.clearMask();
         if (vars[vIdx].isInstantiated()) {
-            currTable.addToMask(supports[vIdx][vars[vIdx].getValue() - offset[vIdx]]);
+            currTable.addToMask(supports[vIdx].get(vars[vIdx].getValue() - offset[vIdx]));
         } else if (vars[vIdx].getDomainSize() > monitors[vIdx].sizeApproximation()) {
             monitors[vIdx].forEachRemVal(onValRem.set(vIdx));
             currTable.reverseMask();
         } else {
             int ub = vars[vIdx].getUB();
             for (int v = vars[vIdx].getLB(); v <= ub; v = vars[vIdx].nextValue(v)) {
-                currTable.addToMask(supports[vIdx][v - offset[vIdx]]);
+                currTable.addToMask(supports[vIdx].get(v - offset[vIdx]));
             }
         }
         currTable.intersectWithMask();
@@ -95,10 +95,10 @@ public class PropCompactTableNeg extends PropCompactTable {
         int domSize = vars[i].getDomainSize();
         long threshold = initThreshold / domSize;
         for (int v = vars[i].getLB(); v <= ub; v = vars[i].nextValue(v)) {
-            long nb1s = currTable.nb1s(supports[i][v - offset[i]]);
+            long nb1s = currTable.nb1s(supports[i].get(v - offset[i]));
             if (nb1s == threshold) {
                 vars[i].removeValue(v, this);
-                currTable.addToMask(supports[i][v - offset[i]]);
+                currTable.addToMask(supports[i].get(v - offset[i]));
                 domSize--;
                 threshold = initThreshold / domSize;
             }
@@ -111,10 +111,10 @@ public class PropCompactTableNeg extends PropCompactTable {
         int domSize = vars[i].getDomainSize();
         long threshold = initThreshold / domSize;
         for (int v = lb; v <= ub; v++) {
-            long nb1s = currTable.nb1s(supports[i][v - offset[i]]);
+            long nb1s = currTable.nb1s(supports[i].get(v - offset[i]));
             if (nb1s == threshold) {
                 lb++;
-                currTable.addToMask(supports[i][v - offset[i]]);
+                currTable.addToMask(supports[i].get(v - offset[i]));
                 domSize--;
                 threshold = initThreshold / domSize;
             } else {
@@ -123,10 +123,10 @@ public class PropCompactTableNeg extends PropCompactTable {
         }
         vars[i].updateLowerBound(lb, this);
         for (int v = ub; v >= lb; v--) {
-            long nb1s = currTable.nb1s(supports[i][v - offset[i]]);
+            long nb1s = currTable.nb1s(supports[i].get(v - offset[i]));
             if (nb1s == threshold) {
                 ub--;
-                currTable.addToMask(supports[i][v - offset[i]]);
+                currTable.addToMask(supports[i].get(v - offset[i]));
                 domSize--;
                 threshold = initThreshold / domSize;
             } else {
