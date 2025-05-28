@@ -79,17 +79,20 @@ public class UnArExpression implements ArExpression {
     @Override
     public IntVar intVar() {
         if (me == null) {
-            if(op == Operator.ABS && e instanceof BiArExpression && ((BiArExpression)e).getOp() == Operator.SUB){
+            if (op == Operator.ABS && e instanceof BiArExpression && ((BiArExpression) e).getOp() == Operator.SUB) {
                 BiArExpression be = (BiArExpression) e;
                 IntVar v1 = be.getExpressionChild()[0].intVar();
                 IntVar v2 = be.getExpressionChild()[1].intVar();
-                me = model.intVar(model.generateName("abs_exp_"), Math.min(v1.getLB(), v2.getLB()), Math.max(v1.getUB(), v2.getUB()));
+                int[] bounds = VariableUtils.boundsForSubstraction(v1, v2);
+                me = model.intVar(model.generateName("abs_exp_"),
+                        Math.max(bounds[0], 0),
+                        Math.max(Math.abs(bounds[0]), Math.abs(bounds[1])));
                 model.distance(v1, v2, "=", me).post();
                 return me;
             }
 
             IntVar v = e.intVar();
-            switch (op){
+            switch (op) {
                 case NEG:
                     me = model.neg(v);
                     break;
@@ -102,7 +105,7 @@ public class UnArExpression implements ArExpression {
                     model.square(me, v).post();
                     break;
                 default:
-                    throw new UnsupportedOperationException("Unary arithmetic expressions does not support "+op.name());
+                    throw new UnsupportedOperationException("Unary arithmetic expressions does not support " + op.name());
             }
         }
         return me;
