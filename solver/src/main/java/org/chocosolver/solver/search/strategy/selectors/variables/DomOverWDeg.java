@@ -13,7 +13,6 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.variables.IVariableMonitor;
-import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.tools.VariableUtils;
@@ -53,7 +52,7 @@ public class DomOverWDeg<V extends Variable>
      */
     final HashMap<Propagator<?>, Element> failCount = new HashMap<>();
 
-    private final BiFunction<Propagator<?>, double[], double[]> remapWeights =
+    protected final BiFunction<Propagator<?>, double[], double[]> remapWeights =
             (p, w) -> {
                 if (w == null) {
                     // if absent
@@ -195,16 +194,19 @@ public class DomOverWDeg<V extends Variable>
         int dk = prop.getVar(elt.ws[1]).instantiationWorldIndex();
         boolean futVar1 = Math.min(dj, dk) < s; // that is, futvars == 1 until we reach 'dk'
         for (int i = 0; i < prop.getNbVars(); i++) {
-            if (prop.getVar(i).isAConstant() || !VariableUtils.isInt(prop.getVar(i))) continue;
-            IntVar ivar = (IntVar) prop.getVar(i);
+            Variable ivar = prop.getVar(i);
+            if (ivar.isAConstant() || !VariableUtils.isInt(ivar)) continue;
+            // variables instanced in previous worlds are not incremented
+            if (ivar.instantiationWorldIndex() < s) continue;
+            final double inc = 1.;
             // recall that variable at 0 is the 'deepest' one
             if (i == elt.ws[0] && futVar1) {
                 // it should be restored upon backtrack
-                environment.saveAt(() -> weights.inc(ivar, 1), dk);
+                environment.saveAt(() -> weights.inc(ivar, inc), dk);
             } else {
-                weights.inc(ivar, 1.);
+                weights.inc(ivar, inc);
             }
-            ws[i] += 1;
+            ws[i] += inc;
         }
     }
 
@@ -266,9 +268,10 @@ public class DomOverWDeg<V extends Variable>
 
     /**
      * Update the watched literals of a propagator when a variable is instantiated
-     * @param p the propagator
+     *
+     * @param p   the propagator
      * @param elt the element associated with the propagator
-     * @param i the index of the watched variable to update
+     * @param i   the index of the watched variable to update
      */
     private void updateFutvars(Propagator<?> p, Element elt, int i) {
         assert (p.getVar(elt.ws[i]).isInstantiated());
@@ -287,16 +290,18 @@ public class DomOverWDeg<V extends Variable>
             if (!other.isInstantiated()) {
                 // 'var' is the last one not instantiated,
                 // so this counter will not be taken into account
-                double[] delta = {0.};
+                double delta;
                 double[] ws = refinedWeights.get(p);
                 if (elt.ws[k] < ws.length) {
                     // may happen propagators (like PropSat) with dynamic variable addition
-                    delta[0] = ws[elt.ws[k]];
+                    delta = ws[elt.ws[k]];
+                } else {
+                    delta = 0.;
                 }
-                weights.inc(other, -delta[0]);
+                weights.inc(other, -delta);
                 // but it should be restored upon backtrack
                 environment.save(() -> {
-                    double ww = weights.get(other) + delta[0];
+                    double ww = weights.get(other) + delta;
                     ww = Math.max(ww, 0.);
                     weights.set(other, ww);
                 });
@@ -305,31 +310,27 @@ public class DomOverWDeg<V extends Variable>
     }
 
     // <-- FOR DEBUGGING PURPOSE ONLY
-    /*double weightW(IntVar v) {
-        int w = 0;
-        int nbp = v.getNbProps();
-        for (int i = 0; i < nbp; i++) {
-            Propagator<?> prop = v.getPropagator(i);
+    /*double weightW(Variable v) {
+        final double[] w = {0};
             // BEWARE: propagators that accept to add dynamically variables led to trouble
-            // when it comes to compute their weight incrementally.
-            w += futvarsW(prop);
-        }
-        return w;
+        // when it comes to compute their weight incrementally.
+        v.streamPropagators().forEach(p -> w[0] += futvarsW(p, v));
+        return w[0];
     }
 
-    int futvarsW(Propagator<?> prop) {
+    double futvarsW(Propagator<?> prop, Variable v) {
         int futVars = 0;
         for (int i = 0; i < prop.getNbVars(); i++) {
             if (!prop.getVar(i).isInstantiated()) {
                 if (++futVars > 1) {
                     Element elt = failCount.get(prop);
                     if (elt != null) {
-                        return elt.ws[2];
+                        return elt.ws[2] * 1.;
                     } else break;
                 }
             }
         }
-        return 0;
+        return 0.;
     }*/
     // FOR DEBUGGING PURPOSE ONLY  -->
 }
