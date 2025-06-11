@@ -20,9 +20,11 @@ import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.decision.SetDecision;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.ArrayDeque;
 import java.util.Arrays;
@@ -136,6 +138,9 @@ public class NogoodFromRestarts implements IMonitorRestart {
     }
 
     private int asLit(IntVar var, DecisionOperator<IntVar> op, int val) {
+        if(VariableUtils.isBool(var)){
+            return asLit((BoolVar) var, op, val);
+        }
         int l;
         if (DecisionOperatorFactory.makeIntEq().equals(op)) {
             l = MiniSat.makeLiteral(png.makeIntEq(var, val), false);
@@ -147,6 +152,28 @@ public class NogoodFromRestarts implements IMonitorRestart {
         } else if (DecisionOperatorFactory.makeIntReverseSplit().equals(op)
                 || op instanceof ObjectiveStrategy.TopDownDecisionOperator) {
             l = MiniSat.makeLiteral(png.makeIntLe(var, val), true);
+        } else {
+            throw new UnsupportedOperationException("Cannot deal with such operator: " + op);
+        }
+        return l;
+    }
+
+    private int asLit(BoolVar var, DecisionOperator<IntVar> op, int val) {
+        int l;
+        if (DecisionOperatorFactory.makeIntEq().equals(op)) {
+            assert val == 0 || val == 1 : "Value must be either 0 or 1 for BoolVar";
+            l = MiniSat.makeLiteral(png.makeBool(var), val == 0);
+        } else if (DecisionOperatorFactory.makeIntNeq().equals(op)) {
+            assert val == 0 || val == 1 : "Value must be either 0 or 1 for BoolVar";
+            l = MiniSat.makeLiteral(png.makeBool(var), val == 1);
+        } else if (DecisionOperatorFactory.makeIntSplit().equals(op)
+                || op instanceof ObjectiveStrategy.BottomUpDecisionOperator) {
+            assert val == 0  : "Value must be 0";
+            l = MiniSat.makeLiteral(png.makeBool(var), true);
+        } else if (DecisionOperatorFactory.makeIntReverseSplit().equals(op)
+                || op instanceof ObjectiveStrategy.TopDownDecisionOperator) {
+            assert val == 1  : "Value must be 1";
+            l = MiniSat.makeLiteral(png.makeBool(var), false);
         } else {
             throw new UnsupportedOperationException("Cannot deal with such operator: " + op);
         }
