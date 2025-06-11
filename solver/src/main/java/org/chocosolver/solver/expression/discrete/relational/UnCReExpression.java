@@ -116,6 +116,11 @@ public class UnCReExpression implements ReExpression {
         e1.extractVar(variables);
     }
 
+    @Override
+    public ArExpression[] getExpressionChild() {
+        return new ArExpression[]{e1};
+    }
+
     private static ArExpression.Operator detectOperator(ArExpression e) {
         int nochild = e.getNoChild();
         if (nochild == 1) {

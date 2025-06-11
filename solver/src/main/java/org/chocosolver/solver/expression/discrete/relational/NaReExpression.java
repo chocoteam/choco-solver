@@ -141,6 +141,11 @@ public class NaReExpression implements ReExpression {
     }
 
     @Override
+    public ArExpression[] getExpressionChild() {
+        return Arrays.stream(es).toArray(ArExpression[]::new);
+    }
+
+    @Override
     public boolean beval(int[] values, Map<IntVar, Integer> map) {
         boolean eval;
         switch (op) {

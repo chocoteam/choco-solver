@@ -333,6 +333,17 @@ public interface ArExpression {
     }
 
     /**
+     * @return the maximum depth of this expression, ie the maximum number of nested expressions
+     */
+    default int maxDepth() {
+        int max = 0;
+        for (ArExpression e : getExpressionChild()) {
+            max = Math.max(max, e.maxDepth());
+        }
+        return max + 1;
+    }
+
+    /**
      * @param values int values to evaluate
      * @param map    mapping between variables of the topmost expression and position in <i>values</i>
      * @return an evaluation of this expression with a tuple
