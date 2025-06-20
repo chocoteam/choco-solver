@@ -14,7 +14,7 @@ import org.chocosolver.solver.variables.IntVar;
 import java.util.Random;
 
 /**
- * Selects randomly a value in the variable domain.
+ * Randomly selects a value in the variable domain.
  *
  * BEWARE: this should not be used within assignments and/or value removals if variables
  * have a bounded domain.
@@ -26,22 +26,44 @@ import java.util.Random;
 public class IntDomainRandom implements IntValueSelector {
 
 	private final Random rand;
+	private final boolean boundOnly;
 
+	/**
+	 * Creates a value selector that randomly selects a value in the variable domain.
+	 * </p>
+	 * By default, if the variable has a bounded domain,
+	 * only the lower or upper bound of the variable will be selected randomly.
+	 * @param seed the seed for the random number generator
+	 */
     public IntDomainRandom(long seed) {
-        this.rand = new Random(seed);
+        this(seed, false);
     }
+
+	/**
+	 * Creates a value selector that randomly selects a value in the variable domain.
+	 * @param seed the seed for the random number generator
+	 * @param boundOnly if true, only the lower or upper bound of the variable will be selected randomly
+	 */
+	public IntDomainRandom(long seed, boolean boundOnly) {
+	        this.rand = new Random(seed);
+			this.boundOnly = boundOnly;
+	    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     public int selectValue(IntVar var) {
-		int i = rand.nextInt(var.getDomainSize());
-		int value = var.getLB();
-		while (i > 0) {
-			value = var.nextValue(value);
-			i--;
-		}
-		return value;
+        if (boundOnly || !var.hasEnumeratedDomain()) {
+            return rand.nextBoolean() ? var.getLB() : var.getUB();
+        } else {
+            int i = rand.nextInt(var.getDomainSize());
+            int value = var.getLB();
+            while (i > 0) {
+                value = var.nextValue(value);
+                i--;
+            }
+            return value;
+        }
     }
 }

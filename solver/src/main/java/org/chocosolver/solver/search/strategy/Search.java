@@ -596,16 +596,7 @@ public class Search {
      * @return assignment strategy
      */
     public static IntStrategy randomSearch(IntVar[] vars, long seed) {
-        IntValueSelector value = new IntDomainRandom(seed);
-        IntValueSelector bound = new IntDomainRandomBound(seed);
-        IntValueSelector selector = var -> {
-            if (var.hasEnumeratedDomain()) {
-                return value.selectValue(var);
-            } else {
-                return bound.selectValue(var);
-            }
-        };
-        return intVarSearch(new Random<>(seed), selector, vars);
+        return intVarSearch(new Random<>(seed), new IntDomainRandom(seed), vars);
     }
 
     /**
