@@ -111,13 +111,29 @@ public class PropXeqYHalfReif extends Propagator<IntVar> {
                     break;
                 case 0b10:
                     if (!x.contains(y.getValue())) {
-                        b.setToFalse(this, lcg() ? Reason.r(y.getValLit(), x.getLit(y.getValue(), IntVar.LR_EQ)) : Reason.undef());
+                        if(x.hasEnumeratedDomain() && y.hasEnumeratedDomain()) {
+                            b.setToFalse(this, lcg() ? Reason.r(y.getValLit(), x.getLit(y.getValue(), IntVar.LR_EQ)) : Reason.undef());
+                        }else{
+                            if(x.getUB() < y.getValue()) {
+                                b.setToFalse(this, lcg() ? Reason.r(x.getMaxLit(), y.getValLit()) : Reason.undef());
+                            } else if (x.getLB() > y.getValue()) {
+                                b.setToFalse(this, lcg() ? Reason.r(x.getMinLit(), y.getValLit()) : Reason.undef());
+                            }
+                        }
                         setPassive();
                     }
                     break;
                 case 0b01:
                     if (!y.contains(x.getValue())) {
-                        b.setToFalse(this, lcg() ? Reason.r(x.getValLit(), y.getLit(x.getValue(), IntVar.LR_EQ)) : Reason.undef());
+                        if(x.hasEnumeratedDomain() && y.hasEnumeratedDomain()) {
+                            b.setToFalse(this, lcg() ? Reason.r(x.getValLit(), y.getLit(x.getValue(), IntVar.LR_EQ)) : Reason.undef());
+                        }else{
+                            if(y.getUB() < x.getValue()) {
+                                b.setToFalse(this, lcg() ? Reason.r(y.getMaxLit(), x.getValLit()) : Reason.undef());
+                            } else if (y.getLB() > x.getValue()) {
+                                b.setToFalse(this, lcg() ? Reason.r(y.getMinLit(), x.getValLit()) : Reason.undef());
+                            }
+                        }
                         setPassive();
                     }
                     break;

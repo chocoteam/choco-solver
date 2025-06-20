@@ -129,7 +129,7 @@ public class LazyClauseGeneration implements Learn {
                 mSolver.getMeasures().incBackjumpCount();
             }
             mSolver.setJumpTo(upto);
-        } // else  always restart on a solution, managed in Solver
+        } // else always restart on a solution, managed in Solver
     }
 
     private void extractFromVariables() {

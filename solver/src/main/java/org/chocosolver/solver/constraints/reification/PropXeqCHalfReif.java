@@ -60,7 +60,15 @@ public class PropXeqCHalfReif extends Propagator<IntVar> {
         }
         // if b is undefined and x does not contain c, b must be false
         else if (!x.contains(c)) {
-            b.setToFalse(this, lcg() ? Reason.r(x.getLit(c, IntVar.LR_EQ)) : Reason.undef());
+            if(x.hasEnumeratedDomain()) {
+                b.setToFalse(this, lcg() ? Reason.r(x.getLit(c, IntVar.LR_EQ)) : Reason.undef());
+            }else{
+                if(x.getUB() < c){
+                    b.setToFalse(this, lcg() ? Reason.r(x.getMaxLit()) : Reason.undef());
+                } else if (x.getLB() > c) {
+                    b.setToFalse(this, lcg() ? Reason.r(x.getMinLit()) : Reason.undef());
+                }
+            }
             setPassive();
         }
     }
