@@ -17,10 +17,7 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
 import org.chocosolver.solver.constraints.nary.flow.PropMinCostMaxFlow;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.Task;
+import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
 
@@ -527,7 +524,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
             //y.eq(x[i]).decompose().impliedBy(c[i].and(d[i]).boolVar());
             c[i].and(d[i]).imp(y.eq(x[i])).post();
         }/*/
-        int univ = Math.max(2, y.getUB() + 1);
+        int univ = Math.min(0, Stream.of(c).mapToInt(IntVar::getLB).min().orElse(0)) - 1;
         Tuples tuples = new Tuples(univ);
         int[] t = new int[c.length + 1];
         Arrays.fill(t, 0);
