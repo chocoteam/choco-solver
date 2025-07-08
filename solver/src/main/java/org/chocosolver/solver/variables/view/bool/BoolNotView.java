@@ -96,6 +96,7 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
     @Override
     public boolean instantiateTo(int value, ICause cause, Reason reason) throws ContradictionException {
         if (!isInstantiatedTo(value)) {
+            reason = cause.manageReification().apply(reason); // to deal with reification of the earliest cause
             boolean done = var.instantiateTo(1 - value, this, reason);
             notifyPropagators(IntEventType.INSTANTIATE, cause);
             return done;
