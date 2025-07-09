@@ -70,6 +70,11 @@ delmsc:
 	@rm ~/.minizinc/solvers/choco-$(VERSION).msc
 
 docker: compet
+	# add an image with LCG support
+	@sed -i '' 's|python3.*|python3 "$$(dirname "$$0")/fzn-choco.py" "$$@" "-lcg"|' parsers/src/main/minizinc/fzn-choco.sh
+	@docker build -f $(ROOT_DIR)/parsers/src/main/minizinc/docker/Dockerfile.dms -t chocoteam/choco-solver-mzn:$(CURRENT_VERSION)-X $(ROOT_DIR)
+	# add an image without LCG support
+	@sed -i '' 's|python3.*|python3 "$$(dirname "$$0")/fzn-choco.py" "$$@"|' parsers/src/main/minizinc/fzn-choco.sh
 	@docker build -f $(ROOT_DIR)/parsers/src/main/minizinc/docker/Dockerfile.dms -t chocoteam/choco-solver-mzn:$(CURRENT_VERSION) $(ROOT_DIR)
 
 antlr:
