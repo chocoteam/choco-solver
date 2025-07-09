@@ -276,7 +276,8 @@ public interface IDecompositionFactory extends ISelf<Model> {
         IntVar rv = ref().intView(1, rowIndex, -rowOffset);
         IntVar cv = ref().intView(1, colIndex, -colOffset);
         IntVar idx = ref().intVar(0, d0 * d1 - 1);
-        ref().scalar(new IntVar[]{rv, cv}, new int[]{d1, 1}, "=", idx).post();
+        ref().table(new IntVar[]{rv, cv, idx},
+                TuplesFactory.scalar(new IntVar[]{rv, cv}, new int[]{d1, 1}, idx, 1)).post();
         // flatten the array
         int[] mvars = ArrayUtils.flatten(matrix);
         // post the element constraint
