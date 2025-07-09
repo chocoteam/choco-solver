@@ -235,6 +235,31 @@ public interface IDecompositionFactory extends ISelf<Model> {
 
 
     /**
+     * Creates a decomposition of the disjunctive constraint.
+     * This constraint ensures that no two tasks overlap.
+     * <p>
+     * If a task is optional, it can be performed with a duration of 0 and the other mandatory tasks can overlap it.
+     * Otherwise, the task must be performed and cannot be overlapped by any other task even if it has a duration of 0.
+     *
+     * @param tasks array of tasks
+     */
+    default void disjunctiveDec(Task[] tasks, boolean strict) {
+        // all durations must be positive or zero
+        for (int i = 0; i < tasks.length; i++) {
+            tasks[i].getDuration().ge(0).post();
+            BoolVar di0 = strict ? ref().boolVar(false) : ref().isEq(tasks[i].getDuration(), 0);
+            for (int j = i + 1; j < tasks.length; j++) {
+                BoolVar dj0 = strict ? ref().boolVar(false) : ref().isEq(tasks[j].getDuration(), 0);
+                BoolVar ibeforej = ref().scalar(new IntVar[]{tasks[i].getStart(), tasks[i].getDuration(), tasks[j].getStart()},
+                        new int[]{1, 1, -1}, "<=", 0).reify();
+                BoolVar jbeforei = ref().scalar(new IntVar[]{tasks[j].getStart(), tasks[j].getDuration(), tasks[i].getStart()},
+                        new int[]{1, 1, -1}, "<=", 0).reify();
+                ref().addClauses(new BoolVar[]{di0, dj0, ibeforej, jbeforei}, new BoolVar[]{});
+            }
+        }
+    }
+
+    /**
      * Creates an element constraint: value = matrix[rowIndex-offset][colIndex-colOffset]
      *
      * @param value     an integer variable taking its value in matrix
