@@ -95,8 +95,8 @@ public abstract class RegParser implements IParser {
 
     @Option(name = "-flush",
             forbids = {"-varsel"},
-            usage = "Autoflush weights on black-box strategies (default: 32).")
-    protected int flushRate = 32;
+            usage = "Autoflush weights on black-box strategies (default: 20).")
+    protected int flushRate = 20;
 
     @Option(name = "-varsel",
             handler = VarSelHandler.class,
@@ -166,7 +166,7 @@ public abstract class RegParser implements IParser {
     protected int nb_cores = 1;
 
     @Option(name = "-seed", usage = "Set the seed for random number generator. ")
-    protected long seed = 0L;
+    protected long seed = 1_000_000_007L;
 
     @Option(name = "--cp-profiler", usage = "Connect to CP-Profiler. Two comma-separated values are expected: the execution id and the port.")
     public String cpProfiler = null;
