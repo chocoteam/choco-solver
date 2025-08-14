@@ -306,6 +306,9 @@ public class BlackBoxConfigurator {
         }
         AbstractStrategy<?> main = Search.sequencer(strats.toArray(new AbstractStrategy[0]));
         solver.addRestarter(restartPolicy.apply(solver));
+        if(restartOnSolution){
+            solver.setRestartOnSolutions();
+        }
         if (nogoodOnRestart) {
             solver.setNoGoodRecordingFromRestarts();
         }
