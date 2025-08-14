@@ -84,6 +84,7 @@ public class PropDivXYZLight extends Propagator<IntVar> {
      */
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+        Y.removeValue(0, this, Reason.undef());
         boolean hasChanged;
         do {
             int x_min = X.getLB();
@@ -131,7 +132,7 @@ public class PropDivXYZLight extends Propagator<IntVar> {
         }
         // check tuple
         if (isCompletelyInstantiated()) {
-            return ESat.eval(X.getValue() / Y.getValue() == Z.getValue());
+            return ESat.eval(Math.ceil(X.getValue() * 1. / Y.getValue()) == Z.getValue());
         }
         // X=0 => Z=0
         if (X.isInstantiatedTo(0) && !Z.contains(0)) {
