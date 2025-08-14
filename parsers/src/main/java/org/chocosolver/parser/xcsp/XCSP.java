@@ -14,7 +14,6 @@ import org.chocosolver.parser.RegParser;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.restart.InnerOuterCutoff;
 import org.chocosolver.solver.search.restart.Restarter;
 import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
@@ -142,8 +141,8 @@ public class XCSP extends RegParser {
         bb.setIntVarStrategy(Search::roundRobinSearch)
                 .setRestartPolicy(s -> new Restarter(new InnerOuterCutoff(50, 1.01, 1.01),
                         c -> s.getFailCount() >= c, 50_000, true))
-                .setNogoodOnRestart(true)
-                .setRestartOnSolution(false)
+                .setNogoodOnRestart(!lcg)
+                .setRestartOnSolution(lcg)
                 .setRefinedPartialAssignmentGeneration(false)
                 .setExcludeObjective(true)
                 .setExcludeViews(false);
