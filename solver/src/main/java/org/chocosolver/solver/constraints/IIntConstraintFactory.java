@@ -229,7 +229,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 return arithm(var1, "=", var2.getValue());
             }
         } else if (var1.isInstantiated()) {
-            return member(var2, new int[]{-var1.getValue(), var1.getValue()});
+            if (var1.getValue() == 0) {
+                var2.eq(0).post();
+            } else if (var1.getValue() > 0) {
+                return member(var2, new int[]{-var1.getValue(), var1.getValue()});
+            } else {
+                return ref().falseConstraint();
+            }
         }
         return new Constraint(ConstraintsName.ABSOLUTE,
                 ref().getSolver().isLCG() ?
