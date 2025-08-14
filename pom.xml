@@ -426,6 +426,32 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>2.6.0</version>
+                <executions>
+                    <!-- Generates the third-party licenses file -->
+                    <execution>
+                        <id>aggregate-third-party</id>
+                        <goals>
+                            <goal>aggregate-add-third-party</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <!-- Where to generate the file -->
+                            <outputDirectory>${project.build.outputDirectory}/META-INF</outputDirectory>
+                            <!-- Text or HTML format -->
+                            <thirdPartyFilename>THIRD-PARTY-LICENSES.txt</thirdPartyFilename>
+                            <licenseMerges>
+                                <licenseMerge>The BSD licence|BSD License|BSD</licenseMerge>
+                                <licenseMerge>The Apache Software License, Version 2.0|Apache License, Version 2.0
+                                </licenseMerge>
+                            </licenseMerges>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
                 <version>3.2.1</version>
