@@ -44,6 +44,8 @@ import org.chocosolver.solver.constraints.nary.channeling.PropInverseChannelBC;
 import org.chocosolver.solver.constraints.nary.circuit.*;
 import org.chocosolver.solver.constraints.nary.count.PropCountVar;
 import org.chocosolver.solver.constraints.nary.count.PropCount_AC;
+import org.chocosolver.solver.constraints.nary.cumulative.CumulFilter;
+import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
 import org.chocosolver.solver.constraints.nary.element.PropElementV_fast;
 import org.chocosolver.solver.constraints.nary.globalcardinality.GlobalCardinality;
 import org.chocosolver.solver.constraints.nary.knapsack.PropKnapsack;
@@ -1505,143 +1507,143 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         }
     }
 
-//    /**
-//     * Creates a cumulative constraint: Enforces that at each point in time,
-//     * the cumulated height of the set of tasks that overlap that point
-//     * does not exceed a given limit.
-//     * <p>
-//     * Task duration and height should be >= 0
-//     * Discards tasks whose duration or height is equal to zero
-//     *
-//     * @param tasks    Task objects containing start, duration and end variables
-//     * @param heights  integer variables representing the resource consumption of each task
-//     * @param capacity integer variable representing the resource capacity
-//     * @return a cumulative constraint
-//     */
-//    default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity) {
-//        return cumulative(tasks, heights, capacity, true);
-//    }
-//
-//    /**
-//     * Creates a cumulative constraint: Enforces that at each point in time,
-//     * the cumulated height of the set of tasks that overlap that point
-//     * does not exceed a given limit.
-//     * <p>
-//     * Task duration and height should be >= 0
-//     * Discards tasks whose duration or height is equal to zero
-//     *
-//     * @param tasks       Task objects containing start, duration and end variables
-//     * @param heights     integer variables representing the resource consumption of each task
-//     * @param capacity    integer variable representing the resource capacity
-//     * @param incremental specifies if an incremental propagation should be applied
-//     * @return a cumulative constraint
-//     */
-//    default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean incremental) {
-//        return cumulative(tasks, heights, capacity, incremental, Cumulative.Filter.DEFAULT.make(tasks.length));
-//    }
-//
-//    /**
-//     * Creates a cumulative constraint: Enforces that at each point in time,
-//     * the cumulated height of the set of tasks that overlap that point
-//     * does not exceed a given limit.
-//     * <p>
-//     * Task duration and height should be >= 0
-//     * Discards tasks whose duration or height is equal to zero
-//     *
-//     * @param tasks       Task objects containing start, duration and end variables
-//     * @param heights     integer variables representing the resource consumption of each task
-//     * @param capacity    integer variable representing the resource capacity
-//     * @param incremental specifies if an incremental propagation should be applied
-//     * @param filters     specifies which filtering algorithms to apply
-//     * @return a cumulative constraint
-//     */
-//    default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean incremental, Cumulative.Filter... filters) {
-//        return cumulative(tasks, heights, capacity, incremental, Arrays.stream(filters).map(f -> f.make(tasks.length)).toArray(CumulFilter[]::new));
-//    }
-//
-//    /**
-//     * Creates a cumulative constraint: Enforces that at each point in time,
-//     * the cumulated height of the set of tasks that overlap that point
-//     * does not exceed a given limit.
-//     * <p>
-//     * Task duration and height should be >= 0
-//     * Discards tasks whose duration or height is equal to zero
-//     *
-//     * @param tasks       Task objects containing start, duration and end variables
-//     * @param heights     integer variables representing the resource consumption of each task
-//     * @param capacity    integer variable representing the resource capacity
-//     * @param incremental specifies if an incremental propagation should be applied
-//     * @param filters     specifies which filtering algorithms to apply
-//     * @return a cumulative constraint
-//     */
-//    default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean incremental, CumulFilter... filters) {
-//        if (ref().getSolver().isLCG()) {
-//            if (ref().getSettings().warnUser()) {
-//                ref().getSolver().log().white().println(
-//                        "Warning: cumulative constraint is decomposed (due to LCG).");
-//            }
-//            ref().cumulativeDec(tasks, heights, capacity);
-//            return ref().voidConstraint();
-//        }
-//        if (tasks.length != heights.length) {
-//            throw new SolverException("Tasks and heights arrays should have same size");
-//        }
-//        int nbUseFull = 0;
-//        for (int h = 0; h < heights.length; h++) {
-//            if (heights[h].getUB() > 0 && tasks[h].getDuration().getUB() > 0) {
-//                nbUseFull++;
-//            }
-//        }
-//        // remove tasks that have no impact on resource consumption
-//        if (nbUseFull < tasks.length) {
-//            if (nbUseFull == 0) return arithm(capacity, ">=", 0);
-//            Task[] T2 = new Task[nbUseFull];
-//            IntVar[] H2 = new IntVar[nbUseFull];
-//            int idx = 0;
-//            for (int h = 0; h < heights.length; h++) {
-//                if (heights[h].getUB() > 0 && tasks[h].getDuration().getUB() > 0) {
-//                    T2[idx] = tasks[h];
-//                    H2[idx] = heights[h];
-//                    idx++;
-//                }
-//            }
-//            tasks = T2;
-//            heights = H2;
-//        }
-//        return new Cumulative(tasks, heights, capacity, incremental, filters);
-//    }
-//
-//    /**
-//     * Creates and <b>posts</b> a decomposition of a cumulative constraint:
-//     * Enforces that at each point in time,
-//     * the cumulated height of the set of tasks that overlap that point
-//     * does not exceed a given limit.
-//     * <p>
-//     * Task duration and height should be >= 0
-//     * Discards tasks whose duration or height is equal to zero
-//     *
-//     * @param starts    starting time of each task
-//     * @param durations processing time of each task
-//     * @param heights   resource consumption of each task
-//     * @param capacity  resource capacity
-//     */
-//    default Constraint cumulative(IntVar[] starts, int[] durations, int[] heights, int capacity) {
-//        int n = starts.length;
-//        final IntVar[] d = new IntVar[n];
-//        final IntVar[] h = new IntVar[n];
-//        final IntVar[] e = new IntVar[n];
-//        Task[] tasks = new Task[n];
-//        for (int i = 0; i < n; i++) {
-//            d[i] = ref().intVar(durations[i]);
-//            h[i] = ref().intVar(heights[i]);
-//            e[i] = ref().intVar(starts[i].getName() + "_e",
-//                    starts[i].getLB() + durations[i],
-//                    starts[i].getUB() + durations[i],
-//                    true);
-//            tasks[i] = new Task(starts[i], d[i], e[i]);
-//        }
-//        return ref().cumulative(tasks, h, ref().intVar(capacity), false, Cumulative.Filter.NAIVETIME);
-//    }
+    /**
+     * Creates a cumulative constraint: Enforces that at each point in time,
+     * the cumulated height of the set of tasks that overlap that point
+     * does not exceed a given limit.
+     * <p>
+     * Task duration and height should be >= 0
+     * Discards tasks whose duration or height is equal to zero
+     *
+     * @param tasks    Task objects containing start, duration and end variables
+     * @param heights  integer variables representing the resource consumption of each task
+     * @param capacity integer variable representing the resource capacity
+     * @return a cumulative constraint
+     */
+    default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity) {
+        return cumulative(tasks, heights, capacity, true);
+    }
+
+    /**
+     * Creates a cumulative constraint: Enforces that at each point in time,
+     * the cumulated height of the set of tasks that overlap that point
+     * does not exceed a given limit.
+     * <p>
+     * Task duration and height should be >= 0
+     * Discards tasks whose duration or height is equal to zero
+     *
+     * @param tasks       Task objects containing start, duration and end variables
+     * @param heights     integer variables representing the resource consumption of each task
+     * @param capacity    integer variable representing the resource capacity
+     * @param incremental specifies if an incremental propagation should be applied
+     * @return a cumulative constraint
+     */
+    default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean incremental) {
+        return cumulative(tasks, heights, capacity, incremental, Cumulative.Filter.DEFAULT.make(tasks.length));
+    }
+
+    /**
+     * Creates a cumulative constraint: Enforces that at each point in time,
+     * the cumulated height of the set of tasks that overlap that point
+     * does not exceed a given limit.
+     * <p>
+     * Task duration and height should be >= 0
+     * Discards tasks whose duration or height is equal to zero
+     *
+     * @param tasks       Task objects containing start, duration and end variables
+     * @param heights     integer variables representing the resource consumption of each task
+     * @param capacity    integer variable representing the resource capacity
+     * @param incremental specifies if an incremental propagation should be applied
+     * @param filters     specifies which filtering algorithms to apply
+     * @return a cumulative constraint
+     */
+    default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean incremental, Cumulative.Filter... filters) {
+        return cumulative(tasks, heights, capacity, incremental, Arrays.stream(filters).map(f -> f.make(tasks.length)).toArray(CumulFilter[]::new));
+    }
+
+    /**
+     * Creates a cumulative constraint: Enforces that at each point in time,
+     * the cumulated height of the set of tasks that overlap that point
+     * does not exceed a given limit.
+     * <p>
+     * Task duration and height should be >= 0
+     * Discards tasks whose duration or height is equal to zero
+     *
+     * @param tasks       Task objects containing start, duration and end variables
+     * @param heights     integer variables representing the resource consumption of each task
+     * @param capacity    integer variable representing the resource capacity
+     * @param incremental specifies if an incremental propagation should be applied
+     * @param filters     specifies which filtering algorithms to apply
+     * @return a cumulative constraint
+     */
+    default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean incremental, CumulFilter... filters) {
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: cumulative constraint is decomposed (due to LCG).");
+            }
+            ref().cumulativeDec(tasks, heights, capacity);
+            return ref().voidConstraint();
+        }
+        if (tasks.length != heights.length) {
+            throw new SolverException("Tasks and heights arrays should have same size");
+        }
+        int nbUseFull = 0;
+        for (int h = 0; h < heights.length; h++) {
+            if (heights[h].getUB() > 0 && tasks[h].getDuration().getUB() > 0) {
+                nbUseFull++;
+            }
+        }
+        // remove tasks that have no impact on resource consumption
+        if (nbUseFull < tasks.length) {
+            if (nbUseFull == 0) return arithm(capacity, ">=", 0);
+            Task[] T2 = new Task[nbUseFull];
+            IntVar[] H2 = new IntVar[nbUseFull];
+            int idx = 0;
+            for (int h = 0; h < heights.length; h++) {
+                if (heights[h].getUB() > 0 && tasks[h].getDuration().getUB() > 0) {
+                    T2[idx] = tasks[h];
+                    H2[idx] = heights[h];
+                    idx++;
+                }
+            }
+            tasks = T2;
+            heights = H2;
+        }
+        return new Cumulative(tasks, heights, capacity, incremental, filters);
+    }
+
+    /**
+     * Creates and <b>posts</b> a decomposition of a cumulative constraint:
+     * Enforces that at each point in time,
+     * the cumulated height of the set of tasks that overlap that point
+     * does not exceed a given limit.
+     * <p>
+     * Task duration and height should be >= 0
+     * Discards tasks whose duration or height is equal to zero
+     *
+     * @param starts    starting time of each task
+     * @param durations processing time of each task
+     * @param heights   resource consumption of each task
+     * @param capacity  resource capacity
+     */
+    default Constraint cumulative(IntVar[] starts, int[] durations, int[] heights, int capacity) {
+        int n = starts.length;
+        final IntVar[] d = new IntVar[n];
+        final IntVar[] h = new IntVar[n];
+        final IntVar[] e = new IntVar[n];
+        Task[] tasks = new Task[n];
+        for (int i = 0; i < n; i++) {
+            d[i] = ref().intVar(durations[i]);
+            h[i] = ref().intVar(heights[i]);
+            e[i] = ref().intVar(starts[i].getName() + "_e",
+                    starts[i].getLB() + durations[i],
+                    starts[i].getUB() + durations[i],
+                    true);
+            tasks[i] = new Task(starts[i], d[i], e[i]);
+        }
+        return ref().cumulative(tasks, h, ref().intVar(capacity), false, Cumulative.Filter.NAIVETIME);
+    }
 
     /**
      * <p>

@@ -85,7 +85,7 @@ public class BlackBoxTest {
         Assert.assertEquals(solver.getSolutionCount(), 724);
     }
 
-    @Test(groups = "1s", dataProvider = "strategies")
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "strategies")
     public void testBios(Function<IntVar[], AbstractStrategy<IntVar>> strat) {
         int n = 2;
         Model model = new Model("all different");
@@ -111,7 +111,7 @@ public class BlackBoxTest {
     }
 
 
-    @Test(groups = "1s", dataProvider = "setstrategies")
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "setstrategies")
     public void testSet(Function<SetVar[], AbstractStrategy<SetVar>> strat) {
         Model model = ProblemMaker.makeSteiner(7);
         SetVar[] vars = model.retrieveSetVars();
