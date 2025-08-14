@@ -276,6 +276,9 @@ public class XCSP extends RegParser {
             try {
                 output.insert(0, "s SATISFIABLE\n");
                 new SolutionChecker(true, instance, new ByteArrayInputStream(output.toString().getBytes()));
+//                new SolutionChecker(instance, new ByteArrayInputStream(output.toString().getBytes()),
+//                        solver.getObjectiveManager().isOptimization() ? solver.getObjectiveManager().getBestSolutionValue().longValue() : null,
+//                        null, true);
             } catch (Exception e) {
                 throw new RuntimeException("wrong solution found twice");
             }
@@ -341,6 +344,9 @@ public class XCSP extends RegParser {
         if (cs) {
             try {
                 new SolutionChecker(true, instance, new ByteArrayInputStream(output.toString().getBytes()));
+//                new SolutionChecker(instance, new ByteArrayInputStream(output.toString().getBytes()),
+//                                        solver.getObjectiveManager().isOptimization() ? solver.getObjectiveManager().getBestSolutionValue().longValue() : null,
+//                                        null, true);
             } catch (Exception e) {
                 e.printStackTrace();
             }
