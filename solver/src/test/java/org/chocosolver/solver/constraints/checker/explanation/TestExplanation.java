@@ -29,10 +29,7 @@ import org.chocosolver.solver.constraints.nary.lex.PropLex;
 import org.chocosolver.solver.constraints.nary.min_max.PropMax;
 import org.chocosolver.solver.constraints.nary.min_max.PropMin;
 import org.chocosolver.solver.constraints.nary.sum.*;
-import org.chocosolver.solver.constraints.reification.PropXeqYHalfReif;
-import org.chocosolver.solver.constraints.reification.PropXinSHalfReif;
-import org.chocosolver.solver.constraints.reification.PropXleYHalfReif;
-import org.chocosolver.solver.constraints.reification.PropXneYHalfReif;
+import org.chocosolver.solver.constraints.reification.*;
 import org.chocosolver.solver.constraints.ternary.*;
 import org.chocosolver.solver.constraints.unary.*;
 import org.chocosolver.solver.search.SearchState;
@@ -42,7 +39,6 @@ import org.chocosolver.solver.search.strategy.strategy.FullyRandom;
 import org.chocosolver.solver.trace.IMessage;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.VariableUtils;
@@ -137,6 +133,8 @@ public class TestExplanation {
                 {PropInverseChannelBC.class, new Class[]{IntVar[].class, IntVar[].class, int.class, int.class}, new Object[]{6, 6, 1, 1}},
                 {PropInverseChannelAC.class, new Class[]{IntVar[].class, IntVar[].class, int.class, int.class}, new Object[]{6, 6, 1, 1}},
                 {PropIntValuePrecedeChain.class, new Class[]{IntVar[].class, int.class, int.class}, new Object[]{6, 1, 3}},
+                {PropXeqCHalfReif.class, new Class[]{IntVar.class, int.class, BoolVar.class}, new Object[]{null, null, null}},
+                {PropAbsoluteLight.class, new Class[]{IntVar.class, IntVar.class}, new Object[]{null}},
                 //{PropCardinality.class, new Class[]{SetVar.class, IntVar.class}, new Object[]{null, null}}
         };
         return Providers.merge(objs, getSeeds());
@@ -146,6 +144,7 @@ public class TestExplanation {
     public Object[][] getConstraints() {
         Object[][] objs = new Object[][]{
                 {"allDifferent", new Class[]{IntVar[].class}, new Object[]{6}},
+                {"allDifferentExcept0", new Class[]{IntVar[].class}, new Object[]{6}},
                 {"allEqual", new Class[]{IntVar[].class}, new Object[]{6}},
                 {"allEqual", new Class[]{IntVar[].class}, new Object[]{6}},
                 {"among", new Class[]{IntVar.class, IntVar[].class, int[].class}, new Object[]{null, 6, 6}},
