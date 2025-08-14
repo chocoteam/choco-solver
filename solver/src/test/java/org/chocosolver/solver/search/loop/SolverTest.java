@@ -29,6 +29,7 @@ import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ProblemMaker;
+import org.chocosolver.util.tools.PreProcessing;
 import org.chocosolver.util.tools.VariableUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -443,8 +444,11 @@ public class SolverTest {
         long before = VariableUtils.domainCardinality(model.retrieveIntVars(true));
         Assert.assertEquals(before, 256);
         solver.propagate();
-        solver.preprocessing(2000);
+        PreProcessing.sac(model, -1);
         long after = VariableUtils.domainCardinality(model.retrieveIntVars(true));
-        Assert.assertEquals(after,32);
+        Assert.assertEquals(after,16);
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 2);
+        Assert.assertEquals(solver.getFailCount(), 0);
     }
 }

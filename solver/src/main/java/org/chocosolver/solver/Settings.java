@@ -49,8 +49,6 @@ public class Settings {
 
     private int maxTupleSizeForSubstitution = 10_000;
 
-    private int timeLimitForPreprocessing = -1;
-
     private boolean sortPropagatorActivationWRTPriority = true;
 
     private int maxPropagatorPriority = PropagatorPriority.VERY_SLOW.getValue();
@@ -305,28 +303,6 @@ public class Settings {
         this.maxTupleSizeForSubstitution = maxTupleSizeForSubstitution;
         return this;
     }
-
-    /**
-     * @return the time allocated for the preprocessing
-     */
-    public long getTimeLimitForPreprocessing() {
-        return timeLimitForPreprocessing;
-    }
-
-    /**
-     * Set the time allocated for the preprocessing step.
-     * If the time limit is reached, the preprocessing is stopped and the resolution starts.
-     * Set a negative value to disable the time limit.
-     *
-     * @param timeLimitForPreprocessing time limit for Strong Arc Consistency (in milliseconds)
-     * @return the current instance
-     * @see org.chocosolver.solver.Solver#preprocessing(long)
-     */
-    public Settings setTimeLimitForPreprocessing(int timeLimitForPreprocessing) {
-        this.timeLimitForPreprocessing = timeLimitForPreprocessing;
-        return this;
-    }
-
 
     /**
      * @return {@code true} if propagators are sorted wrt their priority on initial activation.
