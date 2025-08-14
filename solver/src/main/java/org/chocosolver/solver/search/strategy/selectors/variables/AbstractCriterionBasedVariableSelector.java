@@ -18,9 +18,6 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.objects.IdentityToDouble;
 
-import java.util.HashSet;
-import java.util.List;
-
 /**
  * <p>
  * Project: choco.
@@ -32,12 +29,7 @@ public abstract class AbstractCriterionBasedVariableSelector<V extends Variable>
         IMonitorContradiction, IMonitorRestart {
 
     // TO MANAGE FLUSHING
-    protected static final int FLUSH_TOPS = 20;
-    protected static final double FLUSH_RATIO = .9 * FLUSH_TOPS;
-    protected int flushThs;
-    protected final HashSet<Integer> tops = new HashSet<>();
-    protected int loop = 0;
-
+    protected long flushThs;
     /**
      * Randomness to break ties
      */
@@ -65,19 +57,24 @@ public abstract class AbstractCriterionBasedVariableSelector<V extends Variable>
 
     /**
      * Create a variable selector based on a criterion
-     * @param vars decision variables
-     * @param seed seed for breaking ties randomly, if set to -1, ties are broken by the variable position
-     * @param flush flush threshold, when reached, it flushes scores
+     *
+     * @param vars  decision variables
+     * @param seed  seed for breaking ties randomly, if set to -1, ties are broken by the variable position
+     * @param flush flush-threshold. Counts the number of restarts, and flushes the weights if it exceeds this value.
      */
     public AbstractCriterionBasedVariableSelector(V[] vars, long seed, int flush) {
         this.random = seed > -1 ? new java.util.Random(seed) : null;
         this.solver = vars[0].getModel().getSolver();
         this.environment = vars[0].getModel().getEnvironment();
         this.last = environment.makeInt(vars.length - 1);
-        this.flushThs = flush;
         this.weights = new IdentityToDouble<>();
+        flushThs = flush;
     }
 
+    /**
+     * @implNote
+     * Seems to be a bad idea to aggregate the weights of the views
+     */
     @Override
     public final V getVariable(V[] vars) {
         V best = null;
@@ -88,7 +85,6 @@ public abstract class AbstractCriterionBasedVariableSelector<V extends Variable>
             int domSize = vars[idx].getDomainSize();
             if (domSize > 1) {
                 double weight = weight(vars[idx]) / domSize;
-                //System.out.printf("%3f%n", weight);
                 if (w < weight) {
                     bests.resetQuick();
                     bests.add(idx);
@@ -108,7 +104,7 @@ public abstract class AbstractCriterionBasedVariableSelector<V extends Variable>
         last.set(to);
         if (!bests.isEmpty()) {
             //System.out.printf("%s%n", bests);
-            int currentVar = 0;
+            int currentVar = bests.get(0);
 
             if (random != null) {
                 currentVar = bests.get(random.nextInt(bests.size()));
@@ -130,22 +126,12 @@ public abstract class AbstractCriterionBasedVariableSelector<V extends Variable>
      *
      * @return <i>true</i> if the weights should be flushed
      */
-    protected boolean flushWeights() {
-        List<Integer> temp = weights.getTop(FLUSH_TOPS);
-        long cnt = temp.stream().filter(tops::contains).count();
-        if (cnt >= FLUSH_RATIO) {
-            loop++;
-        } else {
-            loop = 0;
-        }
-        tops.clear();
-        if (loop == flushThs) {
-            loop = 0;
+    protected boolean flushWeights() {if (solver.getRestartCount() >= flushThs) {
+            flushThs = solver.getRestartCount();
+            flushThs += 20;
             return true;
-        } else {
-            tops.addAll(temp);
-            return false;
         }
+        return false;
     }
 
 }

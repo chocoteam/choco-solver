@@ -95,7 +95,7 @@ public class DomOverWDeg<V extends Variable>
      * @param seed      seed for breaking ties randomly
      */
     public DomOverWDeg(V[] variables, long seed) {
-        this(variables, seed, Integer.MAX_VALUE);
+        this(variables, seed, 20);
     }
 
     /**
