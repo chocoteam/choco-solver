@@ -9,15 +9,12 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Providers;
-import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
+import org.chocosolver.solver.*;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -29,7 +26,7 @@ import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 /**
  * Tests the various filtering algorithms of the cumulative constraint
  *
- * @author Thierry Petit, Jean-Guillaume Fages
+ * @author Thierry Petit, Jean-Guillaume Fages, Arthur GODET <arth.godet@gmail.com>
  */
 public class CumulativeTest {
 
@@ -66,7 +63,7 @@ public class CumulativeTest {
                 m.intVar(8, 14)
         );
 
-        m.cumulative(new Task[]{t1, t2}, new IntVar[]{m.intVar(1), m.intVar(1)}, m.intVar(1), true, Cumulative.Filter.TIME.make(2)).post();
+        m.cumulative(new Task[]{t1, t2}, new IntVar[]{m.intVar(1), m.intVar(1)}, m.intVar(1)).post();
 
         Solver s = m.getSolver();
 
@@ -132,30 +129,13 @@ public class CumulativeTest {
     }
 
     public void test(int n, int capamax, int dmin, int hmax, long seed, int mode) {
-        if (VERBOSE)
+        if (VERBOSE) {
             System.out.println(n + " - " + capamax + " - " + dmin + " - " + hmax + " - " + seed + " - " + mode);
-        Cumulative.Filter[][] filters = new Cumulative.Filter[][]{
-                {Cumulative.Filter.TIME},
-                {Cumulative.Filter.TIME, Cumulative.Filter.NRJ},
-                {Cumulative.Filter.HEIGHTS, Cumulative.Filter.SWEEP},
-                {Cumulative.Filter.HEIGHTS, Cumulative.Filter.SWEEP_HEI_SORT},
-                {Cumulative.Filter.HEIGHTS, Cumulative.Filter.SWEEP, Cumulative.Filter.NRJ},
-                {Cumulative.Filter.HEIGHTS, Cumulative.Filter.SWEEP_HEI_SORT, Cumulative.Filter.NRJ},
-                {Cumulative.Filter.TIME, Cumulative.Filter.HEIGHTS, Cumulative.Filter.SWEEP, Cumulative.Filter.NRJ},
-                {Cumulative.Filter.TIME, Cumulative.Filter.HEIGHTS, Cumulative.Filter.SWEEP_HEI_SORT, Cumulative.Filter.NRJ},
-                {Cumulative.Filter.TIME, Cumulative.Filter.HEIGHTS, Cumulative.Filter.SWEEP, Cumulative.Filter.SWEEP_HEI_SORT, Cumulative.Filter.NRJ}
-        };
-        long ref = solve(n, capamax, dmin, hmax, seed, true, mode);
-        if (ref == -1) return;
-        for (boolean g : new boolean[]{true, false})    // graph-based
-            for (int f = 1; f < filters.length; f++) {
-                long val = solve(n, capamax, dmin, hmax, seed, g, mode);
-                assert ref == val || val == -1 : "filter " + f + " failed (can be due to the heuristic in case of timeout)";
-            }
+        }
+        long ref = solve(n, capamax, dmin, hmax, seed, mode);
     }
 
-    public static long solve(int n, int capamax, int dmin, int hmax, long seed,
-                             boolean graph, int mode) {
+    public static long solve(int n, int capamax, int dmin, int hmax, long seed, int mode) {
         final Model model = new Model();
         int dmax = 5 + dmin * 2;
         final IntVar[] s = model.intVarArray("s", n, 0, n * dmax, false);
@@ -169,7 +149,7 @@ public class CumulativeTest {
             t[i] = new Task(s[i], d[i], e[i]);
             model.arithm(e[i], "<=", last).post();
         }
-        model.cumulative(t, h, capa, graph).post();
+        model.cumulative(t, h, capa).post();
         Solver r = model.getSolver();
         r.setSearch(lastConflict(randomSearch(model.retrieveIntVars(false), seed)));
         model.getSolver().limitTime(5000);
@@ -240,5 +220,43 @@ public class CumulativeTest {
         solver.findAllSolutions();
 
         Assert.assertEquals(solver.getSolutionCount(), 8);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "provideFilterHeight")
+    public void testFilterHeight(Integer hMax) {
+        final Model model = new Model();
+        final int[][] s = new int[][]{{0, 0}, {10, 10}, {0, 3}, {6, 8}, {3, 6}};
+        final int[][] d = new int[][]{{5, 5}, {10, 10}, {3, 6}, {5, 7}, {3, 6}};
+        final int[][] e = new int[][]{{5, 5}, {20, 20}, {4, 20}, {1, 20}, {1, 20}};
+        final int[][] h = new int[][]{{hMax, hMax}, {hMax, hMax}, {0, 1}, {0, 1}, {0, 1}};
+
+        Task[] tasks = IntStream.range(0, 5)
+                .mapToObj(i -> new Task(
+                        model.intVar("s" + i, s[i][0], s[i][1]),
+                        model.intVar("d" + i, d[i][0], d[i][1]),
+                        model.intVar("e" + i, e[i][0], e[i][1])))
+                .toArray(Task[]::new);
+
+        IntVar[] height = IntStream.range(0, 5)
+                .mapToObj(i -> model.intVar("h" + i, h[i][0], h[i][1]))
+                .toArray(IntVar[]::new);
+
+        model.cumulative(tasks, height, model.intVar(hMax)).post();
+
+        try {
+//            height[4].updateLowerBound(1, Cause.Null);
+            model.getSolver().propagate();
+        } catch (ContradictionException ex) {
+            Assert.fail();
+        }
+        Assert.assertEquals(height[2].getUB(), 0);
+        Assert.assertEquals(height[3].getUB(), 0);
+        Assert.assertEquals(height[4].getLB(), 0);
+        Assert.assertEquals(height[4].getUB(), 1);
+    }
+
+    @DataProvider(name = "provideFilterHeight")
+    private Object[][] provideFilterHeight() {
+        return new Integer[][]{{1}, {2}};
     }
 }
