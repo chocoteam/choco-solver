@@ -170,7 +170,7 @@ public abstract class SearchViz implements IMonitorDownBranch, IMonitorUpBranch,
             if (last > 0) {
                 String pdec;
                 pdec = pretty(dp.getDecision(last - 1));
-                Decision dec = dp.getLastDecision();
+                Decision<?> dec = dp.getLastDecision();
                 int ari = dec.getArity();
                 sendNode(nc, pid_stack.peek(), alt_stack.pop(), ari, rid, pdec,
                         sendDomain? domainMessage.print():"");
@@ -220,7 +220,7 @@ public abstract class SearchViz implements IMonitorDownBranch, IMonitorUpBranch,
         nc = 0;
     }
 
-    private static String pretty(Decision dec) {
+    private static String pretty(Decision<?> dec) {
         if (dec == null) {
             return "ROOT";
         } else {
