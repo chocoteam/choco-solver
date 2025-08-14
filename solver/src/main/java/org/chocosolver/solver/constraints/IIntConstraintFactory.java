@@ -713,6 +713,15 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param result   result
      */
     default Constraint div(IntVar dividend, IntVar divisor, IntVar result) {
+        int x_sign = PropDivXYZLight.getSign(dividend);
+        int y_sign = PropDivXYZLight.getSign(divisor);
+        int z_sign = PropDivXYZLight.getSign(result);
+        if ((x_sign == 1 && y_sign == -1 && z_sign != 0
+                || x_sign == -1 && y_sign == 1 && z_sign != 0)
+                || x_sign == 1 && y_sign == 1 && z_sign == -1
+                || x_sign == -1 && y_sign == -1 && z_sign == 1) {
+            return ref().falseConstraint();
+        }
         if (ref().getSolver().isLCG()) {
             if (PropDivXYZLight.getSign(dividend) != 0
                     && PropDivXYZLight.getSign(divisor) != 0
