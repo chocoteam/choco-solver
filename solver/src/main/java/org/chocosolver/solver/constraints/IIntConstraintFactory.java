@@ -80,7 +80,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.lang.Math.abs;
@@ -443,17 +442,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param var2 second variable
      */
     default Constraint table(IntVar var1, IntVar var2, Tuples tuples) {
-        /*if (!var1.hasEnumeratedDomain() || !var2.hasEnumeratedDomain()) {
-            return table(var1, var2, tuples, "CT+");
-        } else {
-            return table(var1, var2, tuples, "AC3bit+rm");
-        } */
-        return table(var1, var2, tuples, "CT");
+        String algo = "CT";
+        return table(var1, var2, tuples, algo);
     }
 
     /**
      * Creates a table constraint over a couple of variables var1 and var2:<br/>
-     *
+     * <p>
      * - <b>CT</b>: table constraint which applies the Compact-Table algorithm,<br/>
      * - <b>CT+</b>: table constraint which applies the Compact-Table algorithm on allowed tuples,<br/>
      * - <b>AC2001</b>: table constraint which applies the AC2001 algorithm,<br/>
@@ -2784,19 +2779,6 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint table(IntVar[] vars, Tuples tuples) {
         String algo = "CT";
-        if (tuples.isFeasible()) {
-//            algo = "CT";
-            //noinspection OptionalGetWithoutIsPresent
-            if (//tuples.nbTuples() > 512 &&
-                    (IntStream.range(0, vars.length)
-                            .map(i -> tuples.max(i) - tuples.min(i))
-                            .max().getAsInt()) < 512) {
-                algo = "CT+";
-            } else if (tuples.allowUniversalValue()) {
-                // STR2+ or CT+, depending on dom size?
-                algo = "STR2+";
-            }
-        }
         return table(vars, tuples, algo);
     }
 
@@ -2859,7 +2841,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         if (algo.endsWith("+") && !tuples.isFeasible()) {
             throw new SolverException(algo + " table algorithm cannot be used with forbidden tuples.");
         }
-        if (tuples.allowUniversalValue() && !(algo.contains("CT+") || algo.contains("STR2+"))) {
+        if (tuples.allowUniversalValue() && !(algo.startsWith("CT") || algo.contains("STR2+"))) {
             throw new SolverException(algo + " table algorithm cannot be used with short tuples.");
         }
         Propagator<IntVar> p;
