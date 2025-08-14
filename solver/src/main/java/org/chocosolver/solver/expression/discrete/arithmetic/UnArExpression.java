@@ -79,7 +79,8 @@ public class UnArExpression implements ArExpression {
     @Override
     public IntVar intVar() {
         if (me == null) {
-            if (op == Operator.ABS && e instanceof BiArExpression && ((BiArExpression) e).getOp() == Operator.SUB) {
+            if (op == Operator.ABS && e instanceof BiArExpression && ((BiArExpression) e).getOp() == Operator.SUB
+            && !getModel().getSolver().isLCG()) {
                 BiArExpression be = (BiArExpression) e;
                 IntVar v1 = be.getExpressionChild()[0].intVar();
                 IntVar v2 = be.getExpressionChild()[1].intVar();
