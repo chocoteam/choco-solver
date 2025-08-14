@@ -152,11 +152,11 @@ public class PortFolioTest {
     @Test(groups = "10s", timeOut = 300000)
     public void testP3() {
         for (int iter = 0; iter < 50; iter++) {
-            ParallelPortfolio pares = new ParallelPortfolio(false);
+            ParallelPortfolio pares = new ParallelPortfolio();
             for (int i = 0; i < 20; i++) {
                 Model m = knapsack();
                 m.getSolver().setSearch(activityBasedSearch(m.retrieveIntVars(true)));
-                pares.addModel(m);
+                pares.addModel(m, true, true);
             }
             while (pares.solve()) ;
             Model finder = pares.getBestModel();
@@ -184,11 +184,11 @@ public class PortFolioTest {
     @Test(groups = "10s", timeOut = 300000)
     public void testP3bug2() {
         for (int iter = 0; iter < 50; iter++) {
-            ParallelPortfolio pares = new ParallelPortfolio(false);
+            ParallelPortfolio pares = new ParallelPortfolio();
             for (int i = 0; i < 20; i++) {
                 Model m = knapsack();
                 m.getSolver().setSearch(inputOrderLBSearch(m.retrieveIntVars(true)));
-                pares.addModel(m);
+                pares.addModel(m, true, true);
             }
             while (pares.solve()) ;
             Model finder = pares.getBestModel();
@@ -232,11 +232,11 @@ public class PortFolioTest {
     @Test(groups = "10s", timeOut = 300000)
     public void testP5() {
         for (int iter = 0; iter < 50; iter++) {
-            ParallelPortfolio pares = new ParallelPortfolio(false);
+            ParallelPortfolio pares = new ParallelPortfolio();
             for (int i = 0; i < 10; i++) {
                 Model m = knapsack();
                 m.getSolver().setSearch(randomSearch(m.retrieveIntVars(true), iter));
-                pares.addModel(m);
+                pares.addModel(m, true, true);
             }
             while (pares.solve()) ;
             Model finder = pares.getBestModel();
@@ -248,14 +248,14 @@ public class PortFolioTest {
     @Test(groups = "10s", timeOut = 300000)
     public void testP6() {
         for (int iter = 0; iter < 50; iter++) {
-            ParallelPortfolio pares = new ParallelPortfolio(true);
+            ParallelPortfolio pares = new ParallelPortfolio();
             for (int i = 0; i < 10; i++) {
                 Model m = knapsack();
                 m.setName("Model_" + i);
                 if (i < 5) {
                     m.getObjective().asIntVar().gt(50 + i).post(); // for test purpose
                 }
-                pares.addModel(m, i >= 5);
+                pares.addModel(m, false, i >= 5);
             }
             while (pares.solve()) ;
             Model finder = pares.getBestModel();
@@ -267,7 +267,7 @@ public class PortFolioTest {
     @Test(groups = "10s", timeOut = 300000)
     public void testP7() {
         for (int iter = 0; iter < 50; iter++) {
-            ParallelPortfolio pares = new ParallelPortfolio(false);
+            ParallelPortfolio pares = new ParallelPortfolio();
             for (int i = 0; i < 10; i++) {
                 Model m = knapsack();
                 m.setName("Model_" + i);
@@ -278,7 +278,7 @@ public class PortFolioTest {
                 } else {
                     m.setName("Model_" + i);
                 }
-                pares.addModel(m, i >= 5);
+                pares.addModel(m, false, i >= 5);
             }
             while (pares.solve()) ;
             Model finder = pares.getBestModel();
