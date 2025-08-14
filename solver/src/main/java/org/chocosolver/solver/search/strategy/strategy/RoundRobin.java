@@ -14,9 +14,9 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainLast;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainSticky;
 import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.variables.VariableSelector;
 import org.chocosolver.solver.variables.IntVar;
@@ -38,7 +38,7 @@ import java.util.function.ToDoubleBiFunction;
  * @author Charles Prud'homme
  * @since 11/10/2024
  */
-public class RoundRobin extends AbstractStrategy<IntVar> implements IMonitorRestart { //}, IMonitorSolution {
+public class RoundRobin extends AbstractStrategy<IntVar> implements IMonitorRestart {
 
     /**
      * A strategy that does nothing but return null.
@@ -47,7 +47,7 @@ public class RoundRobin extends AbstractStrategy<IntVar> implements IMonitorRest
     private static class NullStrategy extends AbstractStrategy<IntVar> {
 
         protected NullStrategy() {
-            super(new IntVar[0]);
+            super();
         }
 
         @Override
@@ -71,7 +71,7 @@ public class RoundRobin extends AbstractStrategy<IntVar> implements IMonitorRest
     private final VariableSelector<IntVar>[] variableSelectors;
     // the value selectors to select the next value to assign to the selected variable
     private final IntValueSelector[] valueSelectors;
-
+    Function<IntVar, OptionalInt> stickyFirst = v -> OptionalInt.empty();
     // true if the solution has to be saved
     Function<IntVar, OptionalInt> solutionFirst = v -> OptionalInt.empty();
     Function<IntVar, OptionalInt> bestFirst = v -> OptionalInt.empty();
@@ -92,6 +92,8 @@ public class RoundRobin extends AbstractStrategy<IntVar> implements IMonitorRest
      * @param variables              the variables to branch on
      * @param variableSelectors      the variable selectors
      * @param valueSelectors         the value selectors
+     * @param combinations           the combinations of meta, variable and value selectors
+     * @param stickyValSel           conditions(s) to apply sticky value selector
      * @param solutionSaving         condition(s) to apply solution saving
      * @param bestUntilFirstSolution condition(s) to apply best value selection
      */
@@ -99,11 +101,35 @@ public class RoundRobin extends AbstractStrategy<IntVar> implements IMonitorRest
                       MetaStrategy<IntVar>[] metaStrategies,
                       VariableSelector<IntVar>[] variableSelectors,
                       IntValueSelector[] valueSelectors,
+                      List<int[]> combinations,
+                      BooleanSupplier stickyValSel,
                       BooleanSupplier solutionSaving,
-                      BooleanSupplier bestUntilFirstSolution) {
-        this(variables, metaStrategies, variableSelectors, valueSelectors, solutionSaving, bestUntilFirstSolution,
-                new Policy.NextModuloN(metaStrategies.length * variableSelectors.length * valueSelectors.length),
-                (a, s) -> 0.0);
+                      BooleanSupplier bestUntilFirstSolution,
+                      Policy bandit,
+                      ToDoubleBiFunction<Integer, Integer> reward) {
+        super(variables);
+        this.metaStrategies = metaStrategies;
+        this.variableSelectors = variableSelectors;
+        this.valueSelectors = valueSelectors;
+
+        if (combinations == null) {
+            this.combinations = populate(this.metaStrategies, this.variableSelectors, this.valueSelectors);
+        } else {
+            this.combinations = combinations;
+        }
+
+        this.action = 0;
+        this.step = 0;
+
+        stickyFirst = new IntDomainSticky(variables, valueSelectors[0],
+                (x, v) -> stickyValSel.getAsBoolean());
+        Solution solution = vars[0].getModel().getSolver().defaultSolution();
+        solutionFirst = new IntDomainLast(solution, valueSelectors[0],
+                (x, v) -> solutionSaving.getAsBoolean());
+        bestFirst = new IntDomainBest(valueSelectors[0],
+                v -> bestUntilFirstSolution.getAsBoolean());
+        this.bandit = bandit;
+        this.reward = reward;
     }
 
     /**
@@ -115,6 +141,7 @@ public class RoundRobin extends AbstractStrategy<IntVar> implements IMonitorRest
      * @param variables              the variables to branch on
      * @param variableSelectors      the variable selectors
      * @param valueSelectors         the value selectors
+     * @param stickyValSel           conditions(s) to apply sticky value selector
      * @param solutionSaving         condition(s) to apply solution saving
      * @param bestUntilFirstSolution condition(s) to apply best value selection
      */
@@ -122,34 +149,33 @@ public class RoundRobin extends AbstractStrategy<IntVar> implements IMonitorRest
                       MetaStrategy<IntVar>[] metaStrategies,
                       VariableSelector<IntVar>[] variableSelectors,
                       IntValueSelector[] valueSelectors,
+                      BooleanSupplier stickyValSel,
                       BooleanSupplier solutionSaving,
                       BooleanSupplier bestUntilFirstSolution,
                       Policy bandit,
                       ToDoubleBiFunction<Integer, Integer> reward) {
-        super(variables);
-        this.metaStrategies = metaStrategies;
-        this.variableSelectors = variableSelectors;
-        this.valueSelectors = valueSelectors;
+        this(variables,
+                metaStrategies,
+                variableSelectors,
+                valueSelectors,
+                null,
+                stickyValSel,
+                solutionSaving,
+                bestUntilFirstSolution,
+                bandit,
+                reward);
 
-        int[][] sizes = new int[3][];
-        sizes[META] = new int[metaStrategies.length];
-        sizes[VARIABLE] = new int[variableSelectors.length];
-        sizes[VALUE] = new int[valueSelectors.length];
-        combinations = populate(sizes);
-        this.action = 0;
-        this.step = 0;
-
-        Solution solution = vars[0].getModel().getSolver().defaultSolution();
-        solutionFirst = new IntDomainLast(solution, valueSelectors[0],
-                (x, v) -> solutionSaving.getAsBoolean());
-        bestFirst = new IntDomainBest(valueSelectors[0],
-                v -> bestUntilFirstSolution.getAsBoolean());
-
-        this.bandit = bandit;
-        this.reward = reward;
     }
 
-    private List<int[]> populate(int[][] sizes) {
+    public static List<int[]> populate(MetaStrategy<IntVar>[] metaStrategies,
+                                       VariableSelector<IntVar>[] variableSelectors,
+                                       IntValueSelector[] valueSelectors) {
+
+        int[][] sizes = new int[3][];
+        sizes[VALUE] = new int[valueSelectors.length];
+        sizes[VARIABLE] = new int[variableSelectors.length];
+        sizes[META] = new int[metaStrategies.length];
+
         List<int[]> combinations = new ArrayList<>();
         int n = sizes.length;
         int[] tmp = new int[n];
@@ -204,33 +230,43 @@ public class RoundRobin extends AbstractStrategy<IntVar> implements IMonitorRest
     }
 
     @Override
-    public IntDecision getDecision() {
+    public Decision<IntVar> getDecision() {
         int[] currentIndices = combinations.get(action);
-        IntDecision decision = null;
         //1. call the meta strategy
+        IntVar selectedVariable = null;
         MetaStrategy<IntVar> metaStrategy = metaStrategies[currentIndices[META]];
-        IntVar selectedVariable = metaStrategy.getSelectedVariable();
+        selectedVariable = metaStrategy.getSelectedVariable();
         if (selectedVariable == null) {
             //2. call the strategy, if needed
             VariableSelector<IntVar> strategy = variableSelectors[currentIndices[VARIABLE]];
             selectedVariable = strategy.getVariable(vars);
         }
-        if (selectedVariable != null) {
-            // 3. apply best value selection, if the condition is met
-            OptionalInt opt = bestFirst.apply(selectedVariable);
-            if (!opt.isPresent()) {
-                //4. apply phase saving, if the condition is met
-                opt = solutionFirst.apply(selectedVariable);
-            }
-            //5. call the value selector
-            if (!opt.isPresent()) {
-                IntValueSelector valueSelector = valueSelectors[currentIndices[VALUE]];
-                opt = OptionalInt.of(valueSelector.selectValue(selectedVariable));
-            }
-            decision = vars[0].getModel().getSolver().getDecisionPath()
-                    .makeIntDecision(selectedVariable, DecisionOperatorFactory.makeIntEq(), opt.getAsInt());
+        return computeDecision(selectedVariable);
+    }
+
+    @Override
+    public Decision<IntVar> computeDecision(IntVar variable) {
+        if (variable == null || variable.isInstantiated()) {
+            return null;
         }
-        return decision;
+        int[] currentIndices = combinations.get(action);
+        // 3. apply best value selection, if the condition is met
+        OptionalInt opt = bestFirst.apply(variable);
+        if (!opt.isPresent()) {
+            // 3. apply sticky value selection, if the condition is met
+            opt = stickyFirst.apply(variable);
+        }
+        if (!opt.isPresent()) {
+            //5. apply phase saving, if the condition is met
+            opt = solutionFirst.apply(variable);
+        }
+        //6. call the value selector
+        if (!opt.isPresent()) {
+            IntValueSelector valueSelector = valueSelectors[currentIndices[VALUE]];
+            opt = OptionalInt.of(valueSelector.selectValue(variable));
+        }
+        return variable.getModel().getSolver().getDecisionPath()
+                .makeIntDecision(variable, DecisionOperatorFactory.makeIntEq(), opt.getAsInt());
     }
 
     @Override
@@ -244,5 +280,4 @@ public class RoundRobin extends AbstractStrategy<IntVar> implements IMonitorRest
                 variableSelectors[combinations.get(action)[VARIABLE]].getClass().getSimpleName(),
                 valueSelectors[combinations.get(action)[VALUE]].getClass().getSimpleName());*/
     }
-
 }

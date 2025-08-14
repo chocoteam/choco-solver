@@ -30,6 +30,12 @@ import org.chocosolver.solver.search.strategy.selectors.values.graph.priority.Gr
 import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.search.strategy.strategy.*;
 import org.chocosolver.solver.variables.*;
+import org.chocosolver.util.bandit.Policy;
+import org.chocosolver.util.bandit.UCB1;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.ToDoubleBiFunction;
 
 public class Search {
 
@@ -614,7 +620,90 @@ public class Search {
     }
 
     /**
-     * Defines a round-robin search strategy over the variables.
+     * Defines round-robin search strategy over the variables.
+     * <p>
+     * The strategy is composed of the following meta strategies:
+     * * <ul>
+     * <li>LastConflict-1</li>
+     * <li>LastConflict-0</li>
+     * <li>ConflictOrderingSearch</li>
+     * </ul>
+     * <p>
+     * The strategy is composed of the following variable selectors:
+     * <ul>
+     *     <li>DomOverWDegRef</li>
+     *     <li>DomOverWDeg</li>
+     *     <li>PickOnDom</li>
+     *     <li>FailureBased</li>
+     *     </ul>
+     * <p>
+     *     The strategy is composed of the following value selectors:
+     *     <ul>
+     *         <li>IntDomainMin</li>
+     *         <li>IntDomainMax</li>
+     *         <li>IntDomainRandom</li>
+     *      </ul>
+     * In addition, the phase-saving mechanism is activated.
+     * <p>
+     *     Note that this strategy must be combined with (fast) restarts to be useful.
+     * </p>
+     *
+     * @param vars list of variables
+     * @return a round-robin search strategy
+     */
+    public static AbstractStrategy<IntVar> roundRobinSearch(IntVar... vars) {
+        Model model = vars[0].getModel();
+        long seed =
+                model.getSeed();
+        int flushThr = 20;
+        MetaStrategy[] metaStrategies = new MetaStrategy[]{
+                new LastConflict<>(model, RoundRobin.NULL_STRATEGY, 1),
+                new LastConflict<>(model, RoundRobin.NULL_STRATEGY, 0),
+                new ConflictOrderingSearch<>(model, RoundRobin.NULL_STRATEGY)
+        };
+        VariableSelector[] variableSelectors = new VariableSelector[]{
+                new RoundRobinGroup<>(model, seed),
+                new DomOverWDegRef<>(vars, seed, flushThr),
+                new DomOverWDeg<>(vars, seed, flushThr),
+                new PickOnDom<>(vars, flushThr),
+                new FailureBased<>(vars, seed, 4)
+        };
+        IntValueSelector[] valueSelectors = new IntValueSelector[]{
+                new IntDomainMin(),
+                new IntDomainMax(),
+                new IntDomainRandom(seed)
+        };
+
+        List<int[]> combinations = new ArrayList<>();
+        combinations.add(new int[]{0, 0, 0});
+        combinations.add(new int[]{1, 0, 0});
+        combinations.add(new int[]{2, 0, 0});
+//         then all other combinations
+        for (int k = 0; k < metaStrategies.length; k++) {
+            for (int j = 1; j < variableSelectors.length; j++) {
+                for (int i = 0; i < valueSelectors.length; i++) {
+                    combinations.add(new int[]{i, j, k});
+                }
+            }
+        }
+        return new RoundRobin(vars, metaStrategies, variableSelectors, valueSelectors,
+                combinations,
+                () -> model.getSolver().getSolutionCount() == 0,
+                () -> model.getSolver().getRestartCount() % 18 < 14,
+                () -> false,
+                new Policy.NextModuloN(combinations.size()),
+                (s, a) -> 0.);
+    }
+
+    /**
+     * Defines an adaptive round-robin search strategy over the variables.
+     * <p>
+     * The strategy is composed of the following meta strategies:
+     * * <ul>
+     * <li>LastConflict-1</li>
+     * <li>LastConflict-0</li>
+     * <li>ConflictOrderingSearch</li>
+     * </ul>
      * <p>
      * The strategy is composed of the following variable selectors:
      * <ul>
@@ -632,23 +721,60 @@ public class Search {
      *      </ul>
      * In addition, the phase-saving mechanism is activated.
      *
+     * <p>
+     *     Note that this strategy must be combined with (fast) restarts to be useful.
+     * </p>
+     *
      * @param vars list of variables
      * @return a round-robin search strategy
      */
-    public static AbstractStrategy<IntVar> roundRobinSearch(IntVar... vars) {
-        long seed = 1_000_000_007;
-        return new RoundRobin(vars,
-                new VariableSelector[]{
-                        new DomOverWDegRef<>(vars, seed),
-                        new DomOverWDeg<>(vars, seed),
-                        new PickOnDom<>(vars, 32),
-                        new FailureBased<>(vars, seed, 4)
-                },
-                new IntValueSelector[]{
-                        new IntDomainMin(),
-                        new IntDomainMax(),
-                        new IntDomainRandom(seed)},
-                true, false);
+    public static AbstractStrategy<IntVar> adaptiveRoundRobinSearch(IntVar... vars) {
+        Model model = vars[0].getModel();
+        long seed = model.getSeed();
+        int flushThr = 20;
+        MetaStrategy[] metaStrategies = new MetaStrategy[]{
+                new LastConflict<>(model, RoundRobin.NULL_STRATEGY, 1),
+                new LastConflict<>(model, RoundRobin.NULL_STRATEGY, 0),
+                new ConflictOrderingSearch<>(model, RoundRobin.NULL_STRATEGY)};
+        VariableSelector[] variableSelectors = new VariableSelector[]{
+                new RoundRobinGroup<>(model, seed),
+                new DomOverWDeg<>(vars, seed, flushThr),
+                new DomOverWDegRef<>(vars, seed, flushThr),
+                new FailureBased<>(vars, seed, 4),};
+        IntValueSelector[] valueSelectors = new IntValueSelector[]{
+                new IntDomainMin(),
+                new IntDomainMax(),
+                new IntDomainRandom(seed),};
+        int comb = metaStrategies.length * variableSelectors.length * valueSelectors.length;
+        Policy policy = new UCB1(comb);
+        long[] lastStats = new long[4]; // 0: opt (if any), 1: # solutions, 2: # nodes, 3: # failures
+        lastStats[0] = model.getSolver().getObjectiveManager().isOptimization() ? model.getSolver().getBestSolutionValue().intValue() : 0;
+        ToDoubleBiFunction<Integer, Integer> reward = (s, a) -> {
+            long opt = model.getSolver().getObjectiveManager().isOptimization() ? model.getSolver().getBestSolutionValue().intValue() : 0;
+            long nsols = model.getSolver().getSolutionCount();
+            long nnodes = model.getSolver().getNodeCount();
+            long nfail = model.getSolver().getFailCount();
+
+            long dopt = opt - lastStats[0];
+            long dsols = nsols - lastStats[1];
+            long dnodes = nnodes - lastStats[2];
+            long dfails = nfail - lastStats[3];
+
+            lastStats[0] += dopt;
+            lastStats[1] += dsols;
+            lastStats[2] += dnodes;
+            lastStats[3] += dfails;
+
+            // now, compute the reward.
+            return .5 * Math.log(Math.abs(dopt) + 1) + .3 * Math.sqrt(dsols) + .2 * dfails / dnodes;
+        };
+
+        return new RoundRobin(vars, metaStrategies, variableSelectors, valueSelectors,
+                () -> true,
+                () -> true,
+                () -> false,
+                policy,
+                reward);
     }
 
     // ************************************************************************************
