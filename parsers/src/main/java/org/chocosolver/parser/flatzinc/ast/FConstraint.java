@@ -1092,7 +1092,7 @@ public enum FConstraint {
                         assert durations[i].getUB() >= 0 && resources[i].getUB() >= 0;
                         tasks[i] = new Task(starts[i], durations[i], ends[i]);
                     }
-                    model.cumulative(tasks, resources, limit, true/*, Cumulative.Filter.NAIVETIME*/).post();
+                    model.cumulative(tasks, resources, limit).post();
                     break;
                 case "MZN":
                     model.cumulativeTimeDec(starts,
