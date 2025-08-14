@@ -1061,21 +1061,11 @@ public enum FConstraint {
             final IntVar[] resources = exps.get(2).toIntVarArray(model);
             final IntVar limit = exps.get(3).intVarValue(model);
             String decomp = (String) model.getHook("CUMULATIVE");
+            if (decomp == null) {
+                decomp = "GLB"; // TODO: make it configurable
+            }
             int n = starts.length;
             switch (decomp) {
-                case "GLB":
-                    final IntVar[] ends = new IntVar[n];
-                    Task[] tasks = new Task[n];
-                    for (int i = 0; i < n; i++) {
-                        ends[i] = model.intVar(starts[i].getName() + "_" + durations[i].getName(),
-                                starts[i].getLB() + durations[i].getLB(),
-                                starts[i].getUB() + durations[i].getUB(),
-                                true);
-                        assert durations[i].getUB() >= 0 && resources[i].getUB() >= 0;
-                        tasks[i] = new Task(starts[i], durations[i], ends[i]);
-                    }
-                    model.cumulative(tasks, resources, limit, true/*, Cumulative.Filter.NAIVETIME*/).post();
-                    break;
                 case "MZN":
                     model.cumulativeTimeDec(starts,
                             Arrays.stream(durations).mapToInt(IntVar::getUB).toArray(),
@@ -1159,6 +1149,20 @@ public enum FConstraint {
                                 "<=",
                                 -resources[i].getValue() + limit.getValue()).post();
                     }
+                    break;
+                case "GLB":
+                default:
+                    final IntVar[] ends = new IntVar[n];
+                    Task[] tasks = new Task[n];
+                    for (int i = 0; i < n; i++) {
+                        ends[i] = model.intVar(starts[i].getName() + "_" + durations[i].getName(),
+                                starts[i].getLB() + durations[i].getLB(),
+                                starts[i].getUB() + durations[i].getUB(),
+                                true);
+                        assert durations[i].getUB() >= 0 && resources[i].getUB() >= 0;
+                        tasks[i] = new Task(starts[i], durations[i], ends[i]);
+                    }
+                    model.cumulative(tasks, resources, limit/*, Cumulative.Filter.NAIVETIME*/).post();
                     break;
             }
         }
