@@ -221,7 +221,20 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint absolute(IntVar var1, IntVar var2) {
         assert var1.getModel() == var2.getModel();
-        return new Constraint(ConstraintsName.ABSOLUTE, new PropAbsolute(var1, var2));
+        if (var2.isInstantiated()) {
+            if (var2.getValue() < 0) {
+                return arithm(var1, "=", -var2.getValue());
+            } else {
+                return arithm(var1, "=", var2.getValue());
+            }
+        } else if (var1.isInstantiated()) {
+            return member(var2, new int[]{-var1.getValue(), var1.getValue()});
+        }
+        return new Constraint(ConstraintsName.ABSOLUTE,
+                ref().getSolver().isLCG() ?
+                        new PropAbsoluteLight(var1, var2) :
+                        new PropAbsolute(var1, var2)
+        );
     }
 
     /**
@@ -705,6 +718,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param result   result
      */
     default Constraint div(IntVar dividend, IntVar divisor, IntVar result) {
+        if (ref().getSolver().isLCG()) {
+            if (PropDivXYZLight.getSign(dividend) != 0
+                    && PropDivXYZLight.getSign(divisor) != 0
+                    && PropDivXYZLight.getSign(result) != 0) {
+                return new Constraint(ConstraintsName.DIVISION, new PropDivXYZLight(dividend, divisor, result));
+            }
+        }
         return new Constraint(ConstraintsName.DIVISION, new PropDivXYZ(dividend, divisor, result));
     }
 
