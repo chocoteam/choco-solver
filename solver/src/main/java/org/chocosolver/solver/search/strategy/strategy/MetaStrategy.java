@@ -38,7 +38,7 @@ public abstract class MetaStrategy<V extends Variable> extends AbstractStrategy<
     protected boolean active;
 
     public MetaStrategy(Model model, AbstractStrategy<V> mainStrategy) {
-        super(mainStrategy.vars);
+        super(model, mainStrategy.vars);
         this.mainStrategy = mainStrategy;
         this.model = model;
     }

@@ -164,4 +164,5 @@ public class ConflictOrderingSearch<V extends Variable> extends MetaStrategy<V> 
         }
         return ok;
     }
+
 }
