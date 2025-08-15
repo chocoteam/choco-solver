@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints.nary.cumulative;
 
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -113,6 +114,27 @@ public abstract class PropagatorResource extends Propagator<IntVar> {
     }
 
     /**
+     * Updates the earliest start time (est) of the task, considering its height variable. The height variable's upper bound is set to 0, or the task
+     * can become optional if updating its est would empty the start variable's domain.
+     *
+     * @param task   a task
+     * @param height a height variable
+     * @param cause  the propagator that filters the est
+     * @param reason the reason of the filtering
+     * @return true iff updating the est has filtered a variable
+     * @throws ContradictionException an exception if a domain has been emptied
+     */
+    public static boolean filterEst(Task task, IntVar height, int est, ICause cause, Reason reason) throws ContradictionException {
+        if (height != null && height.getLB() == 0 && task.mustBePerformed() && est > task.getLst()) {
+            return height.updateUpperBound(0, cause, Reason.gather(reason, task.getStart().getMaxLit()));
+        } else if (height == null || height.getLB() > 0 || task instanceof OptionalTask) {
+            return task.updateEst(est, cause, reason);
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Updates the latest start time (lst) of the task, considering its height variable. The height variable's upper bound is set to 0, or the task
      * can become optional if updating its lst would empty the start variable's domain.
      *
@@ -127,6 +149,27 @@ public abstract class PropagatorResource extends Propagator<IntVar> {
             return height.updateUpperBound(0, cause);
         } else if (height == null || height.getLB() > 0 || task instanceof OptionalTask) {
             return task.updateLst(lst, cause);
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Updates the latest start time (lst) of the task, considering its height variable. The height variable's upper bound is set to 0, or the task
+     * can become optional if updating its lst would empty the start variable's domain.
+     *
+     * @param task   a task
+     * @param height a height variable
+     * @param cause  the propagator that filters the est
+     * @param reason the reason of the filtering
+     * @return true iff updating the lst has filtered a variable
+     * @throws ContradictionException an exception if a domain has been emptied
+     */
+    public static boolean filterLst(Task task, IntVar height, int lst, ICause cause, Reason reason) throws ContradictionException {
+        if (height != null && height.getLB() == 0 && task.mustBePerformed() && lst < task.getEst()) {
+            return height.updateUpperBound(0, cause, Reason.gather(reason, task.getStart().getMinLit()));
+        } else if (height == null || height.getLB() > 0 || task instanceof OptionalTask) {
+            return task.updateLst(lst, cause, reason);
         } else {
             return false;
         }
@@ -153,6 +196,27 @@ public abstract class PropagatorResource extends Propagator<IntVar> {
     }
 
     /**
+     * Updates the earliest completion time (ect) of the task, considering its height variable. The height variable's upper bound is set to 0, or the
+     * task can become optional if updating its ect would empty the end variable's domain.
+     *
+     * @param task   a task
+     * @param height a height variable
+     * @param cause  the propagator that filters the est
+     * @param reason the reason of the filtering
+     * @return true iff updating the ect has filtered a variable
+     * @throws ContradictionException an exception if a domain has been emptied
+     */
+    public static boolean filterEct(Task task, IntVar height, int ect, ICause cause, Reason reason) throws ContradictionException {
+        if (height != null && height.getLB() == 0 && task.mustBePerformed() && ect > task.getLct()) {
+            return height.updateUpperBound(0, cause, Reason.gather(reason, task.getEnd().getMaxLit()));
+        } else if (height == null || height.getLB() > 0 || task instanceof OptionalTask) {
+            return task.updateEct(ect, cause, reason);
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Updates the latest completion time (lct) of the task, considering its height variable. The height variable's upper bound is set to 0, or the
      * task can become optional if updating its lct would empty the end variable's domain.
      *
@@ -167,6 +231,27 @@ public abstract class PropagatorResource extends Propagator<IntVar> {
             return height.updateUpperBound(0, cause);
         } else if (height == null || height.getLB() > 0 || task instanceof OptionalTask) {
             return task.updateLct(lct, cause);
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Updates the latest completion time (lct) of the task, considering its height variable. The height variable's upper bound is set to 0, or the
+     * task can become optional if updating its lct would empty the end variable's domain.
+     *
+     * @param task   a task
+     * @param height a height variable
+     * @param cause  the propagator that filters the est
+     * @param reason the reason of the filtering
+     * @return true iff updating the lct has filtered a variable
+     * @throws ContradictionException an exception if a domain has been emptied
+     */
+    public static boolean filterLct(Task task, IntVar height, int lct, ICause cause, Reason reason) throws ContradictionException {
+        if (height != null && height.getLB() == 0 && task.mustBePerformed() && lct < task.getEct()) {
+            return height.updateUpperBound(0, cause, Reason.gather(reason, task.getEnd().getMinLit()));
+        } else if (height == null || height.getLB() > 0 || task instanceof OptionalTask) {
+            return task.updateLct(lct, cause, reason);
         } else {
             return false;
         }
