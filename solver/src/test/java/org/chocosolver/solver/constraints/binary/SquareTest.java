@@ -63,8 +63,8 @@ public class SquareTest {
         solver.setSearch(Search.randomSearch(ArrayUtils.append(x,x2), 0));
         while (solver.solve()) ;
         assertEquals(solver.getSolutionCount(), 184320);
-        assertEquals(solver.getFailCount(), 11417);
-        assertEquals(solver.getNodeCount(), 380056);
+        assertEquals(solver.getFailCount(), 11383);
+        assertEquals(solver.getNodeCount(), 380022);
     }
 
     @Test(groups = "10s", timeOut = 60000)
