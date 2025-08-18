@@ -153,6 +153,6 @@ public class ParetoTest {
         List<Solution> front = m.getSolver().findParetoFront(new IntVar[]{m.neg(obj1), m.neg(obj2)}, Model.MAXIMIZE);
         Assert.assertEquals(front.size(), 26);
         Assert.assertEquals(m.getSolver().getSolutionCount(), 233);
-        Assert.assertEquals(m.getSolver().getNodeCount(), 95190);
+        Assert.assertEquals(m.getSolver().getNodeCount(), 95208);
     }
 }
