@@ -160,7 +160,7 @@ public class PropCompactTable extends Propagator<IntVar> {
      * @param tuples list of feasible tuples
      */
     public PropCompactTable(IntVar[] vars, Tuples tuples) {
-        super(vars, PropagatorPriority.QUADRATIC, true, tuples.allowUniversalValue());
+        super(vars, vars.length <= 3 ? PropagatorPriority.get(vars.length) : PropagatorPriority.QUADRATIC, true, tuples.allowUniversalValue());
         this.tuples = tuples;
         this.currTable = new RSparseBitSet(model.getEnvironment(), this.tuples.nbTuples());
         computeSupports(tuples);
