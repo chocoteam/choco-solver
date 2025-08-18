@@ -721,20 +721,15 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param result   result
      */
     default Constraint div(IntVar dividend, IntVar divisor, IntVar result) {
-        int x_sign = PropDivXYZLight.getSign(dividend);
-        int y_sign = PropDivXYZLight.getSign(divisor);
-        int z_sign = PropDivXYZLight.getSign(result);
-        if ((x_sign == 1 && y_sign == -1 && z_sign != 0
-                || x_sign == -1 && y_sign == 1 && z_sign != 0)
-                || x_sign == 1 && y_sign == 1 && z_sign == -1
-                || x_sign == -1 && y_sign == -1 && z_sign == 1) {
-            return ref().falseConstraint();
-        }
         if (ref().getSolver().isLCG()) {
             if (PropDivXYZLight.getSign(dividend) != 0
                     && PropDivXYZLight.getSign(divisor) != 0
                     && PropDivXYZLight.getSign(result) != 0) {
-                return new Constraint(ConstraintsName.DIVISION, new PropDivXYZLight(dividend, divisor, result));
+                try {
+                    return new Constraint(ConstraintsName.DIVISION, new PropDivXYZLight(dividend, divisor, result));
+                }catch (SolverException e){
+                    // If the light propagator fails, we fall back to the full one
+                }
             }
         }
         return new Constraint(ConstraintsName.DIVISION, new PropDivXYZ(dividend, divisor, result));
