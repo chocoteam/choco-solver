@@ -106,8 +106,8 @@ public class FailureBased<V extends Variable> implements IMonitorContradiction, 
                 currenFixNum++;
             }
         }
-        if (bests.size() > 0) {
-            int currentVarIndex = bests.get(0);
+        if (!bests.isEmpty()) {
+            currentVarIndex = bests.get(0);
             if (ran != null) {
                 currentVarIndex = bests.get(ran.nextInt(bests.size()));
             }

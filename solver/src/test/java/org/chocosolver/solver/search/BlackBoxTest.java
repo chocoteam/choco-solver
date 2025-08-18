@@ -111,7 +111,7 @@ public class BlackBoxTest {
     }
 
 
-    @Test(groups = "1s", timeOut = 60000, dataProvider = "setstrategies")
+    @Test(groups = "1s", timeOut = 10000, dataProvider = "setstrategies")
     public void testSet(Function<SetVar[], AbstractStrategy<SetVar>> strat) {
         Model model = ProblemMaker.makeSteiner(7);
         SetVar[] vars = model.retrieveSetVars();
