@@ -339,6 +339,20 @@ public class VariableUtils {
     }
 
     /**
+     * Check if all variables in the array have an enumerated domain.
+     * @param vars  array of variables
+     * @return <i>true</i> if all variables have an enumerated domain, <i>false</i> otherwise
+     */
+    public static boolean allEnumerated(IntVar[] vars) {
+        for (IntVar var : vars) {
+            if (!var.hasEnumeratedDomain()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Compute the search space size
      *
      * @return search space size
