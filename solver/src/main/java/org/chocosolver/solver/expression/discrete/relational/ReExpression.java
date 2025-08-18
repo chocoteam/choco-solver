@@ -255,7 +255,7 @@ public interface ReExpression extends ArExpression {
         }
         int card = (int) VariableUtils.domainCardinality(uvars);
         Map<IntVar, Integer> map = IntStream.range(0, uvars.length).boxed().collect(Collectors.toMap(i -> uvars[i], i -> i));
-        double s = TuplesFactory.sample(Math.min(card, MAX_SAMPLING_SIZE), new Random(), values -> beval(values, map), uvars);
+        double s = TuplesFactory.sample(Math.min(card, MAX_SAMPLING_SIZE), new Random(uvars[0].getModel().getSeed()), values -> beval(values, map), uvars);
 
         if (card <= Math.pow(2, 19) && uvars.length <= 4 && s * card <= Math.pow(2, 16)) {
             return extension("CT", s <= FEASIBILITY_THRESHOLD);
