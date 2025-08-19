@@ -34,10 +34,6 @@ public abstract class AbstractStrategy<V extends Variable> {
     protected final V[] vars;
     protected final BitSet idScope; // bitset representing the indexes of the variables in the scope
 
-    // *****************************************************************************************************************
-    // DECISION COMPUTATION
-    // *****************************************************************************************************************
-
     /**
      * Create a search strategy based on an array of variables
      *
@@ -84,20 +80,14 @@ public abstract class AbstractStrategy<V extends Variable> {
     public abstract Decision<V> getDecision();
 
     /**
-     * @return array of variables
-     */
-    public V[] getVariables() {
-        return vars;
-    }
-
-    /**
-     * Indicates whether a given variable var is within the scope of this strategy
+     * Computes a decision to be applied to variable var
+     * This method should be implemented in order to use search patterns
      *
      * @param var a variable
-     * @return true iff a given variable var is within the scope of this strategy
+     * @return a decision to be applied to variable var
      */
-    public boolean isVarInScope(Variable var) {
-        return idScope.get(var.getId());
+    public Decision<V> computeDecision(V var) {
+        return null;
     }
 
     /**
@@ -129,8 +119,8 @@ public abstract class AbstractStrategy<V extends Variable> {
     /**
      * @return array of variables
      */
-    public boolean init() {
-        return true;
+    public V[] getVariables() {
+        return vars;
     }
 
     /**
