@@ -12,7 +12,7 @@ mkdir build
 cd build
 cmake -DLP_LIB=soplex -DBUILD_JAVA_INTERFACE=ON -DBUILD_SHARED_LIBS=ON -DINTERVAL_LIB=filib -DJAVA_PACKAGE=org.chocosolver.solver.constraints.real ..
 make
-make install
+sudo make install
 export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib/ibex/3rd
 
 cd ${root}
