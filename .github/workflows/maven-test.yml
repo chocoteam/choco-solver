@@ -27,7 +27,9 @@ jobs:
 
       # Regression tests
       - name: Test Ibex
-        run: mvn --file pom.xml test -Pcoverage -DtestFailureIgnore=true -Dgroups=ibex
+        run: |
+          export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib/ibex/3rd
+          mvn --file pom.xml test -Pcoverage -DtestFailureIgnore=true -Dgroups=ibex
 
   test-solver:
     runs-on: ubuntu-latest

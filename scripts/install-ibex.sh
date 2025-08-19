@@ -10,7 +10,7 @@ tar -xzf ibex-${ibexver}.tar.gz
 cd ibex-lib-ibex-${ibexver}
 mkdir build
 cd build
-cmake -DLP_LIB=soplex -DBUILD_JAVA_INTERFACE=ON -DBUILD_SHARED_LIBS=ON -DINTERVAL_LIB=filib -DJAVA_PACKAGE=org.chocosolver.solver.constraints.real ..
+cmake -DLP_LIB=soplex -DBUILD_JAVA_INTERFACE=ON -DBUILD_SHARED_LIBS=ON -DJAVA_PACKAGE=org.chocosolver.solver.constraints.real ..
 make
 sudo make install
 export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib/ibex/3rd
