@@ -1,20 +1,21 @@
 #!/usr/bin/env bash  
 set -ex
 # download Ibex and untar it
-ibexver=2.8.8
-ibexjavaver=1.2.0
+root=$(pwd)
+ibexver=2.9.1
 curl https://codeload.github.com/ibex-team/ibex-lib/tar.gz/ibex-${ibexver} > ibex-${ibexver}.tar.gz
 tar -xzf ibex-${ibexver}.tar.gz
-curl https://codeload.github.com/ibex-team/ibex-java/tar.gz/${ibexjavaver} > ibex-java-${ibexjavaver}.tar.gz
-tar -xzf ibex-java-${ibexjavaver}.tar.gz --directory ibex-lib-ibex-${ibexver}/plugins/
+
 # prepare installation
 cd ibex-lib-ibex-${ibexver}
-./waf configure --enable-shared --with-jni --java-package-name=org.chocosolver.solver.constraints.real
-./waf build
-sudo ./waf install
-export LD_LIBRARY_PATH=/usr/local/lib
-cd -
+mkdir build
+cd build
+cmake -DLP_LIB=soplex -DBUILD_JAVA_INTERFACE=ON -DBUILD_SHARED_LIBS=ON -DJAVA_PACKAGE=org.chocosolver.solver.constraints.real ..
+make
+sudo make install
+export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib/ibex/3rd
+
+cd ${root}
 sudo rm -r ibex-${ibexver}.tar.gz
-sudo rm -r ibex-java-${ibexjavaver}.tar.gz
 
 ibexsolve -v
