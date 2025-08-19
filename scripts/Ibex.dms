@@ -1,0 +1,26 @@
+FROM ubuntu:latest
+
+# install Java 21
+RUN apt-get update && \
+    apt-get install -y sudo openjdk-21-jdk-headless default-jdk python3 vim git maven curl g++ gcc flex bison cmake git pkg-config
+
+RUN curl https://codeload.github.com/ibex-team/ibex-lib/tar.gz/ibex-2.9.1 > ibex-2.9.1.tar.gz && \
+  tar -xzf ibex-2.9.1.tar.gz && \
+  cd ibex-lib-ibex-2.9.1 && \
+# RUN #git clone https://github.com/ibex-team/ibex-lib.git && \
+#    cd ibex-lib && \
+    mkdir build && \
+    cd build && \
+    cmake -DLP_LIB=soplex -DBUILD_JAVA_INTERFACE=ON -DBUILD_SHARED_LIBS=ON -DJAVA_PACKAGE=org.chocosolver.solver.constraints.real .. && \
+    make && \
+    sudo make install && \
+    export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib/ibex/3rd
+
+RUN git clone --recurse-submodules https://github.com/chocoteam/choco-solver.git && \
+    cd choco-solver && \
+    # git checkout develop && \
+    mvn -q clean install -DskipTests
+RUN cd choco-solver && \
+    # exporting LD_LIBRARY_PATH twice (or at least here) is mandatory
+    export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib/ibex/3rd && \
+    mvn --file pom.xml test -DtestFailureIgnore=true -Dgroups=ibex
