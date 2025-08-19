@@ -65,7 +65,6 @@ public class ConflictOrderingSearch<V extends Variable> extends MetaStrategy<V> 
     /**
      * Creates a conflict-ordering search
      *
-     * @param model        the solver to attach this to
      * @param mainStrategy the main strategy declared
      */
     public ConflictOrderingSearch(Model model, AbstractStrategy<V> mainStrategy) {
@@ -77,7 +76,6 @@ public class ConflictOrderingSearch<V extends Variable> extends MetaStrategy<V> 
         next = new TIntArrayList();
         pcft = -1;
     }
-
 
     public V getSelectedVariable() {
         return firstNotInst();
@@ -164,5 +162,4 @@ public class ConflictOrderingSearch<V extends Variable> extends MetaStrategy<V> 
         }
         return ok;
     }
-
 }

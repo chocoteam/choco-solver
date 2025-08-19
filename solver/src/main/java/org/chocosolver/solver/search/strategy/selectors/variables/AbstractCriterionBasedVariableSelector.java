@@ -18,6 +18,9 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.objects.IdentityToDouble;
 
+import java.util.HashSet;
+import java.util.List;
+
 /**
  * <p>
  * Project: choco.
@@ -126,7 +129,8 @@ public abstract class AbstractCriterionBasedVariableSelector<V extends Variable>
      *
      * @return <i>true</i> if the weights should be flushed
      */
-    protected boolean flushWeights() {if (solver.getRestartCount() >= flushThs) {
+    protected boolean flushWeights() {
+      if (solver.getRestartCount() >= flushThs) {
             flushThs = solver.getRestartCount();
             flushThs += 20;
             return true;

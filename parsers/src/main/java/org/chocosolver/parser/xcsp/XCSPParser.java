@@ -1096,7 +1096,6 @@ public class XCSPParser implements XCallbacks2 {
             vars = Arrays.stream(vars).map(v -> model.intView(1, v, offset)).toArray(IntVar[]::new);
         }
         model.regularDec(vars, auto);//.post();
-//        model.regular(vars, auto).post();
     }
 
     @Override
