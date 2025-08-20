@@ -12,13 +12,15 @@ package org.chocosolver.memory;
 import org.chocosolver.memory.structure.BasicIndexedBipartiteSet;
 import org.chocosolver.memory.structure.IOperation;
 
+import java.util.BitSet;
+
 
 /**
  * An interface to ease declaration of backtrackable objects (mostly primitives).
  *
  * @author Charles Prud'homme, Hadrien Cambazard, Guillaume Rochart
  */
-public interface IEnvironment  {
+public interface IEnvironment {
 
     /**
      * Returns the world number.
@@ -85,6 +87,7 @@ public interface IEnvironment  {
     /**
      * Factory pattern: new StoredFloat objects are created by the environment
      * (no initial value is assigned to the backtrackable search)
+     *
      * @return new IStateDouble computed by the environment
      */
 
@@ -101,6 +104,7 @@ public interface IEnvironment  {
 
     /**
      * Factory pattern: new backtrackable long attached to this environment.
+     *
      * @return a backtrackable long
      */
     @SuppressWarnings("unused")
@@ -108,6 +112,7 @@ public interface IEnvironment  {
 
     /**
      * Factory pattern: new backtrackable long attached to this environment.
+     *
      * @param init its initial value
      * @return a backtrackable long
      */
@@ -122,12 +127,29 @@ public interface IEnvironment  {
     IStateBitSet makeBitSet(int size);
 
     /**
+     * Factory pattern: new IStateBitSet objects are created by the environment
+     *
+     * @param initialSet initial set of the IStateBitSet
+     * @return IStateBitSet
+     */
+    IStateBitSet makeBitSet(BitSet initialSet);
+
+
+    /**
      * Factory pattern: new SparseBitSet objects are created by the environment
      *
      * @param blocksize block size in bits.
      * @return IStateBitSet
      */
     IStateBitSet makeSparseBitset(int blocksize);
+
+    /**
+     * Factory pattern: new SparseBitSet objects are created by the environment
+     *
+     * @param initialSet initial bitset
+     * @return IStateBitSet
+     */
+    IStateBitSet makeSparseBitset(BitSet initialSet);
 
     /**
      * Factory pattern: new IStateIntVector objects are created by the environment
@@ -158,13 +180,15 @@ public interface IEnvironment  {
 
     /**
      * Save this operation onto the stack of operations to undo on backtrack.
+     *
      * @param operation operation to undo
      */
     void save(IOperation operation);
 
     /**
      * Save this operation onto the stack of operations to undo on backtrack, at level `worldIndex`.
-     * @param operation operation to undo
+     *
+     * @param operation  operation to undo
      * @param worldIndex when to apply this
      */
     void saveAt(IOperation operation, int worldIndex);
@@ -172,6 +196,7 @@ public interface IEnvironment  {
     /**
      * Return the current time stamp.
      * It differs from world index since it never decrements.
+     *
      * @return the timestamp
      */
     int getTimeStamp();

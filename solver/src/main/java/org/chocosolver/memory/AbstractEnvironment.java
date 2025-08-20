@@ -11,6 +11,8 @@ package org.chocosolver.memory;
 
 import org.chocosolver.memory.structure.*;
 
+import java.util.BitSet;
+
 /**
  * Super class of all environments !
  */
@@ -59,8 +61,25 @@ public abstract class AbstractEnvironment implements IEnvironment {
     }
 
     @Override
+    public IStateBitSet makeBitSet(BitSet initialSet) {
+        int size = initialSet.size();
+        if (size < 32) {
+            return new OneWordS32BitSet(this, initialSet);
+        } else if (size < 64) {
+            return new OneWordS64BitSet(this, initialSet);
+        } else {
+            return new S64BitSet(this, initialSet);
+        }
+    }
+
+    @Override
     public IStateBitSet makeSparseBitset(int blocksize) {
-        return new SparseBitSet(this, 64);
+        return new SparseBitSet(this, blocksize);
+    }
+
+    @Override
+    public IStateBitSet makeSparseBitset(BitSet initialSet) {
+        return new SparseBitSet(this, initialSet);
     }
 
     /**

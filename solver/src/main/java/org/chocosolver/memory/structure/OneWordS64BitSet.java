@@ -13,6 +13,8 @@ import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateBitSet;
 import org.chocosolver.memory.IStateLong;
 
+import java.util.BitSet;
+
 
 public class OneWordS64BitSet implements IStateBitSet {
 
@@ -42,6 +44,26 @@ public class OneWordS64BitSet implements IStateBitSet {
      */
     public OneWordS64BitSet(IEnvironment environment) {
         word = environment.makeLong(0);
+    }
+
+    /**
+     * Creates a bit set using the specified long array.
+     *
+     * @param environment backtrackable environment
+     * @param initial     the initial long array to use
+     */
+    public OneWordS64BitSet(IEnvironment environment, long initial) {
+        this.word = environment.makeLong(initial);
+    }
+
+    /**
+     * Creates a bit set using the specified long array.
+     *
+     * @param environment backtrackable environment
+     * @param initial     the initial long array to use
+     */
+    public OneWordS64BitSet(IEnvironment environment, BitSet initial) {
+        this(environment, initial.toLongArray()[0]);
     }
 
     /**

@@ -20,7 +20,10 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.util.BitSet;
 
 /**
  * <br/>
@@ -30,38 +33,42 @@ import org.testng.annotations.Test;
  */
 public class BitsetIntVarImplTest {
 
-    BitsetIntVarImpl var;
+    @DataProvider
+    public Object[][] makeVar() {
+        int[] dom = new int[]{-5, 0, 3, 4, 5};
+        BitSet bs = new BitSet();
+        int off = -5;
+        for (int i : dom) {
+            bs.set(i - off);
+        }
 
-    public void setUp() throws Exception {
-        var = new BitsetIntVarImpl("test", new int[]{-5, 0, 3, 4, 5}, new Model());
+        return new Object[][]{
+                {new BitsetIntVarImpl("test", dom, new Model())},
+                {new BitsetIntVarImpl("test", bs, off, new Model())}};
     }
 
-    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
-    public void testUpdateInfeasBounds() throws Exception {
-        setUp();
-        var.updateBounds(1,-1, Cause.Null);
+    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class, dataProvider = "makeVar")
+    public void testUpdateInfeasBounds(IntVar var) throws Exception {
+                var.updateBounds(1,-1, Cause.Null);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testRemoveValue() throws Exception {
-        setUp();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "makeVar")
+    public void testRemoveValue(IntVar var) throws Exception {
         Assert.assertFalse(var.removeValue(7, Cause.Null));
         Assert.assertTrue(var.removeValue(0, Cause.Null));
         Assert.assertFalse(var.contains(0));
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testRemoveInterval() throws Exception {
-        setUp();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "makeVar")
+    public void testRemoveInterval(IntVar var) throws Exception {
         Assert.assertFalse(var.removeInterval(7, 8, Cause.Null));
         Assert.assertTrue(var.removeInterval(0, 3, Cause.Null));
         Assert.assertFalse(var.contains(0));
         Assert.assertFalse(var.contains(3));
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testUpdateLowerBound() throws Exception {
-        setUp();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "makeVar")
+    public void testUpdateLowerBound(IntVar var) throws Exception {
         Assert.assertFalse(var.updateLowerBound(-6, Cause.Null));
         Assert.assertTrue(var.updateLowerBound(0, Cause.Null));
         Assert.assertTrue(var.contains(0));
@@ -69,9 +76,8 @@ public class BitsetIntVarImplTest {
 
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testUpdateUpperBound() throws Exception {
-        setUp();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "makeVar")
+    public void testUpdateUpperBound(IntVar var) throws Exception {
         Assert.assertFalse(var.updateUpperBound(6, Cause.Null));
         Assert.assertTrue(var.updateUpperBound(0, Cause.Null));
         Assert.assertTrue(var.contains(0));
@@ -79,56 +85,48 @@ public class BitsetIntVarImplTest {
     }
 
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testGetLB() throws Exception {
-        setUp();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "makeVar")
+    public void testGetLB(IntVar var) throws Exception {
         Assert.assertEquals(-5, var.getLB());
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testGetUB() throws Exception {
-        setUp();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "makeVar")
+    public void testGetUB(IntVar var) throws Exception {
         Assert.assertEquals(5, var.getUB());
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testGetDomainSize() throws Exception {
-        setUp();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "makeVar")
+    public void testGetDomainSize(IntVar var) throws Exception {
         Assert.assertEquals(5, var.getDomainSize());
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testNextValue() throws Exception {
-        setUp();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "makeVar")
+    public void testNextValue(IntVar var) throws Exception {
         Assert.assertEquals(-5, var.nextValue(-6));
         Assert.assertEquals(0, var.nextValue(-5));
         Assert.assertEquals(Integer.MAX_VALUE, var.nextValue(5));
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testPreviousValue() throws Exception {
-        setUp();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "makeVar")
+    public void testPreviousValue(IntVar var) throws Exception {
         Assert.assertEquals(5, var.previousValue(6));
         Assert.assertEquals(0, var.previousValue(3));
         Assert.assertEquals(Integer.MIN_VALUE, var.previousValue(-5));
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testHasEnumeratedDomain() throws Exception {
-        setUp();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "makeVar")
+    public void testHasEnumeratedDomain(IntVar var) throws Exception {
         Assert.assertTrue(var.hasEnumeratedDomain());
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testGetTypeAndKind() throws Exception {
-        setUp();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "makeVar")
+    public void testGetTypeAndKind(IntVar var) throws Exception {
         Assert.assertTrue((Variable.INT & var.getTypeAndKind()) != 0);
         Assert.assertTrue((Variable.VAR & var.getTypeAndKind()) != 0);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testGetValueIterator() throws Exception {
-        setUp();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "makeVar")
+    public void testGetValueIterator(IntVar var) throws Exception {
         DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(-5, vit.next());
@@ -158,9 +156,8 @@ public class BitsetIntVarImplTest {
         vit.dispose();
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testGetRangeIterator() throws Exception {
-        setUp();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "makeVar")
+    public void testGetRangeIterator(IntVar var) throws Exception {
         DisposableRangeIterator rit = var.getRangeIterator(true);
         Assert.assertTrue(rit.hasNext());
         Assert.assertEquals(-5, rit.min());

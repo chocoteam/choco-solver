@@ -15,6 +15,7 @@ import org.chocosolver.memory.IStateInt;
 import org.chocosolver.memory.IStateLong;
 
 import java.lang.reflect.Array;
+import java.util.BitSet;
 
 
 public class S64BitSet implements IStateBitSet {
@@ -22,10 +23,10 @@ public class S64BitSet implements IStateBitSet {
     private final static boolean CHECK = false;
 
     /*
-    * BitSets are packed into arrays of "words."  Currently a word is
-    * a long, which consists of 64 bits, requiring 6 address bits.
-    * The choice of word size is determined purely by performance concerns.
-    */
+     * BitSets are packed into arrays of "words."  Currently a word is
+     * a long, which consists of 64 bits, requiring 6 address bits.
+     * The choice of word size is determined purely by performance concerns.
+     */
     private final static int ADDRESS_BITS_PER_WORD = 6;
     protected final static int BITS_PER_WORD = 1 << ADDRESS_BITS_PER_WORD;
 
@@ -75,7 +76,7 @@ public class S64BitSet implements IStateBitSet {
      */
     private void checkInvariants() {
         assert (wordsInUse.get() == 0 || words[wordsInUse.get() - 1].get() != 0);
-        assert (wordsInUse.get() >= 0 && wordsInUse.get() <= words.length);
+        assert (wordsInUse.get() <= words.length);
         assert (wordsInUse.get() == words.length || words[wordsInUse.get()].get() == 0);
     }
 
@@ -126,6 +127,28 @@ public class S64BitSet implements IStateBitSet {
 
         initWords(nbits);
     }
+
+    /**
+     * Creates a bit set whose initial size is large enough to explicitly
+     * represent bits with indices in the range <code>0</code> through
+     * <code>nbits-1</code>. All bits are initially <code>false</code>.
+     *
+     * @param environment backtrackable environment
+     * @param initial     the initial bitset
+     * @throws NegativeArraySizeException if the specified initial size
+     *                                    is negative.
+     */
+    public S64BitSet(IEnvironment environment, BitSet initial) {
+        this.environment = environment;
+        long[] iwords = initial.toLongArray();
+        this.wordsInUse = environment.makeInt(iwords.length);
+        this.words = new IStateLong[iwords.length];
+        for (int i = 0; i < iwords.length; i++) {
+            this.words[i] = environment.makeLong(iwords[i]);
+        }
+        if (CHECK) checkInvariants();
+    }
+
 
     private void initWords(int nbits) {
         words = new IStateLong[wordIndex(nbits - 1) + 1];
@@ -397,7 +420,7 @@ public class S64BitSet implements IStateBitSet {
      *
      * @param fromIndex the index to start checking from (inclusive)
      * @return the index of the next set bit, or {@code -1} if there
-     *         is no such bit
+     * is no such bit
      * @throws IndexOutOfBoundsException if the specified index is negative
      * @since 1.4
      */
@@ -470,7 +493,7 @@ public class S64BitSet implements IStateBitSet {
      *
      * @param fromIndex the index to start checking from (inclusive)
      * @return the index of the previous set bit, or {@code -1} if there
-     *         is no such bit
+     * is no such bit
      * @throws IndexOutOfBoundsException if the specified index is less
      *                                   than {@code -1}
      * @since 1.7
@@ -503,7 +526,7 @@ public class S64BitSet implements IStateBitSet {
      *
      * @param fromIndex the index to start checking from (inclusive)
      * @return the index of the previous clear bit, or {@code -1} if there
-     *         is no such bit
+     * is no such bit
      * @throws IndexOutOfBoundsException if the specified index is less
      *                                   than {@code -1}
      * @since 1.7
@@ -561,7 +584,7 @@ public class S64BitSet implements IStateBitSet {
      * <code>BitSet</code>.
      *
      * @return the number of bits set to <tt>true</tt> in this
-     *         <code>BitSet</code>.
+     * <code>BitSet</code>.
      * @since 1.4
      */
     public int cardinality() {

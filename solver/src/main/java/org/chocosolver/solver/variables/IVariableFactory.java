@@ -19,6 +19,8 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
+import java.util.BitSet;
+
 /**
  * Interface to make variables (BoolVar, IntVar, RealVar, SetVar, and GraphVar)
  * <p>
@@ -185,6 +187,20 @@ public interface IVariableFactory extends ISelf<Model> {
     }
 
     /**
+     * Create an integer variable of initial domain declared by <i>values</i>.
+     * The offset is used to shift the values in the domain.
+     * Uses an enumerated domain that supports holes
+     *
+     * @param values domain of the variable as a BitSet
+     *               (only values in the set are considered)
+     * @param offset offset to apply to the values in the set
+     * @return an IntVar of domain <i>values</i>
+     */
+    default IntVar intVar(BitSet values, int offset) {
+        return intVar(generateName("IV_"), values, offset);
+    }
+
+    /**
      * Create an integer variable of initial domain [<i>lb</i>, <i>ub</i>]
      * Uses an enumerated domain if <i>ub</i>-<i>lb</i> is small, and a bounded domain otherwise
      *
@@ -312,6 +328,40 @@ public interface IVariableFactory extends ISelf<Model> {
     }
 
     /**
+     * Create an integer variable of initial domain declared by <i>values</i>.
+     * The offset is used to shift the values in the domain.
+     * Uses an enumerated domain that supports holes
+     *
+     * @param name   name of the variable
+     * @param values domain of the variable as a BitSet
+     *               (only values in the set are considered)
+     * @param offset offset to apply to the values in the set
+     * @return an IntVar of domain <i>values</i>
+     */
+
+    default IntVar intVar(String name, BitSet values, int offset) {
+        if (values == null) {
+            throw new NullPointerException("The bitset should not be null");
+        } else if (values.isEmpty()) {
+            throw new IllegalArgumentException("The bitset should not be empty");
+        } else if (values.nextSetBit(0) != 0) {
+            throw new IllegalArgumentException("The first bit of the bitset should be set to true");
+        }
+        if (values.cardinality() == 1) {
+            return intVar(name, values.nextSetBit(-1) + offset);
+        } else if (values.cardinality() == 2 && offset == 0
+                && values.nextSetBit(0) == 0 && values.nextSetBit(1) == 1) {
+            return boolVar(name);
+        } else {
+            IntVar v = new BitsetIntVarImpl(name, values, offset, ref());
+            if (ref().getSettings().isLCG()) {
+                v = new IntVarEagerLit(v);
+            }
+            return v;
+        }
+    }
+
+    /**
      * Create an integer variable of initial domain based on <code>from</code>.
      *
      * @param from variable to copy values from
@@ -358,6 +408,20 @@ public interface IVariableFactory extends ISelf<Model> {
      */
     default IntVar[] intVarArray(int size, int[] values) {
         return intVarArray(generateName("IV_"), size, values);
+    }
+
+    /**
+     * Creates an array of <i>size</i> integer variables, taking their domain in the BitSet <i>values</i>.
+     * The offset is used to shift the values in the domain.
+     *
+     * @param size   number of variables
+     * @param values initial domain of each variable
+     *               (only values in the set are considered)
+     * @param offset offset to apply to the values in the set
+     * @return an array of <i>size</i> IntVar of domain <i>values</i>
+     */
+    default IntVar[] intVarArray(int size, BitSet values, int offset) {
+        return intVarArray(generateName("IV_"), size, values, offset);
     }
 
     /**
@@ -446,6 +510,25 @@ public interface IVariableFactory extends ISelf<Model> {
         return vars;
     }
 
+    /**
+     * Creates an array of <i>size</i> integer variables, taking their domain in the BitSet <i>values</i>.
+     * The offset is used to shift the values in the domain.
+     *
+     * @param name   prefix name of the variables to create. The ith variable will be named <i>name</i>[i]
+     * @param size   number of variables
+     * @param values initial domain of each variable
+     *               (only values in the set are considered)
+     * @param offset offset to apply to the values in the set
+     * @return an array of <i>size</i> IntVar of domain <i>values</i>
+     */
+    default IntVar[] intVarArray(String name, int size, BitSet values, int offset) {
+        IntVar[] vars = new IntVar[size];
+        for (int i = 0; i < size; i++) {
+            vars[i] = intVar(name + "[" + i + "]", values, offset);
+        }
+        return vars;
+    }
+
     // MATRIX
 
     /**
@@ -458,6 +541,21 @@ public interface IVariableFactory extends ISelf<Model> {
      */
     default IntVar[][] intVarMatrix(int dim1, int dim2, int[] values) {
         return intVarMatrix(generateName("IV_"), dim1, dim2, values);
+    }
+
+    /**
+     * Creates a matrix of <i>dim1*dim2</i> integer variables, taking their domain in the BitSet <i>values</i>.
+     * The offset is used to shift the values in the domain.
+     *
+     * @param dim1   number of rows in the matrix
+     * @param dim2   number of columns in the matrix
+     * @param values initial domain of each variable
+     *               (only values in the set are considered)
+     * @param offset offset to apply to the values in the set
+     * @return an array of <i>size</i> IntVar of domain <i>values</i>
+     */
+    default IntVar[][] intVarMatrix(int dim1, int dim2, BitSet values, int offset) {
+        return intVarMatrix(generateName("IV_"), dim1, dim2, values, offset);
     }
 
     /**
@@ -547,6 +645,26 @@ public interface IVariableFactory extends ISelf<Model> {
         IntVar[][] vars = new IntVar[dim1][dim2];
         for (int i = 0; i < dim1; i++) {
             vars[i] = intVarArray(name + "[" + i + "]", dim2, values);
+        }
+        return vars;
+    }
+
+    /**
+     * Creates a matrix of <i>dim1*dim2</i> integer variables, taking their domain in the BitSet <i>values</i>.
+     * The offset is used to shift the values in the domain.
+     *
+     * @param name   prefix name of the variables to create. The ith variable will be named <i>name</i>[i]
+     * @param dim1   number of rows in the matrix
+     * @param dim2   number of columns in the matrix
+     * @param values initial domain of each variable
+     *               (only values in the set are considered)
+     * @param offset offset to apply to the values in the set
+     * @return an array of <i>size</i> IntVar of domain <i>values</i>
+     */
+    default IntVar[][] intVarMatrix(String name, int dim1, int dim2, BitSet values, int offset) {
+        IntVar[][] vars = new IntVar[dim1][dim2];
+        for (int i = 0; i < dim1; i++) {
+            vars[i] = intVarArray(name + "[" + i + "]", dim2, values, offset);
         }
         return vars;
     }

@@ -31,6 +31,7 @@ import org.chocosolver.util.iterators.IntVarValueIterator;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 import org.chocosolver.util.tools.ArrayUtils;
 
+import java.util.BitSet;
 import java.util.Iterator;
 
 /**
@@ -91,6 +92,37 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
     /**
      * Create an enumerated IntVar based on a bitset
      *
+     * @param name   name of the variable
+     * @param values bitset of available values
+     * @param offset offset of the lower bound and the first value in the domain
+     *               (i.e. the lower bound is offset, the first value in the domain is offset)
+     *               this is required to avoid negative indexes in the bitset
+     * @param model  declaring model
+     */
+    public BitsetIntVarImpl(String name, BitSet values, int offset, Model model) {
+        super(name, model);
+        assert values != null : "The domain of the variable should not be null";
+        assert values.cardinality() > 0 : "The domain of the variable should not be empty";
+        assert values.nextSetBit(0) == 0 : "The domain of the variable should start at 0";
+        IEnvironment env = model.getEnvironment();
+        OFFSET = offset;
+        int capacity = values.size();
+        int length = values.cardinality();
+        if (capacity > 30 && capacity / length > 5) {
+            this.VALUES = env.makeSparseBitset(values);
+        } else {
+            this.VALUES = env.makeBitSet(values);
+        }
+        this.LB = env.makeInt(0);
+        LENGTH = values.previousSetBit(capacity - 1) + 1;
+        this.UB = env.makeInt(LENGTH - 1);
+        this.SIZE = env.makeInt(length);
+    }
+
+
+    /**
+     * Create an enumerated IntVar based on a bitset
+     *
      * @param name         name of the variable
      * @param sortedValues original domain values
      * @param model        declaring model
@@ -102,7 +134,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         int capacity = sortedValues[sortedValues.length - 1] - OFFSET + 1;
         if (capacity > 30 && capacity / sortedValues.length > 5) {
             this.VALUES = env.makeSparseBitset(64);
-        }else {
+        } else {
             this.VALUES = env.makeBitSet(capacity);
         }
         for (int sortedValue : sortedValues) {
@@ -208,7 +240,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
             // the new bounds are now known, delegate to the right method
             fixpoint = updateBounds(nlb, nub, cause);
             hasChanged |= fixpoint;
-        } while(fixpoint);
+        } while (fixpoint);
         // now deal with holes
         int value = vlb;
         boolean hasRemoved = false;
@@ -663,9 +695,9 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         return s.toString();
     }
 
-    ////////////////////////////////////////////////////////////////
-    ///// methode liees au fait qu'une variable est observable /////
-    ////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////
+    /// // methode liees au fait qu'une variable est observable /////
+    /// /////////////////////////////////////////////////////////////
 
 
     @Override
@@ -682,7 +714,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         return new EnumDeltaMonitor(delta, propagator);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public int getTypeAndKind() {
@@ -694,7 +726,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         return new IntEvtScheduler();
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public DisposableValueIterator getValueIterator(boolean bottomUp) {
