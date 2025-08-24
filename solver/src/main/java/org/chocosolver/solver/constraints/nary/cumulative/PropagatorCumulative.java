@@ -61,7 +61,6 @@ public class PropagatorCumulative extends PropagatorResource {
     private final List<Integer> tasksWithFreeParts;
     // For explanations
     private final TIntObjectHashMap<Reason> reasonRect;
-    private final TIntObjectHashMap<Reason> reasonHeightRect;
 
     public PropagatorCumulative(Task[] tasks, IntVar[] heights, IntVar capacity) {
         super(false, tasks, heights, capacity, PropagatorPriority.QUADRATIC, true, false);
@@ -69,7 +68,6 @@ public class PropagatorCumulative extends PropagatorResource {
         tasksWithFreeParts = new ArrayList<>(tasks.length);
         ttAfter = new TIntIntHashMap(2 * tasks.length);
         reasonRect = new TIntObjectHashMap<>();
-        reasonHeightRect = new TIntObjectHashMap<>();
     }
 
     private void scalableTimeTable(final List<Task> tasks, final List<IntVar> heights) throws ContradictionException {
@@ -87,42 +85,29 @@ public class PropagatorCumulative extends PropagatorResource {
             if (profile.getHeightRectangle(idxRectMaxHeight) < profile.getHeightRectangle(j)) {
                 idxRectMaxHeight = j;
             }
-            if (this.getModel().getSettings().isLCG()) {
-                reasonRect.put(j, buildReasonRectangle(j, tasks));
-                reasonHeightRect.put(j, buildReasonHeightRectangle(j, tasks, heights));
+            if (lcg()) {
+                reasonRect.put(j, buildReasonRectangle(j, tasks, heights));
             }
         }
-        if (this.getModel().getSettings().isLCG()) {
-            capacity.updateLowerBound(profile.getHeightRectangle(idxRectMaxHeight), this, reasonHeightRect.get(idxRectMaxHeight));
+        if (lcg()) {
+            capacity.updateLowerBound(profile.getHeightRectangle(idxRectMaxHeight), this, reasonRect.get(idxRectMaxHeight));
         } else {
             capacity.updateLowerBound(profile.getHeightRectangle(idxRectMaxHeight), this);
         }
     }
 
-    private Reason buildReasonHeightRectangle(final int indexRect, final List<Task> tasks, final List<IntVar> heights) {
+    private Reason buildReasonRectangle(final int indexRect, final List<Task> tasks, final List<IntVar> heights) {
         final int startRectangle = profile.getStartRectangle(indexRect);
         final int endRectangle = profile.getEndRectangle(indexRect);
         final TIntArrayList indexesTask = profile.getIndexesTaskRectangle(indexRect);
-        final int[] literals = new int[1 + 3 * indexesTask.size()];
+        final int[] literals = new int[2 + 3 * indexesTask.size()];
         int idx = 0;
+        literals[++idx] = capacity.getLELit(capacity.getUB());
         for (int i = 0; i < indexesTask.size(); ++i) {
             final int idxTask = indexesTask.getQuick(i);
             literals[++idx] = tasks.get(idxTask).getEnd().getGELit(endRectangle);
             literals[++idx] = tasks.get(idxTask).getStart().getLELit(startRectangle);
             literals[++idx] = heights.get(idxTask).getGELit(heights.get(idxTask).getLB());
-        }
-        return Reason.r(literals);
-    }
-
-    private Reason buildReasonRectangle(final int indexRect, final List<Task> tasks) {
-        final int startRectangle = profile.getStartRectangle(indexRect);
-        final int endRectangle = profile.getEndRectangle(indexRect);
-        final TIntArrayList indexesTask = profile.getIndexesTaskRectangle(indexRect);
-        final int[] literals = new int[1 + 2 * indexesTask.size()];
-        int idx = 0;
-        for (int i = 0; i < indexesTask.size(); ++i) {
-            literals[++idx] = tasks.get(indexesTask.getQuick(i)).getEnd().getGELit(endRectangle);
-            literals[++idx] = tasks.get(indexesTask.getQuick(i)).getStart().getLELit(startRectangle);
         }
         return Reason.r(literals);
     }
@@ -134,11 +119,8 @@ public class PropagatorCumulative extends PropagatorResource {
                 final IntVar height = heights.get(i);
                 int j = profile.find(task.getLst());
                 while (j < profile.size() && profile.getStartRectangle(j) < task.getEct()) {
-                    if (this.getModel().getSettings().isLCG()) {
-                        Reason reason = Reason.gather(
-                                Reason.gather(reasonHeightRect.get(j), height.getGELit(height.getLB())),
-                                capacity.getLELit(capacity.getUB())
-                        );
+                    if (lcg()) {
+                        Reason reason = Reason.gather(reasonRect.get(j), height.getGELit(height.getLB()));
                         height.updateUpperBound(capacity.getUB() - (profile.getHeightRectangle(j) - height.getLB()), this, reason);
                     } else {
                         height.updateUpperBound(capacity.getUB() - (profile.getHeightRectangle(j) - height.getLB()), this);
@@ -172,7 +154,7 @@ public class PropagatorCumulative extends PropagatorResource {
             int j = profile.find(task.getEst());
             while (j < profile.size() && profile.getStartRectangle(j) < Math.min(task.getEct(), task.getLst())) {
                 if (capacity.getUB() - height.getLB() < profile.getHeightRectangle(j)) {
-                    if (this.getModel().getSettings().isLCG()) {
+                    if (lcg()) {
                         Reason reason = Reason.gather(reasonRect.get(j), task.getEnd().getGELit(profile.getStartRectangle(j) + 1));
                         hasFiltered |= PropagatorResource.filterEst(task, height, Math.min(task.getLst(), profile.getEndRectangle(j)), this, reason)
                                        && PropagatorResource.mustBePerformed(task, height);
@@ -193,7 +175,7 @@ public class PropagatorCumulative extends PropagatorResource {
             int j = profile.find(task.getLct() - 1);
             while (j >= 1 && profile.getEndRectangle(j) > Math.max(task.getLst(), task.getEct())) {
                 if (capacity.getUB() - height.getLB() < profile.getHeightRectangle(j)) {
-                    if (this.getModel().getSettings().isLCG()) {
+                    if (lcg()) {
                         Reason reason = Reason.gather(reasonRect.get(j), task.getStart().getLELit(profile.getEndRectangle(j) - 1));
                         hasFiltered |= PropagatorResource.filterLct(task, height, Math.max(profile.getStartRectangle(j), task.getEct()), this, reason)
                                        && PropagatorResource.mustBePerformed(task, height);
