@@ -243,8 +243,18 @@ public class OptionalTask extends Task {
     }
 
     @Override
+    public boolean forceToBePerformed(ICause cause, Reason reason) throws ContradictionException {
+        return performed.updateLowerBound(1, cause, reason);
+    }
+
+    @Override
     public boolean forceToBeOptional(ICause cause) throws ContradictionException {
         return performed.updateUpperBound(0, cause);
+    }
+
+    @Override
+    public boolean forceToBeOptional(ICause cause, Reason reason) throws ContradictionException {
+        return performed.updateUpperBound(0, cause, reason);
     }
 
     @Override
