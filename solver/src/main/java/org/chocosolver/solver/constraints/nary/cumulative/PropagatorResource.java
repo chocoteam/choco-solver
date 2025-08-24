@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Abstract class offering useful services for Propagator implementing the Cumulative or Disjunctive constraints.
+ *
  * @author Arthur Godet <arth.godet@gmail.com>
  * @since 17/06/2023
  */
@@ -99,6 +101,7 @@ public abstract class PropagatorResource extends Propagator<IntVar> {
      *
      * @param task   a task
      * @param height a height variable
+     * @param est    the est
      * @param cause  the propagator that filters the est
      * @return true iff updating the est has filtered a variable
      * @throws ContradictionException an exception if a domain has been emptied
@@ -119,6 +122,7 @@ public abstract class PropagatorResource extends Propagator<IntVar> {
      *
      * @param task   a task
      * @param height a height variable
+     * @param est    the est
      * @param cause  the propagator that filters the est
      * @param reason the reason of the filtering
      * @return true iff updating the est has filtered a variable
@@ -140,6 +144,7 @@ public abstract class PropagatorResource extends Propagator<IntVar> {
      *
      * @param task   a task
      * @param height a height variable
+     * @param lst    the lst
      * @param cause  the propagator that filters the est
      * @return true iff updating the lst has filtered a variable
      * @throws ContradictionException an exception if a domain has been emptied
@@ -160,6 +165,7 @@ public abstract class PropagatorResource extends Propagator<IntVar> {
      *
      * @param task   a task
      * @param height a height variable
+     * @param lst    the lst
      * @param cause  the propagator that filters the est
      * @param reason the reason of the filtering
      * @return true iff updating the lst has filtered a variable
@@ -181,6 +187,7 @@ public abstract class PropagatorResource extends Propagator<IntVar> {
      *
      * @param task   a task
      * @param height a height variable
+     * @param ect    the ect
      * @param cause  the propagator that filters the est
      * @return true iff updating the ect has filtered a variable
      * @throws ContradictionException an exception if a domain has been emptied
@@ -201,6 +208,7 @@ public abstract class PropagatorResource extends Propagator<IntVar> {
      *
      * @param task   a task
      * @param height a height variable
+     * @param ect    the ect
      * @param cause  the propagator that filters the est
      * @param reason the reason of the filtering
      * @return true iff updating the ect has filtered a variable
@@ -222,6 +230,7 @@ public abstract class PropagatorResource extends Propagator<IntVar> {
      *
      * @param task   a task
      * @param height a height variable
+     * @param lct    the lct
      * @param cause  the propagator that filters the est
      * @return true iff updating the lct has filtered a variable
      * @throws ContradictionException an exception if a domain has been emptied
@@ -242,6 +251,7 @@ public abstract class PropagatorResource extends Propagator<IntVar> {
      *
      * @param task   a task
      * @param height a height variable
+     * @param lct    the lct
      * @param cause  the propagator that filters the est
      * @param reason the reason of the filtering
      * @return true iff updating the lct has filtered a variable
@@ -261,9 +271,11 @@ public abstract class PropagatorResource extends Propagator<IntVar> {
      * Updates the bounds of the task's duration variable, considering its height variable. The height variable's upper bound is set to 0, or the
      * task becomes optional if updating empties the duration variable's domain.
      *
-     * @param task   a task
-     * @param height a height variable
-     * @param cause  the propagator that filters the est
+     * @param task        a task
+     * @param height      a height variable
+     * @param minDuration the min duration
+     * @param maxDuration the max duration
+     * @param cause       the propagator that filters the est
      * @return true iff updating the bounds of the task's duration variable has filtered a variable
      * @throws ContradictionException an exception if a domain has been emptied
      */
@@ -288,6 +300,18 @@ public abstract class PropagatorResource extends Propagator<IntVar> {
     public static boolean intersect(Task a, Task b) {
         return a.mayBePerformed() && b.mayBePerformed() &&
                 b.getLst() < a.getEct() && a.getLst() < b.getEct();
+    }
+
+    /**
+     * Enforces the relation between start, duration and end variables of the tasks.
+     *
+     * @param tasks the tasks
+     * @throws ContradictionException an exception thrown when enforcing task relation
+     */
+    public static void enforceTaskVariablesRelation(final List<Task> tasks) throws ContradictionException {
+        for (int i = 0; i < tasks.size(); i++) {
+            tasks.get(i).propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
+        }
     }
 
     /**
@@ -452,23 +476,28 @@ public abstract class PropagatorResource extends Propagator<IntVar> {
         }
     }
 
+    /**
+     * Recomputes internal data structures useful for the propagator (should be overridden).
+     */
     protected void recomputeDataStructure() {
 
     }
 
-    protected void enforceTaskVariablesRelation(List<Task> tasks) throws ContradictionException {
-        for (int i = 0; i < tasks.size(); i++) {
-            tasks.get(i).propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
-        }
-    }
-
-    protected void enforceTaskVariablesRelation() throws ContradictionException {
+    /**
+     * Enforces the relation between start, duration and end variables on all the tasks of the propagator (regardless their performance status).
+     *
+     * @throws ContradictionException an exception thrown when enforcing task relation
+     */
+    protected final void enforceTaskVariablesRelation() throws ContradictionException {
         for (int i = 0; i < tasks.length; i++) {
             tasks[i].propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
         }
     }
 
-    protected void computeMustBePerformedTasks() {
+    /**
+     * Computes the collections of tasks regarding their performance status.
+     */
+    protected final void computeMustBePerformedTasks() {
         // TODO: should be shared by all propagators on a given resource to save memory and time
         if (shouldRecomputePerformed || model.getSolver().getNodeCount() == 0) {
             indexes.clear();

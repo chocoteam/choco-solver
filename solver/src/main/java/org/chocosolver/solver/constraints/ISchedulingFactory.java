@@ -82,7 +82,7 @@ public interface ISchedulingFactory extends ISelf<Model> {
         final List<Task> tasksToKeep = new ArrayList<>();
         final List<IntVar> heightsToKeep = new ArrayList<>();
         for (int i = 0; i < heights.length; i++) {
-            if (heights[i].getUB() > 0 && tasks[i].getMaxDuration() > 0) {
+            if (heights[i].getUB() > 0 && tasks[i].getMaxDuration() > 0 && tasks[i].mayBePerformed()) {
                 tasksToKeep.add(tasks[i]);
                 heightsToKeep.add(heights[i]);
             }
@@ -96,15 +96,11 @@ public interface ISchedulingFactory extends ISelf<Model> {
             keptTasks[i] = tasksToKeep.get(i);
             keptHeights[i] = heightsToKeep.get(i);
         }
-        if (keptTasks.length == 1) {
-            return ref().arithm(keptHeights[0], "<=", capacity);
-        } else {
-            return new Constraint(
-                    ConstraintsName.CUMULATIVE,
-                    new PropagatorCumulative(keptTasks, keptHeights, capacity),
-                    new PropagatorCapacity(keptTasks, keptHeights, capacity)
-            );
-        }
+        return new Constraint(
+                ConstraintsName.CUMULATIVE,
+                new PropagatorCumulative(keptTasks, keptHeights, capacity),
+                new PropagatorCapacity(keptTasks, keptHeights, capacity)
+        );
     }
 
     /**
@@ -143,19 +139,19 @@ public interface ISchedulingFactory extends ISelf<Model> {
     ////////////////////////////////// SEARCH ///////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////
 
-    default IntVar[] extractVars(Task[] tasks, Function<Task, IntVar> function) {
+    static IntVar[] extractVars(Task[] tasks, Function<Task, IntVar> function) {
         return Arrays.stream(tasks).map(function).toArray(IntVar[]::new);
     }
 
-    default IntVar[] extractStartVars(Task[] tasks) {
+    static IntVar[] extractStartVars(Task[] tasks) {
         return extractVars(tasks, Task::getStart);
     }
 
-    default IntVar[] extractDurationVars(Task[] tasks) {
+    static IntVar[] extractDurationVars(Task[] tasks) {
         return extractVars(tasks, Task::getDuration);
     }
 
-    default IntVar[] extractEndVars(Task[] tasks) {
+    static IntVar[] extractEndVars(Task[] tasks) {
         return extractVars(tasks, Task::getEnd);
     }
 

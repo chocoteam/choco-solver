@@ -20,55 +20,78 @@ import org.chocosolver.util.sort.ArraySort;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Class representing a series of {@link Event}.
+ *
+ * @author Arthur Godet <arth.godet@gmail.com>
+ * @since 19/10/2023
+ */
 public class EventPointSeries {
-    protected Event[] eventsArray;
-    protected int nbEvents;
-    protected int timeIndex;
-    protected Comparator<Event> comparator = Event::compareTo;
-    protected ArraySort<Event> sort;
+    /**
+     * The array of events.
+     */
+    private final Event[] eventsArray;
+    /**
+     * The index of the last event in the series.
+     */
+    private int nbEvents;
+    /**
+     * The index of the first event in the series.
+     */
+    private int indexFirstEvent;
+    /**
+     * The comparator used on events.
+     */
+    private final Comparator<Event> comparator = Event::compareTo;
+    /**
+     * Used to sort the array of events.
+     */
+    private final ArraySort<Event> sort;
 
-    public EventPointSeries(int nbTasks, int nbMaxEventsPerTask) {
-        eventsArray = new Event[nbMaxEventsPerTask * nbTasks];
+    /**
+     * Instantiates a new EventPointSeries.
+     *
+     * @param nbTasks the maximum number of tasks the EventPointSeries will manage
+     */
+    public EventPointSeries(int nbTasks) {
+        eventsArray = new Event[2 * nbTasks];
         for (int i = 0; i < eventsArray.length; i++) {
             eventsArray[i] = new Event();
         }
         sort = new ArraySort<>(eventsArray.length, true, false);
     }
 
+    /**
+     * Returns true iff the series is empty.
+     *
+     * @return true iff the series is empty
+     */
     public boolean isEmpty() {
-        return timeIndex >= nbEvents;
+        return indexFirstEvent >= nbEvents;
     }
 
+    /**
+     * Returns the size of the series.
+     *
+     * @return the size of the series
+     */
     public int size() {
-        return nbEvents - timeIndex;
+        return nbEvents - indexFirstEvent;
     }
 
-    public void generateEvents(List<Task> tasks, boolean generatePREvents, boolean generateCCPEvents, boolean mergeScpAndCcpEvents) {
+    /**
+     * Generates SCP and ECP events (start and end of compulsory parts) of the tasks and sorts them.
+     *
+     * @param tasks the tasks for which SCP and ECP events should be generated
+     */
+    public void generateEvents(final List<Task> tasks) {
         nbEvents = 0;
-        timeIndex = 0;
+        indexFirstEvent = 0;
         for (int i = 0; i < tasks.size(); i++) {
-            Task task = tasks.get(i);
-            if (task.mustBePerformed()) {
-                if (generatePREvents) {
-                    // start min can be filtered
-                    if (!task.getStart().isInstantiated()) {
-                        eventsArray[nbEvents++].set(Event.PR, i, task.getEst());
-                    }
-                }
-                if (mergeScpAndCcpEvents) {
-                    eventsArray[nbEvents++].set(Event.SCP, i, task.getLst());
-                    if (task.getLst() < task.getEct()) {
-                        eventsArray[nbEvents++].set(Event.ECP, i, task.getEct());
-                    }
-                } else {
-                    // a compulsory part exists
-                    if (task.getLst() < task.getEct()) {
-                        eventsArray[nbEvents++].set(Event.SCP, i, task.getLst());
-                        eventsArray[nbEvents++].set(Event.ECP, i, task.getEct());
-                    } else if (generateCCPEvents) { // conditional compulsory part
-                        eventsArray[nbEvents++].set(Event.CCP, i, task.getLst());
-                    }
-                }
+            final Task task = tasks.get(i);
+            if (task.mustBePerformed() && task.hasCompulsoryPart()) {
+                eventsArray[nbEvents++].set(Event.SCP, i, task.getLst());
+                eventsArray[nbEvents++].set(Event.ECP, i, task.getEct());
             }
         }
         if (!isEmpty()) {
@@ -76,67 +99,28 @@ public class EventPointSeries {
         }
     }
 
-    public Event getEvent() {
-        return eventsArray[timeIndex];
+    /**
+     * Returns the time of the first event in the series.
+     *
+     * @return the time of the first event in the series
+     */
+    public int getTimeFirstEvent() {
+        return eventsArray[indexFirstEvent].getTime();
     }
 
-    public Event removeEvent() {
-        return eventsArray[timeIndex++];
-    }
-
-    public void swap(int index1, int index2) {
-        Event tmp = eventsArray[index1];
-        eventsArray[index1] = eventsArray[index2];
-        eventsArray[index2] = tmp;
-    }
-
-    public void addEvent(int type, int idxTask, int date) {
-        int pos = nbEvents;
-        eventsArray[nbEvents++].set(type, idxTask, date);
-        while (timeIndex <= pos - 1 && comparator.compare(eventsArray[pos - 1], eventsArray[pos]) > 0) {
-            swap(pos - 1, pos);
-            pos--;
-        }
-    }
-
-    public void updateEvent(int type, int idxTask, Updater updater) {
-        int pos = timeIndex;
-        while (pos < nbEvents && (eventsArray[pos].type != type || eventsArray[pos].indexTask != idxTask)) {
-            pos++;
-        }
-        if (pos < nbEvents) {
-            updater.update(eventsArray[pos]);
-            while (pos < nbEvents - 1 && comparator.compare(eventsArray[pos], eventsArray[pos + 1]) > 0) {
-                swap(pos, pos + 1);
-                pos++;
-            }
-        }
-    }
-
-    public void updateCompulsoryPartEvents(int idxTask, Task task) {
-        if (task.getLst() < task.getEct()) {
-            updateEvent(Event.SCP, idxTask, e -> e.date = task.getLst());
-            updateEvent(Event.ECP, idxTask, e -> e.date = task.getEct());
-        }
-    }
-
-    public int getNextDate() {
-        int pos = timeIndex;
-        int date = eventsArray[pos].date;
-        while (pos < nbEvents && eventsArray[pos].date == date) {
-            pos++;
-        }
-        if (pos < nbEvents) {
-            return eventsArray[pos].date;
-        } else {
-            return date;
-        }
+    /**
+     * Removes and returns the first event in the series.
+     *
+     * @return the first event in the series
+     */
+    public Event removeFirstEvent() {
+        return eventsArray[indexFirstEvent++];
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("EventPointSeries[");
-        for (int pos = timeIndex; pos < nbEvents; pos++) {
+        for (int pos = indexFirstEvent; pos < nbEvents; pos++) {
             sb.append(eventsArray[pos]);
             if (pos < nbEvents - 1) {
                 sb.append(",");
@@ -144,10 +128,5 @@ public class EventPointSeries {
         }
         sb.append("]");
         return sb.toString();
-    }
-
-    @FunctionalInterface
-    public interface Updater {
-        void update(Event e);
     }
 }
