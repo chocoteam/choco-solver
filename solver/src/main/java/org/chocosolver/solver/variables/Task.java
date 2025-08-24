@@ -286,7 +286,17 @@ public class Task extends Propagator<IntVar> {
         return false;
     }
 
+    public boolean forceToBePerformed(ICause cause, Reason reason) throws ContradictionException {
+        return false;
+    }
+
     public boolean forceToBeOptional(ICause cause) throws ContradictionException {
+        ContradictionException ex = new ContradictionException();
+        ex.set(cause, null, "forcing Task to be optional");
+        throw ex;
+    }
+
+    public boolean forceToBeOptional(ICause cause, Reason reason) throws ContradictionException {
         ContradictionException ex = new ContradictionException();
         ex.set(cause, null, "forcing Task to be optional");
         throw ex;
