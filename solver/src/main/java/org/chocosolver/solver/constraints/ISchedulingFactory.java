@@ -96,11 +96,18 @@ public interface ISchedulingFactory extends ISelf<Model> {
             keptTasks[i] = tasksToKeep.get(i);
             keptHeights[i] = heightsToKeep.get(i);
         }
-        return new Constraint(
-                ConstraintsName.CUMULATIVE,
-                new PropagatorCumulative(keptTasks, keptHeights, capacity),
-                new PropagatorCapacity(keptTasks, keptHeights, capacity)
-        );
+        if (keptTasks.length == 1) {
+            return new Constraint(
+                    ConstraintsName.CUMULATIVE,
+                    new PropagatorCapacity(keptTasks, keptHeights, capacity)
+            );
+        } else {
+            return new Constraint(
+                    ConstraintsName.CUMULATIVE,
+                    new PropagatorCumulative(keptTasks, keptHeights, capacity),
+                    new PropagatorCapacity(keptTasks, keptHeights, capacity)
+            );
+        }
     }
 
     /**
