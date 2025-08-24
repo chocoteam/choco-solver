@@ -76,10 +76,6 @@ public class PropagationEngine {
      */
     protected Propagator<?> lastProp;
     /**
-     * The last scheduled variable
-     */
-    protected Variable lastVar;
-    /**
      * One bit per queue: true if the queue is not empty.
      */
     private int notEmpty;
@@ -108,11 +104,6 @@ public class PropagationEngine {
             awake_queue.addLast(propagator);
         }
     };
-
-    /**
-     * A propagation insight to collect information about the propagation
-     */
-    private PropagationInsight insight = PropagationInsight.VOID;
 
     /**
      * A seven-queue propagation engine.
@@ -226,28 +217,20 @@ public class PropagationEngine {
      */
     public void propagate() throws ContradictionException {
         propagateSat();
-        insight.clear();
         activatePropagators();
         do {
             manageModifications();
             for (int i = nextNotEmpty(); i > -1; i = nextNotEmpty()) {
                 assert !pro_queue[i].isEmpty() : "try to pop a propagator from an empty queue";
                 lastProp = pro_queue[i].pollFirst();
-                insight.cardinality(lastProp);
                 if (pro_queue[i].isEmpty()) {
                     notEmpty &= ~(1 << i);
                 }
                 // revision of the variable
                 lastProp.unschedule();
                 delayedPropagationType = 0;
-                try {
-                    propagateEvents();
-                    propagateSat();
-                    insight.update(lastProp, lastVar, false);
-                } catch (ContradictionException cex) {
-                    insight.update(lastProp, lastVar, true);
-                    throw cex;
-                }
+                propagateEvents();
+                propagateSat();
                 if (hybrid < 0b01) {
                     manageModifications();
                 }
@@ -345,7 +328,6 @@ public class PropagationEngine {
             notEmpty = notEmpty & ~(1 << i);
         }
         lastProp = null;
-        lastVar = null;
     }
 
     /**
@@ -365,7 +347,6 @@ public class PropagationEngine {
             }
             assert found : variable + " not in scope of " + cause;
         }
-        insight.modifiy(variable);
         if (!variable.isScheduled()) {
             var_queue.addLast(variable);
             variable.schedule();
@@ -417,10 +398,6 @@ public class PropagationEngine {
         }
     }
 
-    public void setInsight(PropagationInsight insight) {
-        this.insight = insight;
-    }
-
     public void setHybrid(byte hybrid) {
         this.hybrid = hybrid;
     }
@@ -443,7 +420,6 @@ public class PropagationEngine {
         notEmpty = 0;
         init = false;
         lastProp = null;
-        lastVar = null;
     }
 
     public void ignoreModifications() {

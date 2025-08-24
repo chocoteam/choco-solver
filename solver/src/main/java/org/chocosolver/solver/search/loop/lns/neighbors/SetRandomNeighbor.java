@@ -37,7 +37,7 @@ public class SetRandomNeighbor implements INeighbor {
 
     @Override
     public void recordSolution() {
-        value.clear();
+        value.resetQuick();
         for (int i:var.getLB()) {
             value.add(i);
         }
@@ -57,7 +57,7 @@ public class SetRandomNeighbor implements INeighbor {
 
     @Override
     public void loadFromSolution(Solution solution) {
-        value.clear();
+        value.resetQuick();
         for(int i:solution.getSetVal(var)){
             value.add(i);
         }

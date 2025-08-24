@@ -42,7 +42,7 @@ public class ConflictOrderingSearchTest {
     public void before() {
         model = new Model();
         mvars = model.intVarArray(10, 0, 5);
-        cos = new ConflictOrderingSearch(model, Search.inputOrderLBSearch(mvars));
+        cos = new ConflictOrderingSearch(Search.inputOrderLBSearch(mvars));
     }
 
 

@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.choco-solver</groupId>
         <artifactId>choco</artifactId>
-        <version>5.0.0-beta.1</version>
+        <version>5.0.0-beta.2</version>
     </parent>
     <artifactId>choco-solver</artifactId>
     <packaging>jar</packaging>
@@ -114,7 +114,7 @@
                 <configuration>
                     <!--suppress UnresolvedMavenProperty -->
 <!--                    <argLine>${argLine} -Xms384m -Xmx768m -Djava.library.path=/usr/local/lib</argLine>-->
-                    <argLine>${argLine} -Djava.library.path=/usr/local/lib</argLine>
+                    <argLine>${argLine} -Djava.library.path=/usr/local/lib:/usr/local/lib/ibex/3rd</argLine>
                     <properties>
                         <property>
                             <name>listener</name>

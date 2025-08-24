@@ -1051,9 +1051,12 @@ public class XCSPParser implements XCallbacks2 {
     public void buildCtrRegular(String id, XVariables.XVarInteger[] list, Transition[] transitions, String startState, String[] finalStates) {
         FiniteAutomaton auto = new FiniteAutomaton();
         TObjectIntHashMap<String> s2s = new TObjectIntHashMap<>(16, 1.5f, -1);
+        // add offset to support negative values in transitions
+        int minVal = Arrays.stream(transitions).mapToInt(tr -> ((Long)tr.value).intValue()).min().getAsInt();
+        int offset = minVal < 0 ? -minVal : 0;
         for (Transition tr : transitions) {
             int f = s2s.get(tr.start);
-            int v = ((Long) tr.value).intValue();
+            int v = ((Long) tr.value).intValue() + offset;
             if (f == -1) {
                 f = auto.addState();
                 s2s.put(tr.start, f);
@@ -1067,7 +1070,11 @@ public class XCSPParser implements XCallbacks2 {
         }
         auto.setInitialState(s2s.get(startState));
         auto.setFinal(Arrays.stream(finalStates).mapToInt(s2s::get).toArray());
-        model.regular(vars(list), auto).post();
+        IntVar[] vars = vars(list);
+        if (offset > 0) {
+            vars = Arrays.stream(vars).map(v -> model.intView(1, v, offset)).toArray(IntVar[]::new);
+        }
+        model.regular(vars, auto).post();
     }
 
     @Override

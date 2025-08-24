@@ -269,7 +269,7 @@ public class PropGenericLagrDCMST extends Propagator<Variable> implements GraphL
             return;//the UB does not allow to prune
         }
         // initialisation
-        mandatoryArcsList.clear();
+        mandatoryArcsList.resetQuick();
         for (int i = 0; i < n; i++) {
             Dmin[i] = D[i].getLB();
             Dmax[i] = D[i].getUB();

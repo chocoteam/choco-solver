@@ -13,7 +13,6 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -36,11 +35,6 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
-
-    /**
-     * The target solver
-     */
-    protected Model model;
 
     /**
      * The main strategy declared in the solver
@@ -67,8 +61,6 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
      */
     int pcft;
 
-    protected Set<V> scope;
-
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
@@ -76,12 +68,10 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
     /**
      * Creates a conflict-ordering search
      *
-     * @param model        the solver to attach this to
      * @param mainStrategy the main strategy declared
      */
-    public ConflictOrderingSearch(Model model, AbstractStrategy<V> mainStrategy) {
+    public ConflictOrderingSearch(AbstractStrategy<V> mainStrategy) {
         super(mainStrategy.vars);
-        this.model = model;
         this.mainStrategy = mainStrategy;
         // internal datastructures
         vars = new ArrayList<>();
@@ -89,7 +79,6 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
         prev = new TIntArrayList();
         next = new TIntArrayList();
         pcft = -1;
-        this.scope = new HashSet<>(Arrays.asList(mainStrategy.vars));
     }
 
     //***********************************************************************************
@@ -98,7 +87,7 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
 
     @Override
     public boolean init() {
-        if(model.getSolver().getSearchMonitors().contains(this)) {
+        if (!model.getSolver().getSearchMonitors().contains(this)) {
             model.getSolver().plugMonitor(this);
         }
         return mainStrategy.init();
@@ -107,7 +96,7 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
     @Override
     public void remove() {
         this.mainStrategy.remove();
-        if(model.getSolver().getSearchMonitors().contains(this)) {
+        if (model.getSolver().getSearchMonitors().contains(this)) {
             model.getSolver().unplugMonitor(this);
         }
     }
@@ -133,9 +122,9 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
     @Override
     public void onContradiction(ContradictionException cex) {
         //noinspection unchecked
-        Decision<V> dec = model.getSolver().getDecisionPath().getLastDecision();
-        if(dec != RootDecision.ROOT) {
-            if (scope.contains(dec.getDecisionVariable())) {
+        Decision<V> dec = decisionPath.getLastDecision();
+        if (dec != RootDecision.ROOT) {
+            if (isVarInScope(dec.getDecisionVariable())) {
                 stampIt(dec.getDecisionVariable());
             }
         }
@@ -191,20 +180,19 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
         return null;
     }
 
-    boolean check(){
+    boolean check() {
         boolean ok = true;
         int first = -1;
-        for(int i = 0; i < vars.size() && ok; i++){
+        for (int i = 0; i < vars.size() && ok; i++) {
             int p = prev.get(i);
             int n = next.get(i);
             ok = (i == pcft && n == -1) || prev.get(n) == i;
             ok &= p == -1 || next.get(p) == i;
-            if(p == -1){
+            if (p == -1) {
                 ok &= first == -1;
                 first = i;
             }
         }
         return ok;
     }
-
 }

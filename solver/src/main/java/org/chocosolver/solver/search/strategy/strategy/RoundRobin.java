@@ -127,7 +127,7 @@ public class RoundRobin extends AbstractStrategy<IntVar> implements IMonitorRest
         if (!opt.isPresent()) {
             opt = OptionalInt.of(valueSelectors[combinations.get(currentCombination)[1]].selectValue(variable));
         }
-        return variable.getModel().getSolver().getDecisionPath().makeIntDecision(variable, DecisionOperatorFactory.makeIntEq(), opt.getAsInt());
+        return decisionPath.makeIntDecision(variable, DecisionOperatorFactory.makeIntEq(), opt.getAsInt());
     }
 
     @Override

@@ -43,19 +43,19 @@ public class StrategiesSequencer<U extends Variable> extends AbstractStrategy<U>
         }
         return vars;
     }
-    
+
     public StrategiesSequencer(IEnvironment environment, AbstractStrategy<U>[] strategies) {
         super(make(strategies));
-        index = environment.makeInt(0);
+        this.index = environment.makeInt(0);
         this.strategies = strategies;
     }
 
     @SafeVarargs
-	public StrategiesSequencer(AbstractStrategy<U>... strategies) {
-		super(make(strategies));
-		index = null;
-		this.strategies = strategies;
-	}
+    public StrategiesSequencer(AbstractStrategy<U>... strategies) {
+        super(make(strategies));
+        this.index = null;
+        this.strategies = strategies;
+    }
 
     @Override
     public boolean init() {
@@ -78,24 +78,15 @@ public class StrategiesSequencer<U extends Variable> extends AbstractStrategy<U>
         if (variable == null || variable.isInstantiated()) {
             return null;
         }
-        int idx = (index==null)?0:index.get();
+        int idx = (index == null) ? 0 : index.get();
         Decision<U> decision = null;
         while (decision == null && idx < strategies.length) {
-            if (contains(strategies[idx].vars, variable)) {
+            if (strategies[idx].isVarInScope(variable)) {
                 decision = strategies[idx].computeDecision(variable);
             }
             idx++;
         }
         return decision;
-    }
-
-    private static boolean contains(Variable[] vars, Variable variable) {
-        for (Variable v : vars) {
-            if (v.equals(variable)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -104,14 +95,14 @@ public class StrategiesSequencer<U extends Variable> extends AbstractStrategy<U>
      */
     @Override
     public Decision<U> getDecision() {
-        int idx = (index==null)?0:index.get();
+        int idx = (index == null) ? 0 : index.get();
         Decision<U> decision = strategies[idx].getDecision();
         while (decision == null && idx < strategies.length - 1) {
             decision = strategies[++idx].getDecision();
         }
-		if(index!=null){
-			index.set(idx);
-		}
+        if (index != null) {
+            index.set(idx);
+        }
         return decision;
     }
 
@@ -130,6 +121,7 @@ public class StrategiesSequencer<U extends Variable> extends AbstractStrategy<U>
 
     /**
      * Return the sub-strategies of <code>this</code>.
+     *
      * @return the sub-strategies of <code>this</code>.
      */
     public AbstractStrategy<U>[] getStrategies() {

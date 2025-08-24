@@ -256,7 +256,7 @@ public class ConnectivityFinder {
             numOfNode = new int[n];
             inf = new int[n];
         }
-        articulations.clear();
+        articulations.resetQuick();
         ISet act = graph.getNodes();
         ISetIterator iter = act.iterator();
         while (iter.hasNext()) {

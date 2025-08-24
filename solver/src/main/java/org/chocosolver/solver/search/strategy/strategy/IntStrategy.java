@@ -93,7 +93,7 @@ public class IntStrategy extends AbstractStrategy<IntVar> {
             return null;
         }
         int value = valueSelector.selectValue(variable);
-        return variable.getModel().getSolver().getDecisionPath().makeIntDecision(variable, decisionOperator, value);
+        return decisionPath.makeIntDecision(variable, decisionOperator, value);
     }
 
     @SuppressWarnings({"unchecked"})

@@ -110,7 +110,7 @@ public class Clause extends Reason {
     /**
      * Create a clause with a set of literals, not learnt
      *
-     * @param ps
+     * @param ps literals
      */
     Clause(TIntList ps) {
         this(ps, false);
@@ -169,7 +169,7 @@ public class Clause extends Reason {
         st.append("T").append(Thread.currentThread().getId());
         st.append("~#").append(id).append(" Size:").append(literals_.length).append(" - ");
         if (literals_.length > 0) {
-            st.append(literals_[0]).append(" ");
+            st.append(literals_[0]);
         }
         for (int i = 1; i < literals_.length; i++) {
             st.append(" ∨ ").append(literals_[i]);

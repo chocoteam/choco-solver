@@ -153,7 +153,7 @@ public class PropAtMostNValues extends Propagator<IntVar> {
     //***********************************************************************************
 
     private void filterK1Rule() throws ContradictionException {
-        dVar.clear();
+        dVar.resetQuick();
         for (int i = 0; i < n; i++) {
             if (!vars[i].isInstantiated()) {
                 if (emptyIntersectionWith(vars[i], instVals)) {

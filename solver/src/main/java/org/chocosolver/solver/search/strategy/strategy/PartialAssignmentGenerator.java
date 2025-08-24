@@ -118,7 +118,7 @@ public class PartialAssignmentGenerator<V extends Variable> extends AbstractStra
             }
             if (best.contains(currentVal)) {
                 //noinspection unchecked
-                return (Decision<V>) solver.getDecisionPath().makeIntDecision(
+                return (Decision<V>) decisionPath.makeIntDecision(
                         best, DecisionOperatorFactory.makeIntEq(), currentVal);
             }
         }
