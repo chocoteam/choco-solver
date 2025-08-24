@@ -10,6 +10,7 @@
 package org.chocosolver.solver.constraints.nary.cumulative;
 
 import org.chocosolver.memory.IStateInt;
+import org.chocosolver.solver.constraints.ISchedulingFactory;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -20,22 +21,25 @@ import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 
+/**
+ * Propagator used to filter the capacity variable and the height variables of tasks in a Cumulative constraint.
+ * More particularly, it assures that the following equation :
+ * <p>
+ * tasks[i].mustBePerformed() &Implies; (heights[i] &le; capacity &or; tasks[i].duration = 0).
+ * <p>
+ * Il also assures that all heights variables and capacity variable are positive.
+ *
+ * @author Arthur Godet <arth.godet@gmail.com>
+ * @since 17/06/2023
+ */
 public class PropagatorCapacity extends Propagator<IntVar> {
-    private static IntVar[] extractDurationVars(Task[] tasks) {
-        IntVar[] durations = new IntVar[tasks.length];
-        for (int i = 0; i < tasks.length; i++) {
-            durations[i] = tasks[i].getDuration();
-        }
-        return durations;
-    }
-
-    protected final IStateInt lastCapaMax;
+    private final IStateInt lastCapaMax;
     private final Task[] tasks;
     private final IntVar[] heights;
     private final IntVar capacity;
 
-    public PropagatorCapacity(Task[] tasks, IntVar[] heights, IntVar capacity) {
-        super(ArrayUtils.append(extractDurationVars(tasks), heights, new IntVar[]{capacity}), PropagatorPriority.LINEAR, true);
+    public PropagatorCapacity(final Task[] tasks, final IntVar[] heights, final IntVar capacity) {
+        super(ArrayUtils.append(ISchedulingFactory.extractDurationVars(tasks), heights, new IntVar[]{capacity}), PropagatorPriority.LINEAR, true);
         this.tasks = tasks;
         this.heights = heights;
         this.capacity = capacity;
@@ -60,7 +64,15 @@ public class PropagatorCapacity extends Propagator<IntVar> {
         }
     }
 
-    private void propagateTask(int i) throws ContradictionException {
+    /**
+     * Propagates the capacity constraint for the task at index i. More particularly, it enforces the following equation :
+     * <p>
+     * tasks[i].mustBePerformed() &Implies; (heights[i] &le; capacity &or; tasks[i].duration = 0).
+     *
+     * @param i the index of the task
+     * @throws ContradictionException whenever a filtering error occurs
+     */
+    private void propagateTask(final int i) throws ContradictionException {
         if (capacity.getUB() < heights[i].getLB()) {
             if (tasks[i].mustBePerformed()) {
                 tasks[i].updateDuration(0, 0, this);
@@ -81,24 +93,50 @@ public class PropagatorCapacity extends Propagator<IntVar> {
                 heights[i].updateLowerBound(0, this);
             }
         }
-        int capaMax = capacity.getUB();
+        final int capaMax = capacity.getUB();
         if (lastCapaMax.get() != capaMax) {
+            // No need to run the following instructions if the maximum capacity has not changed since last run
             lastCapaMax.set(capaMax);
-            int sumHeights = 0;
+            boolean shouldPassivate = true;
             for (int i = 0; i < tasks.length; i++) {
                 propagateTask(i);
-                if (tasks[i].mayBePerformed()) {
-                    sumHeights += heights[i].getUB();
+                if (tasks[i].mayBePerformed() && isUndefined(i)) {
+                    // the equation is not entailed for this task
+                    shouldPassivate = false;
                 }
             }
-            if (sumHeights <= capacity.getLB()) {
+            if (shouldPassivate) {
                 setPassive();
             }
         }
     }
 
+    /**
+     * Returns true iff the status of the task at index i is undefined, <i>i.e.</i> its duration can be strictly
+     * greater than 0 and its height higher than the capacity.
+     *
+     * @param i the index of the task
+     * @return true iff the status of the task at index i is undefined
+     */
+    private boolean isUndefined(final int i) {
+        return tasks[i].getMaxDuration() > 0 && capacity.getLB() < heights[i].getUB();
+    }
+
     @Override
     public ESat isEntailed() {
-        return PropagatorResource.isEntailed(false, tasks, heights, capacity);
+        boolean undefined = false;
+        for (int i = 0; i < tasks.length; ++i) {
+            final boolean undef = isUndefined(i);
+            if (tasks[i].mustBePerformed()) {
+                if (tasks[i].getMinDuration() > 0 && heights[i].getLB() > capacity.getUB()) {
+                    return ESat.FALSE;
+                } else if (undef) {
+                    undefined = true;
+                }
+            } else if (tasks[i].mayBePerformed() && undef) {
+                undefined = true;
+            }
+        }
+        return undefined ? ESat.UNDEFINED : ESat.TRUE;
     }
 }
