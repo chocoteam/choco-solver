@@ -9,20 +9,14 @@
  */
 package org.chocosolver.solver.lcg;
 
-import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Providers;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.strategy.Search;
-import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
-import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
-import org.chocosolver.solver.search.strategy.selectors.variables.Random;
-import org.chocosolver.solver.search.strategy.strategy.SetStrategy;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -132,6 +126,41 @@ public class LCGTest {
             solver.setSearch(Search.randomSearch(vars, seed));
         }
         while (solver.solve()) ;
+        Assert.assertEquals(solver.getSolutionCount(), s, "seed: " + seed);
+    }
+
+    @Test(groups = "lcg", dataProvider = "nqueen", timeOut = 60000)
+    public void testNQueenAllSolutionsLim(boolean bounded, boolean view, int n, int s, long seed) {
+        // to ensure that prohibiting-solution clauses are not removed by the clause database reduction
+        Model model = new Model("LCG Queens enum",
+                Settings.init().setLCG(true)
+                        .setNbMaxLearntClauses(100)
+        );
+        IntVar[] vars = model.intVarArray("Q", n, 1, n, bounded);
+
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                model.arithm(vars[i], "!=", vars[j]).post();
+                if (view) {
+                    model.arithm(vars[i], "!=", vars[j], "+", j - i).post();
+                    model.arithm(vars[i], "!=", vars[j], "-", j - i).post();
+                } else {
+                    model.arithm(vars[i], "!=", model.intView(1, vars[j], j - i)).post();
+                    model.arithm(vars[i], "!=", model.intView(1, vars[j], -j + i)).post();
+                }
+            }
+        }
+        Solver solver = model.getSolver();
+        if (seed == 0) {
+            solver.setSearch(Search.inputOrderLBSearch(vars));
+        } else {
+            solver.setSearch(Search.randomSearch(vars, seed));
+        }
+        while (solver.solve()) {
+//            System.out.printf("#%d : %s%n",
+//                    solver.getSolutionCount(),
+//                    Arrays.toString(Arrays.stream(vars).mapToInt(IntVar::getValue).toArray()));
+        };
         Assert.assertEquals(solver.getSolutionCount(), s, "seed: " + seed);
     }
 

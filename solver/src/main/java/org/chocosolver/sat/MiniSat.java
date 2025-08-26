@@ -84,6 +84,7 @@ public class MiniSat implements SatFactory {
     private final int ccmin_mode = 0; // Controls conflict clause minimization (0=none, 1=basic, 2=deep)
     private double cla_inc = 1;
     private final double clause_decay = 0.999;
+    int learnt_first_removable = 0; // index of first removable learnt clause (related to #reduceDB only).
 
     double learntsize_adjust_confl = 100;
     int learntsize_adjust_cnt = 100;
@@ -255,12 +256,30 @@ public class MiniSat implements SatFactory {
         return addClause(temporary_add_vector_);
     }
 
-    public void addLearnt(TIntList learnt_clause) {
+    /**
+     * Add a learnt clause to the solver.
+     * If the param unforgettable is true, the clause will not be removed during {@link #doReduceDB()}.
+     * This is useful for clauses that prohibit certain parts of the search space (e.g. solution clauses).
+     *
+     * @param learnt_clause the clause to add
+     * @param unforgettable if true, the clause will not be removed during {@link #doReduceDB()}
+     */
+    public void addLearnt(TIntList learnt_clause, boolean unforgettable) {
         if (learnt_clause.size() == 1) {
             uncheckedEnqueue(learnt_clause.get(0));
         } else {
             Clause cr = new Clause(learnt_clause, true);
             learnts.add(cr);
+            if (unforgettable) { // in the case of a solution, for instance.
+                if (learnts.size() > 1) {
+                    // swap the clause with the first removable clause
+                    learnts.set(learnts.size() - 1, learnts.get(learnt_first_removable));
+                    // replace it by the new clause
+                    learnts.set(learnt_first_removable, cr);
+                }
+                // increment the index
+                learnt_first_removable++;
+            }
             attachClause(cr);
             claBumpActivity(cr);
             uncheckedEnqueue(learnt_clause.get(0), Reason.r(cr));
@@ -765,6 +784,10 @@ public class MiniSat implements SatFactory {
             Clause c = cs.get(i);
             if (satisfied(c)) {
                 removeClause(cs.get(i));
+                if (i < learnt_first_removable) { // maintain the index
+                    learnt_first_removable--;
+                    assert learnt_first_removable >= 0;
+                }
             } else {
                 cs.set(j++, cs.get(i));
 
@@ -796,10 +819,12 @@ public class MiniSat implements SatFactory {
         int i, j;
         double extra_lim = cla_inc / learnts.size();    // Remove any clause below this activity
 
-        learnts.sort(Comparator.comparingDouble(c -> c.activity));
-        // Don't delete binary or locked clauses. From the rest, delete clauses from the first half
+        learnts.subList(learnt_first_removable, learnts.size())  // only removable clauses
+                .sort(Comparator.comparingDouble(c -> c.activity));
+        // Don't delete binary or locked clauses or unforgettable clauses.
+        // From the rest, delete clauses from the first half
         // and clauses with activity smaller than 'extra_lim':
-        for (i = j = 0; i < learnts.size(); i++) {
+        for (i = j = learnt_first_removable; i < learnts.size(); i++) {
             Clause c = learnts.get(i);
             if (c.size() > 2 && !locked(c) && (i < learnts.size() / 2 || c.activity < extra_lim))
                 removeClause(learnts.get(i));
@@ -846,8 +871,8 @@ public class MiniSat implements SatFactory {
 
     void claBumpActivity(Clause c) {
         if ((c.activity += cla_inc) > 1e20d) {
-            // Rescale:
-            for (int i = 0; i < learnts.size(); i++) {
+            // Rescale, only clauses that can be removed with reduceDB
+            for (int i = learnt_first_removable; i < learnts.size(); i++) {
                 learnts.get(i).activity *= 1e-20d;
             }
             cla_inc *= 1e-20d;
