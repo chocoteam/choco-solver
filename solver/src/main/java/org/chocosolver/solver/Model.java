@@ -983,7 +983,7 @@ public class Model implements IModel {
                             "A call to Model.post(Constraint) is more appropriate.");
                 } else {
                     for (Propagator<?> p : c.getPropagators()) {
-                        getSolver().getEngine().execute(p);
+                        getSolver().getEngine().execute(p, false);
                     }
                 }
             }
