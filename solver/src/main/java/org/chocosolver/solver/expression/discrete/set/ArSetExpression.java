@@ -1,25 +1,53 @@
+/*
+ * This file is part of choco-solver, http://choco-solver.org/
+ *
+ * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ *
+ * Licensed under the BSD 4-clause license.
+ *
+ * See LICENSE file in the project root for full license information.
+ */
 package org.chocosolver.solver.expression.discrete.set;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
 import org.chocosolver.solver.expression.discrete.relational.UnCReExpression;
 import org.chocosolver.solver.variables.SetVar;
 
+import java.util.Arrays;
+
 /**
- * Interface for set variable (*SetVar*) expressions.
+ * Interface for set variable (*SetVar*) arithmetical expressions.
  * This interface enables the construction of relational and arithmetic expressions
  * over sets, allowing operations such as union, intersection, and membership checks.
+ *
+ * @author Gabriel Augusto David
+ * @author Charles Prud'homme
  */
 
-public interface SetExpression {
+public interface ArSetExpression {
+
+    /**
+     * Return the associated model
+     *
+     * @return a Model object
+     */
+    Model getModel();
+
+    /**
+     * Returns the set variable associated with this expression.
+     *
+     * @return the corresponding set variable.
+     */
+    SetVar setVar();
+
     /**
      * Returns the union of this set with another set.
      *
      * @param y the other set expression.
      * @return a new expression representing the union.
      */
-    default SetExpression union(SetExpression y) {
+    default ArSetExpression union(ArSetExpression y) {
         return new BiArSetExpression(SetOperator.UNION, this, y);
     }
 
@@ -29,16 +57,17 @@ public interface SetExpression {
      * @param y the other set expression.
      * @return a new expression representing the intersection.
      */
-    default SetExpression intersection(SetExpression y) {
+    default ArSetExpression intersection(ArSetExpression y) {
         return new BiArSetExpression(SetOperator.INTERSECTION, this, y);
     }
+
     /**
      * Checks if this set is a subset of another set.
      *
      * @param y the other set expression.
      * @return a boolean expression representing the subset relationship.
      */
-    default ReExpression subSet(SetExpression y) {
+    default ReExpression subSet(ArSetExpression y) {
         return new BiReSetExpression(SetOperator.SUBSET, this, y);
     }
 
@@ -48,7 +77,7 @@ public interface SetExpression {
      * @param y the other set expression.
      * @return a boolean expression representing equality.
      */
-    default ReExpression eq(SetExpression y) {
+    default ReExpression eq(ArSetExpression y) {
         return new BiReSetExpression(SetOperator.EQ, this, y);
     }
 
@@ -58,7 +87,7 @@ public interface SetExpression {
      * @param y the other set expression.
      * @return a boolean expression representing inequality.
      */
-    default ReExpression ne(SetExpression y) {
+    default ReExpression ne(ArSetExpression y) {
         return new BiReSetExpression(SetOperator.NE, this, y);
     }
 
@@ -68,17 +97,18 @@ public interface SetExpression {
      * @param y the other set expression.
      * @return a boolean expression representing the containment relation.
      */
-    default ReExpression contains(SetExpression y) {
+    default ReExpression contains(ArSetExpression y) {
         return new BiReSetExpression(SetOperator.CONTAINS, this, y);
     }
+
     /**
      * Checks if this set does not contain another set.
      *
      * @param y the other set expression.
      * @return a boolean expression representing the non-membership relation.
      */
-    default ReExpression notContains(SetExpression y) {
-        return new BiReSetExpression(SetOperator.NC, this, y);
+    default ReExpression notContains(ArSetExpression y) {
+        return new BiReSetExpression(SetOperator.NOT_CONTAINS, this, y);
     }
 
     /**
@@ -88,7 +118,7 @@ public interface SetExpression {
      * @return a boolean expression representing the subset relationship.
      */
     default ReExpression subSet(int... y) {
-        return new UnReSetExpression(SetOperator.SUBSET, this, y);
+        return new BiReSetExpression(SetOperator.SUBSET, this, this.getModel().setVar(Arrays.stream(y).toArray()));
     }
 
     /**
@@ -98,7 +128,7 @@ public interface SetExpression {
      * @return a boolean expression representing equality.
      */
     default ReExpression eq(int... y) {
-        return new UnReSetExpression(SetOperator.EQ, this, y);
+        return new BiReSetExpression(SetOperator.EQ, this, this.getModel().setVar(Arrays.stream(y).toArray()));
     }
 
     /**
@@ -108,7 +138,7 @@ public interface SetExpression {
      * @return a boolean expression representing non-membership.
      */
     default ReExpression notContains(int... y) {
-        return new UnReSetExpression(SetOperator.NC, this, y);
+        return new BiReSetExpression(SetOperator.NOT_CONTAINS, this, this.getModel().setVar(Arrays.stream(y).toArray()));
     }
 
     /**
@@ -118,7 +148,7 @@ public interface SetExpression {
      * @return a boolean expression representing membership.
      */
     default ReExpression contains(int... y) {
-        return new UnReSetExpression(SetOperator.CONTAINS, this, y);
+        return new BiReSetExpression(SetOperator.CONTAINS, this, this.getModel().setVar(Arrays.stream(y).toArray()));
     }
 
     /**
@@ -128,7 +158,7 @@ public interface SetExpression {
      * @return a boolean expression representing inequality.
      */
     default ReExpression ne(int... y) {
-        return new UnReSetExpression(SetOperator.NE, this, y);
+        return new BiReSetExpression(SetOperator.NE, this, this.getModel().setVar(Arrays.stream(y).toArray()));
     }
 
     /**
@@ -136,9 +166,8 @@ public interface SetExpression {
      *
      * @return a constraint enforcing the non-emptiness of the set.
      */
-    default Constraint notEmpty() {
-        SetVar set = this.getSetVar();
-        return getModel().notEmpty(set);
+    default ReExpression notEmpty() {
+        return new BiReSetExpression(SetOperator.NOT_EMPTY, this, this.getModel().setVar());
     }
 
     /**
@@ -148,26 +177,8 @@ public interface SetExpression {
      * @return a unary relational expression enforcing the set cardinality.
      */
     default UnCReExpression setCard(int valueCard) {
-        SetVar set = this.getSetVar();
+        SetVar set = this.setVar();
         return set.getCard().eq(valueCard);
-    }
-
-    /**
-     * Returns the set variable associated with this expression.
-     *
-     * @return the corresponding set variable.
-     */
-    SetVar getSetVar();
-
-    /**
-     * Returns the model associated with this expression.
-     *
-     * @return the model of the expression.
-     * @throws UnsupportedOperationException if this method is not supported.
-     */
-
-    default Model getModel() {
-        throw new UnsupportedOperationException("getModel() is not supported in this context");
     }
 
 }
