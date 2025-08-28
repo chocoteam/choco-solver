@@ -21,6 +21,7 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.loop.monitors.IMonitorUpBranch;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
+import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
@@ -221,23 +222,11 @@ public abstract class SearchViz implements IMonitorDownBranch, IMonitorUpBranch,
     }
 
     private static String pretty(Decision<?> dec) {
-        if (dec == null) {
-            return "ROOT";
+        if (dec == null || dec instanceof RootDecision) {
+            return "";
         } else {
             // to print decision correctly (since the previous one is sent)
-            int a = dec.getArity();
-            int b = dec.triesLeft();
-            dec.rewind();
-            while (dec.triesLeft() > b + 1) {
-                a--;
-                dec.buildNext();
-            }
-            String pretty = dec.toString();
-            while (a > b) {
-                b++;
-                dec.buildNext();
-            }
-            return pretty;
+            return dec.toString();
         }
     }
 }
