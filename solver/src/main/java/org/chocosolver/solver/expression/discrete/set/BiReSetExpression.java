@@ -1,3 +1,12 @@
+/*
+ * This file is part of choco-solver, http://choco-solver.org/
+ *
+ * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ *
+ * Licensed under the BSD 4-clause license.
+ *
+ * See LICENSE file in the project root for full license information.
+ */
 package org.chocosolver.solver.expression.discrete.set;
 
 import org.chocosolver.solver.Model;
@@ -11,34 +20,32 @@ import java.util.HashSet;
 
 /**
  * BiReSetExpression - Binary Relational Set Expression
- *
+ * <p>
  * This class represents a binary relational expression between two SetVarExpression instances.
  * It supports relational operations such as equality (EQ), inequality (NE), subset (SUBSET),
  * and containment (CONTAINS). The operations can be composed and posted as constraints.
- *
+ * <p>
  * Example:
  * setA.eq(setB).post();
  * setA.ne(setB).post();
+ * </p>
+ *
+ * @author Gabriel Augusto David
+ * @author Charles Prud'homme
  */
 public class BiReSetExpression implements ReExpression {
 
-    private SetOperator op;
-    private SetExpression x;
-    private SetExpression y;
-    private Model model;
-    private SetVar xSet, ySet;
-
-    private Constraint constraint;
-
+    private final SetOperator op;
+    private final ArSetExpression x;
+    private final ArSetExpression y;
+    private final Model model;
     private BoolVar result;
 
-    public BiReSetExpression(SetOperator operator, SetExpression x, SetExpression y) {
+    public BiReSetExpression(SetOperator operator, ArSetExpression x, ArSetExpression y) {
         this.op = operator;
         this.model = x.getModel();
         this.x = x;
         this.y = y;
-        this.xSet = x.getSetVar();
-        this.ySet = y.getSetVar();
     }
 
     public Model getModel() {
@@ -48,25 +55,7 @@ public class BiReSetExpression implements ReExpression {
     @Override
     public BoolVar boolVar() {
         if (result == null) {
-            switch (op) {
-                case SUBSET:
-                    result = model.subsetEq(xSet, ySet).reify();
-                    break;
-                case EQ:
-                    result = model.allEqual(xSet, ySet).reify();
-                    break;
-                case NE:
-                    result = model.allDifferent(xSet, ySet).reify();
-                    break;
-                case CONTAINS:
-                    result = model.subsetEq(ySet, xSet).reify();
-                    break;
-                case NC:
-                    result = model.disjoint(ySet, xSet).reify();
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Unsupported SetOperator: " + op);
-            }
+            result = decompose().reify();
         }
         return result;
     }
@@ -78,25 +67,23 @@ public class BiReSetExpression implements ReExpression {
 
     @Override
     public Constraint decompose() {
+        SetVar xSet = x.setVar();
+        SetVar ySet = y.setVar();
         switch (op) {
             case SUBSET:
-                constraint = model.subsetEq(xSet, ySet);
-                break;
+                return model.subsetEq(xSet, ySet);
             case EQ:
-                constraint = model.allEqual(xSet, ySet);
-                break;
+                return model.allEqual(xSet, ySet);
             case NE:
-                constraint = model.allDifferent(xSet, ySet);
-                break;
+                return model.allDifferent(xSet, ySet);
             case CONTAINS:
-                constraint = model.subsetEq(ySet, xSet);
-                break;
-            case NC:
-                constraint = model.disjoint(xSet,ySet);
-                break;
+                return model.subsetEq(ySet, xSet);
+            case NOT_CONTAINS:
+                return model.disjoint(xSet, ySet);
+            case NOT_EMPTY:
+                return model.notEmpty(xSet);
             default:
                 throw new UnsupportedOperationException("Unsupported SetOperator: " + op);
         }
-        return constraint;
     }
 }
