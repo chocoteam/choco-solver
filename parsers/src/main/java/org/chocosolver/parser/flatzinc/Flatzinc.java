@@ -71,8 +71,8 @@ public class Flatzinc extends RegParser {
     protected boolean oss = false;
 
     @Option(name = "-ocs", usage = "Opens the complementary search to all variables of the problem\n" +
-            "(default: OUTPUT, i.e., restricted to the variables declared in output).")
-    protected CompleteSearch ocs = CompleteSearch.OUTPUT;
+            "(default: ALL, i.e., complete the search with a search on all variables.).")
+    protected CompleteSearch ocs = CompleteSearch.ALL;
 
     //***********************************************************************************
     // VARIABLES
