@@ -111,7 +111,7 @@ public class Profile {
         timePoints[idx] = Integer.MIN_VALUE;
         heights[idx] = 0;
         idx++;
-        eventPointSeries.generateEvents(tasks);
+        eventPointSeries.generateEvents(tasks, tasksHeights);
         if (!eventPointSeries.isEmpty()) {
             int h = 0;
             final TIntArrayList list = new TIntArrayList();
@@ -142,6 +142,7 @@ public class Profile {
 
     /**
      * Finds and returns the index of the rectangle containing the time-point in parameter.
+     * Runs in logarithmic time in the number of rectangles.
      *
      * @param time the time-point
      * @return the index of the rectangle containing the time-point
