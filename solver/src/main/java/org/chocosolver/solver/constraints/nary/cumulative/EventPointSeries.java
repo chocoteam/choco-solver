@@ -14,6 +14,7 @@
 
 package org.chocosolver.solver.constraints.nary.cumulative;
 
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.util.sort.ArraySort;
 
@@ -83,13 +84,14 @@ public class EventPointSeries {
      * Generates SCP and ECP events (start and end of compulsory parts) of the tasks and sorts them.
      *
      * @param tasks the tasks for which SCP and ECP events should be generated
+     * @param heights the height variables of the tasks
      */
-    public void generateEvents(final List<Task> tasks) {
+    public void generateEvents(final List<Task> tasks, final List<IntVar> heights) {
         nbEvents = 0;
         indexFirstEvent = 0;
         for (int i = 0; i < tasks.size(); i++) {
             final Task task = tasks.get(i);
-            if (task.mustBePerformed() && task.hasCompulsoryPart()) {
+            if (PropagatorResource.mustBePerformed(task, heights.get(i)) && task.hasCompulsoryPart()) {
                 eventsArray[nbEvents++].set(Event.SCP, i, task.getLst());
                 eventsArray[nbEvents++].set(Event.ECP, i, task.getEct());
             }
