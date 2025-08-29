@@ -137,7 +137,7 @@ public interface ISchedulingFactory extends ISelf<Model> {
                     starts[i].getLB() + durations[i],
                     starts[i].getUB() + durations[i],
                     true);
-            tasks[i] = new Task(starts[i], d[i], e[i]);
+            tasks[i] = ref().taskVar(starts[i], d[i], e[i]);
         }
         return cumulative(tasks, h, ref().intVar(capacity));
     }
