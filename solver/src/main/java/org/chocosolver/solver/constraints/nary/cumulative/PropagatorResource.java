@@ -303,6 +303,17 @@ public abstract class PropagatorResource extends Propagator<IntVar> {
     }
 
     /**
+     * Returns true iff either of the two tasks may not be performed or they are disjoint, i.e. a.est >= b.lct && b.est >= a.lct.
+     *
+     * @param a a task
+     * @param b another task
+     * @return true iff either of the two tasks may not be performed or they are disjoint
+     */
+    public static boolean disjoint(Task a, Task b) {
+        return !a.mayBePerformed() || !b.mayBePerformed() || a.getEst() >= b.getLct() || b.getEst() >= a.getLct();
+    }
+
+    /**
      * Enforces the relation between start, duration and end variables of the tasks.
      *
      * @param tasks the tasks
@@ -337,8 +348,8 @@ public abstract class PropagatorResource extends Propagator<IntVar> {
                 min = Math.min(min, tasks[i].getLst());
                 max = Math.max(max, tasks[i].getEct());
                 if (tasks[i].mustBePerformed()
-                        && (tasks[i].getEst() + tasks[i].getDuration().getLB() > tasks[i].getLct()
-                        || tasks[i].getLst() + tasks[i].getDuration().getUB() < tasks[i].getEct())) {
+                        && (tasks[i].getEst() + tasks[i].getMinDuration() > tasks[i].getLct()
+                        || tasks[i].getLst() + tasks[i].getMaxDuration() < tasks[i].getEct())) {
                     return ESat.FALSE;
                 }
             }
@@ -511,7 +522,7 @@ public abstract class PropagatorResource extends Propagator<IntVar> {
                 performedAndOptionalMirrorTasks.clear();
             }
             for (int i = 0; i < tasks.length; i++) {
-                if (heights[i].getLB() > 0 && tasks[i].mustBePerformed()) {
+                if (mustBePerformed(tasks[i], heights[i])) {
                     indexes.add(performedTasks.size());
                     performedTasks.add(tasks[i]);
                     performedMirrorTasks.add(tasks[i].getMirror());
@@ -519,7 +530,7 @@ public abstract class PropagatorResource extends Propagator<IntVar> {
                         tasksHeights.add(heights[i]);
                     }
                 }
-                if (filterOptionalTasks && heights[i].getUB() > 0 && tasks[i].mayBePerformed()) {
+                if (filterOptionalTasks && mayBePerformed(tasks[i], heights[i])) {
                     indexesWithOptional.add(performedAndOptionalTasks.size());
                     performedAndOptionalTasks.add(tasks[i]);
                     performedAndOptionalMirrorTasks.add(tasks[i].getMirror());
