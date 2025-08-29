@@ -261,7 +261,7 @@ public class OptionalTask extends Task {
     public boolean updateEst(int est, ICause cause) throws ContradictionException {
         if (mayBePerformed()) {
             if (est <= start.getUB()) {
-                return start.updateLowerBound(est, cause);
+                return super.updateEst(est, cause);
             } else {
                 performed.updateUpperBound(0, cause);
             }
@@ -273,7 +273,7 @@ public class OptionalTask extends Task {
     public boolean updateLst(int lst, ICause cause) throws ContradictionException {
         if (mayBePerformed()) {
             if (lst >= start.getLB()) {
-                return start.updateUpperBound(lst, cause);
+                return super.updateLst(lst, cause);
             } else {
                 performed.updateUpperBound(0, cause);
             }
@@ -285,7 +285,7 @@ public class OptionalTask extends Task {
     public boolean updateEct(int ect, ICause cause) throws ContradictionException {
         if (mayBePerformed()) {
             if (ect <= end.getUB()) {
-                return end.updateLowerBound(ect, cause);
+                return super.updateEct(ect, cause);
             } else {
                 performed.updateUpperBound(0, cause);
             }
@@ -297,7 +297,7 @@ public class OptionalTask extends Task {
     public boolean updateLct(int lct, ICause cause) throws ContradictionException {
         if (mayBePerformed()) {
             if (lct >= end.getLB()) {
-                return end.updateUpperBound(lct, cause);
+                return super.updateLct(lct, cause);
             } else {
                 performed.updateUpperBound(0, cause);
             }
@@ -309,7 +309,7 @@ public class OptionalTask extends Task {
     public boolean updateMinDuration(int minDuration, ICause cause) throws ContradictionException {
         if (mayBePerformed()) {
             if (minDuration <= duration.getUB()) {
-                return duration.updateLowerBound(minDuration, cause);
+                return super.updateMinDuration(minDuration, cause);
             } else {
                 performed.updateUpperBound(0, cause);
             }
@@ -321,7 +321,7 @@ public class OptionalTask extends Task {
     public boolean updateMaxDuration(int maxDuration, ICause cause) throws ContradictionException {
         if (mayBePerformed()) {
             if (maxDuration >= duration.getLB()) {
-                return duration.updateUpperBound(maxDuration, cause);
+                return super.updateMaxDuration(maxDuration, cause);
             } else {
                 performed.updateUpperBound(0, cause);
             }
@@ -333,7 +333,7 @@ public class OptionalTask extends Task {
     public boolean updateDuration(int minDuration, int maxDuration, ICause cause) throws ContradictionException {
         if (mayBePerformed()) {
             if (minDuration <= maxDuration && minDuration <= duration.getUB() && maxDuration >= duration.getLB()) {
-                return duration.updateBounds(minDuration, maxDuration, cause);
+                return super.updateDuration(minDuration, maxDuration, cause);
             } else {
                 performed.updateUpperBound(0, cause);
             }
@@ -345,7 +345,7 @@ public class OptionalTask extends Task {
     public boolean instantiateStartAt(int t, ICause cause) throws ContradictionException {
         if (mayBePerformed()) {
             if (start.getLB() <= t && t <= start.getUB()) {
-                return start.instantiateTo(t, cause);
+                return super.instantiateStartAt(t, cause);
             } else {
                 performed.updateUpperBound(0, cause);
             }
@@ -357,7 +357,7 @@ public class OptionalTask extends Task {
     public boolean instantiateEndAt(int t, ICause cause) throws ContradictionException {
         if (mayBePerformed()) {
             if (end.getLB() <= t && t <= end.getUB()) {
-                return end.instantiateTo(t, cause);
+                return super.instantiateEndAt(t, cause);
             } else {
                 performed.updateUpperBound(0, cause);
             }
@@ -369,7 +369,7 @@ public class OptionalTask extends Task {
     public boolean updateEst(int est, ICause cause, Reason reason) throws ContradictionException {
         if (mayBePerformed()) {
             if (est <= start.getUB()) {
-                return start.updateLowerBound(est, cause, reason);
+                return super.updateEst(est, cause, reason);
             } else {
                 performed.updateUpperBound(0, cause, reason);
             }
@@ -381,7 +381,7 @@ public class OptionalTask extends Task {
     public boolean updateLst(int lst, ICause cause, Reason reason) throws ContradictionException {
         if (mayBePerformed()) {
             if (lst >= start.getLB()) {
-                return start.updateUpperBound(lst, cause, reason);
+                return super.updateLst(lst, cause, reason);
             } else {
                 performed.updateUpperBound(0, cause, reason);
             }
@@ -393,7 +393,7 @@ public class OptionalTask extends Task {
     public boolean updateEct(int ect, ICause cause, Reason reason) throws ContradictionException {
         if (mayBePerformed()) {
             if (ect <= end.getUB()) {
-                return end.updateLowerBound(ect, cause, reason);
+                return super.updateEct(ect, cause, reason);
             } else {
                 performed.updateUpperBound(0, cause, reason);
             }
@@ -405,7 +405,7 @@ public class OptionalTask extends Task {
     public boolean updateLct(int lct, ICause cause, Reason reason) throws ContradictionException {
         if (mayBePerformed()) {
             if (lct >= end.getLB()) {
-                return end.updateUpperBound(lct, cause, reason);
+                return super.updateLct(lct, cause, reason);
             } else {
                 performed.updateUpperBound(0, cause, reason);
             }
@@ -417,7 +417,7 @@ public class OptionalTask extends Task {
     public boolean updateMinDuration(int minDuration, ICause cause, Reason reason) throws ContradictionException {
         if (mayBePerformed()) {
             if (minDuration <= duration.getUB()) {
-                return duration.updateLowerBound(minDuration, cause, reason);
+                return super.updateMinDuration(minDuration, cause, reason);
             } else {
                 performed.updateUpperBound(0, cause, reason);
             }
@@ -429,7 +429,7 @@ public class OptionalTask extends Task {
     public boolean updateMaxDuration(int maxDuration, ICause cause, Reason reason) throws ContradictionException {
         if (mayBePerformed()) {
             if (maxDuration >= duration.getLB()) {
-                return duration.updateUpperBound(maxDuration, cause, reason);
+                return super.updateMaxDuration(maxDuration, cause, reason);
             } else {
                 performed.updateUpperBound(0, cause, reason);
             }
@@ -441,7 +441,7 @@ public class OptionalTask extends Task {
     public boolean updateDuration(int minDuration, int maxDuration, ICause cause, Reason reason) throws ContradictionException {
         if (mayBePerformed()) {
             if (minDuration <= maxDuration && minDuration <= duration.getUB() && maxDuration >= duration.getLB()) {
-                return duration.updateBounds(minDuration, maxDuration, cause, reason);
+                return super.updateDuration(minDuration, maxDuration, cause, reason);
             } else {
                 performed.updateUpperBound(0, cause, reason);
             }
@@ -453,7 +453,7 @@ public class OptionalTask extends Task {
     public boolean instantiateStartAt(int t, ICause cause, Reason reason) throws ContradictionException {
         if (mayBePerformed()) {
             if (start.getLB() <= t && t <= start.getUB()) {
-                return start.instantiateTo(t, cause, reason);
+                return super.instantiateStartAt(t, cause, reason);
             } else {
                 performed.updateUpperBound(0, cause, reason);
             }
@@ -465,7 +465,7 @@ public class OptionalTask extends Task {
     public boolean instantiateEndAt(int t, ICause cause, Reason reason) throws ContradictionException {
         if (mayBePerformed()) {
             if (end.getLB() <= t && t <= end.getUB()) {
-                return end.instantiateTo(t, cause, reason);
+                return super.instantiateEndAt(t, cause, reason);
             } else {
                 performed.updateUpperBound(0, cause, reason);
             }
