@@ -88,7 +88,7 @@ public class Event implements Comparable<Event> {
     @Override
     public int compareTo(Event o) {
         if (this.time == o.time) {
-            return this.type - o.type;
+            return -(this.type - o.type);
         }
         return this.time - o.time;
     }
