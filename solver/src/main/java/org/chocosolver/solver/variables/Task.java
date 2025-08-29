@@ -43,6 +43,8 @@ public class Task extends Propagator<IntVar> {
 
     protected Task mirror = null;
 
+    private boolean insidePropagation = false;
+
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
@@ -203,75 +205,147 @@ public class Task extends Propagator<IntVar> {
     }
 
     public boolean updateEst(int est, ICause cause) throws ContradictionException {
-        return start.updateLowerBound(est, cause);
+        if (start.updateLowerBound(est, cause)) {
+            propagate();
+            return true;
+        }
+        return false;
     }
 
     public boolean updateLst(int lst, ICause cause) throws ContradictionException {
-        return start.updateUpperBound(lst, cause);
+        if (start.updateUpperBound(lst, cause)) {
+            propagate();
+            return true;
+        }
+        return false;
     }
 
     public boolean updateEct(int ect, ICause cause) throws ContradictionException {
-        return end.updateLowerBound(ect, cause);
+        if (end.updateLowerBound(ect, cause)) {
+            propagate();
+            return true;
+        }
+        return false;
     }
 
     public boolean updateLct(int lct, ICause cause) throws ContradictionException {
-        return end.updateUpperBound(lct, cause);
+        if (end.updateUpperBound(lct, cause)) {
+            propagate();
+            return true;
+        }
+        return false;
     }
 
     public boolean updateMinDuration(int minDuration, ICause cause) throws ContradictionException {
-        return duration.updateLowerBound(minDuration, cause);
+        if (duration.updateLowerBound(minDuration, cause)) {
+            propagate();
+            return true;
+        }
+        return false;
     }
 
     public boolean updateMaxDuration(int maxDuration, ICause cause) throws ContradictionException {
-        return duration.updateUpperBound(maxDuration, cause);
+        if (duration.updateUpperBound(maxDuration, cause)) {
+            propagate();
+            return true;
+        }
+        return false;
     }
 
     public boolean updateDuration(int minDuration, int maxDuration, ICause cause) throws ContradictionException {
-        return duration.updateBounds(minDuration, maxDuration, cause);
+        if (duration.updateBounds(minDuration, maxDuration, cause)) {
+            propagate();
+            return true;
+        }
+        return false;
     }
 
     public boolean updateEst(int est, ICause cause, Reason reason) throws ContradictionException {
-        return start.updateLowerBound(est, cause, reason);
+        if (start.updateLowerBound(est, cause, reason)) {
+            propagate();
+            return true;
+        }
+        return false;
     }
 
     public boolean updateLst(int lst, ICause cause, Reason reason) throws ContradictionException {
-        return start.updateUpperBound(lst, cause, reason);
+        if (start.updateUpperBound(lst, cause, reason)) {
+            propagate();
+            return true;
+        }
+        return false;
     }
 
     public boolean updateEct(int ect, ICause cause, Reason reason) throws ContradictionException {
-        return end.updateLowerBound(ect, cause, reason);
+        if (end.updateLowerBound(ect, cause, reason)) {
+            propagate();
+            return true;
+        }
+        return false;
     }
 
     public boolean updateLct(int lct, ICause cause, Reason reason) throws ContradictionException {
-        return end.updateUpperBound(lct, cause, reason);
+        if (end.updateUpperBound(lct, cause, reason)) {
+            propagate();
+            return true;
+        }
+        return false;
     }
 
     public boolean updateMinDuration(int minDuration, ICause cause, Reason reason) throws ContradictionException {
-        return duration.updateLowerBound(minDuration, cause, reason);
+        if (duration.updateLowerBound(minDuration, cause, reason)) {
+            propagate();
+            return true;
+        }
+        return false;
     }
 
     public boolean updateMaxDuration(int maxDuration, ICause cause, Reason reason) throws ContradictionException {
-        return duration.updateUpperBound(maxDuration, cause, reason);
+        if (duration.updateUpperBound(maxDuration, cause, reason)) {
+            propagate();
+            return true;
+        }
+        return false;
     }
 
     public boolean updateDuration(int minDuration, int maxDuration, ICause cause, Reason reason) throws ContradictionException {
-        return duration.updateBounds(minDuration, maxDuration, cause, reason);
+        if (duration.updateBounds(minDuration, maxDuration, cause, reason)) {
+            propagate();
+            return true;
+        }
+        return false;
     }
 
     public boolean instantiateStartAt(int t, ICause cause) throws ContradictionException {
-        return start.instantiateTo(t, cause);
+        if (start.instantiateTo(t, cause)) {
+            propagate();
+            return true;
+        }
+        return false;
     }
 
     public boolean instantiateEndAt(int t, ICause cause) throws ContradictionException {
-        return end.instantiateTo(t, cause);
+        if (end.instantiateTo(t, cause)) {
+            propagate();
+            return true;
+        }
+        return false;
     }
 
     public boolean instantiateStartAt(int t, ICause cause, Reason reason) throws ContradictionException {
-        return start.instantiateTo(t, cause, reason);
+        if (start.instantiateTo(t, cause, reason)) {
+            propagate();
+            return true;
+        }
+        return false;
     }
 
     public boolean instantiateEndAt(int t, ICause cause, Reason reason) throws ContradictionException {
-        return end.instantiateTo(t, cause, reason);
+        if (end.instantiateTo(t, cause, reason)) {
+            propagate();
+            return true;
+        }
+        return false;
     }
 
     public boolean mayBePerformed() {
@@ -311,6 +385,7 @@ public class Task extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+        insidePropagation = true;
         if (model.getSolver().getNodeCount() == 0) { // Only at root node
             updateMinDuration(0, this);
         }
@@ -319,27 +394,17 @@ public class Task extends Propagator<IntVar> {
         do {
             hasFiltered = false;
             if (mayBePerformed()) {
-                if (lcg) {
-                    hasFiltered = updateEst(end.getLB() - duration.getUB(), this, Reason.r(end.getMinLit(), duration.getMaxLit()));
-                    hasFiltered |= updateLst(end.getUB() - duration.getLB(), this, Reason.r(end.getMaxLit(), duration.getMinLit()));
+                hasFiltered = updateEst(end.getLB() - duration.getUB(), this, lcg ? Reason.r(end.getMinLit(), duration.getMaxLit()) : Reason.undef());
+                hasFiltered |= updateLst(end.getUB() - duration.getLB(), this, lcg ? Reason.r(end.getMaxLit(), duration.getMinLit()) : Reason.undef());
 
-                    hasFiltered |= updateEct(start.getLB() + duration.getLB(), this, Reason.r(start.getMinLit(), duration.getMinLit()));
-                    hasFiltered |= updateLct(start.getUB() + duration.getUB(), this, Reason.r(start.getMaxLit(), duration.getMaxLit()));
+                hasFiltered |= updateEct(start.getLB() + duration.getLB(), this, lcg ? Reason.r(start.getMinLit(), duration.getMinLit()) : Reason.undef());
+                hasFiltered |= updateLct(start.getUB() + duration.getUB(), this, lcg ? Reason.r(start.getMaxLit(), duration.getMaxLit()) : Reason.undef());
 
-                    hasFiltered |= updateMinDuration(end.getLB() - start.getUB(), this, Reason.r(end.getMinLit(), start.getMaxLit()));
-                    hasFiltered |= updateMaxDuration(end.getUB() - start.getLB(), this, Reason.r(end.getMaxLit(), start.getMinLit()));
-                } else {
-                    hasFiltered = updateEst(end.getLB() - duration.getUB(), this);
-                    hasFiltered |= updateLst(end.getUB() - duration.getLB(), this);
-
-                    hasFiltered |= updateEct(start.getLB() + duration.getLB(), this);
-                    hasFiltered |= updateLct(start.getUB() + duration.getUB(), this);
-
-                    hasFiltered |= updateMinDuration(end.getLB() - start.getUB(), this);
-                    hasFiltered |= updateMaxDuration(end.getUB() - start.getLB(), this);
-                }
+                hasFiltered |= updateMinDuration(end.getLB() - start.getUB(), this, lcg ? Reason.r(end.getMinLit(), start.getMaxLit()) : Reason.undef());
+                hasFiltered |= updateMaxDuration(end.getUB() - start.getLB(), this, lcg ? Reason.r(end.getMaxLit(), start.getMinLit()) : Reason.undef());
             }
         } while (hasFiltered);
+        insidePropagation = false;
     }
 
     @Override
@@ -365,5 +430,11 @@ public class Task extends Propagator<IntVar> {
         action.accept(start);
         action.accept(duration);
         action.accept(end);
+    }
+
+    private void propagate() throws ContradictionException {
+        if (!insidePropagation) {
+            propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
+        }
     }
 }
