@@ -45,13 +45,13 @@
 2012,amaze+amaze+2012-06-22.fzn,1,928,321050,321049
 #2012,amaze+amaze+2012-07-04.fzn,1,481,244,243
 2012,fast-food+fastfood+ff3.fzn,195,1330,71699,71310
-2012,filters+filter+ar_1_2.fzn,4,18,28624,28617
+2012,filters+filter+ar_1_2.fzn,4,18,26682,26675
 2012,filters+filter+dct_1_1.fzn,1,34,49,48
 2012,filters+filter+ewf_1_1.fzn,1,28,37,36
 2012,filters+filter+fir16_1_1.fzn,1,35,34,33
 2012,filters+filter+fir_1_1.fzn,1,18,24,23
-2012,mspsp+mspsp+easy_01.fzn,5,26,1251640,1251631
-2012,mspsp+mspsp+medium_03.fzn,5,26,1251640,1251631
+2012,mspsp+mspsp+easy_01.fzn,5,26,1251641,1251632
+2012,mspsp+mspsp+medium_03.fzn,5,26,1251641,1251632
 2012,nonogram+non+non_fast_8.fzn,1,_,1932,1928
 2012,pattern-set-mining-k2+pattern_set_mining_k2+audiology.fzn,38,54,212187,212112
 2012,radiation+radiation+m06_15_15.fzn,1,711,307742,307741

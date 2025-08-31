@@ -9,6 +9,7 @@
  */
 package org.chocosolver.flatzinc;
 
+import org.chocosolver.parser.Level;
 import org.chocosolver.parser.PerformanceListener;
 import org.chocosolver.parser.SetUpException;
 import org.chocosolver.parser.flatzinc.Flatzinc;
@@ -40,7 +41,7 @@ public class PerformanceTest {
     private static final String COMMENT = "#";
     private static final String DELIMITER = ",";
 
-    private static final String LEVEL = "SILENT";
+    private static final String LEVEL = Level.SILENT.name();
 
 
     public Object[][] getInstances(String name) {

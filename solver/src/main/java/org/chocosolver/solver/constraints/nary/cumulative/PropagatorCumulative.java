@@ -24,6 +24,8 @@ import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.sort.ArraySort;
+import org.chocosolver.util.sort.IntComparator;
 
 import java.util.*;
 
@@ -89,6 +91,14 @@ public class PropagatorCumulative extends Propagator<IntVar> {
     private final List<Task> tasksWithFreeParts;
     private final Comparator<Task> comparatorFreeParts;
     private final Map<Task, IntVar> mapTaskToHeight;
+    // For energy naive
+    private final IntComparator comparator;
+    private final int[] sorArray;
+    private final ArraySort<?> sorter;
+    // For disjunctive energy naive
+    private final ArraySort<?> sort;
+    private final IntComparator comp;
+    private final int[] tsks;
     // For explanations
     private final TIntObjectHashMap<Reason> reasonRect;
 
@@ -105,6 +115,16 @@ public class PropagatorCumulative extends Propagator<IntVar> {
         comparatorFreeParts = PropagatorCumulative::compareTaskWithFreeParts;
         mapTaskToHeight = new HashMap<>(tasks.length);
         reasonRect = new TIntObjectHashMap<>();
+        sorArray = new int[tasks.length];
+        sorter = new ArraySort<>(tasks.length,false,true);
+        comparator = (i1, i2) -> {
+            int coef1 = (100 * tasks[i1].getMinDuration() * heights[i1].getLB()) / (tasks[i1].getLct() - tasks[i1].getEst());
+            int coef2 = (100 * tasks[i2].getMinDuration() * heights[i2].getLB()) / (tasks[i2].getLct() - tasks[i2].getEst());
+            return coef2 - coef1;
+        };
+        sort = new ArraySort<>(tasks.length, false, true);
+        comp = (i1, i2) -> tasks[i1].getEst() - tasks[i2].getEst();
+        tsks = new int[tasks.length];
 
         for (int i = 0; i < tasks.length; ++i) {
             if (!tasks[i].mustBePerformed() && tasks[i].mayBePerformed()) {
@@ -147,6 +167,10 @@ public class PropagatorCumulative extends Propagator<IntVar> {
         scalableTimeTable();
         overloadChecking();
         updateHeights();
+        energyNaive();
+        if (capacity.isInstantiatedTo(1) && activeTasks.size() < 50) {
+            disjunctiveEnergyNaive();
+        }
     }
 
     @Override
@@ -487,6 +511,96 @@ public class PropagatorCumulative extends Propagator<IntVar> {
                 }
                 if (!isActive(i)) {
                     activeTasks.clear(i);
+                }
+            }
+        }
+    }
+
+    /**
+     * Applies a naive version of the Energetic Reasoning rule.
+     * TODO : should be completed/replaced with state-of-the-art filtering algorithm (with explanations)
+     *
+     * @throws ContradictionException when a filtering error is encountered
+     */
+    private void energyNaive() throws ContradictionException {
+        int idx = 0;
+        for (int i = activeTasks.nextSetBit(0); i != -1; i = activeTasks.nextSetBit(i + 1)) {
+            if (mustBePerformed(tasks[i], heights[i]) && tasks[i].getMinDuration() > 0) {
+                sorArray[idx++] = i;
+            }
+        }
+        sorter.sort(sorArray,idx,comparator);
+        double xMin = Integer.MAX_VALUE / 2d;
+        double xMax = Integer.MIN_VALUE / 2d;
+        double surface = 0;
+        double camax = capacity.getUB();
+        for (int k = 0; k < idx; k++) {
+            final int i = sorArray[k];
+            xMax = Math.max(xMax, tasks[i].getLct());
+            xMin = Math.min(xMin, tasks[i].getEst());
+            if (xMax >= xMin) {
+                final double availSurf = (xMax - xMin) * camax - surface;
+                heights[i].updateUpperBound((int) Math.floor((availSurf / tasks[i].getMinDuration()) + 0.01), this);
+                tasks[i].updateMaxDuration((int) Math.floor((availSurf / heights[i].getLB()) + 0.01), this);
+                surface += (long) tasks[i].getMinDuration() * heights[i].getLB(); // potential overflow
+                if (xMax > xMin) {
+                    capacity.updateLowerBound((int) Math.ceil(surface / (xMax - xMin) - 0.01), this);
+                }
+                if (surface > (xMax - xMin) * camax) {
+                    fails(); // TODO: could be more precise, for explanation purpose
+                }
+            }
+        }
+    }
+
+    /**
+     * Applies a naive version of the Energetic Reasoning rule for Disjunctive constraint.
+     * TODO : should be completed/replaced with state-of-the-art filtering algorithm (with explanations)
+     *
+     * @throws ContradictionException when a filtering error is encountered
+     */
+    private void disjunctiveEnergyNaive() throws ContradictionException {
+        // filtering algorithm for disjunctive constraint
+        capacity.updateUpperBound(1, this);
+        // remove tasks that do not consume any resource
+        int tskSize = 0;
+        for (int i = activeTasks.nextSetBit(0); i != -1; i = activeTasks.nextSetBit(i + 1)) {
+            if (mustBePerformed(tasks[i], heights[i]) && tasks[i].getMinDuration() > 0) {
+                tsks[tskSize++] = i;
+            }
+        }
+        sort.sort(tsks, tskSize, comp);
+        // run energetic reasoning
+        for (int x = 0; x < tskSize; x++) {
+            final int task1 = tsks[x];
+            for (int y = 0; y < tskSize; y++) {
+                if (x != y) {
+                    final int task2 = tsks[y];
+                    final int t1 = tasks[task1].getEst();
+                    final int t2 = tasks[task2].getLct();
+                    if (tasks[task1].getEct() > tasks[task2].getLst()) {
+                        tasks[task1].updateEst(tasks[task2].getEct(), this);
+                        tasks[task2].updateLct(tasks[task1].getLst(), this);
+                    } else if (t1 < t2 && (t1 < tasks[task2].getEct() || t2 > tasks[task1].getLst())) {
+                        int w = 0;
+                        for (int z = 0; z < tskSize; z++) {
+                            final int task3 = tsks[z];
+                            if (task3 != task1 && task3 != task2) {
+                                if (tasks[task3].getEst() >= t2) {
+                                    break;
+                                }
+                                int pB = tasks[task3].getMinDuration() * heights[task3].getLB();
+                                int pbt1 = Math.max(0, pB - Math.max(0, t1 - tasks[task3].getEst()));
+                                int pbt2 = Math.max(0, pB - Math.max(0, tasks[task3].getLct() - t2));
+                                int pbt = Math.min(pbt1, pbt2);
+                                w += Math.min(t2 - t1, pbt);
+                            }
+                        }
+                        if (w + tasks[task1].getMinDuration() + tasks[task2].getMinDuration() > t2 - t1) {
+                            tasks[task1].updateEst(tasks[task2].getEct(), this);
+                            tasks[task2].updateLct(tasks[task1].getLst(), this);
+                        }
+                    }
                 }
             }
         }
