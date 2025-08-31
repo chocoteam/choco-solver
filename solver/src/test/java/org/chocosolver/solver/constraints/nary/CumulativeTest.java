@@ -639,7 +639,7 @@ public class CumulativeTest {
     }
 
     @Test(groups = "1s", timeOut = 60000)
-    public void testPropagatorCapacity() {
+    public void testFilteringHeightsAndCapacity() {
         Model model = new Model();
         IntVar capacity = model.intVar("capacity", 2, 4);
 

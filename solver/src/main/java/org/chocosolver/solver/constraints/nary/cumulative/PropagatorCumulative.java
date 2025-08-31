@@ -199,7 +199,7 @@ public class PropagatorCumulative extends Propagator<IntVar> {
         if (min <= max) {
             int[] consoMin = new int[max - min];
             for (int i = 0; i < n; i++) {
-                if (tasks[i].mustBePerformed()) {
+                if (mustBePerformed(tasks[i], heights[i])) {
                     for (int t = tasks[i].getLst(); t < tasks[i].getEct(); t++) {
                         consoMin[t - min] += heights[i].getLB();
                         if (consoMin[t - min] > capacity.getUB()) {
