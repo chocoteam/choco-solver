@@ -14,12 +14,15 @@
 
 package org.chocosolver.solver.constraints.nary.cumulative;
 
+import org.chocosolver.memory.IStateBitSet;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.util.sort.ArraySort;
 
 import java.util.Comparator;
 import java.util.List;
+
+import static org.chocosolver.solver.constraints.nary.cumulative.SchedulingUtils.mustBePerformed;
 
 /**
  * Class representing a series of {@link Event}.
@@ -91,7 +94,29 @@ public class EventPointSeries {
         indexFirstEvent = 0;
         for (int i = 0; i < tasks.size(); i++) {
             final Task task = tasks.get(i);
-            if (PropagatorResource.mustBePerformed(task, heights.get(i)) && task.hasCompulsoryPart()) {
+            if (mustBePerformed(task, heights.get(i)) && task.hasCompulsoryPart()) {
+                eventsArray[nbEvents++].set(Event.SCP, i, task.getLst());
+                eventsArray[nbEvents++].set(Event.ECP, i, task.getEct());
+            }
+        }
+        if (!isEmpty()) {
+            sort.sort(eventsArray, nbEvents, comparator);
+        }
+    }
+
+    /**
+     * Generates SCP and ECP events (start and end of compulsory parts) of the tasks and sorts them.
+     *
+     * @param tasks the tasks for which SCP and ECP events should be generated
+     * @param heights the height variables of the tasks
+     * @param activeTasks the indexes of tasks to consider
+     */
+    public void generateEvents(final Task[] tasks, final IntVar[] heights, final IStateBitSet activeTasks) {
+        nbEvents = 0;
+        indexFirstEvent = 0;
+        for (int i = activeTasks.nextSetBit(0); i != -1; i = activeTasks.nextSetBit(i + 1)) {
+            final Task task = tasks[i];
+            if (mustBePerformed(task, heights[i]) && task.hasCompulsoryPart()) {
                 eventsArray[nbEvents++].set(Event.SCP, i, task.getLst());
                 eventsArray[nbEvents++].set(Event.ECP, i, task.getEct());
             }

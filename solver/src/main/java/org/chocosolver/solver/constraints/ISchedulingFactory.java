@@ -14,7 +14,6 @@ import java.util.function.Function;
 
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.nary.cumulative.PropagatorCapacity;
 import org.chocosolver.solver.constraints.nary.cumulative.PropagatorCumulative;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.strategy.Search;
@@ -96,18 +95,10 @@ public interface ISchedulingFactory extends ISelf<Model> {
             keptTasks[i] = tasksToKeep.get(i);
             keptHeights[i] = heightsToKeep.get(i);
         }
-        if (keptTasks.length == 1) {
-            return new Constraint(
-                    ConstraintsName.CUMULATIVE,
-                    new PropagatorCapacity(keptTasks, keptHeights, capacity)
-            );
-        } else {
-            return new Constraint(
-                    ConstraintsName.CUMULATIVE,
-                    new PropagatorCumulative(keptTasks, keptHeights, capacity),
-                    new PropagatorCapacity(keptTasks, keptHeights, capacity)
-            );
-        }
+        return new Constraint(
+                ConstraintsName.CUMULATIVE,
+                new PropagatorCumulative(keptTasks, keptHeights, capacity)
+        );
     }
 
     /**
