@@ -47,7 +47,7 @@ public interface ISchedulingFactory extends ISelf<Model> {
      * @param capacity integer variable representing the resource capacity
      * @return a cumulative constraint
      */
-    default Constraint cumulative(List<Task> tasks, List<IntVar> heights, IntVar capacity) {
+    default Constraint cumulative(final List<Task> tasks, final List<IntVar> heights, final IntVar capacity) {
         if (tasks.size() != heights.size()) {
             throw new SolverException("Tasks and heights arrays should have same size");
         }
@@ -73,7 +73,32 @@ public interface ISchedulingFactory extends ISelf<Model> {
      * @param capacity integer variable representing the resource capacity
      * @return a cumulative constraint
      */
-    default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity) {
+    default Constraint cumulative(final Task[] tasks, final IntVar[] heights, final IntVar capacity) {
+        return cumulative(tasks, heights, capacity, false, false);
+    }
+
+    /**
+     * Creates a cumulative constraint: Enforces that at each point in time,
+     * the cumulated height of the set of tasks that overlap that point
+     * does not exceed a given limit.
+     * <p>
+     * heights should be >= 0
+     * Discards tasks whose duration or height is equal to zero
+     *
+     * @param tasks    Task objects containing start, duration and end variables
+     * @param heights  integer variables representing the resource consumption of each task
+     * @param capacity integer variable representing the resource capacity
+     * @param energyNaive whether to apply the naive energy filtering
+     * @param disjunctiveEnergyNaive whether to apply the naive disjunctive energy filtering
+     * @return a cumulative constraint
+     */
+    default Constraint cumulative(
+            final Task[] tasks,
+            final IntVar[] heights,
+            final IntVar capacity,
+            final boolean energyNaive,
+            final boolean disjunctiveEnergyNaive
+    ) {
         if (tasks.length != heights.length) {
             throw new SolverException("Tasks and heights arrays should have same size");
         }
@@ -97,7 +122,7 @@ public interface ISchedulingFactory extends ISelf<Model> {
         }
         return new Constraint(
                 ConstraintsName.CUMULATIVE,
-                new PropagatorCumulative(keptTasks, keptHeights, capacity)
+                new PropagatorCumulative(keptTasks, keptHeights, capacity, energyNaive, disjunctiveEnergyNaive)
         );
     }
 
@@ -115,7 +140,7 @@ public interface ISchedulingFactory extends ISelf<Model> {
      * @param heights   resource consumption of each task
      * @param capacity  resource capacity
      */
-    default Constraint cumulative(IntVar[] starts, int[] durations, int[] heights, int capacity) {
+    default Constraint cumulative(final IntVar[] starts, final int[] durations, final int[] heights, final int capacity) {
         int n = starts.length;
         final IntVar[] d = new IntVar[n];
         final IntVar[] h = new IntVar[n];
@@ -137,19 +162,19 @@ public interface ISchedulingFactory extends ISelf<Model> {
     ////////////////////////////////// SEARCH ///////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////
 
-    static IntVar[] extractVars(Task[] tasks, Function<Task, IntVar> function) {
+    static IntVar[] extractVars(final Task[] tasks, final Function<Task, IntVar> function) {
         return Arrays.stream(tasks).map(function).toArray(IntVar[]::new);
     }
 
-    static IntVar[] extractStartVars(Task[] tasks) {
+    static IntVar[] extractStartVars(final Task[] tasks) {
         return extractVars(tasks, Task::getStart);
     }
 
-    static IntVar[] extractDurationVars(Task[] tasks) {
+    static IntVar[] extractDurationVars(final Task[] tasks) {
         return extractVars(tasks, Task::getDuration);
     }
 
-    static IntVar[] extractEndVars(Task[] tasks) {
+    static IntVar[] extractEndVars(final Task[] tasks) {
         return extractVars(tasks, Task::getEnd);
     }
 
@@ -162,7 +187,7 @@ public interface ISchedulingFactory extends ISelf<Model> {
      * @param tasks the tasks
      * @return the strategy
      */
-    default IntStrategy setTimes(Task[] tasks) {
+    default IntStrategy setTimes(final Task[] tasks) {
         SetTimes setTimes = new SetTimes(tasks);
         ref().post(new Constraint("SET_TIMES", setTimes));
         return Search.intVarSearch(setTimes, new IntDomainMin(), extractStartVars(tasks));
@@ -188,7 +213,7 @@ public interface ISchedulingFactory extends ISelf<Model> {
      * @param rule  the rule
      * @return true iff task1 is before task2 according to the rule
      */
-    default boolean before(Task task1, Task task2, ArbitrationRule rule) {
+    default boolean before(final Task task1, final Task task2, final ArbitrationRule rule) {
         switch (rule) {
             case MIN_EST:
                 return task1.getStart().getLB() < task2.getStart().getLB();
@@ -217,11 +242,11 @@ public interface ISchedulingFactory extends ISelf<Model> {
      * @param tasks the tasks
      * @return the strategy
      */
-    default IntStrategy smallest(Task[] tasks) {
+    default IntStrategy smallest(final Task[] tasks) {
         return smallest(tasks, ArbitrationRule.MIN_ECT);
     }
 
-    default IntStrategy smallest(Task[] tasks, ArbitrationRule arbitrationRule) {
+    default IntStrategy smallest(final Task[] tasks, final ArbitrationRule arbitrationRule) {
         IntVar[] starts = extractStartVars(tasks);
         return Search.intVarSearch(
                 variables -> {

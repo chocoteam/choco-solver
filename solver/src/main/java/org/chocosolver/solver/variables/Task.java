@@ -394,14 +394,56 @@ public class Task extends Propagator<IntVar> {
         do {
             hasFiltered = false;
             if (mayBePerformed()) {
-                hasFiltered = updateEst(end.getLB() - duration.getUB(), this, lcg ? Reason.r(end.getMinLit(), duration.getMaxLit()) : Reason.undef());
-                hasFiltered |= updateLst(end.getUB() - duration.getLB(), this, lcg ? Reason.r(end.getMaxLit(), duration.getMinLit()) : Reason.undef());
+                if (lcg) {
+                    hasFiltered = updateEst(
+                            end.getLB() - duration.getUB(),
+                            this,
+//                            Reason.r(end.getMinLit(), duration.getMaxLit())
+                            Reason.r(end.getLELit(end.getLB() - 1), duration.getGELit(duration.getUB() + 1))
+                    );
+                    hasFiltered |= updateLst(
+                            end.getUB() - duration.getLB(),
+                            this,
+//                            Reason.r(end.getMaxLit(), duration.getMinLit())
+                            Reason.r(end.getGELit(end.getUB() + 1), duration.getLELit(duration.getLB() - 1))
+                    );
 
-                hasFiltered |= updateEct(start.getLB() + duration.getLB(), this, lcg ? Reason.r(start.getMinLit(), duration.getMinLit()) : Reason.undef());
-                hasFiltered |= updateLct(start.getUB() + duration.getUB(), this, lcg ? Reason.r(start.getMaxLit(), duration.getMaxLit()) : Reason.undef());
+                    hasFiltered |= updateEct(
+                            start.getLB() + duration.getLB(),
+                            this,
+//                            Reason.r(start.getMinLit(), duration.getMinLit())
+                            Reason.r(start.getLELit(start.getLB() - 1), duration.getLELit(duration.getLB() - 1))
+                    );
+                    hasFiltered |= updateLct(
+                            start.getUB() + duration.getUB(),
+                            this,
+//                            Reason.r(start.getMaxLit(), duration.getMaxLit())
+                            Reason.r(start.getGELit(start.getUB() + 1), duration.getGELit(duration.getUB() + 1))
+                    );
 
-                hasFiltered |= updateMinDuration(end.getLB() - start.getUB(), this, lcg ? Reason.r(end.getMinLit(), start.getMaxLit()) : Reason.undef());
-                hasFiltered |= updateMaxDuration(end.getUB() - start.getLB(), this, lcg ? Reason.r(end.getMaxLit(), start.getMinLit()) : Reason.undef());
+                    hasFiltered |= updateMinDuration(
+                            end.getLB() - start.getUB(),
+                            this,
+//                            Reason.r(end.getMinLit(), start.getMaxLit())
+                            Reason.r(end.getLELit(end.getLB() - 1), start.getGELit(start.getUB() + 1))
+                    );
+                    hasFiltered |= updateMaxDuration(
+                            end.getUB() - start.getLB(),
+                            this,
+//                            Reason.r(end.getMaxLit(), start.getMinLit())
+                            Reason.r(end.getGELit(end.getUB() + 1), start.getLELit(start.getLB() - 1))
+                    );
+                } else {
+                    hasFiltered = updateEst(end.getLB() - duration.getUB(), this);
+                    hasFiltered |= updateLst(end.getUB() - duration.getLB(), this);
+
+                    hasFiltered |= updateEct(start.getLB() + duration.getLB(), this);
+                    hasFiltered |= updateLct(start.getUB() + duration.getUB(), this);
+
+                    hasFiltered |= updateMinDuration(end.getLB() - start.getUB(), this);
+                    hasFiltered |= updateMaxDuration(end.getUB() - start.getLB(), this);
+                }
+                // TODO : add filtering for enumerated domains
             }
         } while (hasFiltered);
         insidePropagation = false;
