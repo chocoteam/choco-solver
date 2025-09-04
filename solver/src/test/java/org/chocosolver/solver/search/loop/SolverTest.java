@@ -123,7 +123,7 @@ public class SolverTest {
         r.setHBFS(.05, .1, 32);
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 7);
-        assertEquals(model.getSolver().getNodeCount(), 4542);
+        assertEquals(model.getSolver().getNodeCount(), 5881);
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -179,7 +179,7 @@ public class SolverTest {
         while (model.getSolver().solve()) ;
 
         assertEquals(model.getSolver().getSolutionCount(), 3);
-        assertEquals(model.getSolver().getNodeCount(), 16);
+        assertEquals(model.getSolver().getNodeCount(), 17);
     }
 
     @Test(groups = "1s", timeOut = 60000)

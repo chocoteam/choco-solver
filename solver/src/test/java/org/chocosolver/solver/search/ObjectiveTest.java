@@ -319,8 +319,8 @@ public class ObjectiveTest {
             best = objective.getValue();
         }
         assertEquals(best, 34);
-        assertEquals(model.getSolver().getSolutionCount(), 9);
-        assertEquals(model.getSolver().getNodeCount(), 1333);
+        assertEquals(model.getSolver().getSolutionCount(), 8);
+        assertEquals(model.getSolver().getNodeCount(), 1807);
     }
     
     

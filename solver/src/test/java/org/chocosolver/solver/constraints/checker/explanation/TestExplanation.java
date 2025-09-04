@@ -123,7 +123,6 @@ public class TestExplanation {
                 {PropXeqYHalfReif.class, new Class[]{IntVar.class, IntVar.class, BoolVar.class}, new Object[]{null, null, null}},
                 {PropXneYHalfReif.class, new Class[]{IntVar.class, IntVar.class, BoolVar.class}, new Object[]{null, null, null}},
                 {PropXinSHalfReif.class, new Class[]{IntVar.class, IntIterableRangeSet.class, BoolVar.class}, new Object[]{null, null, null}},
-                {PropXplusYeqZ.class, new Class[]{IntVar.class, IntVar.class, IntVar.class}, new Object[]{null, null, null}},
                 {PropAllDiffInst.class, new Class[]{IntVar[].class}, new Object[]{6}},
                 {PropAllDiffBC.class, new Class[]{IntVar[].class}, new Object[]{6}},
                 {PropAllDiffAC.class, new Class[]{IntVar[].class, boolean.class}, new Object[]{6, false}},

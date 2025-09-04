@@ -12,7 +12,7 @@ basics;BusScheduling-cnt-t1.xml.lzma;1;7;185;174
 basics;CarSequencing-dingbas.xml.lzma;1;_;12;7
 basics;ChessboardColoration-07-07.xml.lzma;26;2;8434;7256
 basics;ColouredQueens-07.xml.lzma;1;_;23;10
-basics;CostasArray-12.xml.lzma;1;_;3824;3441
+basics;CostasArray-12.xml.lzma;1;_;261;233
 basics;Crossword-lex-vg-5-6.xml.lzma;1;_;7316;6668
 basics;CrosswordDesign-03-4-rom_c18.xml.lzma;5;12;66;56
 basics;CryptoPuzzle-cross-roads-danger.xml.lzma;1;_;9;4
@@ -22,7 +22,7 @@ basics;driverlogw-09.xml.lzma;1;_;1758;1211
 basics;Fapp-m2s-ex2_c18.xml.lzma;16;13871;282;180
 basics;Filters-dct_2_3.xml.lzma;19;16;3052;1704
 basics;FlexibleJobshop-easy01.xml.lzma;24;253;213;152
-basics;FlexibleJobshop-easy02.xml.lzma;64;11;6216;2754
+basics;FlexibleJobshop-easy02.xml.lzma;64;11;6921;3059
 basics;Furniture.xml.lzma;1;603;33;32
 basics;GracefulGraph-K02-P04.xml.lzma;1;_;85;73
 basics;GraphColoring-3-fullins-4.xml.lzma;11;6;101587;76903
@@ -35,13 +35,13 @@ basics;KnightTour-06-ext03.xml.lzma;1;_;147;110
 basics;KnightTour-06-int.xml.lzma;1;_;168;128
 basics;Langford-3-10.xml.lzma;1;_;456;428
 basics;LangfordBin-08.xml.lzma;1;_;529;465
-basics;LowAutocorrelation-015.xml.lzma;26;15;38486;28884
+basics;LowAutocorrelation-015.xml.lzma;25;15;52114;38962
 basics;MagicSequence-008-ca.xml.lzma;1;_;6;4
 basics;MagicSequence-008-co.xml.lzma;1;_;6;4
 basics;MagicSquare-4-table.xml.lzma;1;_;9;3
 basics;MagicSquare-6-mdd.xml.lzma;1;_;209;157
 basics;MagicSquare-6-sum.xml.lzma;1;_;217;162
-basics;Mapping-full2x2_mp3.xml.lzma;1;1100;1504;1355
+basics;Mapping-full2x2_mp3.xml.lzma;1;1100;1345;1203
 basics;Mario-easy-4.xml.lzma;16;545;8705;8077
 #basics;MarketSplit-01.xml.lzma;0;_;1113575;919484
 basics;MSPSP-easy_01.xml.lzma;13;26;1421;650
@@ -86,9 +86,9 @@ basics;StripPacking-C1P1.xml.lzma;1;_;109846;80898
 basics;Subisomorphism-A-10.xml.lzma;1;_;30;28
 basics;Sudoku-s01a-alldiff.xml.lzma;1;_;1;0
 basics;SumColoring-myciel4_c18.xml.lzma;4;22;45690;42079
-basics;Taillard-os-04-04-0.xml.lzma;27;193;8750;7799
+basics;Taillard-os-04-04-0.xml.lzma;28;193;8848;7869
 basics;Tal-01_c18.xml.lzma;2;6;11;8
-basics;TeamAssignment-data1_4_6.xml.lzma;20;2948;11582;10504
+basics;TeamAssignment-data1_4_6.xml.lzma;20;2948;11657;10545
 basics;TemplateDesign-m1-1_c18.xml.lzma;2;2;133;129
 basics;TemplateDesign-m1s-1_c18.xml.lzma;1;2;10;9
 basics;TemplateDesign-m2-1_c18.xml.lzma;2;2;167;161

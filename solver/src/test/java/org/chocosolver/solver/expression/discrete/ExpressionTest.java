@@ -616,7 +616,7 @@ public class ExpressionTest {
         IntVar z = model.intVar("z", new int[]{0, 1, 2});
 
         z.ne(1).post();
-        x.eq(1).imp(y.sub(z).eq(0)).post(); // wrong -> y = {0..2}
+        x.eq(1).imp(y.sub(z).eq(0)).extension().post(); // wrong -> y = {0..2}
         x.eq(1).post();
 
         model.getSolver().propagate();

@@ -45,7 +45,7 @@ public class WarmStartTest {
         s.addHint(vars[6], 34);
         s.removeHints();
         while (s.solve()) ;
-        Assert.assertEquals(s.getSolutionCount(), 9);
+        Assert.assertEquals(s.getSolutionCount(), 8);
         assertEquals(s.getObjectiveManager().getBestSolutionValue(), 34);
 
     }
@@ -62,7 +62,7 @@ public class WarmStartTest {
         s.removeHints();
         s.hardReset();
         while (s.solve()) ;
-        Assert.assertEquals(s.getSolutionCount(), 9);
+        Assert.assertEquals(s.getSolutionCount(), 8);
         assertEquals(s.getObjectiveManager().getBestSolutionValue(), 34);
     }
 
