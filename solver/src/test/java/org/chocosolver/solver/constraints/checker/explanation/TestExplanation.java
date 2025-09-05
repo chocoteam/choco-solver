@@ -161,6 +161,7 @@ public class TestExplanation {
                 {"circuit", new Class[]{IntVar[].class, int.class}, new Object[]{6, null}},
                 {"count", new Class[]{IntVar.class, IntVar[].class, IntVar.class}, new Object[]{null, 6, null}},
                 {"count", new Class[]{int.class, IntVar[].class, IntVar.class}, new Object[]{null, 6, null}},
+                {"cumulative", new Class[]{Task[].class, IntVar[].class, IntVar.class, boolean.class, boolean.class}, new Object[]{8, 8, null, null, null}},
                 {"decreasing", new Class[]{IntVar[].class, int.class}, new Object[]{6, null}},
                 {"div", new Class[]{IntVar.class, IntVar.class, IntVar.class}, new Object[]{null, null, null}},
                 {"increasing", new Class[]{IntVar[].class, int.class}, new Object[]{6, null}},
@@ -564,7 +565,7 @@ public class TestExplanation {
     }
 
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Test(groups = "lcg", timeOut = 60_000, dataProvider = "trueOrFalse", dataProviderClass = Providers.class)
     public void testTable2(boolean lcg) {
