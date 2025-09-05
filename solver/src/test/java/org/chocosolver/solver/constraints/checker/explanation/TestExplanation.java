@@ -42,7 +42,7 @@ import org.chocosolver.solver.search.strategy.strategy.FullyRandom;
 import org.chocosolver.solver.trace.IMessage;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.VariableUtils;
@@ -229,6 +229,14 @@ public class TestExplanation {
                 } else if (IntVar[].class.isAssignableFrom(parameterType)) {
                     info[i] = 5;
                     classes[i] = "IntVar[].class";
+                    objects[i] = String.valueOf(6);
+                } else if (Task.class.isAssignableFrom(parameterType)) {
+                    info[i] = 5;
+                    classes[i] = "Task.class";
+                    objects[i] = null;
+                } else if (Task[].class.isAssignableFrom(parameterType)) {
+                    info[i] = 5;
+                    classes[i] = "Task[].class";
                     objects[i] = String.valueOf(6);
                 } else if (int.class.isAssignableFrom(parameterType)) {
                     info[i] = null;
@@ -441,6 +449,15 @@ public class TestExplanation {
                         variables.add(_variables[j]);
                     }
                     parameters[i] = _variables;
+                } else if (Task[].class == parameterType) {
+                    Task[] _tasks = new Task[(int) info[i]];
+                    for (int j = 0; j < _tasks.length; j++) {
+                        _tasks[j] = DomainBuilder.makeTask(model, rnd, variables.size());
+                        variables.add(_tasks[j].getStart());
+                        variables.add(_tasks[j].getDuration());
+                        variables.add(_tasks[j].getEnd());
+                    }
+                    parameters[i] = _tasks;
                 } else if (int[].class == parameterType) {
                     if (info[i] instanceof Integer) {
                         int[] _constants = new int[(int) info[i]];
@@ -467,6 +484,12 @@ public class TestExplanation {
                     IntVar _variable = DomainBuilder.makeIntVar(model, rnd, variables.size());
                     variables.add(_variable);
                     parameters[i] = _variable;
+                } else if (Task.class == parameterType) {
+                    Task _task = DomainBuilder.makeTask(model, rnd, variables.size());
+                    variables.add(_task.getStart());
+                    variables.add(_task.getDuration());
+                    variables.add(_task.getEnd());
+                    parameters[i] = _task;
                 } else if (Operator.class == parameterType) {
                     parameters[i] = Operator.get((String) info[i]);
                 } else if (IntIterableRangeSet.class == parameterType) {

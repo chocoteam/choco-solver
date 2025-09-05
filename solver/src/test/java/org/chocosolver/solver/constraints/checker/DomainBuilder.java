@@ -14,6 +14,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.Task;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -197,6 +198,27 @@ public class DomainBuilder {
                 var = model.boolVar(name);
         }
         return var;
+    }
+
+    public static Task makeTask(Model model, Random rnd, int pos) {
+        String name = "T_" + pos;
+        int v = rnd.nextInt(5);
+        switch (v) {
+            case 0: // fixed duration and end as a view
+                IntVar start0 = makeIntVar(model, rnd, pos);
+                int duration0 = 1 + rnd.nextInt(10);
+                return new Task(start0, duration0);
+            case 1: // fixed duration
+                IntVar start1 = makeIntVar(model, rnd, pos);
+                int duration1 = 1 + rnd.nextInt(10);
+                IntVar end1 = makeIntVar(model, rnd, pos);
+                return new Task(start1, duration1, end1);
+            default: // all variables
+                IntVar start2 = makeIntVar(model, rnd, pos);
+                IntVar duration2 = makeIntVar(model, rnd, pos);
+                IntVar end2 = makeIntVar(model, rnd, pos);
+                return new Task(start2, duration2, end2);
+        }
     }
 
 }
