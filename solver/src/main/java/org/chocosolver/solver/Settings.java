@@ -49,6 +49,8 @@ public class Settings {
 
     private int maxTupleSizeForSubstitution = 10_000;
 
+    private long maxSizeInMBToUseCompactTable = 1024L;
+
     private boolean sortPropagatorActivationWRTPriority = true;
 
     private int maxPropagatorPriority = PropagatorPriority.VERY_SLOW.getValue();
@@ -301,6 +303,24 @@ public class Settings {
      */
     public Settings setMaxTupleSizeForSubstitution(int maxTupleSizeForSubstitution) {
         this.maxTupleSizeForSubstitution = maxTupleSizeForSubstitution;
+        return this;
+    }
+
+    /**
+     * @return maximum estimated size, in MB, of the table to use compact table representation
+     */
+    public long getMaxSizeInMBToUseCompactTable() {
+        return maxSizeInMBToUseCompactTable;
+    }
+
+    /**
+     * Define the maximum estimated size, in MB, of the table to use compact table representation.
+     *
+     * @param maxSizeInMBToUseCompactTable size threshold (in MB) to use compact table representation
+     * @return the current instance
+     */
+    public Settings setMaxSizeInMBToUseCompactTable(int maxSizeInMBToUseCompactTable) {
+        this.maxSizeInMBToUseCompactTable = maxSizeInMBToUseCompactTable;
         return this;
     }
 
@@ -640,7 +660,7 @@ public class Settings {
      * when a bound is modified, the channeling is done with all known values between the previous and the new bound.
      * It provides stronger reasons, which are slower to compute but more informative.
      *
-     * @param intVarLazyLitWithWeakBounds
+     * @param intVarLazyLitWithWeakBounds weak chaining or not
      * @return the current instance
      */
     public Settings setIntVarLazyLitWithWeakBounds(boolean intVarLazyLitWithWeakBounds) {

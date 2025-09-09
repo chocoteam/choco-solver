@@ -14,6 +14,7 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.binary.*;
 import org.chocosolver.solver.constraints.binary.element.ElementFactory;
 import org.chocosolver.solver.constraints.extension.Tuples;
@@ -727,7 +728,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                     && PropDivXYZLight.getSign(result) != 0) {
                 try {
                     return new Constraint(ConstraintsName.DIVISION, new PropDivXYZLight(dividend, divisor, result));
-                }catch (SolverException e){
+                } catch (SolverException e) {
                     // If the light propagator fails, we fall back to the full one
                 }
             }
@@ -2781,16 +2782,27 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     /**
-     * Creates a table constraint specifying that the sequence of variables vars must belong to the list of tuples
-     * (or must NOT belong in case of infeasible tuples)
+     * Creates a table constraint specifying that the sequence of variables 'vars'
+     * must belong to the list of tuples (or must NOT belong in case of infeasible tuples)
      * <p>
-     * Default configuration with GACSTR+ algorithm for feasible tuples and GAC3rm otherwise
+     * Default configuration is "CT" if memory consumption is not too high, "STR2+" otherwise.
      *
      * @param vars   variables forming the tuples
      * @param tuples the relation between the variables (list of allowed/forbidden tuples)
+     * @see Settings#getMaxSizeInMBToUseCompactTable()
+     * @see Settings#setMaxSizeInMBToUseCompactTable(int)
      */
     default Constraint table(IntVar[] vars, Tuples tuples) {
         String algo = "CT";
+        long estimatedMem = 0;
+        long maxMem = ref().getSettings().getMaxSizeInMBToUseCompactTable();
+        for (int i = 0; i < vars.length && tuples.isFeasible(); i++) {
+            estimatedMem += ((tuples.nbTuples() / 64L) * vars[i].getRange()) / 1024 / 1024; // in MB
+            if (estimatedMem < 0 || estimatedMem > maxMem) {
+                algo = "STR2+";
+                break;
+            }
+        }
         return table(vars, tuples, algo);
     }
 

@@ -55,10 +55,10 @@ public class PropCompactTable extends Propagator<IntVar> {
          */
         static ISupport make(int range, int nValues, int nWords){
             if(range > 256 && range >= 1.1 * nValues){
-                // If the variable seems to be sparse, we use a sparse support structure
+                // If the variable seems sparse, we use a sparse support structure
                 return new SparseSupport(nValues, nWords);
             } else {
-                // If the variable seems to be dense, we use a dense support structure
+                // If the variable seems dense, we use a dense support structure
                 return new DenseSupport(range, nWords);
             }
         }
