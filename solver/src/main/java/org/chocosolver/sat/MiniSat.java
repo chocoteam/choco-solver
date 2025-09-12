@@ -391,10 +391,33 @@ public class MiniSat implements SatFactory {
         trail_markers_.add(trail_.size());
     }
 
+    /**
+     * Indicates if all literals but one are false in the clause.
+     * By implication, the remaining literal is the asserting literal.
+     * By construction, the literal at index 0 is the asserting literal and should not be considered.
+     *
+     * @param sat the solver
+     * @param c   the clause to consider
+     * @return true if all literals but one (at index 0) are false, false otherwise
+     * @implNote This method can only be called on clauses learnt during propagation.
+     * Indeed, the method assumes that the literal at index 0 is the asserting literal and all other literals are false.
+     * In such situation, the clause is a reason (i.e. it is the reason of a propagation).
+     * If the clause has been propagated once (ie, is not a reason anymore), the clause may be in any order
+     * or may not be unit anymore.
+     */
+    private static boolean isAssertingClause(MiniSat sat, Clause c) {
+        for (int i = 1; i < c.size(); i++) {
+            if (sat.valueLit(c._g(i)) != MiniSat.lFalse) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     // Enqueue a literal. Assumes value of literal is undefined.
     public void uncheckedEnqueue(int l, Reason from) {
         assert valueLit(l) == lUndef : "l: " + printLit(l) + " from: " + from;
-        assert from.getConflict().allFalseButOne(this): "the reason " + showReason(from) + " is not valid because it is not unit";
+        assert isAssertingClause(this, from.getConflict()) : "the reason " + showReason(from) + " is not valid because it is not unit";
         int v = var(l);
         if (assignment_.getQuick(v) == lUndef) {
             onLiteralPushed(l);
@@ -429,10 +452,11 @@ public class MiniSat implements SatFactory {
 
     public void cEnqueue(int l, Reason r) {
         assert valueLit(l) != lTrue;
-        assert r.getConflict().allFalseButOne(this): "the reason " + showReason(r) + " is not valid because it is not unit";
+        assert r != null : "reason is null for " + printLit(l);
+        assert isAssertingClause(this, r.getConflict()) : "the reason " + showReason(r) + " is not valid because it is not unit";
         int v = var(l);
         if (valueLit(l) == lFalse) {
-            if (r == null || r == R_Undef) {
+            if (r == R_Undef) {
                 // assert(decisionLevel() == 0);
                 confl = C_Fail; // todo: check
             } else {
