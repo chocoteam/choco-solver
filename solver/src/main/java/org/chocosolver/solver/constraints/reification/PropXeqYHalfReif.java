@@ -86,14 +86,14 @@ public class PropXeqYHalfReif extends Propagator<IntVar> {
                     for (int val = vars[0].getLB(); val <= ub; val = vars[0].nextValue(val)) {
                         if (!vars[1].contains(val)) {
                             vars[0].removeValue(val, this,
-                                    lcg() ? Reason.r(vars[1].getLit(val, IntVar.LR_NE), b.getValLit()) : Reason.undef());
+                                    lcg() ? Reason.r(vars[1].getLit(val, IntVar.LR_EQ), b.getValLit()) : Reason.undef());
                         }
                     }
                     ub = vars[1].getUB();
                     for (int val = vars[1].getLB(); val <= ub; val = vars[1].nextValue(val)) {
                         if (!vars[0].contains(val)) {
                             vars[1].removeValue(val, this,
-                                    lcg() ? Reason.r(vars[0].getLit(val, IntVar.LR_NE), b.getValLit()) : Reason.undef());
+                                    lcg() ? Reason.r(vars[0].getLit(val, IntVar.LR_EQ), b.getValLit()) : Reason.undef());
                         }
                     }
                 }

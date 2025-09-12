@@ -139,6 +139,22 @@ public class Clause extends Reason {
         return learnt;
     }
 
+    /**
+     * Indicates if all literals but one are false in the clause.
+     * By implication, the remaining literal is the asserting literal.
+     * By contract, the literal at index 0 is the asserting literal and should not be considered.
+     * @param sat the solver
+     * @return true if all literals but one (at index 0) are false, false otherwise
+     */
+    public boolean allFalseButOne(MiniSat sat){
+        for(int i=1; i<literals_.length; i++){
+            if(sat.valueLit(literals_[i]) != MiniSat.lFalse) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     /**
      * Get the i-th literal of the clause

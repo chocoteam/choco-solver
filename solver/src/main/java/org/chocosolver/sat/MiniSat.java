@@ -121,7 +121,7 @@ public class MiniSat implements SatFactory {
             seen.set(v);
             // false literal
             v = newVariable();
-            l = makeLiteral(v, true);
+            l = makeLiteral(v, false);
             assignment_.set(v, makeBoolean(sgn(l)));
             vardata.set(v, new VarData(R_Undef, trailMarker(), trail_.size()));
             trail_.add(l);
@@ -394,6 +394,7 @@ public class MiniSat implements SatFactory {
     // Enqueue a literal. Assumes value of literal is undefined.
     public void uncheckedEnqueue(int l, Reason from) {
         assert valueLit(l) == lUndef : "l: " + printLit(l) + " from: " + from;
+        assert from.getConflict().allFalseButOne(this): "the reason " + showReason(from) + " is not valid because it is not unit";
         int v = var(l);
         if (assignment_.getQuick(v) == lUndef) {
             onLiteralPushed(l);
@@ -428,6 +429,7 @@ public class MiniSat implements SatFactory {
 
     public void cEnqueue(int l, Reason r) {
         assert valueLit(l) != lTrue;
+        assert r.getConflict().allFalseButOne(this): "the reason " + showReason(r) + " is not valid because it is not unit";
         int v = var(l);
         if (valueLit(l) == lFalse) {
             if (r == null || r == R_Undef) {
@@ -678,7 +680,7 @@ public class MiniSat implements SatFactory {
                 int x = var(q);
                 if (!seen.get(x) && level(x) > rootlvl) {
                     assert p == litUndef || pos(var(p)) > pos(x) : "chronological inconsistency :(" + printLit(p) + " @ " + pos(var(p)) +
-                            ") is explained by a previous event (" + printLit(x) + " @ " + pos(x) + ") " + c;
+                            ") is explained by a older event (" + printLit(x) + " @ " + pos(x) + ") " + c;
                     varBumpActivity(x);
                     seen.set(x);
                     if (DEBUG > 1) System.out.printf("mark %d\n", x);
@@ -988,8 +990,8 @@ public class MiniSat implements SatFactory {
                 st.append("clause (");
                 Clause cl = (Clause) r;
                 for (int i = 1; i < cl.size(); i++) {
-                    if (i > 1) st.append(" ∧ ");
-                    st.append(printLit(neg(cl._g(i))));
+                    if (i > 1) st.append(" ∨ ");
+                    st.append(printLit(cl._g(i)));
                 }
                 st.append(")");
                 //st.append(" -> ").append(printLit(r.cl._g(0)));
@@ -998,11 +1000,11 @@ public class MiniSat implements SatFactory {
             //    ss << "absorbed binary clause?";
             //    break;
             case 2:
-                st.append("single literal ").append(printLit(neg(((Reason.Reason1) r).d1)));
+                st.append("single literal ").append(printLit(((Reason.Reason1) r).d1));
                 break;
             case 3:
-                st.append("two literals ").append(printLit(neg(((Reason.Reason2) r).d1)))
-                        .append(" ∧ ").append(printLit(neg(((Reason.Reason2) r).d2)));
+                st.append("two literals ").append(printLit(((Reason.Reason2) r).d1))
+                        .append(" ∨ ").append(printLit(((Reason.Reason2) r).d2));
                 break;
         }
         return st.toString();
