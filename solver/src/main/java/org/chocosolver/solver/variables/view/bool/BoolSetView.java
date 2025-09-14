@@ -167,7 +167,8 @@ public class BoolSetView<S extends SetVar> extends AbstractView<S> implements Bo
 
     @Override
     public int getRange() {
-        return getUB() - getLB();
+        // For boolean variables, the range is always equal to the domain size
+        return getDomainSize();
     }
 
     @Override

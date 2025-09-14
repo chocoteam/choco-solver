@@ -2,7 +2,7 @@
 # like running test suites
 
 ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-PRETTY_DATE := $(shell date +'%m/%d/%Y %H:%M')
+PRETTY_DATE := $(shell date +'%Y-%m-%dT%H:%M')
 DATE := $(shell date +'%y%m%d_%H%M')
 CURRENT_VERSION := $(shell mvn help:evaluate -Dexpression=project.version | grep -v "\[INFO\]" | grep -v "\[WARNING\]")
 
@@ -53,8 +53,8 @@ tests : 1s 10s ibex checker mzn xcsp mps dimacs expl lcg
 	mvn test -DtestFailureIgnore=true -Dgroups="$@"
 
 update_date:
-	@sed -i '' 's|\s*System.out.printf("c Choco.*|System.out.printf("c Choco%s ($(PRETTY_DATE))\\n", lcg? " with LCG" : "");|' parsers/src/main/java/org/chocosolver/parser/xcsp/XCSP.java
-	@sed -i '' 's|\s*System.out.printf("%% Choco%s (.*|System.out.printf("%% Choco%s ($(PRETTY_DATE))\\n", lcg? " with LCG" : "");|' parsers/src/main/java/org/chocosolver/parser/flatzinc/Flatzinc.java
+	@sed -i '' 's|\s*System.out.printf("c Choco.*|System.out.printf("c Choco-solver%s ($(CURRENT_VERSION), $(PRETTY_DATE))\\n", lcg? " with LCG" : "");|' parsers/src/main/java/org/chocosolver/parser/xcsp/XCSP.java
+	@sed -i '' 's|\s*System.out.printf("%% Choco.*|System.out.printf("%% Choco-solver%s ($(CURRENT_VERSION), $(PRETTY_DATE))\\n", lcg? " with LCG" : "");|' parsers/src/main/java/org/chocosolver/parser/flatzinc/Flatzinc.java
 
 compet: update_date clean package
 
@@ -70,6 +70,11 @@ delmsc:
 	@rm ~/.minizinc/solvers/choco-$(VERSION).msc
 
 docker: compet
+	# add an image with LCG support
+	@sed -i '' 's|python3.*|python3 "$$(dirname "$$0")/fzn-choco.py" "$$@" "-lcg"|' parsers/src/main/minizinc/fzn-choco.sh
+	@docker build -f $(ROOT_DIR)/parsers/src/main/minizinc/docker/Dockerfile.dms -t chocoteam/choco-solver-mzn:$(CURRENT_VERSION)-X $(ROOT_DIR)
+	# add an image without LCG support
+	@sed -i '' 's|python3.*|python3 "$$(dirname "$$0")/fzn-choco.py" "$$@"|' parsers/src/main/minizinc/fzn-choco.sh
 	@docker build -f $(ROOT_DIR)/parsers/src/main/minizinc/docker/Dockerfile.dms -t chocoteam/choco-solver-mzn:$(CURRENT_VERSION) $(ROOT_DIR)
 
 antlr:

@@ -117,6 +117,11 @@ public class BiReExpression implements ReExpression {
         e2.extractVar(variables);
     }
 
+    @Override
+    public ArExpression[] getExpressionChild() {
+        return new ArExpression[]{e1, e2};
+    }
+
     private static ArExpression.Operator detectOperator(ArExpression e){
         int nochild = e.getNoChild();
         if(nochild == 1){

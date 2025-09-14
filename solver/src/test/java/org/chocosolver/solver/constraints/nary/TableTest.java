@@ -20,6 +20,7 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.extension.hybrid.HybridTuples;
 import org.chocosolver.solver.constraints.extension.hybrid.ISupportable;
+import org.chocosolver.solver.constraints.extension.nary.PropCompactTableNeg;
 import org.chocosolver.solver.constraints.extension.nary.TuplesLargeTable;
 import org.chocosolver.solver.constraints.extension.nary.TuplesTable;
 import org.chocosolver.solver.constraints.extension.nary.TuplesVeryLargeTable;
@@ -50,7 +51,7 @@ public class TableTest {
 
     private static final String[] ALGOS = {"CT+", "FC", "GAC2001", "GACSTR+", "GAC2001+", "GAC3rm+", "GAC3rm", "STR2+", "MDD+"};
 
-    private static final String[] BIN_ALGOS = {"FC", "AC2001", "AC3", "AC3rm", "AC3bit+rm", "CT+"};
+    private static final String[] BIN_ALGOS = {"FC", "AC2001", "AC3", "AC3rm", "AC3bit+rm", "CT", "CT+"};
 
     @DataProvider(name = "algos")
     public Object[][] algos() {
@@ -532,9 +533,8 @@ public class TableTest {
         IntVar x = model.intVar(1, 3);
         IntVar y = model.intVar(1, 3);
         IntVar z = model.intVar(1, 3);
-        Tuples ts = new Tuples(true);
         int ST = 99;
-        ts.setUniversalValue(ST);
+        Tuples ts = new Tuples(ST);
         ts.add(3, ST, 1);
         ts.add(1, 2, 3);
         ts.add(2, 3, 2);
@@ -553,9 +553,8 @@ public class TableTest {
         IntVar x = model.intVar(1, 3);
         IntVar y = model.intVar(1, 3);
         IntVar z = model.intVar(1, 3);
-        Tuples ts = new Tuples(true);
         int ST = 99;
-        ts.setUniversalValue(ST);
+        Tuples ts = new Tuples(ST);
         ts.add(ST, ST, ST);
         model.table(new IntVar[]{x, y, z}, ts, staralgo).post();
 
@@ -572,9 +571,8 @@ public class TableTest {
         IntVar x = model.intVar("x", 0, 1);
         IntVar y = model.intVar("y", 0, 1);
         IntVar z = model.intVar("z", 0, 1);
-        Tuples ts = new Tuples(true);
         int ST = 99;
-        ts.setUniversalValue(ST);
+        Tuples ts = new Tuples(ST);
         ts.add(1, ST, ST);
         ts.add(ST, 1, ST);
         ts.add(ST, ST, 1);
@@ -594,9 +592,8 @@ public class TableTest {
         IntVar cp = model.intVar("y", 2, 2);
         IntVar t = model.intVar("z", 0, 999);
         IntVar l = model.intVar("z", 1, 70_000, true);
-        Tuples ts = new Tuples(true);
         int ST = -1;
-        ts.setUniversalValue(ST);
+        Tuples ts = new Tuples(ST);
         ts.add(1, 2, ST, 3500);
         ts.add(2, 2, ST, 3500);
         model.table(new IntVar[]{st, cp, t, l}, ts, staralgo).post();
@@ -872,7 +869,7 @@ public class TableTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
     public void testMany1(String a) {
-        for(int i = 0; i < 200; i++) {
+        for (int i = 0; i < 200; i++) {
             Model model = new Model();
             IntVar x = model.intVar("x", new int[]{-4, -1, 2});
             IntVar y = model.intVar("y", -2, -1);
@@ -891,7 +888,7 @@ public class TableTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "balgos")
     public void testMany2(String a) {
-        for(int i = 0; i < 200; i++) {
+        for (int i = 0; i < 200; i++) {
             Model model = new Model();
             IntVar x = model.intVar("x", new int[]{1, 2, 4, 7, 18});
             Tuples t = new Tuples();
@@ -908,6 +905,29 @@ public class TableTest {
                 out.printf("%d - %d\n", x.getValue(), x.getValue());
             }
             Assert.assertEquals(model.getSolver().getSolutionCount(), 2);
+        }
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "balgos")
+    public void testMany3(String a) {
+        if (a.contains("+")) return;
+        for (int i = 0; i < 200; i++) {
+            Model model = new Model();
+            IntVar x = model.intVar("x", new int[]{1, 2, 4, 7, 18});
+            Tuples t = new Tuples(false);
+            t.add(1, 4);
+            t.add(2, 1);
+            t.add(4, 7);
+            t.add(7, 2);
+            t.add(7, 7);
+            t.add(18, 18);
+            model.table(x, x, t, a).post();
+            Solver solver = model.getSolver();
+            solver.setSearch(new FullyRandom(new IntVar[]{x}, i));
+            while (model.getSolver().solve()) {
+                out.printf("%d - %d\n", x.getValue(), x.getValue());
+            }
+            Assert.assertEquals(model.getSolver().getSolutionCount(), 3);
         }
     }
 
@@ -962,6 +982,55 @@ public class TableTest {
             m.getSolver().solve();
             out.println(Arrays.toString(intVars));
         }
+    }
+
+    @Test
+    public void testNegCT() {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 2);
+        IntVar y = model.intVar("y", 0, 2);
+        IntVar z = model.intVar("z", 0, 2);
+        Tuples t = new Tuples(false);
+        t.add(0, 0, 0);
+        t.add(1, 1, 1);
+        t.add(2, 2, 2);
+        new Constraint("TABLE", new PropCompactTableNeg(new IntVar[]{x, y, z}, t)).post();
+        while (model.getSolver().solve()) {
+            out.printf("%d - %d - %d\n", x.getValue(), y.getValue(), z.getValue());
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), (int) Math.pow(3, 3) - 3);
+    }
+
+    @Test(groups = "1s", dataProvider = "algos")
+    public void testExp1(String a) {
+        Model model = new Model();
+        BoolVar x = model.boolVar("x");
+        IntVar y = model.intVar("y", 0, 121);
+        IntVar z = model.intVar("z", 0, 121);
+        x.ne(0).or(y.dist(z).eq(1)).extension(a).post();
+        x.eq(0).post();
+        y.eq(0).post();
+        while (model.getSolver().solve()) {
+            out.printf("%d - %d - %d\n", x.getValue(), y.getValue(), z.getValue());
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
+    }
+
+    @Test(groups = "1s", dataProvider = "algos")
+    public void testExp2(String a) {
+        Model model = new Model();
+        BoolVar x = model.boolVar("x");
+        int n = 122;
+        IntVar y = model.intVar("y", 0, n);
+        IntVar z = model.intVar("z", 0, n);
+        x.ne(1).or(y.dist(z).eq(1)).extension(a).post();
+        x.eq(0).post();
+        y.eq(0).post();
+//        model.getSolver().showDecisions(128);
+        while (model.getSolver().solve()) {
+            out.printf("%d - %d - %d\n", x.getValue(), y.getValue(), z.getValue());
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), n+1);
     }
 
 }

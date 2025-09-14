@@ -898,26 +898,26 @@ public interface Modeler {
         }
     };
 
-    Modeler modelplusac = new Modeler() {
-        @Override
-        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Model s = new Model("plus" + n);
-            IntVar[] vars = new IntVar[n];
-            for (int i = 0; i < vars.length; i++) {
-                vars[i] = s.intVar("X_" + i, domains[i]);
-                if (map != null) map.put(domains[i], vars[i]);
-            }
-
-            s.arithm(vars[0], "+", vars[1], "=", vars[2]).post();
-            s.getSolver().setSearch(randomSearch(vars, 0));
-            return s;
-        }
-
-        @Override
-        public String name() {
-            return "X+Y=Z (ac)";
-        }
-    };
+//    Modeler modelplusac = new Modeler() {
+//        @Override
+//        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+//            Model s = new Model("plus" + n);
+//            IntVar[] vars = new IntVar[n];
+//            for (int i = 0; i < vars.length; i++) {
+//                vars[i] = s.intVar("X_" + i, domains[i]);
+//                if (map != null) map.put(domains[i], vars[i]);
+//            }
+//
+//            s.arithm(vars[0], "+", vars[1], "=", vars[2]).post();
+//            s.getSolver().setSearch(randomSearch(vars, 0));
+//            return s;
+//        }
+//
+//        @Override
+//        public String name() {
+//            return "X+Y=Z (ac)";
+//        }
+//    };
 
     Modeler modelmodulobc = new Modeler() {
         @Override

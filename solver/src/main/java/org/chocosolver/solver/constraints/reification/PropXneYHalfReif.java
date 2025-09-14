@@ -43,10 +43,7 @@ public class PropXneYHalfReif extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        if (vIdx < 2) {
-            return IntEventType.INSTANTIATE.getMask();
-        }
-        return IntEventType.INCLOW.getMask();
+        return IntEventType.INSTANTIATE.getMask();
     }
 
     @Override

@@ -11,6 +11,7 @@ package org.chocosolver.solver.expression.discrete.logical;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -102,6 +103,11 @@ public class NaLoExpression extends LoExpression {
     @Override
     public void extractVar(HashSet<IntVar> variables) {
         Arrays.stream(es).forEach(e -> e.extractVar(variables));
+    }
+
+    @Override
+    public ArExpression[] getExpressionChild() {
+        return Arrays.stream(es).toArray(ReExpression[]::new);
     }
 
     @Override

@@ -14,6 +14,8 @@ import org.chocosolver.parser.RegParser;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.restart.InnerOuterCutoff;
+import org.chocosolver.solver.search.restart.Restarter;
 import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.SearchParams;
@@ -134,7 +136,17 @@ public class XCSP extends RegParser {
     public void parse(Model target, XCSPParser parser) throws Exception {
         parser.model(target, instance);
         // and define a search strategy
-        freesearch(target.getSolver());
+        BlackBoxConfigurator bb = BlackBoxConfigurator.init();
+        // variable selection
+        bb.setIntVarStrategy(Search::roundRobinSearch)
+                .setRestartPolicy(s -> new Restarter(new InnerOuterCutoff(50, 1.01, 1.01),
+                        c -> s.getFailCount() >= c, 50_000, true))
+                .setNogoodOnRestart(!lcg)
+                .setRestartOnSolution(lcg)
+                .setRefinedPartialAssignmentGeneration(false)
+                .setExcludeObjective(true)
+                .setExcludeViews(false);
+        bb.make(target);
     }
 
 
@@ -264,6 +276,9 @@ public class XCSP extends RegParser {
             try {
                 output.insert(0, "s SATISFIABLE\n");
                 new SolutionChecker(true, instance, new ByteArrayInputStream(output.toString().getBytes()));
+//                new SolutionChecker(instance, new ByteArrayInputStream(output.toString().getBytes()),
+//                        solver.getObjectiveManager().isOptimization() ? solver.getObjectiveManager().getBestSolutionValue().longValue() : null,
+//                        null, true);
             } catch (Exception e) {
                 throw new RuntimeException("wrong solution found twice");
             }
@@ -329,6 +344,9 @@ public class XCSP extends RegParser {
         if (cs) {
             try {
                 new SolutionChecker(true, instance, new ByteArrayInputStream(output.toString().getBytes()));
+//                new SolutionChecker(instance, new ByteArrayInputStream(output.toString().getBytes()),
+//                                        solver.getObjectiveManager().isOptimization() ? solver.getObjectiveManager().getBestSolutionValue().longValue() : null,
+//                                        null, true);
             } catch (Exception e) {
                 e.printStackTrace();
             }

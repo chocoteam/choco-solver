@@ -115,10 +115,10 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar, Lit
 
     @Override
     public int getLit(int val, int type) {
-        if (val < getLB()) {
+        if (val < min0) {
             return 1 ^ (type & 1);  // undefined, undefined, true, false
         }
-        if (val > getUB()) {
+        if (val > max0) {
             return type & 1;  // undefined, undefined, false, true
         }
         switch (type) {

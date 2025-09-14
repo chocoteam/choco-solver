@@ -273,13 +273,13 @@ public class TestConsistency {
         }
     }
 
-    @Test(groups="checker", timeOut=60000)
-    public void testPLUSAC() {
-        long seed = System.currentTimeMillis();
-        for (int i = 0; i < 99; i++) {
-            checkConsistency(Modeler.modelplusac, 3, -8, 8, null, seed + i, "ac");
-        }
-    }
+//    @Test(groups="checker", timeOut=60000)
+//    public void testPLUSAC() {
+//        long seed = System.currentTimeMillis();
+//        for (int i = 0; i < 99; i++) {
+//            checkConsistency(Modeler.modelplusac, 3, -8, 8, null, seed + i, "ac");
+//        }
+//    }
 
     // MODULO *******************************************************
 

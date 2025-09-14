@@ -19,9 +19,7 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.setDataStructures.ISet;
-import org.chocosolver.util.objects.setDataStructures.SetFactory;
-import org.chocosolver.util.objects.setDataStructures.SetType;
+import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -41,11 +39,11 @@ public class PropTableStr2 extends Propagator<IntVar> {
 
     private final int[][] table;
     private final Str2_var[] str2vars;
-    private final ISet tuples;
+    private final int[] tuples;
+    private final IStateInt idx;
     private final ArrayList<Str2_var> ssup;
     private final ArrayList<Str2_var> sval;
     private boolean firstProp = true;
-    private final Tuples tuplesObject;
     private final int star;
 
     //***********************************************************************************
@@ -53,9 +51,8 @@ public class PropTableStr2 extends Propagator<IntVar> {
     //***********************************************************************************
 
     public PropTableStr2(IntVar[] vars_, Tuples tuplesObject) {
-        super(vars_, PropagatorPriority.LINEAR, false);
+        super(vars_, PropagatorPriority.QUADRATIC, false);
         this.table = tuplesObject.toMatrix();
-        this.tuplesObject = tuplesObject;
 
         int size = 0;
         if (table.length > 0) {
@@ -68,9 +65,11 @@ public class PropTableStr2 extends Propagator<IntVar> {
             max = Math.max(max, vars_[i].getUB());
         }
         this.star = tuplesObject.allowUniversalValue() ? tuplesObject.getStarValue() : max + 1;
-        tuples = SetFactory.makeStoredSet(SetType.BIPARTITESET, 0, model);
+        tuples = ArrayUtils.array(0, table.length);
+        idx = model.getEnvironment().makeInt(table.length);
         ssup = new ArrayList<>();
         sval = new ArrayList<>();
+        initializeSupports();
     }
 
     //***********************************************************************************
@@ -82,31 +81,30 @@ public class PropTableStr2 extends Propagator<IntVar> {
         if (firstProp) {
             firstProp = false;
             model.getEnvironment().save(() -> firstProp = true);
-            initialPropagate();
+            if (idx.get() == 0) {
+                this.fails();
+            }
         }
         Filter();
     }
 
     @Override
     public ESat isEntailed() {
-        if (firstProp) { // data structure not ready
-            return tuplesObject.check(vars);
-        } else {
-            boolean hasSupport = false;
-            for (int tuple : tuples) {
-                if (is_tuple_supported(tuple)) {
-                    hasSupport = true;
-                }
+        boolean hasSupport = false;
+        for (int i = 0; i < idx.get(); i++) {
+            int tuple = tuples[i];
+            if (is_tuple_supported(tuple)) {
+                hasSupport = true;
             }
-            if (hasSupport) {
-                if (isCompletelyInstantiated()) {
-                    return ESat.TRUE;
-                } else {
-                    return ESat.UNDEFINED;
-                }
+        }
+        if (hasSupport) {
+            if (isCompletelyInstantiated()) {
+                return ESat.TRUE;
             } else {
-                return ESat.FALSE;
+                return ESat.UNDEFINED;
             }
+        } else {
+            return ESat.FALSE;
         }
     }
 
@@ -122,26 +120,23 @@ public class PropTableStr2 extends Propagator<IntVar> {
     private boolean is_tuple_supported(int tuple_index) {
         for (int i = 0; i < sval.size(); i++) {
             Str2_var v = sval.get(i);
-            if (table[tuple_index][v.index] != star &&
-                    !v.var.contains(table[tuple_index][v.index])) {
+            int val = table[tuple_index][v.index];
+            if (val != star && !v.var.contains(val)) {
                 return false;
             }
         }
         return true;
     }
 
-    private void initialPropagate() throws ContradictionException {
-        for (int t = 0; t < table.length; t++) {
-            tuples.add(t);
-        }
-        if (tuples.isEmpty()) {
-            this.fails();
-        }
+    /**
+     * Initialize the supports of all values of all variables
+     */
+    private void initializeSupports() {
+        prepare();
+        checkTuples();
     }
 
-    private void Filter() throws ContradictionException {
-        ssup.clear();
-        sval.clear();
+    private void prepare() {
         for (int i = 0; i < str2vars.length; i++) {
             Str2_var tmp = str2vars[i];
             ssup.add(tmp);
@@ -151,7 +146,12 @@ public class PropTableStr2 extends Propagator<IntVar> {
                 tmp.last_size.set(tmp.cnt);
             }
         }
-        for (int tuple : tuples) {
+    }
+
+    private void checkTuples() {
+        int sz = idx.get();
+        for (int i = 0; i < sz; i++) {
+            int tuple = tuples[i];
             if (is_tuple_supported(tuple)) {
                 for (int var = 0; var < ssup.size(); var++) {
                     Str2_var v = ssup.get(var);
@@ -171,9 +171,19 @@ public class PropTableStr2 extends Propagator<IntVar> {
                     }
                 }
             } else {
-                tuples.remove(tuple);
+                sz--;
+                tuples[i] = tuples[sz];
+                tuples[sz] = tuple;
+                i--;
             }
         }
+        idx.set(sz);
+    }
+
+    private void Filter() throws ContradictionException {
+        ssup.clear();
+        sval.clear();
+        initializeSupports();
         for (int i = 0; i < ssup.size(); i++) {
             ssup.get(i).remove_unsupported_value(this);
         }
@@ -202,7 +212,7 @@ public class PropTableStr2 extends Propagator<IntVar> {
          */
         private int offset;
         /**
-         * Count the number of value to remove
+         * Count the number of values to remove
          */
         private int cnt;
 

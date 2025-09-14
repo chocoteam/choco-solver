@@ -92,12 +92,20 @@ public class NaReExpression implements ReExpression {
                     model.nValues(vs, count).post();
                     model.reifyXeqC(count, 1, me);
                 }
-            }else if(op == Operator.IN){
+            } else if (op == Operator.NE) {
+                if (vs.length == 2) {
+                    model.reifyXneY(vs[0], vs[1], me);
+                } else {
+                    IntVar count = model.intVar(op + "_count_", 1, vs.length);
+                    model.nValues(vs, count).post();
+                    model.reifyXgtC(count, 1, me);
+                }
+            } else if (op == Operator.IN) {
                 BoolVar[] reifs = model.boolVarArray(vs.length - 1);
                 for(int i = 1; i < vs.length; i++) {
                     model.reifyXeqY(vs[0], vs[i], reifs[i-1]);
                 }
-                model.addClausesSumBoolArrayGreaterEqVar(reifs,me);
+                model.addClausesBoolOrArrayEqVar(reifs,me);
             } else if (op == Operator.NIN) {
                 BoolVar[] reifs = model.boolVarArray(vs.length - 1);
                 for (int i = 1; i < vs.length; i++) {
@@ -127,6 +135,12 @@ public class NaReExpression implements ReExpression {
                 }else {
                     return model.allEqual(vs);
                 }
+            case NE:
+                if (vs.length == 2) {
+                    return model.arithm(vs[0], "!=", vs[1]);
+                } else {
+                    return model.notAllEqual(vs);
+                }
             case IN:
                 return model.count(vs[0],
                         Arrays.copyOfRange(vs, 1, vs.length),
@@ -141,6 +155,11 @@ public class NaReExpression implements ReExpression {
     }
 
     @Override
+    public ArExpression[] getExpressionChild() {
+        return Arrays.stream(es).toArray(ArExpression[]::new);
+    }
+
+    @Override
     public boolean beval(int[] values, Map<IntVar, Integer> map) {
         boolean eval;
         switch (op) {
@@ -151,6 +170,7 @@ public class NaReExpression implements ReExpression {
                     eval = op.eval(es[0].ieval(values, map), es[i].ieval(values, map));
                 }
                 break;
+            case NE:
             case IN:
                 eval = false;
                 for (int i = 1; i < es.length; i++) {

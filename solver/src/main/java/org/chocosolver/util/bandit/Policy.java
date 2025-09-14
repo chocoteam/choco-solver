@@ -41,4 +41,26 @@ public interface Policy {
      */
     void update(int action, double reward);
 
+    class NextModuloN implements Policy {
+
+        int n;
+
+        public NextModuloN(int n) {
+            this.n = n;
+        }
+
+        @Override
+        public void init() {
+        }
+
+        @Override
+        public int nextAction(int step) {
+            return step % n;
+        }
+
+        @Override
+        public void update(int action, double reward) {
+        }
+    }
+
 }

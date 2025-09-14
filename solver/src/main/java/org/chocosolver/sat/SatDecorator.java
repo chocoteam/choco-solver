@@ -88,7 +88,7 @@ public class SatDecorator extends MiniSat {
                 return;
             default:
                 Clause cr = new Clause(ps);
-                removeDominated(cr);
+                //removeDominated(cr);
                 dynClauses.add(cr);
                 attachClause(cr);
                 break;

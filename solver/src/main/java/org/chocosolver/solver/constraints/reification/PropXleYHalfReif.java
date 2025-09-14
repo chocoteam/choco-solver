@@ -41,10 +41,13 @@ public class PropXleYHalfReif extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        if (vIdx == 1) {
+        if (vIdx == 0) {
+            return IntEventType.INCLOW.getMask();
+        } else if (vIdx == 1) {
             return IntEventType.DECUPP.getMask();
+        }else{
+            return IntEventType.INSTANTIATE.getMask();
         }
-        return IntEventType.INCLOW.getMask();
     }
 
     @Override

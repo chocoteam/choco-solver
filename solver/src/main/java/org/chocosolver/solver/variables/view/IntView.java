@@ -89,11 +89,6 @@ public abstract class IntView<I extends IntVar> extends AbstractView<I> implemen
     }
 
     @Override
-    public int getRange() {
-        return var.getRange();
-    }
-
-    @Override
     public boolean hasEnumeratedDomain() {
         return var.hasEnumeratedDomain();
     }

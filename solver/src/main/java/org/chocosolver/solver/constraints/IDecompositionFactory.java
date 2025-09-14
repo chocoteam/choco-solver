@@ -14,6 +14,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.extension.Tuples;
+import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
 import org.chocosolver.solver.constraints.nary.flow.PropMinCostMaxFlow;
 import org.chocosolver.solver.exception.SolverException;
@@ -21,6 +22,7 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Task;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.ArrayList;
@@ -45,6 +47,55 @@ import static java.lang.String.format;
  * @since 12/06/2018.
  */
 public interface IDecompositionFactory extends ISelf<Model> {
+
+    /**
+     * Creates and <b>posts</b> a decomposition of an allDifferent_except constraint.
+     * <p>
+     * This constraint ensures that all variables from vars are pairwise different, except those which are in except.
+     * </p>
+     * This decomposition is based on the simple arithmetic reasoning.
+     *
+     * @param vars   array of integer variables
+     * @param except array of values that can be excluded from the allDifferent constraint
+     */
+    default void allDifferentExceptDec(IntVar[] vars, int[] except) {
+        BoolVar[] bs = new BoolVar[vars.length];
+        IntIterableRangeSet set = new IntIterableRangeSet(except);
+        for (int i = 0; i < vars.length; i++) {
+            bs[i] = ref().boolVar();
+            ref().reifyXnotinS(vars[i], set, bs[i]);
+        }
+        for (int i = 0; i < vars.length - 1; i++) {
+            for (int j = i + 1; j < vars.length; j++) {
+                ref().impXrelYC(vars[i], "!=", vars[j], 0, bs[i].and(bs[j]).boolVar());
+            }
+        }
+    }
+
+    /**
+     * Creates and <b>posts</b> a decomposition of an allDifferent_except constraint.
+     * <p>
+     * This constraint ensures that all variables from vars are pairwise different, except those which are in except.
+     * </p>
+     * This decomposition is based on the global cardinality constraint.
+     *
+     * @param vars   array of integer variables
+     * @param except array of values that can be excluded from the allDifferent constraint
+     */
+    default void allDifferentExceptDec2(IntVar[] vars, int[] except) {
+        IntIterableRangeSet values = new IntIterableRangeSet();
+        for (IntVar var : vars) {
+            values.addAll(var);
+        }
+        values.addAll(except);
+        IntIterableRangeSet sexcept = new IntIterableRangeSet(except);
+        int[] valuesArray = values.toArray();
+        IntVar[] occurrences = new IntVar[valuesArray.length];
+        for (int i = 0; i < valuesArray.length; i++) {
+            occurrences[i] = ref().intVar(0, sexcept.contains(valuesArray[i]) ? vars.length : 1);
+        }
+        ref().globalCardinality(vars, valuesArray, occurrences, true).post();
+    }
 
     /**
      * Posts a decomposition of an among constraint.
@@ -188,6 +239,31 @@ public interface IDecompositionFactory extends ISelf<Model> {
 
 
     /**
+     * Creates a decomposition of the disjunctive constraint.
+     * This constraint ensures that no two tasks overlap.
+     * <p>
+     * If a task is optional, it can be performed with a duration of 0 and the other mandatory tasks can overlap it.
+     * Otherwise, the task must be performed and cannot be overlapped by any other task even if it has a duration of 0.
+     *
+     * @param tasks array of tasks
+     */
+    default void disjunctiveDec(Task[] tasks, boolean strict) {
+        // all durations must be positive or zero
+        for (int i = 0; i < tasks.length; i++) {
+            tasks[i].getDuration().ge(0).post();
+            BoolVar di0 = strict ? ref().boolVar(false) : ref().isEq(tasks[i].getDuration(), 0);
+            for (int j = i + 1; j < tasks.length; j++) {
+                BoolVar dj0 = strict ? ref().boolVar(false) : ref().isEq(tasks[j].getDuration(), 0);
+                BoolVar ibeforej = ref().scalar(new IntVar[]{tasks[i].getStart(), tasks[i].getDuration(), tasks[j].getStart()},
+                        new int[]{1, 1, -1}, "<=", 0).reify();
+                BoolVar jbeforei = ref().scalar(new IntVar[]{tasks[j].getStart(), tasks[j].getDuration(), tasks[i].getStart()},
+                        new int[]{1, 1, -1}, "<=", 0).reify();
+                ref().addClauses(new BoolVar[]{di0, dj0, ibeforej, jbeforei}, new BoolVar[]{});
+            }
+        }
+    }
+
+    /**
      * Creates an element constraint: value = matrix[rowIndex-offset][colIndex-colOffset]
      *
      * @param value     an integer variable taking its value in matrix
@@ -204,7 +280,8 @@ public interface IDecompositionFactory extends ISelf<Model> {
         IntVar rv = ref().intView(1, rowIndex, -rowOffset);
         IntVar cv = ref().intView(1, colIndex, -colOffset);
         IntVar idx = ref().intVar(0, d0 * d1 - 1);
-        ref().scalar(new IntVar[]{rv, cv}, new int[]{d1, 1}, "=", idx).post();
+        ref().table(new IntVar[]{rv, cv, idx},
+                TuplesFactory.scalar(new IntVar[]{rv, cv}, new int[]{d1, 1}, idx, 1)).post();
         // flatten the array
         int[] mvars = ArrayUtils.flatten(matrix);
         // post the element constraint
@@ -359,7 +436,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
     default void circuitDec(IntVar[] S, int offset) {
         int n = S.length;
         ref().allDifferent(S, "AC").post();
-        IntVar[] t = ref().intVarArray("t", n - 1, offset + 1, n + offset -1 );
+        IntVar[] t = ref().intVarArray("t", n - 1, offset + 1, n + offset - 1);
         ref().allDifferent(t, "AC").post();
         ref().arithm(t[0], "=", S[0]).post();
         for (int i = 1; i < n - 2; i++) {
@@ -433,9 +510,8 @@ public interface IDecompositionFactory extends ISelf<Model> {
      * @implNote This is encoded thanks to a table constraint.
      */
     default void ifThenElseDec(BoolVar[] c, int[] x, IntVar y) {
-        Tuples tuples = new Tuples();
         int star = Math.max(2, y.getUB() + 1);
-        tuples.setUniversalValue(star);
+        Tuples tuples = new Tuples(star);
         int[] t = new int[c.length + 1];
         Arrays.fill(t, 0);
         t[c.length] = star;
@@ -478,9 +554,8 @@ public interface IDecompositionFactory extends ISelf<Model> {
             //y.eq(x[i]).decompose().impliedBy(c[i].and(d[i]).boolVar());
             c[i].and(d[i]).imp(y.eq(x[i])).post();
         }/*/
-        Tuples tuples = new Tuples();
-        int univ = Math.max(2, y.getUB() + 1);
-        tuples.setUniversalValue(univ);
+        int univ = Math.min(0, Stream.of(c).mapToInt(IntVar::getLB).min().orElse(0)) - 1;
+        Tuples tuples = new Tuples(univ);
         int[] t = new int[c.length + 1];
         Arrays.fill(t, 0);
         t[c.length] = c.length;

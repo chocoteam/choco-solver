@@ -52,6 +52,7 @@ public final class BoolGeqView<I extends IntVar> extends BoolIntView<I> {
     @Override
     public boolean instantiateTo(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
+        reason = cause.manageReification().apply(reason); // to deal with reification of the earliest cause
         boolean done = false;
         if (value < 0 || value > 1) {
             if (getModel().getSolver().isLCG()) {

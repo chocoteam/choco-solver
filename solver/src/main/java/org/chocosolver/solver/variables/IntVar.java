@@ -618,7 +618,9 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      *
      * @return the range of this domain
      */
-    int getRange();
+    default int getRange(){
+        return getUB() - getLB() + 1;
+    }
 
     /**
      * Returns the first value just after v in <code>this</code> which is <b>in</b> the domain.

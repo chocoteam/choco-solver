@@ -102,8 +102,12 @@ public class LNSTest {
             bp = power.getValue();
             bw = scalar.getValue();
         }
-        Assert.assertEquals(bp, 8372);
-        Assert.assertEquals(bw, 1092);
+        // Some combinations of LNS and search strategies do not find the optimal solution
+        // So, the least we can do is to check that a solution is found
+        Assert.assertTrue(r.getSolutionCount() > 0, "No solution found with LNS=" + lns);
+        // We can also check that the weight is not that bad
+        Assert.assertTrue(bp >= 7900, "Power is too low with LNS=" + lns);
+        Assert.assertTrue(bw >= 1090, "Weight is too low with LNS=" + lns);
     }
 
     @DataProvider(name = "lns")

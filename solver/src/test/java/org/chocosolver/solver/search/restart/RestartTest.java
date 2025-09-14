@@ -134,7 +134,8 @@ public class RestartTest {
         );
         while (solver.solve()) ;
         assertEquals(solver.getRestartCount(), 2);
-        assertEquals(solver.getSolutionCount(), 10);
+        assertEquals(solver.getSolutionCount(), 7);
+        assertEquals(solver.getObjectiveManager().getBestSolutionValue(), 55);
     }
 
     @Test(groups = "lcg", dataProvider = "random", dataProviderClass = Providers.class)
@@ -159,12 +160,12 @@ public class RestartTest {
         solver.setSearch(domOverWDegSearch(ticks));
         while (solver.solve()) ;
         assertEquals(solver.getRestartCount(), 2);
-        assertEquals(solver.getSolutionCount(), 3);
+        assertEquals(solver.getSolutionCount(), 6);
         assertEquals(solver.getObjectiveManager().getBestSolutionValue(), 34);
         solver.hardReset();
         while (solver.solve()) ;
         assertEquals(solver.getRestartCount(), 0);
-        assertEquals(solver.getSolutionCount(), 10);
+        assertEquals(solver.getSolutionCount(), 8);
         assertEquals(solver.getObjectiveManager().getBestSolutionValue(), 34);
     }
 

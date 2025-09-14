@@ -319,6 +319,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     @Override
     public int getRange() {
+        // For boolean variables, the range is always equal to the domain size
         return getDomainSize();
     }
 

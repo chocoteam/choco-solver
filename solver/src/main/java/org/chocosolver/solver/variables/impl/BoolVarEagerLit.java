@@ -301,6 +301,7 @@ public class BoolVarEagerLit extends AbstractVariable implements BoolVar, LitVar
 
     @Override
     public int getRange() {
+        // For boolean variables, the range is always equal to the domain size
         return getDomainSize();
     }
 

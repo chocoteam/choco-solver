@@ -14,6 +14,7 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.binary.*;
 import org.chocosolver.solver.constraints.binary.element.ElementFactory;
 import org.chocosolver.solver.constraints.extension.Tuples;
@@ -80,7 +81,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.lang.Math.abs;
@@ -221,7 +221,26 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint absolute(IntVar var1, IntVar var2) {
         assert var1.getModel() == var2.getModel();
-        return new Constraint(ConstraintsName.ABSOLUTE, new PropAbsolute(var1, var2));
+        if (var2.isInstantiated()) {
+            if (var2.getValue() < 0) {
+                return arithm(var1, "=", -var2.getValue());
+            } else {
+                return arithm(var1, "=", var2.getValue());
+            }
+        } else if (var1.isInstantiated()) {
+            if (var1.getValue() == 0) {
+                var2.eq(0).post();
+            } else if (var1.getValue() > 0) {
+                return member(var2, new int[]{-var1.getValue(), var1.getValue()});
+            } else {
+                return ref().falseConstraint();
+            }
+        }
+        return new Constraint(ConstraintsName.ABSOLUTE,
+                ref().getSolver().isLCG() ?
+                        new PropAbsoluteLight(var1, var2) :
+                        new PropAbsolute(var1, var2)
+        );
     }
 
     /**
@@ -430,15 +449,15 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param var2 second variable
      */
     default Constraint table(IntVar var1, IntVar var2, Tuples tuples) {
-        if (!var1.hasEnumeratedDomain() || !var2.hasEnumeratedDomain()) {
-            return table(var1, var2, tuples, "CT+");
-        } else {
-            return table(var1, var2, tuples, "AC3bit+rm");
-        }
+        String algo = "CT";
+        return table(var1, var2, tuples, algo);
     }
 
     /**
      * Creates a table constraint over a couple of variables var1 and var2:<br/>
+     * <p>
+     * - <b>CT</b>: table constraint which applies the Compact-Table algorithm,<br/>
+     * - <b>CT+</b>: table constraint which applies the Compact-Table algorithm on allowed tuples,<br/>
      * - <b>AC2001</b>: table constraint which applies the AC2001 algorithm,<br/>
      * - <b>AC3</b>: table constraint which applies the AC3 algorithm,<br/>
      * - <b>AC3rm</b>: table constraint which applies the AC3 rm algorithm,<br/>
@@ -447,7 +466,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      *
      * @param var1   first variable
      * @param var2   second variable
-     * @param tuples the relation between the two variables, among {"AC3", "AC3rm", "AC3bit+rm", "AC2001", "CT+", "FC"}
+     * @param tuples the relation between the two variables, among {"AC3", "AC3rm", "AC3bit+rm", "AC2001", "CT+", "CT", "FC"}
      */
     default Constraint table(IntVar var1, IntVar var2, Tuples tuples, String algo) {
         Object[] args = variableUniqueness(new IntVar[]{var1, var2});
@@ -461,13 +480,27 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             ref().addTable(new IntVar[]{var1, var2}, tuples);
             return ref().voidConstraint();
         }
+        if (algo.endsWith("+") && !tuples.isFeasible()) {
+            throw new SolverException(algo + " table algorithm cannot be used with forbidden tuples.");
+        }
+        if (tuples.allowUniversalValue() && !(algo.contains("CT+") || algo.contains("STR2+"))) {
+            throw new SolverException(algo + " table algorithm cannot be used with short tuples.");
+        }
+
         Propagator<IntVar> p;
         if (tuples.allowUniversalValue()) {
             p = new PropCompactTableStar(new IntVar[]{var1, var2}, tuples);
         } else {
             switch (algo) {
+                case "CT":
                 case "CT+":
-                    p = new PropCompactTable(new IntVar[]{var1, var2}, tuples);
+                    if (tuples.allowUniversalValue()) {
+                        p = new PropCompactTableStar(new IntVar[]{var1, var2}, tuples);
+                    } else if (tuples.isFeasible()) {
+                        p = new PropCompactTable(new IntVar[]{var1, var2}, tuples);
+                    } else {
+                        p = new PropCompactTableNeg(new IntVar[]{var1, var2}, tuples);
+                    }
                     break;
                 case "AC2001":
                     p = new PropBinAC2001(var1, var2, tuples);
@@ -687,6 +720,17 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param result   result
      */
     default Constraint div(IntVar dividend, IntVar divisor, IntVar result) {
+        if (ref().getSolver().isLCG()) {
+            if (PropDivXYZLight.getSign(dividend) != 0
+                    && PropDivXYZLight.getSign(divisor) != 0
+                    && PropDivXYZLight.getSign(result) != 0) {
+                try {
+                    return new Constraint(ConstraintsName.DIVISION, new PropDivXYZLight(dividend, divisor, result));
+                } catch (SolverException e) {
+                    // If the light propagator fails, we fall back to the full one
+                }
+            }
+        }
         return new Constraint(ConstraintsName.DIVISION, new PropDivXYZ(dividend, divisor, result));
     }
 
@@ -893,7 +937,32 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param vars collection of variables
      */
     default Constraint allDifferentExcept0(IntVar[] vars) {
+        if (ref().getSolver().isLCG()) {
+            return allDifferentExceptValues(vars, 0);
+        }
         return allDifferentUnderCondition(vars, Condition.EXCEPT_0, true);
+    }
+
+    /**
+     * Creates an allDifferent constraint for variables that are not equal to 0.
+     * There can be multiple variables equal to 0.
+     *
+     * @param vars collection of variables
+     */
+    default Constraint allDifferentExceptValues(IntVar[] vars, int... values) {
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: allDifferentExceptValues constraint is decomposed (due to LCG).");
+            }
+            ref().allDifferentExceptDec(vars, values);
+            return ref().voidConstraint();
+        }
+        final IntIterableRangeSet svalues = new IntIterableRangeSet(values);
+        if (svalues.size() == 1) {
+            return allDifferentUnderCondition(vars, v -> !v.contains(svalues.min()), true);
+        }
+        return allDifferentUnderCondition(vars, v -> !svalues.intersect(v), true);
     }
 
     /**
@@ -1507,9 +1576,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             return Constraint.merge(ConstraintsName.DIFFNWITHCUMULATIVE,
                     diffNCons,
                     min(minX, X), max(maxX, EX), scalar(new IntVar[]{maxX, minX}, new int[]{1, -1}, "=", diffX),
-                    ref().cumulative(TX, height, diffY),
+                    model.cumulative(TX, height, diffY),
                     min(minY, Y), max(maxY, EY), scalar(new IntVar[]{maxY, minY}, new int[]{1, -1}, "=", diffY),
-                    ref().cumulative(TY, width, diffX)
+                    model.cumulative(TY, width, diffX)
             );
         } else {
             return diffNCons;
@@ -2573,28 +2642,25 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     /**
-     * Creates a table constraint specifying that the sequence of variables vars must belong to the list of tuples
-     * (or must NOT belong in case of infeasible tuples)
+     * Creates a table constraint specifying that the sequence of variables 'vars'
+     * must belong to the list of tuples (or must NOT belong in case of infeasible tuples)
      * <p>
-     * Default configuration with GACSTR+ algorithm for feasible tuples and GAC3rm otherwise
+     * Default configuration is "CT" if memory consumption is not too high, "STR2+" otherwise.
      *
      * @param vars   variables forming the tuples
      * @param tuples the relation between the variables (list of allowed/forbidden tuples)
+     * @see Settings#getMaxSizeInMBToUseCompactTable()
+     * @see Settings#setMaxSizeInMBToUseCompactTable(int)
      */
     default Constraint table(IntVar[] vars, Tuples tuples) {
-        String algo = "GAC3rm";
-        if (tuples.isFeasible()) {
-            //noinspection OptionalGetWithoutIsPresent
-            if (tuples.nbTuples() > 512 &&
-                    (IntStream.range(0, vars.length)
-                            .map(i -> tuples.max(i) - tuples.min(i))
-                            .max().getAsInt()) < 512) {
-                algo = "CT+";
-            } else if (tuples.allowUniversalValue()) {
-                // STR2+ or CT+, depending on dom size
+        String algo = "CT";
+        long estimatedMem = 0;
+        long maxMem = ref().getSettings().getMaxSizeInMBToUseCompactTable();
+        for (int i = 0; i < vars.length && tuples.isFeasible(); i++) {
+            estimatedMem += ((tuples.nbTuples() / 64L) * vars[i].getRange()) / 1024 / 1024; // in MB
+            if (estimatedMem < 0 || estimatedMem > maxMem) {
                 algo = "STR2+";
-            } else {
-                algo = "GACSTR+";
+                break;
             }
         }
         return table(vars, tuples, algo);
@@ -2603,7 +2669,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     /**
      * Creates a table constraint, with the specified algorithm defined algo
      * <p>
-     * - <b>CT+</b>: Compact-Table algorithm (AC),
+     * - <b>CT</b>: Compact-Table algorithm (AC),
+     * <br/>
+     * <p>
+     * - <b>CT+</b>: Compact-Table algorithm for allowed tuples only (AC),
      * <br/>
      * - <b>GAC2001</b>: Arc Consistency version 2001 for tuples,
      * <br/>
@@ -2623,11 +2692,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      *
      * @param vars   variables forming the tuples
      * @param tuples the relation between the variables (list of allowed/forbidden tuples). Should not be modified once passed to the constraint.
-     * @param algo   to choose among {"CT+", "GAC3rm", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC", "STR2+"}
+     * @param algo   to choose among {"CT", "CT+", "AC3rm", "GAC3rm", "AC2001", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC", "STR2+"}
      */
     default Constraint table(IntVar[] vars, Tuples tuples, String algo) {
         // if some variables appears more than one time, the filtering algorithm can be not correct
         vars = (IntVar[]) variableUniqueness(vars)[0];
+        // check views too
+
         if (ref().getSolver().isLCG()) {
             if (ref().getSettings().warnUser()) {
                 ref().getSolver().log().white().println(
@@ -2640,6 +2711,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             switch (algo) {
                 case "FC":
                     return table(vars[0], vars[1], tuples, algo);
+                case "AC2001":
                 case "GAC2001":
                     return table(vars[0], vars[1], tuples, "AC2001");
                 case "CT+":
@@ -2650,19 +2722,22 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                     return table(vars[0], vars[1], tuples);
             }
         }
-        if (algo.contains("+") && !tuples.isFeasible()) {
+        if (algo.endsWith("+") && !tuples.isFeasible()) {
             throw new SolverException(algo + " table algorithm cannot be used with forbidden tuples.");
         }
-        if (tuples.allowUniversalValue() && !(algo.contains("CT+") || algo.contains("STR2+"))) {
+        if (tuples.allowUniversalValue() && !(algo.startsWith("CT") || algo.contains("STR2+"))) {
             throw new SolverException(algo + " table algorithm cannot be used with short tuples.");
         }
         Propagator<IntVar> p;
         switch (algo) {
+            case "CT":
             case "CT+": {
                 if (tuples.allowUniversalValue()) {
                     p = new PropCompactTableStar(vars, tuples);
-                } else {
+                } else if (tuples.isFeasible()) {
                     p = new PropCompactTable(vars, tuples);
+                } else {
+                    p = new PropCompactTableNeg(vars, tuples);
                 }
             }
             break;
@@ -2672,9 +2747,11 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             case "FC":
                 p = new PropLargeFC(vars, tuples);
                 break;
+            case "AC3rm":
             case "GAC3rm":
                 p = new PropLargeGAC3rm(vars, tuples);
                 break;
+            case "AC2001":
             case "GAC2001":
                 p = new PropLargeGAC2001(vars, tuples);
                 break;

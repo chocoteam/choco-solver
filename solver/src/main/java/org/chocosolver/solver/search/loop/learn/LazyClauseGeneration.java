@@ -62,6 +62,10 @@ public class LazyClauseGeneration implements Learn {
      */
     private long nbRestarts = 0;
     /**
+     * Indicates whether the current clause comes from on a solution (or on a failure).
+     */
+    private boolean onSolution = false;
+    /**
      * A temporary storage for learnt clauses.
      */
     private final TIntArrayList learnt_clause = new TIntArrayList();
@@ -95,7 +99,7 @@ public class LazyClauseGeneration implements Learn {
             mSolver.cancelTrail();
             mSolver.getDecisionPath().synchronize(true, learnt_clause.size() > 1);
             if (!learnt_clause.isEmpty()) {
-                mSat.addLearnt(learnt_clause);
+                mSat.addLearnt(learnt_clause, onSolution);
             }
         } else {
             nbRestarts = mSolver.getRestartCount();
@@ -108,6 +112,7 @@ public class LazyClauseGeneration implements Learn {
     private void onFailure() {
         ContradictionException cex = mSolver.getContradictionException();
         int backtrack_level = analyze(cex, ON_FAILURE);
+        onSolution = false; // to indicate that we are learning on a failure, for #forget()
         int upto = mSolver.getEnvironment().getWorldIndex() - backtrack_level;
         if (upto > 1) {
             mSolver.getMeasures().incBackjumpCount();
@@ -124,12 +129,13 @@ public class LazyClauseGeneration implements Learn {
 
             mSat.confl = new Clause(learnt_clause, false /*?*/);
             int backtrack_level = analyze(mSolver.getContradictionException().set(Cause.Sat, null, null), ON_SOLUTION);
+            onSolution = true; // to indicate that we are learning on a solution, for #forget()
             int upto = mSolver.getEnvironment().getWorldIndex() - backtrack_level;
             if (upto > 1) {
                 mSolver.getMeasures().incBackjumpCount();
             }
             mSolver.setJumpTo(upto);
-        } // else  always restart on a solution, managed in Solver
+        } // else always restart on a solution, managed in Solver
     }
 
     private void extractFromVariables() {

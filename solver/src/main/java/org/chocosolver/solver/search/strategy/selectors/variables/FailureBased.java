@@ -55,7 +55,7 @@ public class FailureBased<V extends Variable> implements IMonitorContradiction, 
      * @param sType: the score type. 1->FRB; 2->FRBA; 3->FLB; 4->FLBA.
      */
     public FailureBased(V[] vars, long seed, int sType) {
-        ran = new Random(seed);
+        this.ran = seed > -1 ? new java.util.Random(seed) : null;
         solver = vars[0].getModel().getSolver();
         solver.plugMonitor(this);
         varNum = vars.length;
@@ -106,8 +106,11 @@ public class FailureBased<V extends Variable> implements IMonitorContradiction, 
                 currenFixNum++;
             }
         }
-        if (bests.size() > 0) {
-            currentVarIndex = bests.get(ran.nextInt(bests.size()));
+        if (!bests.isEmpty()) {
+            currentVarIndex = bests.get(0);
+            if (ran != null) {
+                currentVarIndex = bests.get(ran.nextInt(bests.size()));
+            }
             best = vars[currentVarIndex];
             assignTimes[currentVarIndex]++;
         }

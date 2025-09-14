@@ -12,8 +12,6 @@ package org.chocosolver.solver.variables;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ternary.PropXplusYeqZ;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
@@ -367,7 +365,7 @@ public class TaskTest {
         IntVar dur = model.intVar("dur", new int[]{1, 2, 4, 5});
         IntVar last = model.intVar("last", 5, 6);
         IntVar IV390 = model.intVar("IV390", 6);
-        new Constraint("", new PropXplusYeqZ(first, dur, last)).post();
+        model.arithm(first, "+", dur, "=", last).post();
         new Task(first, dur, IV390);
         Solver s = model.getSolver();
         s.setSearch(Search.inputOrderLBSearch(last));  // <- for the issue
@@ -381,7 +379,7 @@ public class TaskTest {
         IntVar dur = new BitsetIntVarImpl("dur", new int[]{1, 2, 4, 5}, model);
         IntVar last = model.intVar("last", 5, 6);
         IntVar IV390 = model.intVar("IV390", 6);
-        new Constraint("", new PropXplusYeqZ(first, dur, last)).post();
+        model.arithm(first, "+", dur, "=", last).post();
         new Task(first, dur, IV390);
         Solver s = model.getSolver();
         s.setSearch(Search.inputOrderLBSearch(last));  // <- for the issue
@@ -395,7 +393,7 @@ public class TaskTest {
         IntVar dur = model.offset(model.intVar("dur", new int[]{1, 2, 4, 5}), 2);
         IntVar last = model.offset(model.intVar("last", 5, 6), 2);
         IntVar IV390 = model.offset(model.intVar("IV390", 6), 2);
-        new Constraint("", new PropXplusYeqZ(first, dur, last)).post();
+        model.arithm(first, "+", dur, "=", last).post();
         new Task(first, dur, IV390);
         Solver s = model.getSolver();
         s.setSearch(Search.inputOrderLBSearch(last));  // <- for the issue
