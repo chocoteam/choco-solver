@@ -160,7 +160,7 @@ public class TestExplanation {
                 {"circuit", new Class[]{IntVar[].class, int.class}, new Object[]{6, null}},
                 {"count", new Class[]{IntVar.class, IntVar[].class, IntVar.class}, new Object[]{null, 6, null}},
                 {"count", new Class[]{int.class, IntVar[].class, IntVar.class}, new Object[]{null, 6, null}},
-                {"cumulative", new Class[]{Task[].class, IntVar[].class, IntVar.class, boolean.class, boolean.class}, new Object[]{8, 8, null, null, null}},
+                {"cumulative", new Class[]{Task[].class, IntVar[].class, IntVar.class, boolean.class, boolean.class}, new Object[]{6, 6, null, null, null}},
                 {"decreasing", new Class[]{IntVar[].class, int.class}, new Object[]{6, null}},
                 {"div", new Class[]{IntVar.class, IntVar.class, IntVar.class}, new Object[]{null, null, null}},
                 {"increasing", new Class[]{IntVar[].class, int.class}, new Object[]{6, null}},
@@ -186,7 +186,6 @@ public class TestExplanation {
                 {"times", new Class[]{IntVar.class, int.class, IntVar.class}, new Object[]{null, null, null}},
 
                 //not supported {"allDifferentExcept0", new Class[]{IntVar[].class}, new Object[]{6}},
-                //not supported {"cumulative", new Class[]{IntVar[].class, int[].class, int[].class, int.class}, new Object[]{6, 6, 6, null}},
                 //not supported {"diffN", new Class[]{IntVar[].class, IntVar[].class, IntVar[].class, IntVar[].class, boolean.class}, new Object[]{4, 4, 4, 4, null}},
                 //not supported {"knapsack", new Class[]{IntVar[].class, IntVar.class, IntVar.class, int[].class, int[].class}, new Object[]{4, null, null, 4, 4}},
                 // ignored {"clausesIntChanneling", new Class[]{IntVar.class, BoolVar[].class, BoolVar[].class}, new Object[]{null, 6, 6}},
