@@ -211,12 +211,19 @@ public class DomainBuilder {
             case 1: // fixed duration
                 IntVar start1 = makeIntVar(model, rnd, pos);
                 int duration1 = 1 + rnd.nextInt(10);
-                IntVar end1 = makeIntVar(model, rnd, pos);
+                IntVar end1 = model.intVar(name + ".end", start1.getLB() + duration1, start1.getUB() + duration1);
                 return new Task(start1, duration1, end1);
             default: // all variables
-                IntVar start2 = makeIntVar(model, rnd, pos);
-                IntVar duration2 = makeIntVar(model, rnd, pos);
-                IntVar end2 = makeIntVar(model, rnd, pos);
+                int[] times = new int[]{
+                        MIN_LOW_BND + rnd.nextInt(MAX_DOM_SIZE),
+                        MIN_LOW_BND + rnd.nextInt(MAX_DOM_SIZE),
+                        MIN_LOW_BND + rnd.nextInt(MAX_DOM_SIZE),
+                        MIN_LOW_BND + rnd.nextInt(MAX_DOM_SIZE)
+                };
+                Arrays.sort(times);
+                IntVar start2 = model.intVar(name + ".start", times[0], times[1]);
+                IntVar duration2 = model.intVar(name + ".duration", times[2] - times[1], times[3] - times[0]);
+                IntVar end2 = model.intVar(name + ".end", times[2], times[3]);
                 return new Task(start2, duration2, end2);
         }
     }

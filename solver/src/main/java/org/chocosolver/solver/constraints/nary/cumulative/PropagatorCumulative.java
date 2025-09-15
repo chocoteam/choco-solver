@@ -12,6 +12,7 @@ package org.chocosolver.solver.constraints.nary.cumulative;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import org.chocosolver.memory.IStateBitSet;
 import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.constraints.Explained;
@@ -102,7 +103,9 @@ public class PropagatorCumulative extends Propagator<IntVar> {
     private final IntComparator comp;
     private final int[] tsks;
     // For explanations
-    private final TIntObjectHashMap<Reason> reasonRect;
+    private final TIntArrayList literals;
+    private final TObjectIntHashMap<IntVar> initialLB;
+    private final TObjectIntHashMap<IntVar> initialUB;
 
     public PropagatorCumulative(final Task[] tasks, final IntVar[] heights, final IntVar capacity) {
         this(tasks, heights, capacity, false, false);
@@ -126,7 +129,6 @@ public class PropagatorCumulative extends Propagator<IntVar> {
         ttAfter = new TIntIntHashMap(2 * tasks.length);
         comparatorFreeParts = PropagatorCumulative::compareTaskWithFreeParts;
         mapTaskToHeight = new HashMap<>(tasks.length);
-        reasonRect = new TIntObjectHashMap<>();
         this.energyNaive = energyNaive;
         sorArray = new int[tasks.length];
         sorter = new ArraySort<>(tasks.length,false,true);
@@ -146,6 +148,9 @@ public class PropagatorCumulative extends Propagator<IntVar> {
             }
             mapTaskToHeight.put(tasks[i], heights[i]);
         }
+        initialLB = new TObjectIntHashMap<>(4 * tasks.length + 1);
+        initialUB = new TObjectIntHashMap<>(4 * tasks.length + 1);
+        literals = new TIntArrayList(4 * tasks.length + 3);
     }
 
     @Override
@@ -165,14 +170,21 @@ public class PropagatorCumulative extends Propagator<IntVar> {
         if (PropagatorEventType.isFullPropagation(evtmask)) {
             capacity.updateLowerBound(0, this);
             activeTasks.clear();
+            initialLB.clear();
+            initialUB.clear();
             for (int i = 0; i < tasks.length; ++i) {
-                heights[i].updateLowerBound(0, this);
-                tasks[i].updateMinDuration(0, this);
+                heights[i].updateLowerBound(0, this, Reason.undef());
+                tasks[i].updateMinDuration(0, this, Reason.undef());
                 propagateTaskHeight(i);
                 if (isActive(i)) {
                     activeTasks.set(i);
                 }
+                addInitialBounds(heights[i]);
+                addInitialBounds(tasks[i].getStart());
+                addInitialBounds(tasks[i].getDuration());
+                addInitialBounds(tasks[i].getEnd());
             }
+            addInitialBounds(capacity);
         }
         if (activeTasks.size() <= 1) {
             // No need for TimeTable or OverloadChecking in such a case
@@ -269,6 +281,11 @@ public class PropagatorCumulative extends Propagator<IntVar> {
         return ESat.UNDEFINED;
     }
 
+    private void addInitialBounds(final IntVar variable) {
+        initialLB.put(variable, variable.getLB());
+        initialUB.put(variable, variable.getUB());
+    }
+
     /**
      * Builds the profil and applies TimeTable filtering (idempotent).
      *
@@ -295,15 +312,121 @@ public class PropagatorCumulative extends Propagator<IntVar> {
             if (profile.getHeightRectangle(idxRectMaxHeight) < profile.getHeightRectangle(j)) {
                 idxRectMaxHeight = j;
             }
-            if (lcg()) {
-                reasonRect.put(j, buildReasonRectangle(j));
-            }
         }
         if (lcg()) {
-            capacity.updateLowerBound(profile.getHeightRectangle(idxRectMaxHeight), this, reasonRect.get(idxRectMaxHeight));
+//            capacity.updateLowerBound(profile.getHeightRectangle(idxRectMaxHeight), this, this.defaultReason(capacity));
+            literals.clear();
+            final int begin = profile.getStartRectangle(idxRectMaxHeight)
+                              + ((profile.getEndRectangle(idxRectMaxHeight) - profile.getStartRectangle(idxRectMaxHeight) - 1) / 2);
+            analyseTasks(
+                    literals,
+                    profile.getIndexesTaskRectangle(idxRectMaxHeight),
+                    0,
+                    begin,
+                    begin + 1
+            );
+            capacity.updateLowerBound(profile.getHeightRectangle(idxRectMaxHeight), this, buildReason(literals));
+//            capacity.updateLowerBound(profile.getHeightRectangle(idxRectMaxHeight), this, reasonRect.get(idxRectMaxHeight));
         } else {
             capacity.updateLowerBound(profile.getHeightRectangle(idxRectMaxHeight), this);
         }
+    }
+
+    // Wrapper to get the negated literal -[[v <= val]] = [[v >= val + 1]]
+    private int getNegLeqLit(final IntVar v, final int val) {
+        if (v.isInstantiated()) {
+            return v.getValLit();
+        }
+        return v.hasEnumeratedDomain() ? v.getGELit(val + 1) : v.getMaxLit();
+    }
+
+    // Wrapper to get the negated literal -[[v >= val]] = [[ v <= val - 1]]
+    private int getNegGeqLit(final IntVar v, final int val) {
+        if (v.isInstantiated()) {
+            return v.getValLit();
+        }
+        return v.hasEnumeratedDomain() ? v.getLELit(val - 1) : v.getMinLit();
+    }
+
+    private void analyseLimitAndTasks(
+            final TIntArrayList literals,
+            final TIntArrayList indexesTask,
+            int liftUsage,
+            final int begin,
+            final int end
+    ) {
+//        final int diffLimit = initialUB.get(capacity) - capacity.getUB();
+//        if (diffLimit > 0) {
+//            if (diffLimit <= liftUsage) {
+//                liftUsage -= diffLimit;
+//            } else {
+//                liftUsage = 0;
+//                literals.add(getNegLeqLit(capacity, capacity.getUB() + liftUsage));
+////                literals.add(capacity.getGELit(capacity.getUB() + liftUsage + 1));
+//            }
+//        }
+//        literals.add(getNegLeqLit(capacity, capacity.getUB()));
+        literals.add(capacity.getMaxLit());
+        analyseTasks(literals, indexesTask, liftUsage, begin, end);
+    }
+
+    private void analyseTasks(
+            final TIntArrayList literals,
+            final TIntArrayList indexesTask,
+            int liftUsage,
+            final int begin,
+            final int end
+    ) {
+        for (int k = 0; k < indexesTask.size(); ++k) {
+            final int i = indexesTask.getQuick(k);
+            literals.add(getNegGeqLit(tasks[i].getEnd(), end));
+            literals.add(getNegLeqLit(tasks[i].getStart(), begin));
+            literals.add(tasks[i].getDuration().getMinLit());
+            literals.add(heights[i].getMinLit());
+//            literals.add(getNegGeqLit(tasks[i].getDuration(), tasks[i].getMinDuration()));
+//            literals.add(getNegGeqLit(heights[i], heights[i].getLB()));
+        }
+    }
+
+    private void analyseTasks2(
+            final TIntArrayList literals,
+            final TIntArrayList indexesTask,
+            int liftUsage,
+            final int begin,
+            final int end
+    ) {
+        for (int k = 0; k < indexesTask.size(); ++k) {
+            final int i = indexesTask.getQuick(k);
+            if (heights[i].getLB() <= liftUsage) {
+                liftUsage -= heights[i].getLB();
+            } else {
+                if (initialLB.get(tasks[i].getStart()) + tasks[i].getMinDuration() <= end) {
+                    literals.add(getNegGeqLit(tasks[i].getEnd(), end));
+                }
+                if (begin < initialUB.get(tasks[i].getStart())) {
+                    literals.add(getNegLeqLit(tasks[i].getStart(), begin));
+                }
+                if (initialLB.get(tasks[i].getDuration()) < tasks[i].getMinDuration()) {
+                    literals.add(getNegGeqLit(tasks[i].getDuration(), tasks[i].getMinDuration()));
+                }
+                final int usageDiff = heights[i].getLB() - initialLB.get(heights[i]);
+                if (usageDiff > 0) {
+                    if (usageDiff <= liftUsage) {
+                        liftUsage -= usageDiff;
+                    } else {
+                        literals.add(getNegGeqLit(heights[i], heights[i].getLB()));
+                    }
+                }
+            }
+        }
+    }
+
+    private Reason buildReason(final TIntArrayList literals) {
+        final int[] ps = new int[literals.size() + 1];
+        for (int i = 0; i < literals.size(); ++i) {
+            ps[i + 1] = literals.getQuick(i);
+        }
+        return Reason.r(ps);
     }
 
     /**
@@ -318,7 +441,7 @@ public class PropagatorCumulative extends Propagator<IntVar> {
         final TIntArrayList indexesTask = profile.getIndexesTaskRectangle(indexRect);
         final int[] literals = new int[2 + 3 * indexesTask.size()];
         int idx = 0;
-        literals[++idx] = capacity.getLELit(capacity.getUB());
+        literals[++idx] = capacity.getGELit(capacity.getUB() + 1);
         for (int i = 0; i < indexesTask.size(); ++i) {
             final int idxTask = indexesTask.getQuick(i);
             literals[++idx] = tasks[idxTask].getEnd().getLELit(endRectangle - 1);
@@ -371,7 +494,12 @@ public class PropagatorCumulative extends Propagator<IntVar> {
                 if (capacity.getUB() - height.getLB() < profile.getHeightRectangle(j)) {
                     final Reason reason;
                     if (lcg()) {
-                        reason = Reason.gather(reasonRect.get(j), task.getEnd().getLELit(profile.getStartRectangle(j)));
+//                        reason = this.defaultReason(task.getStart());
+                        literals.clear();
+                        final int end = Math.min(task.getEct(), profile.getEndRectangle(j));
+                        analyseLimitAndTasks(literals, profile.getIndexesTaskRectangle(j), 0, end - 1, end);
+                        reason = buildReason(literals);
+//                        reason = Reason.gather(reasonRect.get(j), task.getEnd().getLELit(profile.getStartRectangle(j)));
                     } else {
                         reason = Reason.undef();
                     }
@@ -400,7 +528,12 @@ public class PropagatorCumulative extends Propagator<IntVar> {
                 if (capacity.getUB() - height.getLB() < profile.getHeightRectangle(j)) {
                     final Reason reason;
                     if (lcg()) {
-                        reason = Reason.gather(reasonRect.get(j), task.getStart().getGELit(profile.getEndRectangle(j)));
+//                        reason = this.defaultReason(task.getEnd());
+                        literals.clear();
+                        final int begin = Math.max(profile.getStartRectangle(j), task.getLst());
+                        analyseLimitAndTasks(literals, profile.getIndexesTaskRectangle(j), 0, begin, begin + 1);
+                        reason = buildReason(literals);
+//                        reason = Reason.gather(reasonRect.get(j), task.getStart().getGELit(profile.getEndRectangle(j)));
                     } else {
                         reason = Reason.undef();
                     }
@@ -518,7 +651,22 @@ public class PropagatorCumulative extends Propagator<IntVar> {
                 int j = profile.find(task.getLst());
                 while (j < profile.size() && profile.getStartRectangle(j) < task.getEct()) {
                     if (lcg()) {
-                        final Reason reason = Reason.gather(reasonRect.get(j), height.getLELit(height.getLB() - 1));
+                        final Reason reason = this.defaultReason(height);
+//                        final Reason reason;
+//                        if (profile.getIndexesTaskRectangle(j).contains(i)) {
+//                            reason = Reason.gather(reasonRect.get(j), height.getLELit(height.getLB() - 1));
+//                        } else {
+//                            reason = Reason.gather(
+//                                    Reason.gather(
+//                                            Reason.gather(
+//                                                    reasonRect.get(j),
+//                                                    height.getLELit(height.getLB() - 1)
+//                                            ),
+//                                            task.getStart().getMaxLit()
+//                                    ),
+//                                    task.getEnd().getMinLit()
+//                            );
+//                        }
                         height.updateUpperBound(capacity.getUB() - (profile.getHeightRectangle(j) - height.getLB()), this, reason);
                     } else {
                         height.updateUpperBound(capacity.getUB() - (profile.getHeightRectangle(j) - height.getLB()), this);
@@ -686,12 +834,12 @@ public class PropagatorCumulative extends Propagator<IntVar> {
                 final Reason reason = tasks[i] instanceof OptionalTask
                         ? Reason.r(heights[i].getLELit(heights[i].getLB() - 1), capacity.getGELit(capacity.getUB() + 1), ((OptionalTask) tasks[i]).getPerformed().getEQLit(0))
                         : Reason.r(heights[i].getLELit(heights[i].getLB() - 1), capacity.getGELit(capacity.getUB() + 1));
-                tasks[i].updateDuration(0, 0, this, reason);
+                tasks[i].updateMaxDuration(0, this, reason);
             } else {
                 tasks[i].forceToBeOptional(this, Reason.r(heights[i].getLELit(heights[i].getLB() - 1), capacity.getGELit(capacity.getUB() + 1)));
             }
         } else if (tasks[i].mustBePerformed() && tasks[i].getMinDuration() > 0) {
-            final int durationLit = tasks[i].getDuration().getLELit(0);
+            final int durationLit = tasks[i].getDuration().getEQLit(0);
             final Reason reasonHeight;
             final Reason reasonCapacity;
             if (tasks[i] instanceof OptionalTask) {

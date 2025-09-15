@@ -69,7 +69,7 @@ public class Profile {
      * @return the size of the profile
      */
     public int size() {
-        return idx - 2;
+        return idx - 1;
     }
 
     /**
@@ -169,7 +169,7 @@ public class Profile {
                         h -= tasksHeights[event.getIndexTask()].getLB();
                     }
                 }
-                if (h != heights[idx - 1]) {
+                if (lcg || h != heights[idx - 1]) {
                     heights[idx] = h;
                     if (lcg) {
                         indexesTask[idx].clear();
