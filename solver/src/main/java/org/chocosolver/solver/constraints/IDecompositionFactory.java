@@ -82,7 +82,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
      * @param vars   array of integer variables
      * @param except array of values that can be excluded from the allDifferent constraint
      */
-    default void allDifferentExceptDec2(IntVar[] vars, int[] except) {
+    default void allDifferentExceptDecWithGCC(IntVar[] vars, int[] except) {
         IntIterableRangeSet values = new IntIterableRangeSet();
         for (IntVar var : vars) {
             values.addAll(var);
@@ -246,6 +246,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
      * Otherwise, the task must be performed and cannot be overlapped by any other task even if it has a duration of 0.
      *
      * @param tasks array of tasks
+     * @param strict set to <i>true</i> to prevent overlapping even if the duration is equal to 0
      */
     default void disjunctiveDec(Task[] tasks, boolean strict) {
         // all durations must be positive or zero

@@ -946,7 +946,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     /**
-     * Creates an allDifferent constraint for variables that are not equal to 0.
+     * Creates an allDifferent constraint for variables that are not equal to any of the specified values.
      * There can be multiple variables equal to 0.
      *
      * @param vars collection of variables

@@ -634,7 +634,7 @@ public class MiniSat implements SatFactory {
         replaceUnreliableLits(out_learnt);
         // Simplify conflict clause:
         //
-        int i, j = 1;
+        int i, j;
         analyze_toclear.resetQuick();
         analyze_toclear.addAll(out_learnt);
         /*if (ccmin_mode == 2) {
@@ -704,7 +704,7 @@ public class MiniSat implements SatFactory {
                 int x = var(q);
                 if (!seen.get(x) && level(x) > rootlvl) {
                     assert p == litUndef || pos(var(p)) > pos(x) : "chronological inconsistency :(" + printLit(p) + " @ " + pos(var(p)) +
-                            ") is explained by a older event (" + printLit(x) + " @ " + pos(x) + ") " + c;
+                            ") is explained by an older event (" + printLit(x) + " @ " + pos(x) + ") " + c;
                     varBumpActivity(x);
                     seen.set(x);
                     if (DEBUG > 1) System.out.printf("mark %d\n", x);
