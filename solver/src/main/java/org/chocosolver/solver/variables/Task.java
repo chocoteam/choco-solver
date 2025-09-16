@@ -309,7 +309,8 @@ public class Task extends Propagator<IntVar> {
     }
 
     public boolean updateDuration(int minDuration, int maxDuration, ICause cause, Reason reason) throws ContradictionException {
-        if (duration.updateBounds(minDuration, maxDuration, cause, reason)) {
+        if (duration.updateLowerBound(minDuration, cause, reason)
+            || duration.updateUpperBound(maxDuration, cause, reason)) {
             propagate();
             return true;
         }
@@ -404,34 +405,29 @@ public class Task extends Propagator<IntVar> {
                     hasFiltered |= updateLst(
                             end.getUB() - duration.getLB(),
                             this,
-//                            Reason.r(end.getMaxLit(), duration.getMinLit())
-                            Reason.r(end.getGELit(end.getUB() + 1), duration.getLELit(duration.getLB() - 1))
+                            Reason.r(end.getMaxLit(), duration.getMinLit())
                     );
 
                     hasFiltered |= updateEct(
                             start.getLB() + duration.getLB(),
                             this,
-//                            Reason.r(start.getMinLit(), duration.getMinLit())
-                            Reason.r(start.getLELit(start.getLB() - 1), duration.getLELit(duration.getLB() - 1))
+                            Reason.r(start.getMinLit(), duration.getMinLit())
                     );
                     hasFiltered |= updateLct(
                             start.getUB() + duration.getUB(),
                             this,
-//                            Reason.r(start.getMaxLit(), duration.getMaxLit())
-                            Reason.r(start.getGELit(start.getUB() + 1), duration.getGELit(duration.getUB() + 1))
+                            Reason.r(start.getMaxLit(), duration.getMaxLit())
                     );
 
                     hasFiltered |= updateMinDuration(
                             end.getLB() - start.getUB(),
                             this,
-//                            Reason.r(end.getMinLit(), start.getMaxLit())
-                            Reason.r(end.getLELit(end.getLB() - 1), start.getGELit(start.getUB() + 1))
+                            Reason.r(end.getMinLit(), start.getMaxLit())
                     );
                     hasFiltered |= updateMaxDuration(
                             end.getUB() - start.getLB(),
                             this,
-//                            Reason.r(end.getMaxLit(), start.getMinLit())
-                            Reason.r(end.getGELit(end.getUB() + 1), start.getLELit(start.getLB() - 1))
+                            Reason.r(end.getMaxLit(), start.getMinLit())
                     );
                 } else {
                     hasFiltered = updateEst(end.getLB() - duration.getUB(), this);
