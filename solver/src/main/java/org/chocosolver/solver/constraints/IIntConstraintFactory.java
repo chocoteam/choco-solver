@@ -846,7 +846,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param vars list of variables
      */
     default Constraint allDifferent(IntVar... vars) {
-        return allDifferent(vars, "DEFAULT");
+        return allDifferent(vars, "AC_COMPLEMENT");
     }
 
     /**
