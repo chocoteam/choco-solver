@@ -129,8 +129,6 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
         this.SCCbelonging = new int[D];
         this.upToDateSCC = new int[D];
         this.updateKey = 0;
-
-//        System.out.println("Number of values = " + D); //DEBUG
     }
 
     private void refineUniverse(TrackingList valueUniverse) { // The tracking list initially contains an interval, so we refine it by removing the values that are present in no variables' domain (which may contain holes)
@@ -151,7 +149,6 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
     //***********************************************************************************
 
     public boolean propagate() throws ContradictionException {
-//        System.out.println("========================================== START PROPAGATION =========================================="); //DEBUG
         this.pruned = false;
         updateDynamicStructuresOpening(false);
         boolean foundMatching = findMaximumMatching();
@@ -163,7 +160,6 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
 //        else {
 //            vars[0].instantiateTo(vars[0].getLB() - 1, aCause);
 //        }
-//        System.out.println("========================================== END PROPAGATION =========================================="); //DEBUG
         return this.pruned;
     }
 
@@ -185,8 +181,8 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
                 }
                 else {
                     // It is not possible to get a maximum matching --> the constraint can not be satisfied
-                    //todo: BUG FOUND ---> when an exception is raised, the refill operation is not call and the structur of the tracking list is broken
-                    //todo: solution ---> integrate the refill operation in the generateFailureExplanation() method, before raising the exception
+                    //NOTE: BUG FOUND ---> when an exception is raised, the refill operation is not call and the structure of the tracking list is broken
+                    //NOTE: solution ---> integrate the refill operation in the generateFailureExplanation() method, before raising the exception
                     generateFailureExplanation();
 //                    valuesDynamic.refill(); // valuesDynamic is a backtrackable TrackingList, we must refill it to avoid breaking its structure while backtracking
                     return false;
@@ -266,7 +262,7 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
                     nonValues[m++] = value;
                 }
             }
-            assert m == nonValues.length : "oups";
+            assert m == nonValues.length;
             // Start generating the explanation
             m = 1;
             for (int i = 0; i < tailBFS; i++) {
@@ -280,7 +276,7 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
             assert m == explanation.length;
             reason = Reason.r(explanation);
         }
-        valuesDynamic.refill(); // valuesDynamic is a backtrackable TrackingList, we must refill it to avoid breaking its structure while backtracking
+        valuesDynamic.refill(); // valuesDynamic is a backtrackable TrackingList, we must refill it to avoid breaking its structure when backtracking
         aCause.fails(reason);
     }
 
@@ -298,8 +294,6 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
         this.numVisit = 1;
         this.firstSCC = true;
         resetSCCs();
-//        System.out.println("Initial number of SCCs = " + numberOfSCCs); //DEBUG
-//        System.out.println("Key = " + updateKey); //DEBUG
         int var = variablesDynamic.getSource();
 
         while(variablesDynamic.hasNext(var)) {
@@ -309,19 +303,12 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
             }
         }
         if (topTarjan != 0) {prune(t_node);} // If the artificial node t_node is alone, no pruning is possible and the structures tarjanStack and inStack are already cleared.
-//        System.out.println("Final number of SCCs = " + numberOfSCCs); //DEBUG
     }
 
     private void bimodalDFS(int var) throws ContradictionException {
         setPre(matching.getMatchU(var), numVisit);
         setLow(matching.getMatchU(var), numVisit);
         numVisit++;
-//        if (updateKey == 1584) { //DEBUG
-//            System.out.println("var = " + var);
-//            System.out.println("Var is matched : " + matching.inMatchingV(var));
-//            System.out.println("Matched value : " + matching.getMatchU(var));
-//            System.out.println("Is value already visited ? " + !valuesDynamic.isPresent(matching.getMatchU(var)));
-//        }
         valuesDynamic.remove(matching.getMatchU(var));
         tarjanStack[topTarjan] = matching.getMatchU(var);
         topTarjan++;
@@ -345,25 +332,12 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
             int pointerVar = valuesDynamic.getPrevious(vars[var].getLB()); //Optimisation: start iterating from the lower bound instead of the beginning of the list (the list is sorted in ascending order)
             int var_ub = vars[var].getUB(); //Optimisation
             while (valuesDynamic.hasNext(pointerVar) && pointerVar < var_ub) { // Explore all the branches going out of var in the DFS tree
-//                if (updateKey == 1584 && var == 588) { //DEBUG
-//                    System.out.println("Pointer Var 1 = " + pointerVar);
-//                }
                 pointerVar = valuesDynamic.trackLeft(pointerVar); // Go back in the list of unvisited values
-//                if (updateKey == 1584 && var == 588) { //DEBUG
-//                    System.out.println("Pointer Var 2 = " + pointerVar);
-//                    if (pointerVar != valuesDynamic.getSource()) { System.out.println("Is it not visited ? " + valuesDynamic.isPresent(pointerVar));}
-//                }
+
                 while(valuesDynamic.hasNext(pointerVar) && pointerVar < var_ub && !vars[var].contains(valuesDynamic.getNext(pointerVar))) { // Go to the last consecutive non-domain value
                     pointerVar = valuesDynamic.getNext(pointerVar);
                 }
-//                if (updateKey == 1584 && var == 588) { //DEBUG
-//                    System.out.println("Pointer Var 3 = " + pointerVar);
-//                }
                 if (valuesDynamic.hasNext(pointerVar) && pointerVar < var_ub) {// If we did not reach the end of the list of unvisited values, the next value is a domain value
-//                    if (updateKey == 1584) { //DEBUG
-//                        System.out.println("New value to process : " + valuesDynamic.getNext(pointerVar));
-//                        System.out.println("Is it not visited ? " + valuesDynamic.isPresent(valuesDynamic.getNext(pointerVar)));
-//                    }
                     process(var, valuesDynamic.getNext(pointerVar));
                     var_ub = vars[var].getUB(); //Optimisation: iterate until the upper bound instead of the end of the list (the list is sorted in ascending order)
                 }
@@ -470,8 +444,6 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
                             int ub = vars[var].getUB();
                             for (int domainValue = vars[var].getLB(); domainValue <= ub; domainValue = vars[var].nextValue(domainValue)) {
                                 if (complementSCC.isPresent(domainValue)) {
-                                    // Prune the pair (var, domainValue)
-                                    //vars[var].removeValue(domainValue, aCause);
                                     pruned = true;
                                     // Prune the pair (var, domainValue) + Explanation
                                     generatePruningExplanation(var, domainValue);
@@ -483,8 +455,6 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
                             while (complementSCC.hasNext(complementValue)) {
                                 complementValue = complementSCC.getNext(complementValue);
                                 if (vars[var].contains(complementValue)) {
-                                    // Prune the pair (var, complementValue)
-                                    //vars[var].removeValue(complementValue, aCause);
                                     pruned = true;
                                     // Prune the pair (var, complementValue) + Explanation
                                     generatePruningExplanation(var, complementValue);
@@ -506,18 +476,11 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
         int maxValSCC = minValue;
         int scc = getSCC(destinationVal);
         if (vars[sourceVar].getModel().getSolver().isLCG()) {
-            if (getSizeScc(scc) == 1) {
-                //TODO: discuss explanation with a single literal for instantiation
+            if (getSizeScc(scc) == 1) { // Got a specific way to generate the explanation in the case of forced instantiation
                 int matchedVar = matching.getMatchV(destinationVal);
                 assert vars[matchedVar].isInstantiatedTo(destinationVal);
                 reason = Reason.r(vars[matchedVar].getValLit());
             } else {
-//                System.out.println("Size of the explanation = " + 1 + getSizeScc(scc) * (2 + (maxValSCC - minValSCC + 1) - getSizeScc(scc))); //DEBUG
-//                System.out.println("Size of the SCC = " + getSizeScc(scc)); //DEBUG
-//                System.out.println("Number of SCCs = " + numberOfSCCs); //DEBUG
-//                System.out.println("SCC indices = " + SCCindices); //DEBUG
-//                System.out.println("SCCs = " + SCCpartition); //DEBUG
-
                 // Get the minimum and maximum values of the destination SCC
                 for (int i = getStartPositionSCC(scc); i < getEndPositionSCC(scc); i++) {
                     minValSCC = Math.min(minValSCC, SCCpartition[i]);
@@ -608,16 +571,13 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
 
         valuesDynamic.refill();
         complementSCC.refill();
-
         while (topTarjan != 0) {
             valuesDynamic.removeFromUniverse(tarjanStack[topTarjan - 1], env);
             complementSCC.removeFromUniverse(tarjanStack[topTarjan - 1], env);
             topTarjan--;
         }
 
-
         // Now that the pruning is done, we can remove from the universes of variables and values the pairs that were instantiated either before or during the call to this propagator
-
         int var  = variablesDynamic.getSource();
         while (variablesDynamic.hasNext(var)) {
             var = variablesDynamic.getNext(var);
