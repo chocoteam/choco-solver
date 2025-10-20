@@ -26,9 +26,9 @@ public class BipartiteMatching {
     private final int minV;
     private final int maxV;
     private final int sizeV;
-    private final int UNMATCHED;
-    private int[] matchingU;
-    private int[] matchingV;
+    private final int unmatched;
+    private final int[] matchingU;
+    private final int[] matchingV;
     private int size;
 
     public BipartiteMatching(int minU, int maxU, int minV, int maxV) {
@@ -38,40 +38,28 @@ public class BipartiteMatching {
         this.minV = minV;
         this.maxV = maxV;
         this.sizeV = maxV - minV + 1;
-        this.UNMATCHED = minU < minV ? minU - 1 : minV - 1;
+        this.unmatched = minU < minV ? minU - 1 : minV - 1;
         this.matchingU = new int[sizeU];
         for (int i = 0; i < sizeU; i++) {
-            matchingU[i] = UNMATCHED;
+            matchingU[i] = unmatched;
         }
         this.matchingV = new int[sizeV];
         for (int i = 0; i < sizeV; i++) {
-            matchingV[i] = UNMATCHED;
+            matchingV[i] = unmatched;
         }
         this.size = 0;
     }
 
-    public int getsizeU() {return this.sizeU;}
+    public int getSizeU() {return this.sizeU;}
 
-    public int getsizeV() {return this.sizeV;}
-
-    // /**
-    //  * Returns the array of the matched vertices of V
-    //  * Warning: If all vertices of U are not matched it will contain some UNMATCHED values, use it wisely
-    //  */
-    // public int[] getMatchedU() {return matchingV;}
-
-    // /**
-    //  * Returns the array of the matched vertices of V
-    //  * Warning: If all vertices of V are not matched it will contain some UNMATCHED values, use it wisely
-    //  */
-    // public int[] getMatchedV() {return matchingU;}
+    public int getSizeV() {return this.sizeV;}
 
     public boolean inMatchingU(int u) {
-        return matchingU[u - minU] != UNMATCHED;
+        return matchingU[u - minU] != unmatched;
     }
 
     public boolean inMatchingV(int v) {
-        return matchingV[v - minV] != UNMATCHED;
+        return matchingV[v - minV] != unmatched;
     }
 
     public int getMatchU(int u) {
@@ -101,8 +89,8 @@ public class BipartiteMatching {
         if (!inMatchingU(u) || !inMatchingV(v) || getMatchU(u) != v || getMatchV(v) != u) {
             throw new Error("Error: The pair you want to unmatch is not part of the matching");
         }
-        matchingU[u - minU] = UNMATCHED;
-        matchingV[v - minV] = UNMATCHED;
+        matchingU[u - minU] = unmatched;
+        matchingV[v - minV] = unmatched;
         size--;
     }
 
@@ -137,14 +125,16 @@ public class BipartiteMatching {
     public String toString() {
         String printedString = "";
         for (int u = minU; u <= maxU; u++) {
-            if (inMatchingU(u)) {System.out.println("x" + u + " <--> " + getMatchU(u));}
+            if (inMatchingU(u)) {
+                printedString += u + " <--> " + getMatchU(u) + '\n';
+            }
         }
         return printedString;
     }
 
     public boolean equals(BipartiteMatching otherMatching) {
-        if (sizeU != otherMatching.getsizeU() || sizeV != otherMatching.getsizeV()) {return false;}
-        for (int u = minU; u <= sizeU; u++) {
+        if (sizeU != otherMatching.getSizeU() || sizeV != otherMatching.getSizeV()) {return false;}
+        for (int u = minU; u <= maxU; u++) {
             if ((inMatchingU(u) && !otherMatching.inMatchingU(u)) || (!inMatchingU(u) && otherMatching.inMatchingU(u)) || getMatchU(u) != otherMatching.getMatchU(u)) {
                 return false;
             }

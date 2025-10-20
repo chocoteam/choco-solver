@@ -43,47 +43,51 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
     public static final String PARTIAL = "AC_PARTIAL";
     public static final String TUNED = "AC_TUNED";
 
+    public static final int BFS = 0;
+    public static final int DFS = 1;
+    public static final int PRUNE = 2;
+
     Propagator<IntVar> aCause;
     Model model;
     protected IntVar[] vars;
     private final int R;    // Total number of variables
-    private TrackingList variablesDynamic;  // The dynamic list of uninstantiated variables
+    private final TrackingList variablesDynamic;  // The dynamic list of uninstantiated variables
     private final int minValue;
     private final int maxValue;
     private final int D;    // Total number of values
-    private TrackingList valuesDynamic;  // The dynamic list of values present in the domain of at least one variable and not matched to an instantiated variable
+    private final TrackingList valuesDynamic;  // The dynamic list of values present in the domain of at least one variable and not matched to an instantiated variable
     private final int fail; // Symbol signifying we couldn't find an augmenting path
-    private BipartiteMatching matching; // The matching used dynamically
-    private int[] parentBFS; // Array storing the parent of each value-node in the BFS tree
-    private int[] queueBFS; // Queue of the variables to explore during the BFS
+    private final BipartiteMatching matching; // The matching used dynamically
+    private final int[] parentBFS; // Array storing the parent of each value-node in the BFS tree
+    private final int[] queueBFS; // Queue of the variables to explore during the BFS
     private int headBFS;
     private int tailBFS;
     private int minValSearchedNodes;  // For failure explanation
     private int maxValSearchedNodes;  // For failure explanation
     private final int t_node; // Symbol representing the artificial sink node of the Residual Graph
-    private TrackingList complementSCC; // List of the values that are not in the discovered SCC
-    private int[] tarjanStack;  // The stack used in Tarjan's algorithm to find the SCCs
+    private final TrackingList complementSCC; // List of the values that are not in the discovered SCC
+    private final int[] tarjanStack;  // The stack used in Tarjan's algorithm to find the SCCs
     private int topTarjan;
-    private boolean[] inStack; // Boolean array informing the presence of a value in the stack
-    private int[] pre; // Pre visit order of the values
-    private int[] low; // Low point of the values
+    private final boolean[] inStack; // Boolean array informing the presence of a value in the stack
+    private final int[] pre; // Pre visit order of the values
+    private final int[] low; // Low point of the values
     private int numVisit; // Current visit number of the DFS in Tarjan's algorithm
     private boolean firstSCC; // Indicates if the discovered SCC is the first discovered one in the current propagation
     private final String mode; // Indicating the mode in which we are using the procedure (Classic, Complement, Hybrid or Tuned)
     private boolean pruned; // True if some variable-value pairs were pruned
 
-    private int[] SCCpartition; // Partition of the values relative to the SCCs
-    private int[] SCCindices; // End point of each SCC in the partition
+    private final int[] sccPartition; // Partition of the values relative to the SCCs
+    private final int[] sccIndices; // End point of each SCC in the partition
     private int numberOfSCCs;
-    private int[] SCCbelonging; // index of the SCC each value belongs to
-    private int[] upToDateSCC; // indicating for each value if its SCC has been updated in this call
+    private final int[] sccBelonging; // index of the SCC each value belongs to
+    private final int[] upToDateSCC; // indicating for each value if its SCC has been updated in this call
     private int updateKey; // This key is incremented at each call, to reset the upToDate information
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public AlgoAllDiffBimodal(IntVar[] variables, Propagator<IntVar> cause, String ACmode) {
+    public AlgoAllDiffBimodal(IntVar[] variables, Propagator<IntVar> cause, String acMode) {
         // Variables and data structures for the whole procedure
         this.aCause = cause;
         this.model = variables[0].getModel();
@@ -104,7 +108,7 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
         this.fail = minValue - 1;
         this.matching = new BipartiteMatching(0, R-1, minValue, maxValue);
 
-        this.mode = ACmode;
+        this.mode = acMode;
 
         // Specific data structures for finding the maximum matching
         this.parentBFS = new int[D];
@@ -123,10 +127,10 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
         this.low = new int[D];
 
         // Specific data structures for generating the explanations
-        this.SCCpartition = new int[D];
-        this.SCCindices = new int[D];
+        this.sccPartition = new int[D];
+        this.sccIndices = new int[D];
         this.numberOfSCCs = 0;
-        this.SCCbelonging = new int[D];
+        this.sccBelonging = new int[D];
         this.upToDateSCC = new int[D];
         this.updateKey = 0;
     }
@@ -150,16 +154,11 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
 
     public boolean propagate() throws ContradictionException {
         this.pruned = false;
+        // propInstDependant is set to false by default, meaning that this propagator does not require the Instantiation Propagator to be called just before
         updateDynamicStructuresOpening(false);
-        boolean foundMatching = findMaximumMatching();
-        if(foundMatching) {
-            filter();
-            updateDynamicStructuresEnding();
-        }
-        //NOTE: don't need anymore because of generateFailureExplanation
-//        else {
-//            vars[0].instantiateTo(vars[0].getLB() - 1, aCause);
-//        }
+        findMaximumMatching();
+        filter();
+        updateDynamicStructuresEnding();
         return this.pruned;
     }
 
@@ -168,7 +167,7 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
     //***********************************************************************************
 
 
-    private boolean findMaximumMatching() throws ContradictionException {
+    private void findMaximumMatching() throws ContradictionException {
         complementSCC.refill(); // This will be used to find the cut for a failure explanation
         int var = variablesDynamic.getSource();
         while (variablesDynamic.hasNext(var)) { // We increase the size of the current matching until no unmatched variable remains
@@ -181,16 +180,11 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
                 }
                 else {
                     // It is not possible to get a maximum matching --> the constraint can not be satisfied
-                    //NOTE: BUG FOUND ---> when an exception is raised, the refill operation is not call and the structure of the tracking list is broken
-                    //NOTE: solution ---> integrate the refill operation in the generateFailureExplanation() method, before raising the exception
                     generateFailureExplanation();
-//                    valuesDynamic.refill(); // valuesDynamic is a backtrackable TrackingList, we must refill it to avoid breaking its structure while backtracking
-                    return false;
                 }
             }
         }
         valuesDynamic.refill(); // valuesDynamic is a global variable used in the whole filtering procedure, so we must refill it
-        return true;
     }
 
 
@@ -219,7 +213,7 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
             int var = queueBFS[headBFS];
             headBFS++;
             int val;
-            if (choiceBimodalBFS(var)) {    // If var has a small domain, we iterate over its domain and explore the unvisited values
+            if (choice(BFS, var)) {    // If var has a small domain, we iterate over its domain and explore the unvisited values
                 int ub = vars[var].getUB();
                 for (val = vars[var].getLB(); val <= ub; val = vars[var].nextValue(val)) {
                     if (valuesDynamic.isPresent(val) && stop(var, val)) {return val;}
@@ -251,11 +245,11 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
     public void generateFailureExplanation() throws ContradictionException {
         Reason reason = Reason.undef();
         if (aCause.lcg()) {
-            int nvars = tailBFS;
-            int nvals = tailBFS - 1;
-            int[] explanation = new int[1 + nvars * (2 + (maxValSearchedNodes - minValSearchedNodes + 1) - nvals)];
+            int nVars = tailBFS;
+            int nVals = tailBFS - 1;
+            int[] explanation = new int[1 + nVars * (2 + (maxValSearchedNodes - minValSearchedNodes + 1) - nVals)];
             // Store the values between minValSearchedNodes and maxValSearchedNodes that does not belong to the searched nodes
-            int[] nonValues = new int[(maxValSearchedNodes - minValSearchedNodes + 1) - nvals];
+            int[] nonValues = new int[(maxValSearchedNodes - minValSearchedNodes + 1) - nVals];
             int m = 0;
             for (int value = minValSearchedNodes + 1; value < maxValSearchedNodes; value++) {
                 if (!isInSearchedNodes(value)) { // The value does not belong to the searched nodes
@@ -315,7 +309,7 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
         declareInStack(matching.getMatchU(var), true);
         int val;
 
-        if(choiceBimodalDFS(var)) {   // If var has a small domain then iterate over the domain
+        if(choice(DFS, var)) {   // If var has a small domain then iterate over the domain
             int ub = vars[var].getUB();
             for (val = vars[var].getLB(); val <= ub; val = vars[var].nextValue(val)) {
                 // ======================= Case 1 : explore a non-visited value =======================
@@ -332,7 +326,7 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
             int pointerVar = valuesDynamic.getPrevious(vars[var].getLB()); //Optimisation: start iterating from the lower bound instead of the beginning of the list (the list is sorted in ascending order)
             int var_ub = vars[var].getUB(); //Optimisation
             while (valuesDynamic.hasNext(pointerVar) && pointerVar < var_ub) { // Explore all the branches going out of var in the DFS tree
-                pointerVar = valuesDynamic.trackLeft(pointerVar); // Go back in the list of unvisited values
+                pointerVar = valuesDynamic.trackPrev(pointerVar); // Go back in the list of unvisited values
 
                 while(valuesDynamic.hasNext(pointerVar) && pointerVar < var_ub && !vars[var].contains(valuesDynamic.getNext(pointerVar))) { // Go to the last consecutive non-domain value
                     pointerVar = valuesDynamic.getNext(pointerVar);
@@ -377,7 +371,7 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
 
 
     /**
-     * In this function we prune all the arcs coming from the variables of the discovered SCC and pointing toward valyes outside the discovered SCC
+     * In this function we prune all the arcs coming from the variables of the discovered SCC and pointing toward values outside the discovered SCC
      */
     private void prune(int root) throws ContradictionException {
         complementSCC.refill();
@@ -440,7 +434,7 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
 
                     if (vars[var].getDomainSize() > 1) { // If the domain is a singleton there is nothing to prune
 
-                        if (choicePrune(var)) {  // If var has a small domain then iterate over the domain and prune the values that are in the complement
+                        if (choice(PRUNE, var)) {  // If var has a small domain then iterate over the domain and prune the values that are in the complement
                             int ub = vars[var].getUB();
                             for (int domainValue = vars[var].getLB(); domainValue <= ub; domainValue = vars[var].nextValue(domainValue)) {
                                 if (complementSCC.isPresent(domainValue)) {
@@ -483,8 +477,8 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
             } else {
                 // Get the minimum and maximum values of the destination SCC
                 for (int i = getStartPositionSCC(scc); i < getEndPositionSCC(scc); i++) {
-                    minValSCC = Math.min(minValSCC, SCCpartition[i]);
-                    maxValSCC = Math.max(maxValSCC, SCCpartition[i]);
+                    minValSCC = Math.min(minValSCC, sccPartition[i]);
+                    maxValSCC = Math.max(maxValSCC, sccPartition[i]);
                 }
 
                 // Create the array of the explanation with the right size
@@ -502,7 +496,7 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
                 // Start generating the explanation
                 m = 1;
                 for (int i = getStartPositionSCC(scc); i < getEndPositionSCC(scc); i++) {
-                    int var = matching.getMatchV(SCCpartition[i]);
+                    int var = matching.getMatchV(sccPartition[i]);
                     explanation[m++] = MiniSat.neg(vars[var].getLit(minValSCC, LR_GE));
                     for (int value : nonValues) {
                         explanation[m++] = MiniSat.neg(vars[var].getLit(value, LR_NE));
@@ -597,57 +591,33 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
     //      These functions decide whether the domain is considered as small or large
     //***********************************************************************************
 
-
-    private boolean choiceBimodalBFS(int var) {
+    private boolean choice(int algo, int var) {
         switch (mode) {
             case CLASSIC:
                 return true;
             case COMPLEMENT:
                 return false;
             case PARTIAL:
-//                return vars[var].getDomainSize() < valuesDynamic.getSize();
-                return Math.max((vars[var].getUB() - vars[var].getLB() + 63) >> 6, vars[var].getDomainSize()) < valuesDynamic.getSize(); // More suited to BitSet domain representation
+                if (algo == BFS || algo == DFS) {
+//                    return vars[var].getDomainSize() < valuesDynamic.getSize();
+                    return Math.max((vars[var].getUB() - vars[var].getLB() + 63) >> 6, vars[var].getDomainSize()) < valuesDynamic.getSize(); // More suited to BitSet domain representation
+                } else {
+//                    return vars[var].getDomainSize() < complementSCC.getSize();
+                    return Math.max((vars[var].getUB() - vars[var].getLB() + 63) >> 6, vars[var].getDomainSize()) < complementSCC.getSize(); // More suited to BitSet domain representation
+                }
             case TUNED:
-//                return vars[var].getDomainSize() < valuesDynamic.getSize();
-                return Math.max((vars[var].getUB() - vars[var].getLB() + 63) >> 6, vars[var].getDomainSize()) < valuesDynamic.getSize(); // More suited to BitSet domain representation
-            default:
-                return true;
+                if (algo == BFS) {
+//                    return vars[var].getDomainSize() < valuesDynamic.getSize();
+                    return Math.max((vars[var].getUB() - vars[var].getLB() + 63) >> 6, vars[var].getDomainSize()) < valuesDynamic.getSize(); // More suited to BitSet domain representation
+                } else if (algo == DFS) {
+//                    return vars[var].getDomainSize() < Math.sqrt(valuesDynamic.getSize());
+                    return Math.max((vars[var].getUB() - vars[var].getLB() + 63) >> 6, vars[var].getDomainSize()) < Math.sqrt(valuesDynamic.getSize()); // More suited to BitSet domain representation
+                } else {
+//                    return vars[var].getDomainSize() < complementSCC.getSize();
+                    return Math.max((vars[var].getUB() - vars[var].getLB() + 63) >> 6, vars[var].getDomainSize()) < complementSCC.getSize(); // More suited to BitSet domain representation
+                }
         }
-
-    }
-
-    private boolean choiceBimodalDFS(int var) {
-        switch (mode) {
-            case CLASSIC:
-                return true;
-            case COMPLEMENT:
-                return false;
-            case PARTIAL:
-//                return vars[var].getDomainSize() < valuesDynamic.getSize();
-                return Math.max((vars[var].getUB() - vars[var].getLB() + 63) >> 6, vars[var].getDomainSize()) < valuesDynamic.getSize(); // More suited to BitSet domain representation
-            case TUNED:
-//                return vars[var].getDomainSize() < Math.sqrt(valuesDynamic.getSize());
-                return Math.max((vars[var].getUB() - vars[var].getLB() + 63) >> 6, vars[var].getDomainSize()) < Math.sqrt(valuesDynamic.getSize()); // More suited to BitSet domain representation
-            default:
-                return true;
-        }
-    }
-
-    private boolean choicePrune(int var) {
-        switch (mode) {
-            case CLASSIC:
-                return true;
-            case COMPLEMENT:
-                return false;
-            case PARTIAL:
-//                return vars[var].getDomainSize() < complementSCC.getSize();
-                return Math.max((vars[var].getUB() - vars[var].getLB() + 63) >> 6, vars[var].getDomainSize()) < complementSCC.getSize(); // More suited to BitSet domain representation
-            case TUNED:
-//                return vars[var].getDomainSize() < complementSCC.getSize();
-                return Math.max((vars[var].getUB() - vars[var].getLB() + 63) >> 6, vars[var].getDomainSize()) < complementSCC.getSize(); // More suited to BitSet domain representation
-            default:
-                return true;
-        }
+        return true;
     }
 
 
@@ -688,11 +658,11 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
     }
 
     private int getSCC(int val) {
-        return SCCbelonging[val - minValue];
+        return sccBelonging[val - minValue];
     }
 
     private void setSCC(int val, int scc) {
-        SCCbelonging[val - minValue] = scc;
+        sccBelonging[val - minValue] = scc;
     }
 
     private boolean isUpToDateSCC(int val) {return upToDateSCC[val - minValue] == updateKey; }
@@ -711,13 +681,15 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
     private void newSCC() {
         numberOfSCCs++;
         int lastSCC = getLastSCC();
-        if (lastSCC == 0) {SCCindices[lastSCC] = 0;}
-        else {SCCindices[lastSCC] = SCCindices[lastSCC - 1];}
+        if (lastSCC == 0) {
+            sccIndices[lastSCC] = 0;}
+        else {
+            sccIndices[lastSCC] = sccIndices[lastSCC - 1];}
     }
 
     private void addToSCC(int val, int scc) {
-        SCCpartition[SCCindices[scc]] = val;
-        SCCindices[scc]++;
+        sccPartition[sccIndices[scc]] = val;
+        sccIndices[scc]++;
         setSCC(val, scc);
         setUpToDateSCC(val);
     }
@@ -732,12 +704,12 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
         if(scc == 0) {
             return 0;
         } else {
-            return SCCindices[scc - 1];
+            return sccIndices[scc - 1];
         }
     }
 
     private int getEndPositionSCC(int scc) {
-        return SCCindices[scc];
+        return sccIndices[scc];
     }
 
     private int getSizeScc(int scc) {return getEndPositionSCC(scc) - getStartPositionSCC(scc);}

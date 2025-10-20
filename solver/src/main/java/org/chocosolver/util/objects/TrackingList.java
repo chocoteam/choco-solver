@@ -14,20 +14,20 @@ import org.chocosolver.memory.IEnvironment;
 /**
  * The Tracking list is similar to a doubly linked list
  * for which each element has a predecessor and a successor, implemented by arrays
- * An artifical source node is added at the beginning of the list
+ * An artificial source node is added at the beginning of the list
  * An artificial sink node is added at the end of the list
- * The tracking list allows to call the functions TrackPrev and TrackNext that are specific to this data structure
+ * The tracking list allows to call the function TrackPrev that is specific to this data structure
  * Furthermore, it is possible to distinguish the elements removed/reinserted to the list and to the universe in case the tracking list is used in a dynamic environment
  * @author Sulian Le Bozec-Chiffoleau
  * @since 17 Oct. 2024
  */
 
 public class TrackingList {
-    private int[] successor;
-    private int[] predecessor;
-    private int[] stackRemoved;
+    private final int[] successor;
+    private final int[] predecessor;
+    private final int[] stackRemoved;
     private int topRemoved;
-    private boolean[] present;
+    private final boolean[] present;
     private final int source;
     private final int sink;
     private final int minValue;
@@ -111,7 +111,7 @@ public class TrackingList {
      * @Warning You can only remove an element that is present in the in-list and that is not the source nor the sink
      */
     public void remove(int e) {
-        assert(isPresent(e));
+        if (!isPresent(e)) {throw new Error("Error: This element is not present in the in-list");}
         int i = convertToIndex(e);
         successor[predecessor[i] + 1] = successor[i + 1];
         predecessor[successor[i + 1]] = predecessor[i];
@@ -125,13 +125,11 @@ public class TrackingList {
      * @Warning This method can be called only if every element of the universe is present in the in-list
      */
     public void removeFromUniverse(int e) {
-        assert(topRemoved == 0);
-        assert(isPresent(e));
+        if (!isPresent(e)) {throw new Error("Error: This element is not present in the in-list");}
+        else if (topRemoved != 0) {throw new Error("Error: The tracking has not been refilled yet with all elements from the universe");}
         int i = convertToIndex(e);
-        int pi = predecessor[i];
-        int si = successor[i + 1];
-        successor[pi + 1] = si;
-        predecessor[si] = pi;
+        successor[predecessor[i] + 1] = successor[i + 1];
+        predecessor[successor[i + 1]] = predecessor[i];
         universeSize--;
         present[i] = false;
     }
@@ -141,8 +139,8 @@ public class TrackingList {
      * @Warning This method can be called only if every element of the universe is present in the in-list
      */
     public void removeFromUniverse(int e, IEnvironment env) {
-        assert(topRemoved == 0);
-        assert(isPresent(e));
+        if (!isPresent(e)) {throw new Error("Error: This element is not present in the in-list");}
+        else if (topRemoved != 0) {throw new Error("Error: The tracking has not been refilled yet with all elements from the universe");}
         int i = convertToIndex(e);
         int pi = predecessor[i];
         int si = successor[i + 1];
@@ -161,7 +159,7 @@ public class TrackingList {
     }
 
     /**
-     * Refills the tracking list with all the elements of the universe
+     * Refills the tracking list with all the elements from the universe
      */
     public void refill() {
         while (topRemoved != 0) {
@@ -177,7 +175,7 @@ public class TrackingList {
      * Special elementary function of the tracking list
      * Returns the first element in the in-list from a given element and toward the predecessors
      */
-    public int trackLeft(int e) {
+    public int trackPrev(int e) {
         int i = convertToIndex(e);
         int indexSource = convertToIndex(source);
         int indexSink = convertToIndex(sink);
