@@ -401,7 +401,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         M.setTopDecisionPosition(0);
         pushTrail(); // store state before initial propagation; w = 0 -> 1
         try {
-            checkTasks();
             mMeasures.incFixpointCount();
             // check sat
             if (isLCG() && !getSat().ok_) {
@@ -566,16 +565,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
                         "%.2f%% propagators are explained\n", e * 100. / c);
             }
             warned.clear();
-        }
-    }
-
-    private void checkTasks() throws ContradictionException {
-        if (mModel.getHook(Model.TASK_SET_HOOK_NAME) != null) {
-            //noinspection unchecked
-            ArrayList<Task> tset = (ArrayList<Task>) mModel.getHook(Model.TASK_SET_HOOK_NAME);
-            for (int i = 0; i < tset.size(); i++) {
-                tset.get(i).ensureBoundConsistency();
-            }
         }
     }
 
@@ -836,7 +825,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         if (!engine.isInitialized()) {
             engine.initialize();
         }
-        checkTasks();
         try {
             engine.propagate();
         } finally {
