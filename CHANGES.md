@@ -17,10 +17,13 @@ See [milestone 5.0.0-beta.2](https://github.com/chocoteam/choco-solver/milestone
 - Fix bug in ConflictOrderingSearch (monitor not plugged)
 - Performance improvement for LastConflict, ConflictOrderingSearch and StrategySequencer.
 - Fix bug : regular constraints parsed from XCSP now support negative values
+- Fix bug : Unexpected behavior when using Task with scalar (#1114)
+- Replace Cumulative implementation by state-of-the-art implementation of TimeTabling and OverloadChecking
 
 #### Contributors to this release:
 - [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
 - [Jean-Guillaume Fages](https://github.com/jgFages) (@jgFages)
+- [Arthur Godet](https://github.com/ArthurGodet) (@ArthurGodet)
 
 
 **Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v5.0.0-beta.1...v5.0.0-beta.2
