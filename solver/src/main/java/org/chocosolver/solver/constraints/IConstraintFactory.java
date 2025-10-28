@@ -22,7 +22,7 @@ import java.util.function.Supplier;
  *
  * @author Jean-Guillaume FAGES
  */
-public interface IConstraintFactory extends IIntConstraintFactory, IRealConstraintFactory, ISetConstraintFactory, IGraphConstraintFactory {
+public interface IConstraintFactory extends IIntConstraintFactory, IRealConstraintFactory, ISchedulingFactory, ISetConstraintFactory, IGraphConstraintFactory {
 
     /**
      * Create a constraint that acts as an observer.

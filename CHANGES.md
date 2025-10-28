@@ -71,23 +71,6 @@ See [milestone 5.0.0](https://github.com/chocoteam/choco-solver/milestone/40)
 **Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v4.10.17...v4.10.18
 
 4.10.17 - 23 Sep 2024
- -------------------
- 
- ### Hotfix
- - Fix bug in `PropHybridTable` (#1102)
- 
- **Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v4.10.16...v4.10.17
-
-4.10.16 - 12 Sep 2024
--------------------
-
-### Hotfix
-- Fix bug in `IntAffineView` (#1101)
-
-**Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v4.10.15...v4.10.16
-
-
-4.10.17 - 23 Sep 2024
 -------------------
 
 ### Hotfix

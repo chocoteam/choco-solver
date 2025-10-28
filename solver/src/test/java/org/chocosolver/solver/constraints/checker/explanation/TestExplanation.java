@@ -40,6 +40,7 @@ import org.chocosolver.solver.search.strategy.strategy.FullyRandom;
 import org.chocosolver.solver.trace.IMessage;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.VariableUtils;
@@ -164,6 +165,7 @@ public class TestExplanation {
                 {"circuit", new Class[]{IntVar[].class, int.class}, new Object[]{6, null}},
                 {"count", new Class[]{IntVar.class, IntVar[].class, IntVar.class}, new Object[]{null, 6, null}},
                 {"count", new Class[]{int.class, IntVar[].class, IntVar.class}, new Object[]{null, 6, null}},
+                {"cumulative", new Class[]{Task[].class, IntVar[].class, IntVar.class, boolean.class, boolean.class}, new Object[]{6, 6, null, null, null}},
                 {"decreasing", new Class[]{IntVar[].class, int.class}, new Object[]{6, null}},
                 {"div", new Class[]{IntVar.class, IntVar.class, IntVar.class}, new Object[]{null, null, null}},
                 {"increasing", new Class[]{IntVar[].class, int.class}, new Object[]{6, null}},
@@ -189,7 +191,6 @@ public class TestExplanation {
                 {"times", new Class[]{IntVar.class, int.class, IntVar.class}, new Object[]{null, null, null}},
 
                 //not supported {"allDifferentExcept0", new Class[]{IntVar[].class}, new Object[]{6}},
-                //not supported {"cumulative", new Class[]{IntVar[].class, int[].class, int[].class, int.class}, new Object[]{6, 6, 6, null}},
                 //not supported {"diffN", new Class[]{IntVar[].class, IntVar[].class, IntVar[].class, IntVar[].class, boolean.class}, new Object[]{4, 4, 4, 4, null}},
                 //not supported {"knapsack", new Class[]{IntVar[].class, IntVar.class, IntVar.class, int[].class, int[].class}, new Object[]{4, null, null, 4, 4}},
                 // ignored {"clausesIntChanneling", new Class[]{IntVar.class, BoolVar[].class, BoolVar[].class}, new Object[]{null, 6, 6}},
@@ -232,6 +233,14 @@ public class TestExplanation {
                 } else if (IntVar[].class.isAssignableFrom(parameterType)) {
                     info[i] = 5;
                     classes[i] = "IntVar[].class";
+                    objects[i] = String.valueOf(6);
+                } else if (Task.class.isAssignableFrom(parameterType)) {
+                    info[i] = 5;
+                    classes[i] = "Task.class";
+                    objects[i] = null;
+                } else if (Task[].class.isAssignableFrom(parameterType)) {
+                    info[i] = 5;
+                    classes[i] = "Task[].class";
                     objects[i] = String.valueOf(6);
                 } else if (int.class.isAssignableFrom(parameterType)) {
                     info[i] = null;
@@ -444,6 +453,15 @@ public class TestExplanation {
                         variables.add(_variables[j]);
                     }
                     parameters[i] = _variables;
+                } else if (Task[].class == parameterType) {
+                    Task[] _tasks = new Task[(int) info[i]];
+                    for (int j = 0; j < _tasks.length; j++) {
+                        _tasks[j] = DomainBuilder.makeTask(model, rnd, variables.size());
+                        variables.add(_tasks[j].getStart());
+                        variables.add(_tasks[j].getDuration());
+                        variables.add(_tasks[j].getEnd());
+                    }
+                    parameters[i] = _tasks;
                 } else if (int[].class == parameterType) {
                     if (info[i] instanceof Integer) {
                         int[] _constants = new int[(int) info[i]];
@@ -470,6 +488,12 @@ public class TestExplanation {
                     IntVar _variable = DomainBuilder.makeIntVar(model, rnd, variables.size());
                     variables.add(_variable);
                     parameters[i] = _variable;
+                } else if (Task.class == parameterType) {
+                    Task _task = DomainBuilder.makeTask(model, rnd, variables.size());
+                    variables.add(_task.getStart());
+                    variables.add(_task.getDuration());
+                    variables.add(_task.getEnd());
+                    parameters[i] = _task;
                 } else if (Operator.class == parameterType) {
                     parameters[i] = Operator.get((String) info[i]);
                 } else if (IntIterableRangeSet.class == parameterType) {

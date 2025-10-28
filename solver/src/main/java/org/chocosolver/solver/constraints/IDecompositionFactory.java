@@ -132,7 +132,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
      * @param durations processing time of each task
      * @param heights   resource consumption of each task
      * @param capacity  resource capacity
-     * @see org.chocosolver.solver.constraints.IIntConstraintFactory#cumulative(IntVar[], int[],
+     * @see org.chocosolver.solver.constraints.ISchedulingFactory#cumulative(IntVar[], int[],
      * int[], int)
      */
     default void cumulativeTimeDec(IntVar[] starts, int[] durations, int[] heights, int capacity) {
@@ -170,7 +170,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
      * @param tasks    set of tasks
      * @param heights  resource consumption of each task
      * @param capacity resource capacity
-     * @see org.chocosolver.solver.constraints.IIntConstraintFactory#cumulative(IntVar[], int[],
+     * @see org.chocosolver.solver.constraints.ISchedulingFactory#cumulative(IntVar[], int[],
      * int[], int)
      */
     default void cumulativeDec(Task[] tasks, IntVar[] heights, IntVar capacity) {
@@ -190,7 +190,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
      * @param durations processing time of each task
      * @param heights   resource consumption of each task
      * @param capacity  resource capacity
-     * @see org.chocosolver.solver.constraints.IIntConstraintFactory#cumulative(IntVar[], int[],
+     * @see org.chocosolver.solver.constraints.ISchedulingFactory#cumulative(IntVar[], int[],
      * int[], int)
      */
     default void cumulativeDec(IntVar[] starts, IntVar[] durations, IntVar[] heights, IntVar capacity) {

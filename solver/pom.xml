@@ -114,7 +114,7 @@
                 <configuration>
                     <!--suppress UnresolvedMavenProperty -->
 <!--                    <argLine>${argLine} -Xms384m -Xmx768m -Djava.library.path=/usr/local/lib</argLine>-->
-                    <argLine>${argLine} -Djava.library.path=/usr/local/lib</argLine>
+                    <argLine>${argLine} -Djava.library.path=/usr/local/lib:/usr/local/lib/ibex/3rd</argLine>
                     <properties>
                         <property>
                             <name>listener</name>

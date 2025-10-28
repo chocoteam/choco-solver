@@ -20,9 +20,9 @@ basics;Cutstock-small.xml.lzma;2;4;21;18
 basics;Domino-300-300.xml.lzma;1;_;1;0
 basics;driverlogw-09.xml.lzma;1;_;1758;1211
 basics;Fapp-m2s-ex2_c18.xml.lzma;16;13871;282;180
-basics;Filters-dct_2_3.xml.lzma;19;16;3052;1704
-basics;FlexibleJobshop-easy01.xml.lzma;24;253;213;152
-basics;FlexibleJobshop-easy02.xml.lzma;64;11;6921;3059
+basics;Filters-dct_2_3.xml.lzma;19;16;2051;1100
+basics;FlexibleJobshop-easy01.xml.lzma;31;253;262;171
+basics;FlexibleJobshop-easy02.xml.lzma;59;11;5770;2403
 basics;Furniture.xml.lzma;1;603;33;32
 basics;GracefulGraph-K02-P04.xml.lzma;1;_;85;73
 basics;GraphColoring-3-fullins-4.xml.lzma;11;6;101587;76903
@@ -44,8 +44,8 @@ basics;MagicSquare-6-sum.xml.lzma;1;_;217;162
 basics;Mapping-full2x2_mp3.xml.lzma;1;1100;1345;1203
 basics;Mario-easy-4.xml.lzma;16;545;8705;8077
 #basics;MarketSplit-01.xml.lzma;0;_;1113575;919484
-basics;MSPSP-easy_01.xml.lzma;13;26;1421;650
-basics;MSPSP-hard_01.xml.lzma;4;35;305;229
+basics;MSPSP-easy_01.xml.lzma;14;26;1816;800
+basics;MSPSP-hard_01.xml.lzma;4;35;627;512
 basics;MultiKnapsack-1-0_X2.xml.lzma;1;_;2;0
 basics;MultiKnapsack-1-01.xml.lzma;1;_;2;0
 basics;NFC-12_2_10.xml.lzma;31;848;173;108
@@ -71,7 +71,7 @@ basics;QueenAttacking-06.xml.lzma;5;0;4307;3458
 basics;Queens-0008-m1.xml.lzma;1;_;31;27
 basics;RadarSurveillance-8-24-3-2-00.xml.lzma;1;_;92;22
 basics;Ramsey-12.xml.lzma;45;2;71913;41237
-basics;Rcpsp-j30-01-01_c18.xml.lzma;7;43;208;179
+basics;Rcpsp-j30-01-01_c18.xml.lzma;7;43;204;175
 basics;Rlfap-graph-04-opt_c18.xml.lzma;5;394;1492;801
 basics;RoomMate-sr0050-int.xml.lzma;1;_;2;0
 basics;SocialGolfers-4-3-4-cp.xml.lzma;1;_;225;151
@@ -82,11 +82,11 @@ basics;SteelMillSlab-m2-simple_c18.xml.lzma;1;0;70;50
 basics;SteelMillSlab-m2s-mini-simple_c18.xml.lzma;1;0;138;50
 basics;StillLife-03-06.xml.lzma;5;10;424;381
 basics;StillLife-wastage-03.xml.lzma;3;6;23;18
-basics;StripPacking-C1P1.xml.lzma;1;_;109846;80898
+basics;StripPacking-C1P1.xml.lzma;1;_;23702;17004
 basics;Subisomorphism-A-10.xml.lzma;1;_;30;28
 basics;Sudoku-s01a-alldiff.xml.lzma;1;_;1;0
 basics;SumColoring-myciel4_c18.xml.lzma;4;22;45690;42079
-basics;Taillard-os-04-04-0.xml.lzma;28;193;8848;7869
+basics;Taillard-os-04-04-0.xml.lzma;52;193;13313;11765
 basics;Tal-01_c18.xml.lzma;2;6;11;8
 basics;TeamAssignment-data1_4_6.xml.lzma;20;2948;11657;10545
 basics;TemplateDesign-m1-1_c18.xml.lzma;2;2;133;129
