@@ -51,6 +51,14 @@ public class AllDifferent extends Constraint {
                 message = "Warning: Adjust consistency level of AllDifferent from \"AC_ZHANG\" to " +
                         "\"AC_TUNED\" due to LCG.";
             }
+            boolean allEnum = Arrays.stream(VARS).allMatch(IntVar::hasEnumeratedDomain);
+            if (!allEnum) {
+                if (consistency.startsWith("AC") || consistency.equals("DEFAULT")) {
+                    consistency = "BC";
+                    message = "Warning: Adjust consistency level of AllDifferent to \"BC\" due to LCG" +
+                            "because not all variables are enumerated.";
+                }
+            }
             if (!message.isEmpty() && model.getSettings().warnUser()) {
                 model.getSolver().log().white().println(message);
             }
