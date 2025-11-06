@@ -17,7 +17,6 @@ import org.chocosolver.solver.constraints.binary.PropNotEqualX_Y;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 /**
  * Ensures that all variables from VARS take a different value.
@@ -25,51 +24,39 @@ import java.util.Objects;
  */
 public class AllDifferent extends Constraint {
 
-    public static String OPTION_CONSISTENCY = "DEFAULT";
-    public static String OPTION_PROPINST = "DEFAULT";
-
-    public static final String AC = "AC";
-    public static final String AC_REGIN = "AC_REGIN";
-    public static final String AC_ZHANG = "AC_ZHANG";
-    public static final String AC_CLASSIC= "AC_CLASSIC";
-    public static final String AC_COMPLEMENT = "AC_COMPLEMENT";
-    public static final String AC_PARTIAL = "AC_PARTIAL";
-    public static final String AC_TUNED = "AC_TUNED";
-    public static final String BC = "BC";
-    public static final String FC = "FC";
-    public static final String NEQS = "NEQS";
-    public static final String DEFAULT = "DEFAULT";
+    public enum Consistency {
+        AC,
+        AC_REGIN,
+        AC_ZHANG,
+        AC_CLASSIC,
+        AC_COMPLEMENT,
+        AC_PARTIAL,
+        AC_TUNED,
+        BC,
+        FC,
+        NEQS,
+        DEFAULT
+    }
 
     public AllDifferent(IntVar[] vars, String type) {
         super(ConstraintsName.ALLDIFFERENT, createPropagators(vars, type));
     }
 
     private static Propagator[] createPropagators(IntVar[] VARS, String consistency) {
-        if(!Objects.equals(OPTION_CONSISTENCY, "DEFAULT")){
-            consistency = OPTION_CONSISTENCY;
-        }
-        boolean propInst = !Objects.equals(OPTION_PROPINST, "false") && !Objects.equals(OPTION_PROPINST, "FALSE");
-
         Model model = VARS[0].getModel();
         if (model.getSolver().isLCG()) {
             String message = "";
-            if (consistency.equals("AC") || consistency.equals("AC_ZHANG")) {
-                //TODO: put AC_TUNED as default ?
-                consistency = "AC_REGIN";
-                message = "Warning: Adjust consistency level of AllDifferent to \"AC_REGIN\" due to LCG resolution.";
-            }
-            boolean allEnum = Arrays.stream(VARS).allMatch(IntVar::hasEnumeratedDomain);
-            if (!allEnum) {
-                if (consistency.equals("AC_REGIN") || consistency.equals("DEFAULT")) {
-                    consistency = "BC";
-                    message = "Warning: Adjust consistency level of AllDifferent to \"BC\" due to LCG resolution.";
-                }
+            if (consistency.equals("AC_ZHANG")) {
+                consistency = "AC_TUNED";
+                message = "Warning: Adjust consistency level of AllDifferent from \"AC_ZHANG\" to " +
+                        "\"AC_TUNED\" due to LCG.";
             }
             if (!message.isEmpty() && model.getSettings().warnUser()) {
                 model.getSolver().log().white().println(message);
             }
         }
-        switch (consistency) {
+        Consistency choice = Consistency.valueOf(consistency);
+        switch (choice) {
             case NEQS: {
                 int s = VARS.length;
                 int k = 0;
@@ -84,34 +71,24 @@ public class AllDifferent extends Constraint {
             case FC:
                 return new Propagator[]{new PropAllDiffInst(VARS)};
             case BC:
-                if (propInst) {return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffBC(VARS)};}
-                else {return new Propagator[]{new PropAllDiffBC(VARS)};}
-            case AC_REGIN:
-                if (propInst) {return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffAC(VARS, false)};}
-                else {return new Propagator[]{new PropAllDiffAC(VARS, false)};}
+                return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffBC(VARS)};
             case AC:
+            case AC_REGIN:
             case AC_ZHANG:
-                if (propInst) {return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffAC(VARS, true)};}
-                else {return new Propagator[]{new PropAllDiffAC(VARS, true)};}
             case AC_CLASSIC:
             case AC_COMPLEMENT:
             case AC_PARTIAL:
             case AC_TUNED:
-                if(propInst) {return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffAC(VARS, consistency)};}
-                else {return new Propagator[]{new PropAllDiffAC(VARS, consistency)};}
+                return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffAC(VARS, choice)};
             case DEFAULT:
             default: {
                 // adds a Probabilistic AC (only if at least some variables have an enumerated domain)
-                boolean enumDom = false;
-                for (int i = 0; i < VARS.length && !enumDom; i++) {
-                    if (VARS[i].hasEnumeratedDomain()) {
-                        enumDom = true;
-                    }
-                }
-                if (enumDom) {
-                    return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffBC(VARS), new PropAllDiffAdaptative(VARS)};
+                boolean allEnum = Arrays.stream(VARS).allMatch(IntVar::hasEnumeratedDomain);
+                if (allEnum) {
+                    return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffBC(VARS),
+                            new PropAllDiffAdaptative(VARS, Consistency.valueOf("AC_TUNED"))};
                 } else {
-                    return createPropagators(VARS, "BC");
+                    return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffBC(VARS)};
                 }
             }
         }

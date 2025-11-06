@@ -42,9 +42,10 @@ public class PropAllDiffAdaptative extends PropAllDiffAC {
      * enables to control the cardinality of the matching
      *
      * @param variables array of integer variables
+     * @param mode      name of the filtering algorithm
      */
-    public PropAllDiffAdaptative(IntVar[] variables) {
-        super(variables, !variables[0].getModel().getSolver().isLCG());
+    public PropAllDiffAdaptative(IntVar[] variables, AllDifferent.Consistency mode) {
+        super(variables, mode);
         rd = new Random(vars[0].getModel().getSeed());
         calls = success = 1;
     }

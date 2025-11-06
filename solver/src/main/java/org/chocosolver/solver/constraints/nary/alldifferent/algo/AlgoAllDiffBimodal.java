@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2024, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2025, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -14,6 +14,7 @@ import org.chocosolver.sat.MiniSat;
 import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.nary.alldifferent.AllDifferent;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.BipartiteMatching;
@@ -23,8 +24,8 @@ import static org.chocosolver.solver.variables.IntVar.*;
 
 
 /**
- * Algorithm of Alldifferent ensuring GAC
- *
+ * Algorithm of Alldifferent ensuring GAC.
+ * <p/>
  * Uses a variant of Regin algorithm based on the partially complemented (PC) approach
  * <p/>
  * Keeps track of previous matching and the sets of relevant variables and values for further calls
@@ -37,11 +38,6 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
-
-    public static final String CLASSIC = "AC_CLASSIC";
-    public static final String COMPLEMENT = "AC_COMPLEMENT";
-    public static final String PARTIAL = "AC_PARTIAL";
-    public static final String TUNED = "AC_TUNED";
 
     public static final int BFS = 0;
     public static final int DFS = 1;
@@ -73,7 +69,7 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
     private final int[] low; // Low point of the values
     private int numVisit; // Current visit number of the DFS in Tarjan's algorithm
     private boolean firstSCC; // Indicates if the discovered SCC is the first discovered one in the current propagation
-    private final String mode; // Indicating the mode in which we are using the procedure (Classic, Complement, Hybrid or Tuned)
+    private final AllDifferent.Consistency mode; // Indicating the mode in which we are using the procedure (Classic, Complement, Hybrid or Tuned)
     private boolean pruned; // True if some variable-value pairs were pruned
 
     private final int[] sccPartition; // Partition of the values relative to the SCCs
@@ -87,7 +83,7 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public AlgoAllDiffBimodal(IntVar[] variables, Propagator<IntVar> cause, String acMode) {
+    public AlgoAllDiffBimodal(IntVar[] variables, Propagator<IntVar> cause, AllDifferent.Consistency acMode) {
         // Variables and data structures for the whole procedure
         this.aCause = cause;
         this.model = variables[0].getModel();
@@ -593,11 +589,11 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
 
     private boolean choice(int algo, int var) {
         switch (mode) {
-            case CLASSIC:
+            case AC_CLASSIC:
                 return true;
-            case COMPLEMENT:
+            case AC_COMPLEMENT:
                 return false;
-            case PARTIAL:
+            case AC_PARTIAL:
                 if (algo == BFS || algo == DFS) {
 //                    return vars[var].getDomainSize() < valuesDynamic.getSize();
                     return Math.max((vars[var].getUB() - vars[var].getLB() + 63) >> 6, vars[var].getDomainSize()) < valuesDynamic.getSize(); // More suited to BitSet domain representation
@@ -605,7 +601,7 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
 //                    return vars[var].getDomainSize() < complementSCC.getSize();
                     return Math.max((vars[var].getUB() - vars[var].getLB() + 63) >> 6, vars[var].getDomainSize()) < complementSCC.getSize(); // More suited to BitSet domain representation
                 }
-            case TUNED:
+            case AC_TUNED:
                 if (algo == BFS) {
 //                    return vars[var].getDomainSize() < valuesDynamic.getSize();
                     return Math.max((vars[var].getUB() - vars[var].getLB() + 63) >> 6, vars[var].getDomainSize()) < valuesDynamic.getSize(); // More suited to BitSet domain representation

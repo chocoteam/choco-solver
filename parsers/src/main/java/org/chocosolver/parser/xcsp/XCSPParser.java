@@ -790,7 +790,7 @@ public class XCSPParser implements XCallbacks2 {
     @Override
     public void buildCtrAllDifferentExcept(String id, XVariables.XVarInteger[] list, int[] except) {
         if (except.length == 0) {
-            model.allDifferent(vars(list), "AC_TUNED").post();
+            model.allDifferent(vars(list)).post();
         } else if (except.length == 1 && except[0] == 0) {
             model.allDifferentExcept0(vars(list)).post();
         } else {

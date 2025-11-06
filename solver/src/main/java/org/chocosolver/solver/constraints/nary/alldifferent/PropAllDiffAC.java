@@ -32,7 +32,7 @@ import org.chocosolver.util.ESat;
  *
  * @author Jean-Guillaume Fages
  */
-@Explained(partial = true, comment = "Fast algorithm not explained")
+@Explained(partial = true, comment = "AC_ZHANG not explained")
 public class PropAllDiffAC extends Propagator<IntVar> {
 
     //***********************************************************************************
@@ -50,17 +50,21 @@ public class PropAllDiffAC extends Propagator<IntVar> {
      * enables to control the cardinality of the matching
      *
      * @param variables array of integer variables
+     * @param mode      name of the filtering algorithm
      */
-    public PropAllDiffAC(IntVar[] variables, boolean fast) {
+    public PropAllDiffAC(IntVar[] variables, AllDifferent.Consistency mode) {
         super(variables, PropagatorPriority.QUADRATIC, false);
-        this.filter = fast ?
-            new AlgoAllDiffACFast(variables, this):
-            new AlgoAllDiffAC(variables, this);
-    }
-
-    public PropAllDiffAC(IntVar[] variables, String mode) {
-        super(variables, PropagatorPriority.QUADRATIC, false);
-        this.filter = new AlgoAllDiffBimodal(variables, this, mode);
+        switch (mode) {
+            case AC_REGIN:
+                this.filter = new AlgoAllDiffAC(variables, this);
+                break;
+            case AC_ZHANG:
+                this.filter = new AlgoAllDiffACFast(variables, this);
+                break;
+            default:
+                this.filter = new AlgoAllDiffBimodal(variables, this, mode);
+                break;
+        }
     }
 
     //***********************************************************************************
