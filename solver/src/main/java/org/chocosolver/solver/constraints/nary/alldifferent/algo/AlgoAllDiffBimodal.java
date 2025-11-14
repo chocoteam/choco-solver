@@ -79,6 +79,8 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
     private final int[] upToDateSCC; // indicating for each value if its SCC has been updated in this call
     private int updateKey; // This key is incremented at each call, to reset the upToDate information
 
+    private final boolean allEnum;
+
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
@@ -129,6 +131,15 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
         this.sccBelonging = new int[D];
         this.upToDateSCC = new int[D];
         this.updateKey = 0;
+
+        boolean temp = true;
+        for (IntVar x : vars) {
+            if (!x.hasEnumeratedDomain()) {
+                temp = false;
+                break;
+            }
+        }
+        this.allEnum = temp;
     }
 
     private void refineUniverse(TrackingList valueUniverse) { // The tracking list initially contains an interval, so we refine it by removing the values that are present in no variables' domain (which may contain holes)
@@ -150,8 +161,7 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
 
     public boolean propagate() throws ContradictionException {
         this.pruned = false;
-        // propInstDependant is set to false by default, meaning that this propagator does not require the Instantiation Propagator to be called just before
-        updateDynamicStructuresOpening(false);
+        updateDynamicStructuresOpening();
         findMaximumMatching();
         filter();
         updateDynamicStructuresEnding();
@@ -430,26 +440,51 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
 
                     if (vars[var].getDomainSize() > 1) { // If the domain is a singleton there is nothing to prune
 
-                        if (choice(PRUNE, var)) {  // If var has a small domain then iterate over the domain and prune the values that are in the complement
+                        if (vars[var].hasEnumeratedDomain()) { // If the domain is enumerated, proceed with the bimodal pruning
+                            if (choice(PRUNE, var)) {  // If var has a small domain then iterate over the domain and prune the values that are in the complement
+                                int ub = vars[var].getUB();
+                                for (int domainValue = vars[var].getLB(); domainValue <= ub; domainValue = vars[var].nextValue(domainValue)) {
+                                    if (complementSCC.isPresent(domainValue)) {
+                                        pruned = true;
+                                        // Prune the pair (var, domainValue) + Explanation
+                                        generatePruningExplanation(var, domainValue);
+                                    }
+                                }
+
+                            } else {    // If var has a large domain then iterate over the values in the complement and prune the ones that are in the domain of var
+                                int complementValue = complementSCC.getSource();
+                                while (complementSCC.hasNext(complementValue)) {
+                                    complementValue = complementSCC.getNext(complementValue);
+                                    if (vars[var].contains(complementValue)) {
+                                        pruned = true;
+                                        // Prune the pair (var, complementValue) + Explanation
+                                        generatePruningExplanation(var, complementValue);
+                                    }
+                                }
+                            }
+                        } else { // If the domain is not enumerated but is an interval, then we prune the bounds in the right order
+                            assert !vars[var].getModel().getSolver().isLCG() : "not compatible with LCG yet";
+                            // Iterate over the interval from left to right until we reach a value that we can not prune
                             int ub = vars[var].getUB();
-                            for (int domainValue = vars[var].getLB(); domainValue <= ub; domainValue = vars[var].nextValue(domainValue)) {
-                                if (complementSCC.isPresent(domainValue)) {
-                                    pruned = true;
-                                    // Prune the pair (var, domainValue) + Explanation
-                                    generatePruningExplanation(var, domainValue);
+                            boolean boundPruned = true;
+                            for (int boundValue = vars[var].getLB(); boundValue <= ub && boundPruned; boundValue++) {
+                                if (complementSCC.isPresent(boundValue)) {
+                                    generatePruningExplanation(var, boundValue);
+                                } else {
+                                    boundPruned = false;
+                                }
+                            }
+                            // Iterate over the interval from right to left until we reach a value that we can not prune
+                            int lb = vars[var].getLB();
+                            boundPruned = true;
+                            for (int boundValue = vars[var].getUB(); boundValue >= lb && boundPruned; boundValue--) {
+                                if (complementSCC.isPresent(boundValue)) {
+                                    generatePruningExplanation(var, boundValue);
+                                } else {
+                                    boundPruned = false;
                                 }
                             }
 
-                        } else {    // If var has a large domain then iterate over the values in the complement and prune the ones that are in the domain of var
-                            int complementValue = complementSCC.getSource();
-                            while (complementSCC.hasNext(complementValue)) {
-                                complementValue = complementSCC.getNext(complementValue);
-                                if (vars[var].contains(complementValue)) {
-                                    pruned = true;
-                                    // Prune the pair (var, complementValue) + Explanation
-                                    generatePruningExplanation(var, complementValue);
-                                }
-                            }
                         }
 
                     }
@@ -462,10 +497,10 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
 
     public void generatePruningExplanation(int sourceVar, int destinationVal) throws ContradictionException {
         Reason reason = Reason.undef();
-        int minValSCC = maxValue;
-        int maxValSCC = minValue;
-        int scc = getSCC(destinationVal);
         if (vars[sourceVar].getModel().getSolver().isLCG()) {
+            int minValSCC = maxValue;
+            int maxValSCC = minValue;
+            int scc = getSCC(destinationVal);
             if (getSizeScc(scc) == 1) { // Got a specific way to generate the explanation in the case of forced instantiation
                 int matchedVar = matching.getMatchV(destinationVal);
                 assert vars[matchedVar].isInstantiatedTo(destinationVal);
@@ -515,23 +550,12 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
     //***********************************************************************************
 
 
-    private void updateDynamicStructuresOpening(boolean propInstDependant){
-        IEnvironment env = model.getEnvironment();
+    private void updateDynamicStructuresOpening(){
+        // Repair the matching
         int var  = variablesDynamic.getSource();
         while (variablesDynamic.hasNext(var)) {
             var = variablesDynamic.getNext(var);
             if (vars[var].isInstantiated()) {
-
-
-                if (propInstDependant) { // This block can be called only if the propagator related to the instantiation of the variables has been called before
-                    variablesDynamic.removeFromUniverse(var, env); // The instantiated variables are removed from the universe
-
-                    if (valuesDynamic.isPresent(vars[var].getValue())) { // The values of the instantiated variables are removed from the universe
-                        valuesDynamic.removeFromUniverse(vars[var].getValue(), env);
-                        complementSCC.removeFromUniverse(vars[var].getValue(), env);
-                    }
-                }
-
                 if (matching.inMatchingU(var)) { // Unmatch the instantiated variable from its current matched value
                     matching.unMatch(var, matching.getMatchU(var));
                 }
@@ -548,9 +572,7 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
     private void updateDynamicStructuresEnding() {
         IEnvironment env = model.getEnvironment();
 
-
         // The remaining unvisited values are present in the domain of no variables, thus we can remove them from the universe of values for the next call to the propagator
-
         int val = valuesDynamic.getSource();
         while (valuesDynamic.hasNext(val)) {
             val = valuesDynamic.getNext(val);
@@ -558,7 +580,7 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
             tarjanStack[topTarjan] = val;
             topTarjan++;
         }
-
+        // We must refill the tracking lists before removing some elements from their universe, otherwise their structure is broken
         valuesDynamic.refill();
         complementSCC.refill();
         while (topTarjan != 0) {
@@ -568,18 +590,43 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
         }
 
         // Now that the pruning is done, we can remove from the universes of variables and values the pairs that were instantiated either before or during the call to this propagator
-        int var  = variablesDynamic.getSource();
-        while (variablesDynamic.hasNext(var)) {
-            var = variablesDynamic.getNext(var);
-            if (vars[var].isInstantiated()) {
-                // The instantiated variables are removed from the universe
-                variablesDynamic.removeFromUniverse(var, env);
+        int var = variablesDynamic.getSource();
+        if (allEnum) { // If all the domains are enumerated, then we can safely proceed with the removals as all the required pruning has been done
+            while (variablesDynamic.hasNext(var)) {
+                var = variablesDynamic.getNext(var);
+                if (vars[var].isInstantiated()) {
+                    // The instantiated variables are removed from the universe
+                    variablesDynamic.removeFromUniverse(var, env);
 
-                // The values of the instantiated variables are removed from the universe
-                valuesDynamic.removeFromUniverse(vars[var].getValue(), env);
-                complementSCC.removeFromUniverse(vars[var].getValue(), env);
+                    // The values of the instantiated variables are removed from the universe
+                    valuesDynamic.removeFromUniverse(vars[var].getValue(), env);
+                    complementSCC.removeFromUniverse(vars[var].getValue(), env);
+                }
+            }
+        } else { // If all domains are not enumerated, then some instantiated values may still belong to the domain of a bounded variable. Thus, it must remain in the graph to be pruned in a future call to the propagator.
+            while (variablesDynamic.hasNext(var)) {
+                var = variablesDynamic.getNext(var);
+                if (vars[var].isInstantiated() && !isInAnotherBoundedDomain(var, vars[var].getValue())) {
+                    // The instantiated variables are removed from the universe
+                    variablesDynamic.removeFromUniverse(var, env);
+
+                    // The values of the instantiated variables are removed from the universe
+                    valuesDynamic.removeFromUniverse(vars[var].getValue(), env);
+                    complementSCC.removeFromUniverse(vars[var].getValue(), env);
+                }
             }
         }
+    }
+
+    private boolean isInAnotherBoundedDomain(int var, int val) {
+        int x = variablesDynamic.getSource();
+        while (variablesDynamic.hasNext(x)) {
+            x = variablesDynamic.getNext(x);
+            if (x != var && !vars[x].hasEnumeratedDomain() && vars[x].contains(val)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     //***********************************************************************************
