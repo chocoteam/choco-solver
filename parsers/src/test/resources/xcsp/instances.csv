@@ -33,7 +33,7 @@ basics;Kakuro-easy-000-sumdiff.xml.lzma;1;_;9;7
 basics;Knapsack-30-100-00.xml.lzma;39;709;46790;38340
 basics;KnightTour-06-ext03.xml.lzma;1;_;147;110
 basics;KnightTour-06-int.xml.lzma;1;_;168;128
-basics;Langford-3-10.xml.lzma;1;_;456;428
+basics;Langford-3-10.xml.lzma;1;_;864;820
 basics;LangfordBin-08.xml.lzma;1;_;529;465
 basics;LowAutocorrelation-015.xml.lzma;25;15;52114;38962
 basics;MagicSequence-008-ca.xml.lzma;1;_;6;4
@@ -42,7 +42,7 @@ basics;MagicSquare-4-table.xml.lzma;1;_;9;3
 basics;MagicSquare-6-mdd.xml.lzma;1;_;209;157
 basics;MagicSquare-6-sum.xml.lzma;1;_;217;162
 basics;Mapping-full2x2_mp3.xml.lzma;1;1100;1345;1203
-basics;Mario-easy-4.xml.lzma;16;545;8705;8077
+basics;Mario-easy-4.xml.lzma;16;545;9345;8664
 #basics;MarketSplit-01.xml.lzma;0;_;1113575;919484
 basics;MSPSP-easy_01.xml.lzma;13;26;1421;650
 basics;MSPSP-hard_01.xml.lzma;4;35;305;229
@@ -63,11 +63,11 @@ basics;PizzaVoucher-10a_c18.xml.lzma;16;210;11508;10338
 basics;Primes-15-20-2-1.xml.lzma;1;_;6;0
 basics;PrizeCollecting-15-3-5-0.xml.lzma;8;20;1946;1785
 basics;qcp-15-120-00_X2.xml.lzma;1;_;1126;786
-basics;QuadraticAssignment-qap_c18.xml.lzma;12;4776;1808;1686
-basics;QuadraticAssignment-qap.xml.lzma;12;4776;1808;1686
+basics;QuadraticAssignment-qap_c18.xml.lzma;13;4776;2606;2452
+basics;QuadraticAssignment-qap.xml.lzma;13;4776;2606;2452
 basics;QuasiGroup-3-04.xml.lzma;1;_;2;0
-basics;QuasiGroup-7-09.xml.lzma;1;_;1053;892
-basics;QueenAttacking-06.xml.lzma;5;0;4307;3458
+basics;QuasiGroup-7-09.xml.lzma;1;_;1070;907
+basics;QueenAttacking-06.xml.lzma;8;0;4210;5386
 basics;Queens-0008-m1.xml.lzma;1;_;31;27
 basics;RadarSurveillance-8-24-3-2-00.xml.lzma;1;_;92;22
 basics;Ramsey-12.xml.lzma;45;2;71913;41237
