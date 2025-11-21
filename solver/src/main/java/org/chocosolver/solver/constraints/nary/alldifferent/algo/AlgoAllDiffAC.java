@@ -39,7 +39,7 @@ import static org.chocosolver.solver.variables.IntVar.*;
  *
  * @author Jean-Guillaume Fages
  */
-public class AlgoAllDiffAC {
+public class AlgoAllDiffAC implements IAlldifferentAlgorithm {
 
     //***********************************************************************************
     // VARIABLES

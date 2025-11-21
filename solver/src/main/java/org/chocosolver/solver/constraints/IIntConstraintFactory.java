@@ -1774,9 +1774,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         }
         Propagator<IntVar> ip = allEnum ? new PropInverseChannelAC(vars1, vars2, offset1, offset2)
                 : new PropInverseChannelBC(vars1, vars2, offset1, offset2);
-        Constraint alldiff1 = allDifferent(vars1, ac ? "AC" : "");
+        Constraint alldiff1 = allDifferent(vars1, ac ? "AC" : "BC");
         alldiff1.ignore();
-        Constraint alldiff2 = allDifferent(vars2, ac ? "AC" : "");
+        Constraint alldiff2 = allDifferent(vars2, ac ? "AC" : "BC");
         alldiff2.ignore();
         return new Constraint(ConstraintsName.INVERSECHANNELING, ArrayUtils.append(
                 alldiff1.getPropagators(),

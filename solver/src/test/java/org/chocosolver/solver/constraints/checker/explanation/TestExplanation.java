@@ -18,6 +18,7 @@ import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.nary.PropIntValuePrecedeChain;
+import org.chocosolver.solver.constraints.nary.alldifferent.AllDifferent;
 import org.chocosolver.solver.constraints.nary.alldifferent.PropAllDiffAC;
 import org.chocosolver.solver.constraints.nary.alldifferent.PropAllDiffBC;
 import org.chocosolver.solver.constraints.nary.alldifferent.PropAllDiffInst;
@@ -126,7 +127,11 @@ public class TestExplanation {
                 {PropXinSHalfReif.class, new Class[]{IntVar.class, IntIterableRangeSet.class, BoolVar.class}, new Object[]{null, null, null}},
                 {PropAllDiffInst.class, new Class[]{IntVar[].class}, new Object[]{6}},
                 {PropAllDiffBC.class, new Class[]{IntVar[].class}, new Object[]{6}},
-                {PropAllDiffAC.class, new Class[]{IntVar[].class, boolean.class}, new Object[]{6, false}},
+                {PropAllDiffAC.class, new Class[]{IntVar[].class, AllDifferent.Consistency.class}, new Object[]{6, AllDifferent.Consistency.AC_REGIN}},
+                {PropAllDiffAC.class, new Class[]{IntVar[].class, AllDifferent.Consistency.class}, new Object[]{6, AllDifferent.Consistency.AC_TUNED}},
+                {PropAllDiffAC.class, new Class[]{IntVar[].class, AllDifferent.Consistency.class}, new Object[]{6, AllDifferent.Consistency.AC_CLASSIC}},
+                {PropAllDiffAC.class, new Class[]{IntVar[].class, AllDifferent.Consistency.class}, new Object[]{6, AllDifferent.Consistency.AC_COMPLEMENT}},
+                {PropAllDiffAC.class, new Class[]{IntVar[].class, AllDifferent.Consistency.class}, new Object[]{6, AllDifferent.Consistency.AC_PARTIAL}},
                 {PropLex.class, new Class[]{IntVar[].class, IntVar[].class, boolean.class}, new Object[]{5, 5, null}},
                 {PropElementV_fast.class, new Class[]{IntVar.class, IntVar[].class, IntVar.class}, new Object[]{null, 6, null}},
                 {PropEnumDomainChanneling.class, new Class[]{BoolVar[].class, IntVar.class, int.class}, new Object[]{5, null, null}},
@@ -499,6 +504,11 @@ public class TestExplanation {
                     } else {
                         parameters[i] = info[i];
                     }
+                }else {
+                    if (info[i] == null) {
+                        throw new UnsupportedOperationException("Unknown value for parameter "+ parameterType);
+                    }
+                    parameters[i] = info[i];
                 }
             }
             i++;
