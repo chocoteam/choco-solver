@@ -592,8 +592,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         }
         // table decomposition todo as intension constraint
         Tuples tuples = new Tuples(true);
-        for (int val1 : base) {
-            for (int val2 : exponent) {
+        int baseUB = base.getUB();
+        for (int val1 = base.getLB(); val1 <= baseUB; val1 = base.nextValue(val1)) {
+            int exponentUB = exponent.getUB();
+            for (int val2 = exponent.getLB(); val2 <= exponentUB; val2 = exponent.nextValue(val2)) {
                 int res = (int) Math.pow(val1, val2);
                 if (result.contains(res)) {
                     tuples.add(val1, val2, res);

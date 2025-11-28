@@ -26,8 +26,6 @@ import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
 import org.chocosolver.util.iterators.*;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
-import java.util.Iterator;
-
 /**
  * <br/>
  *
@@ -61,11 +59,6 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * To iterate over ranges
      */
     private DisposableRangeIterator _riterator;
-
-    /**
-     * Value iterator allowing for(int i:this) loops
-     */
-    private IntVarValueIterator _javaIterator;
 
     /**
      * Create a bounded domain IntVar : [min,max]
@@ -348,8 +341,8 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     }
 
     @Override
-    public int getValue() throws IllegalStateException{
-        if(!isInstantiated()) {
+    public int getValue() throws IllegalStateException {
+        if (!isInstantiated()) {
             throw new IllegalStateException("getValue() can be only called on instantiated variable. " +
                     name + " is not instantiated");
         }
@@ -505,15 +498,6 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             _riterator.topDownInit();
         }
         return _riterator;
-    }
-
-    @Override
-    public Iterator<Integer> iterator() {
-        if (_javaIterator == null) {
-            _javaIterator = new IntVarValueIterator(this);
-        }
-        _javaIterator.reset();
-        return _javaIterator;
     }
 
 }

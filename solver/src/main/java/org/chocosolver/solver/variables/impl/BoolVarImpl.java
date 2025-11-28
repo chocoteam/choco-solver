@@ -26,8 +26,6 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.*;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
-import java.util.Iterator;
-
 /**
  * <br/>
  *
@@ -56,10 +54,6 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
      * To iterate over ranges
      */
     private DisposableRangeIterator _riterator;
-    /**
-     * Value iterator allowing for(int i:this) loops
-     */
-    private IntVarValueIterator _javaIterator;
     /**
      * Set to <tt>true</tt> if this variable reacts is associated with at least one propagator which reacts
      * on value removal
@@ -250,7 +244,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
         }
         return hasChanged;
     }
-    
+
     @Override
     public boolean isInstantiated() {
         return mValue < kUNDEF;
@@ -270,7 +264,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     }
 
     @Override
-    public int getValue() throws IllegalStateException{
+    public int getValue() throws IllegalStateException {
         if (!isInstantiated()) {
             throw new IllegalStateException("getValue() can be only called on instantiated variable. " +
                     name + " is not instantiated");
@@ -441,15 +435,6 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
             _riterator.topDownInit();
         }
         return _riterator;
-    }
-
-    @Override
-    public Iterator<Integer> iterator() {
-        if (_javaIterator == null) {
-            _javaIterator = new IntVarValueIterator(this);
-        }
-        _javaIterator.reset();
-        return _javaIterator;
     }
 
     @Override

@@ -30,8 +30,6 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.*;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
-import java.util.Iterator;
-
 /**
  * Boolean view b over a set variable S:
  * With v an integer, b = true iff S contains v.
@@ -78,10 +76,6 @@ public class BoolSetView<S extends SetVar> extends AbstractView<S> implements Bo
      * Range iterator
      */
     protected DisposableRangeIterator _riterator;
-    /**
-     * Value iterator allowing for(int i:this) loops
-     */
-    private final IntVarValueIterator _javaIterator = new IntVarValueIterator(this);
 
     public BoolSetView(int v, S setVar) {
         super("boolSetView[" + v + " in " + setVar.getName() + "]", setVar);
@@ -206,7 +200,7 @@ public class BoolSetView<S extends SetVar> extends AbstractView<S> implements Bo
     }
 
     @Override
-    public final int getValue() throws IllegalStateException{
+    public final int getValue() throws IllegalStateException {
         if (!isInstantiated()) {
             throw new IllegalStateException("getValue() can be only called on instantiated variable. " +
                     name + " is not instantiated");
@@ -402,9 +396,4 @@ public class BoolSetView<S extends SetVar> extends AbstractView<S> implements Bo
         return _riterator;
     }
 
-    @Override
-    public Iterator<Integer> iterator() {
-        _javaIterator.reset();
-        return _javaIterator;
-    }
 }

@@ -27,8 +27,6 @@ import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.*;
 
-import java.util.Iterator;
-
 import static org.chocosolver.sat.MiniSat.C_Undef;
 
 /**
@@ -63,10 +61,6 @@ public class BoolVarEagerLit extends AbstractVariable implements BoolVar, LitVar
      * To iterate over ranges
      */
     private DisposableRangeIterator _riterator;
-    /**
-     * Value iterator allowing for(int i:this) loops
-     */
-    private IntVarValueIterator _javaIterator;
     /**
      * Set to <tt>true</tt> if this variable reacts is associated with at least one propagator which reacts
      * on value removal
@@ -423,15 +417,6 @@ public class BoolVarEagerLit extends AbstractVariable implements BoolVar, LitVar
             _riterator.topDownInit();
         }
         return _riterator;
-    }
-
-    @Override
-    public Iterator<Integer> iterator() {
-        if (_javaIterator == null) {
-            _javaIterator = new IntVarValueIterator(this);
-        }
-        _javaIterator.reset();
-        return _javaIterator;
     }
 
     @Override
