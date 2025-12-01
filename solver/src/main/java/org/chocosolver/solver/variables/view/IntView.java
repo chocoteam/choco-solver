@@ -19,7 +19,6 @@ import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.iterators.*;
 
-import java.util.Iterator;
 import java.util.function.Consumer;
 
 /**
@@ -59,14 +58,10 @@ public abstract class IntView<I extends IntVar> extends AbstractView<I> implemen
     protected DisposableRangeIterator _riterator;
 
     /**
-     * Value iterator allowing for(int i:this) loops
-     */
-    private final IntVarValueIterator _javaIterator = new IntVarValueIterator(this);
-
-    /**
      * Create a view based on {@code var}
+     *
      * @param name name of the view
-     * @param var observed variable
+     * @param var  observed variable
      */
     protected IntView(String name, I var) {
         super(name, var);
@@ -98,7 +93,7 @@ public abstract class IntView<I extends IntVar> extends AbstractView<I> implemen
         return getVariable().isInstantiated();
     }
 
-	@Override
+    @Override
     public IDelta getDelta() {
         return var.getDelta();
     }
@@ -126,7 +121,7 @@ public abstract class IntView<I extends IntVar> extends AbstractView<I> implemen
         return _viterator;
     }
 
-	@Override
+    @Override
     public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
         if (_riterator == null || _riterator.isNotReusable()) {
             _riterator = new DisposableRangeBoundIterator(this);
@@ -137,12 +132,6 @@ public abstract class IntView<I extends IntVar> extends AbstractView<I> implemen
             _riterator.topDownInit();
         }
         return _riterator;
-    }
-
-    @Override
-    public Iterator<Integer> iterator() {
-        _javaIterator.reset();
-        return _javaIterator;
     }
 
     @Override

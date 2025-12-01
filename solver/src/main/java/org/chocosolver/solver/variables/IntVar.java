@@ -37,7 +37,7 @@ import java.util.stream.StreamSupport;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpression {
+public interface IntVar extends ICause, Variable, ArExpression {
 
     /**
      * Provide a minimum value for integer variable lower bound.

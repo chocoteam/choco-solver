@@ -20,9 +20,6 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-
 /**
  * <p>
  * Project: choco.
@@ -188,18 +185,6 @@ public class BoolVarImplTest {
         Assert.assertEquals(1, rit.max());
         rit.previous();
         Assert.assertFalse(rit.hasPrevious());
-    }
-
-    @Test(groups = "1s", timeOut = 60000)
-    public void testIterator() throws Exception {
-        setUp();
-        Iterator<Integer> iter = var.iterator();
-        Assert.assertTrue(iter.hasNext());
-        Assert.assertEquals(iter.next().intValue(), 0);
-        Assert.assertTrue(iter.hasNext());
-        Assert.assertEquals(iter.next().intValue(), 1);
-        Assert.assertFalse(iter.hasNext());
-        Assert.assertThrows(NoSuchElementException.class, () -> iter.next());
     }
 
     @Test(groups = "1s", timeOut = 60000)

@@ -26,7 +26,6 @@ import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 import java.util.Arrays;
-import java.util.Iterator;
 
 import static org.chocosolver.sat.MiniSat.*;
 
@@ -607,11 +606,6 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         return var.monitorDelta(propagator);
-    }
-
-    @Override
-    public Iterator<Integer> iterator() {
-        return var.iterator();
     }
 
     @Override
