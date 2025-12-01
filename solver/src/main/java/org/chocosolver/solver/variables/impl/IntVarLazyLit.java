@@ -28,8 +28,6 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
-import java.util.Iterator;
-
 import static org.chocosolver.sat.MiniSat.C_Undef;
 
 /**
@@ -359,11 +357,6 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar, Lit
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         return var.monitorDelta(propagator);
-    }
-
-    @Override
-    public Iterator<Integer> iterator() {
-        return var.iterator();
     }
 
     @Override
