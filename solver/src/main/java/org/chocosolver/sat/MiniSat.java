@@ -12,6 +12,8 @@ package org.chocosolver.sat;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.stack.TIntStack;
+import gnu.trove.stack.array.TIntArrayStack;
 import org.chocosolver.solver.variables.impl.LitVar;
 
 import java.util.ArrayList;
@@ -81,7 +83,7 @@ public class MiniSat implements SatFactory {
     // Number of variables
     int num_vars_;
     int rootlvl = 0;
-    private final int ccmin_mode = 0; // Controls conflict clause minimization (0=none, 1=basic, 2=deep)
+    private final int ccmin_mode = 1; // Controls conflict clause minimization (0=none, 1=basic, 2=deep)
     private double cla_inc = 1;
     private final double clause_decay = 0.999;
     int learnt_first_removable = 0; // index of first removable learnt clause (related to #reduceDB only).
@@ -101,6 +103,7 @@ public class MiniSat implements SatFactory {
     double max_learnts;
     final BitSet seen = new BitSet();
     private final TIntArrayList analyze_toclear = new TIntArrayList();
+    private final TIntStack analyze_stack = new TIntArrayStack();
     private final TIntArrayList temporary_add_vector_ = new TIntArrayList();
 
     /**
@@ -637,27 +640,23 @@ public class MiniSat implements SatFactory {
         int i, j;
         analyze_toclear.resetQuick();
         analyze_toclear.addAll(out_learnt);
-        /*if (ccmin_mode == 2) {
-            uint32_t abstract_level = 0;
+        if (ccmin_mode == 2) {
+            int abstract_level = 0;
             for (i = 1; i < out_learnt.size(); i++)
                 abstract_level |= abstractLevel(var(out_learnt.get(i))); // (maintain an abstraction of levels involved in conflict)
 
             for (i = j = 1; i < out_learnt.size(); i++)
-                if (reason(var(out_learnt.get(i))) == CR_Undef || !litRedundant(out_learnt.get(i), abstract_level))
+                if (reason(var(out_learnt.get(i))) == C_Undef || !litRedundant(out_learnt.get(i), abstract_level))
                     out_learnt.set(j++, out_learnt.get(i));
 
-        } else */
-        if (ccmin_mode == 1) {
-            //todo fix ccmin_mode
+        } else if (ccmin_mode == 1) {
             for (i = j = 1; i < out_learnt.size(); i++) {
-                int x = var(out_learnt.get(i));
-
-                if (getConfl(x) == C_Undef)
+                Clause c = getConfl(out_learnt.get(i));
+                if (c == C_Undef)
                     out_learnt.set(j++, out_learnt.get(i));
                 else {
-                    Clause c = getConfl(var(out_learnt.get(i)));
                     for (int k = 1; k < c.size(); k++)
-                        if (!seen.get(var(c._g(k))) && level(var(c._g(k))) > rootlvl) {
+                        if (!seen.get(var(c._g(k))) && level(var(c._g(k))) > 0) { // or root_level ?
                             out_learnt.set(j++, out_learnt.get(i));
                             break;
                         }
@@ -728,6 +727,40 @@ public class MiniSat implements SatFactory {
             if (DEBUG > 1) System.out.printf("path-- (%d)\n", pathC);
         } while (pathC > 0 || !cinfo.get(var(p)).reliable);
         out_learnt.set(0, neg(p));
+    }
+
+    /* Check if 'p' can be removed. 'abstract_levels' is used to abort early if the algorithm is
+     * visiting literals at levels that cannot be removed later.
+     */
+    boolean litRedundant(int p, int abstract_levels) {
+        analyze_stack.clear();
+        analyze_stack.push(p);
+        int top = analyze_toclear.size();
+        while (analyze_stack.size() > 0) {
+            assert (reason(var(analyze_stack.peek())) != C_Undef);
+            Clause c = getConfl(analyze_stack.peek());
+            analyze_stack.pop();
+
+            for (int i = 1; i < c.size(); i++) {
+                p = c._g(i);
+                if (!seen.get(var(p)) && level(var(p)) > 0) {
+                    if (reason(var(p)) != C_Undef && (abstractLevel(var(p)) & abstract_levels) != 0) {
+                        seen.set(var(p));
+                        analyze_stack.push(p);
+                        analyze_toclear.add(p);
+                    } else {
+                        for (int j = top; j < analyze_toclear.size(); j++)
+                            seen.clear(var(analyze_toclear.get(j)));
+
+                        //analyze_toclear.shrink(analyze_toclear.size() - top);
+                        analyze_toclear.remove(top, analyze_toclear.size() - top);
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -871,8 +904,12 @@ public class MiniSat implements SatFactory {
         return vardata.get(x).cr;
     }
 
-    int level(int x) {
+    public int level(int x) {
         return vardata.get(x).level;
+    }
+
+    int abstractLevel(int x) {
+        return 1 << (level(x) & 31);
     }
 
     int pos(int x) {
