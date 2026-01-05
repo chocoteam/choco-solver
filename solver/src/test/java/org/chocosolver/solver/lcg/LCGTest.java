@@ -730,6 +730,31 @@ public class LCGTest {
         Assert.assertEquals(solver.getSolutionCount(), 5);
     }
 
+    @Test(groups = "lcg", timeOut = 600000)
+    public void test685() {
+
+        for (int i = 1024; i >= 908; i /= 2) {
+            System.out.printf("Testing with range [%d,%d]%n", Short.MIN_VALUE / i, Short.MAX_VALUE / i);
+
+            //{a*b + c == 2020, a + b*c == 2021}
+            Model model = new Model(Settings.init().setLCG(true));
+            IntVar a = model.intVar("a", Short.MIN_VALUE / i, Short.MAX_VALUE / i);
+            IntVar b = model.intVar("b", Short.MIN_VALUE / i, Short.MAX_VALUE / i);
+            IntVar c = model.intVar("c", Short.MIN_VALUE / i, Short.MAX_VALUE / i);
+            a.mul(b).add(c).eq(20).post();
+            a.add(b.mul(c)).eq(21).post();
+            //model.displayVariableOccurrences();
+            //model.displayPropagatorOccurrences();
+            Solver solver = model.getSolver();
+            solver.showShortStatistics();
+            //solver.showDecisions(()->"");
+            while (solver.solve()) {
+                System.out.printf("a=%d b=%d c=%d%n", a.getValue(), b.getValue(), c.getValue());
+            }
+            Assert.assertEquals(solver.getSolutionCount(), 1);
+        }
+    }
+
     @DataProvider
     public Object[][] offsets() {
         return new Object[][]{{0}, {1}};
