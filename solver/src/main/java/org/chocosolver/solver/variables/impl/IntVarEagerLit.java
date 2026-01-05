@@ -126,6 +126,12 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
         for (int v : values) {
             sat.newVariable(new MiniSat.ChannelInfo(this, 1, 1, v));
         }
+        for (int i = lit_min; i <= lit_min; i++) {
+            sat.cEnqueue(getGELit(i), Reason.undef());
+        }
+        for (int i = lit_max; i <= lit_max; i++) {
+            sat.cEnqueue(getLELit(i), Reason.undef());
+        }
     }
 
     @Override
