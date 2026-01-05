@@ -912,7 +912,7 @@ public class MiniSat implements SatFactory {
         return 1 << (level(x) & 31);
     }
 
-    int pos(int x) {
+    public int pos(int x) {
         return vardata.get(x).pos;
     }
 
