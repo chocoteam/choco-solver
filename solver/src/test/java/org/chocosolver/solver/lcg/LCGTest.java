@@ -729,4 +729,19 @@ public class LCGTest {
         solver.findAllSolutions();
         Assert.assertEquals(solver.getSolutionCount(), 5);
     }
+
+    @DataProvider
+    public Object[][] offsets() {
+        return new Object[][]{{0}, {1}};
+    }
+
+    @Test(groups = "lcg", timeOut = 600000, dataProvider = "offsets")
+    public void testJG1(int offset) {
+        // When the domain is sparse, the lit-based domain was not correctly instantiated
+        Model model = new Model(Settings.init().setLCG(true));
+        IntVar a = model.intVar("a", offset, 31);
+        IntVar b = model.intVar("b", new int[]{offset, 10, 20, 30});
+        model.arithm(a, "=", b).post();
+        model.getSolver().solve();
+    }
 }
