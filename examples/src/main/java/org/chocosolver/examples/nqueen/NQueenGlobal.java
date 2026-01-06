@@ -12,7 +12,9 @@ package org.chocosolver.examples.nqueen;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.Settings;
 
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
 
 /**
@@ -25,7 +27,8 @@ public class NQueenGlobal extends AbstractNQueen {
 
     @Override
     public void buildModel() {
-        model = new Model("NQueen");
+        model = new Model("NQueen", Settings.init().setLCG(false));
+//        model = new Model("NQueen");
         vars = new IntVar[n];
         IntVar[] diag1 = new IntVar[n];
         IntVar[] diag2 = new IntVar[n];
@@ -36,9 +39,10 @@ public class NQueenGlobal extends AbstractNQueen {
             diag2[i] = model.offset(vars[i], -i);
         }
 
-        model.allDifferent(vars, "BC").post();
-        model.allDifferent(diag1, "BC").post();
-        model.allDifferent(diag2, "BC").post();
+        String consistency = "AC_TUNED";
+        model.allDifferent(vars, consistency).post();
+        model.allDifferent(diag1, consistency).post();
+        model.allDifferent(diag2, consistency).post();
     }
 
     @Override
