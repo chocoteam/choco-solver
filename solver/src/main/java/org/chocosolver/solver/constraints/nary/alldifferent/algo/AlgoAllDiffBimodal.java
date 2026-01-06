@@ -518,6 +518,8 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
                 reason = Reason.r(vars[matchedVar].getValLit());
             } else if (factorExists(scc)) { // Check whether the explanation related to the destination SCC has already been computed
                 reason = Reason.r(MiniSat.neg(sccFactors[scc]));
+                //TODO
+                //System.out.println("propagation call : " + updateKey + " | SCC : " + scc); //DEBUG
             } else {
                 // Get the minimum and maximum values of the destination SCC
                 for (int i = getStartPositionSCC(scc); i < getEndPositionSCC(scc); i++) {
@@ -549,11 +551,15 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
                 }
                 assert m == explanation.length;
 
+                //TODO: in progress
+
                 // Create the corresponding factor
                 int factor = MiniSat.makeLiteral(sat.newVariable(new MiniSat.ChannelInfo(null, -1, -1, -1, false)), true);
                 sat.cEnqueue(factor, Reason.r(explanation));
                 sccFactors[scc] = factor;
                 upToDateFactor[scc] = updateKey;
+
+                //System.out.println("propagation call : " + updateKey + " | SCC : " + scc + " | reason size : " + explanation.length); //DEBUG
 
                 reason = Reason.r(MiniSat.neg(factor));
 

@@ -27,7 +27,7 @@ public class NQueenGlobal extends AbstractNQueen {
 
     @Override
     public void buildModel() {
-        model = new Model("NQueen", Settings.init().setLCG(false));
+        model = new Model("NQueen", Settings.init().setLCG(true));
 //        model = new Model("NQueen");
         vars = new IntVar[n];
         IntVar[] diag1 = new IntVar[n];
