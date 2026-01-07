@@ -85,6 +85,9 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
 
     private final boolean allEnum;
 
+    private final boolean bicliqueFactorisation;
+    private long explanationTime;
+
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
@@ -151,6 +154,9 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
             }
         }
         this.allEnum = temp;
+        //TODO
+        this.bicliqueFactorisation = true;
+        this.explanationTime = 0;
     }
 
     private void refineUniverse(TrackingList valueUniverse) { // The tracking list initially contains an interval, so we refine it by removing the values that are present in no variables' domain (which may contain holes)
@@ -176,6 +182,12 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
         findMaximumMatching();
         filter();
         updateDynamicStructuresEnding();
+
+        //TODO: explanation time
+//        if (pruned) {
+//            System.out.println(aCause.getId() + " Cumulative explanation time in nanoseconds : " + explanationTime);
+//        }
+
         return this.pruned;
     }
 
@@ -260,6 +272,9 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
     }
 
     public void generateFailureExplanation() throws ContradictionException {
+        //TODO: explanation time
+        long startTime = System.nanoTime();
+
         Reason reason = Reason.undef();
         if (aCause.lcg()) {
             int nVars = tailBFS;
@@ -288,6 +303,10 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
             reason = Reason.r(explanation);
         }
         valuesDynamic.refill(); // valuesDynamic is a backtrackable TrackingList, we must refill it to avoid breaking its structure when backtracking
+
+        //TODO: explanation time
+        explanationTime += System.nanoTime() - startTime;
+
         aCause.fails(reason);
     }
 
@@ -507,6 +526,9 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
     }
 
     public void generatePruningExplanation(int sourceVar, int destinationVal) throws ContradictionException {
+        //TODO: explanation time
+        long startTime = System.nanoTime();
+
         Reason reason = Reason.undef();
         if (vars[sourceVar].getModel().getSolver().isLCG()) {
             int minValSCC = maxValue;
@@ -516,10 +538,10 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
                 int matchedVar = matching.getMatchV(destinationVal);
                 assert vars[matchedVar].isInstantiatedTo(destinationVal);
                 reason = Reason.r(vars[matchedVar].getValLit());
-            } else if (factorExists(scc)) { // Check whether the explanation related to the destination SCC has already been computed
+            } else if (bicliqueFactorisation && factorExists(scc)) { // Check whether the explanation related to the destination SCC has already been computed
                 reason = Reason.r(MiniSat.neg(sccFactors[scc]));
                 //TODO
-                //System.out.println("propagation call : " + updateKey + " | SCC : " + scc); //DEBUG
+//                System.out.println("propagation call : " + updateKey + " | SCC : " + scc); //DEBUG
             } else {
                 // Get the minimum and maximum values of the destination SCC
                 for (int i = getStartPositionSCC(scc); i < getEndPositionSCC(scc); i++) {
@@ -551,20 +573,23 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
                 }
                 assert m == explanation.length;
 
-                //TODO: in progress
-
                 // Create the corresponding factor
-                int factor = MiniSat.makeLiteral(sat.newVariable(new MiniSat.ChannelInfo(null, -1, -1, -1, false)), true);
-                sat.cEnqueue(factor, Reason.r(explanation));
-                sccFactors[scc] = factor;
-                upToDateFactor[scc] = updateKey;
+                if (bicliqueFactorisation) {
+                    int factor = MiniSat.makeLiteral(sat.newVariable(new MiniSat.ChannelInfo(null, -1, -1, -1, false)), true);
+                    sat.cEnqueue(factor, Reason.r(explanation));
+                    sccFactors[scc] = factor;
+                    upToDateFactor[scc] = updateKey;
+                    reason = Reason.r(MiniSat.neg(factor));
+                } else {
+                    reason = Reason.r(explanation);
+                }
 
-                //System.out.println("propagation call : " + updateKey + " | SCC : " + scc + " | reason size : " + explanation.length); //DEBUG
-
-                reason = Reason.r(MiniSat.neg(factor));
-
+//                System.out.println("propagation call : " + updateKey + " | SCC : " + scc + " | reason size : " + explanation.length); //DEBUG
             }
         }
+        //TODO: explanation time
+        explanationTime += System.nanoTime() - startTime;
+
         vars[sourceVar].removeValue(destinationVal, aCause, reason);
     }
 
