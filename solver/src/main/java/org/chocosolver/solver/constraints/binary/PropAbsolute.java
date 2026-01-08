@@ -43,7 +43,7 @@ public class PropAbsolute extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        if (isUnfixedEnumerated(vars[0]) && isUnfixedEnumerated(vars[1])) {
+        if (vars[0].hasEnumeratedDomain() && vars[1].hasEnumeratedDomain()) {
             return IntEventType.all();
         } else {
             return IntEventType.boundAndInst();
