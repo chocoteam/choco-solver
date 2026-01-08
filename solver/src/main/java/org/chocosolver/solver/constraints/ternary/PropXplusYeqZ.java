@@ -18,6 +18,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
+import java.util.Arrays;
+
 /**
  * A propagator to ensure that X + Y = Z holds, where X, Y and Z are IntVar.
  * This propagator ensures AC when all variables are enumerated, BC otherwise.
@@ -32,9 +34,10 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
 
     private static final int THRESHOLD = 300;
     /**
-     * Set to <tt>true</tt> if X, Y and Z are bounded
+     * Set to <tt>true</tt> if at least two variables from X, Y and Z are either fixed or bounded
+     * Or if LCG is used, as AC is not explained yet
      */
-    private final boolean allbounded;
+    private final boolean isRangeOnly;
     /**
      * Temporary structure to ease filtering
      */
@@ -49,7 +52,9 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
      */
     public PropXplusYeqZ(IntVar X, IntVar Y, IntVar Z) {
         super(new IntVar[]{X, Y, Z}, PropagatorPriority.TERNARY, false);
-        allbounded = (!X.hasEnumeratedDomain() & !Y.hasEnumeratedDomain() & !Z.hasEnumeratedDomain());
+        isRangeOnly = lcg() || Arrays.stream(vars)
+                .filter(v -> v.isInstantiated() || !v.hasEnumeratedDomain())
+                .count() >= 2;
         set = new IntIterableRangeSet();
     }
 
@@ -77,8 +82,7 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
                 lcg() ? Reason.r(vars[0].getMinLit(), vars[1].getMinLit()) : Reason.undef());
         change |= vars[2].updateUpperBound(ub, this,
                 lcg() ? Reason.r(vars[0].getMaxLit(), vars[1].getMaxLit()) : Reason.undef());
-        if (!allbounded) {
-            if ((long) vars[0].getDomainSize() * vars[1].getDomainSize() > THRESHOLD || lcg()) return change;
+        if (isAC(vars[0], vars[1])) {
             set.clear();
             int ub1 = vars[0].getUB();
             int ub2 = vars[1].getUB();
@@ -115,8 +119,7 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
                 lcg() ? Reason.r(vars[2].getMinLit(), vars[vo].getMaxLit()) : Reason.undef());
         change |= vars[vr].updateUpperBound(ub, this,
                 lcg() ? Reason.r(vars[2].getMaxLit(), vars[vo].getMinLit()) : Reason.undef());
-        if (!allbounded) {
-            if ((long) vars[2].getDomainSize() * vars[vo].getDomainSize() > THRESHOLD || lcg()) return change;
+        if (isAC(vars[2], vars[vo])) {
             set.clear();
             int ub1 = vars[2].getUB();
             int ub2 = vars[vo].getUB();
@@ -136,6 +139,10 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
             vars[vr].removeAllValuesBut(set, this); // todo explain
         }
         return change;
+    }
+
+    private boolean isAC(IntVar v1, IntVar v2) {
+        return !isRangeOnly && (long) v1.getDomainSize() * v2.getDomainSize() < THRESHOLD;
     }
 
     @Override
