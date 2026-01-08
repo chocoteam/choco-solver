@@ -69,12 +69,12 @@ public final class PropCompactTableNeg extends PropCompactTable {
     @Override
     protected void filterDomains() throws ContradictionException {
         long count = currTable.nb1s();
-        if (count == 0) {
+        if (count == 0) { // Invariant 8.4
             setPassive();
         } else {
             // check for views
             long initThreshold = VariableUtils.domainCardinality(vars);
-            if (uniqueness && count == initThreshold) {
+            if (invariant && count == initThreshold) { // Invariant 8.4
                 fails();
             }
             currTable.clearMask();

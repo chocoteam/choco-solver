@@ -126,6 +126,7 @@ public class PropCompactTable extends Propagator<IntVar> {
     protected IIntDeltaMonitor[] monitors;
     protected final UnaryIntProcedure<Integer> onValRem;
     protected final boolean uniqueness;
+    protected final boolean invariant;
     //***********************************************************************************
     // CONSTRUCTOR
     //***********************************************************************************
@@ -170,6 +171,7 @@ public class PropCompactTable extends Propagator<IntVar> {
         }
         onValRem = makeProcedure();
         uniqueness = uniqueness(vars);
+        invariant = uniqueness && !tuples.allowUniversalValue();
     }
 
     //***********************************************************************************
@@ -276,12 +278,11 @@ public class PropCompactTable extends Propagator<IntVar> {
 
     protected void filterDomains() throws ContradictionException {
         long count = currTable.nb1s();
-        if (count == 0) { // Invariant 3.4
+        if (count == 0) { // Invariant 3.4  (Invariant 7.8 for CT*)
             fails();
         } else {
             // --> does not work with views
-            long initthreshold = VariableUtils.domainCardinality(vars);
-            if (uniqueness && count == initthreshold) { // Invariant 3.3
+            if (invariant && count == VariableUtils.domainCardinality(vars)) { // Invariant 3.3, only for positive table
                 setPassive();
                 return;
             }
