@@ -53,7 +53,7 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
     public PropXplusYeqZ(IntVar X, IntVar Y, IntVar Z) {
         super(new IntVar[]{X, Y, Z}, PropagatorPriority.TERNARY, false);
         isRangeOnly = lcg() || Arrays.stream(vars)
-                .filter(v -> v.isInstantiated() || !v.hasEnumeratedDomain())
+                .filter(v -> !v.hasUnfixedEnumeratedDomain())
                 .count() >= 2;
         set = new IntIterableRangeSet();
     }

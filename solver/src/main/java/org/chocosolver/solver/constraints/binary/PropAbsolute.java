@@ -38,12 +38,12 @@ public class PropAbsolute extends Propagator<IntVar> {
         super(ArrayUtils.toArray(X, Y), PropagatorPriority.BINARY, true);
         this.X = vars[0];
         this.Y = vars[1];
-        bothEnumerated = X.hasEnumeratedDomain() && Y.hasEnumeratedDomain();
+        bothEnumerated = X.hasUnfixedEnumeratedDomain() && Y.hasUnfixedEnumeratedDomain();
     }
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        if (vars[0].hasEnumeratedDomain() && vars[1].hasEnumeratedDomain()) {
+        if (isUnfixedEnumerated(vars[0]) && isUnfixedEnumerated(vars[1])) {
             return IntEventType.all();
         } else {
             return IntEventType.boundAndInst();
@@ -96,13 +96,13 @@ public class PropAbsolute extends Propagator<IntVar> {
             if (varIdx == 1) {
                 X.instantiateTo(Math.abs(Y.getValue()), this, lcg() ? Reason.r(Y.getValLit()) : Reason.undef());
                 setPassive();
-            } else if (Y.hasEnumeratedDomain()) {
+            } else if (Y.hasUnfixedEnumeratedDomain()) {
                 int val = X.getValue();
                 Y.updateLowerBound(-val, this, lcg() ? Reason.r(X.getValLit()) : Reason.undef());
                 Y.updateUpperBound(val, this, lcg() ? Reason.r(X.getValLit()) : Reason.undef());
                 val--;
-                for (int v = -val; v <= val; v = Y.nextValue(v)) {
-                    Y.removeValue(v, this, lcg() ? Reason.r(X.getValLit()) : Reason.undef());
+                if (val >= 0) {
+                    Y.removeInterval(-val, val, lcg() ? Reason.r(X.getValLit()) : Reason.undef());
                 }
                 setPassive();
             } else {
@@ -124,10 +124,9 @@ public class PropAbsolute extends Propagator<IntVar> {
         int min = X.getLB();
         Y.updateLowerBound(-max, this, lcg() ? Reason.r(X.getMaxLit()) : Reason.undef());
         Y.updateUpperBound(max, this, lcg() ? Reason.r(X.getMaxLit()) : Reason.undef());
-        for (int v = 1 - min; v <= min - 1; v = Y.nextValue(v)) {
-            Y.removeValue(v, this, lcg() ? Reason.r(X.getMinLit()) : Reason.undef());
+        if (1 - min <= min -1) {
+            Y.removeInterval(1 - min, min - 1, lcg() ? Reason.r(X.getMinLit()) : Reason.undef());
         }
-        //if (!lcg()) Y.removeInterval(1 - min, min - 1, this);
         /////////////////////////////////////////////////
         int prevLB = X.getLB();
         int prevUB = X.getUB();
