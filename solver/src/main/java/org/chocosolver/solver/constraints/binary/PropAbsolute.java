@@ -102,7 +102,7 @@ public class PropAbsolute extends Propagator<IntVar> {
                 Y.updateUpperBound(val, this, lcg() ? Reason.r(X.getValLit()) : Reason.undef());
                 val--;
                 if (val >= 0) {
-                    Y.removeInterval(-val, val, lcg() ? Reason.r(X.getValLit()) : Reason.undef());
+                    removeInterval(Y, -val, val, lcg() ? Reason.r(X.getValLit()) : Reason.undef());
                 }
                 setPassive();
             } else {
@@ -125,7 +125,7 @@ public class PropAbsolute extends Propagator<IntVar> {
         Y.updateLowerBound(-max, this, lcg() ? Reason.r(X.getMaxLit()) : Reason.undef());
         Y.updateUpperBound(max, this, lcg() ? Reason.r(X.getMaxLit()) : Reason.undef());
         if (1 - min <= min -1) {
-            Y.removeInterval(1 - min, min - 1, lcg() ? Reason.r(X.getMinLit()) : Reason.undef());
+            removeInterval(Y, 1 - min, min - 1, lcg() ? Reason.r(X.getMinLit()) : Reason.undef());
         }
         /////////////////////////////////////////////////
         int prevLB = X.getLB();
@@ -177,4 +177,13 @@ public class PropAbsolute extends Propagator<IntVar> {
     // EXPLANATIONS
     //***********************************************************************************
 
+    private void removeInterval(IntVar intVar, int fromIncl, int toIncl, Reason reason) throws ContradictionException {
+        if (!lcg()) {
+            intVar.removeInterval(fromIncl, toIncl, this);
+        } else {
+            for (int i=fromIncl; i<=toIncl; i++) {
+                intVar.removeValue(i, this, reason);
+            }
+        }
+    }
 }
