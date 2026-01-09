@@ -103,6 +103,7 @@ public class PerformanceTest {
         Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), solutions, "Unexpected number of solutions");
         Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), nodes, "Unexpected number of nodes");
         Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), failures, "Unexpected number of failures");
+        System.gc();
     }
 
     @DataProvider()
@@ -135,6 +136,7 @@ public class PerformanceTest {
         Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), solutions, "Unexpected number of solutions");
         Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), nodes, "Unexpected number of nodes");
         Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), failures, "Unexpected number of failures");
+        System.gc();
     }
 
 
@@ -163,6 +165,7 @@ public class PerformanceTest {
         Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), 16582, "Unexpected number of nodes");
         Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), 16581, "Unexpected number of failures");
         Assert.assertEquals(fzn.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), 6, "Unexpected best solution");
+        System.gc();
     }
 
     @Test(groups = "mzn", timeOut = 240_000, priority = 2)
@@ -189,6 +192,7 @@ public class PerformanceTest {
         Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), 2_174_212, "Unexpected number of nodes");
         Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), 2_174_147, "Unexpected number of failures");
         Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), 33, "Unexpected number of solutions");
+        System.gc();
     }
 
     @Test(groups = "mzn", timeOut = 240_000, priority = 2)
@@ -215,6 +219,7 @@ public class PerformanceTest {
         Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), 35, "Unexpected number of solutions");
         Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), 822_035, "Unexpected number of nodes");
         Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), 821_966, "Unexpected number of failures");
+        System.gc();
     }
 
     @Test(groups = "mzn", timeOut = 60_000, priority = 1)
@@ -242,6 +247,7 @@ public class PerformanceTest {
         Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), 2, "Unexpected number of solutions");
         Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), 90_150, "Unexpected number of nodes");
         Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), 90_147, "Unexpected number of failures");
+        System.gc();
     }
 
     @Test(groups = "mzn", timeOut = 60_000, priority = 1)
@@ -269,6 +275,7 @@ public class PerformanceTest {
         Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), 22, "Unexpected number of solutions");
         Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), 3725, "Unexpected number of nodes");
         Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), 3523, "Unexpected number of failures");
+        System.gc();
     }
 
     @DataProvider()
@@ -305,5 +312,6 @@ public class PerformanceTest {
         Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), solutions, "Unexpected number of solutions");
         Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), nodes, "Unexpected number of nodes");
         Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), failures, "Unexpected number of failures");
+        System.gc();
     }
 }
