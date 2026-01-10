@@ -155,7 +155,7 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
         }
         this.allEnum = temp;
         //TODO
-        this.bicliqueFactorisation = true;
+        this.bicliqueFactorisation = Settings.PARAM_BICLIQUE_FACTORISATION;
         this.explanationTime = 0;
     }
 
@@ -575,7 +575,7 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
 
                 // Create the corresponding factor
                 if (bicliqueFactorisation) {
-                    int factor = MiniSat.makeLiteral(sat.newVariable(new MiniSat.ChannelInfo(null, -1, -1, -1, false)), true);
+                    int factor = sat.newTemporaryVariable();
                     sat.cEnqueue(factor, Reason.r(explanation));
                     sccFactors[scc] = factor;
                     upToDateFactor[scc] = updateKey;

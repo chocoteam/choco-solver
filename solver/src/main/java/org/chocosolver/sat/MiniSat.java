@@ -12,6 +12,9 @@ package org.chocosolver.sat;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.stack.TIntStack;
+import gnu.trove.stack.array.TIntArrayStack;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.variables.impl.LitVar;
 
 import java.util.ArrayList;
@@ -49,6 +52,7 @@ public class MiniSat implements SatFactory {
     public static final int lTrue = 0b01;
     public static final int lFalse = 0b10;
     public static final int lUndef = 0b11;
+    public static final int TMP_VAR_TYPE = 2;
     // undefined clause
     protected static ThreadLocal<Integer> clauseCounter = ThreadLocal.withInitial(() -> 0);
     public static final Clause C_Undef = Clause.undef();
@@ -81,7 +85,7 @@ public class MiniSat implements SatFactory {
     // Number of variables
     int num_vars_;
     int rootlvl = 0;
-    private final int ccmin_mode = 0; // Controls conflict clause minimization (0=none, 1=basic, 2=deep)
+    private final int ccmin_mode = Settings.PARAM_CLAUSE_MINIMISATION; // Controls conflict clause minimization (0=none, 1=local, 2=recursive)
     private double cla_inc = 1;
     private final double clause_decay = 0.999;
     int learnt_first_removable = 0; // index of first removable learnt clause (related to #reduceDB only).
@@ -99,9 +103,13 @@ public class MiniSat implements SatFactory {
     private int clauses_literals;
     private int learnts_literals;
     double max_learnts;
-    final BitSet seen = new BitSet();
+    private boolean[] seen = new boolean[1 << 10];
     private final TIntArrayList analyze_toclear = new TIntArrayList();
+    private final TIntStack analyze_stack = new TIntArrayStack();
     private final TIntArrayList temporary_add_vector_ = new TIntArrayList();
+    public final TIntStack temporary_variables = new TIntArrayStack();
+    private int[] minRank = new int[ccmin_mode == 2 ? 1 << 8 : 0];
+    private int[] marked = new int[ccmin_mode > 0 ? 1 << 8 : 0];
 
     /**
      * Create a new instance of MiniSat solver.
@@ -118,16 +126,21 @@ public class MiniSat implements SatFactory {
             assignment_.set(v, makeBoolean(sgn(l)));
             vardata.set(v, new VarData(R_Undef, trailMarker(), trail_.size()));
             trail_.add(l);
-            seen.set(v);
+            //seen.set(v);
+            seen[v] = true;
             // false literal
             v = newVariable();
             l = makeLiteral(v, false);
             assignment_.set(v, makeBoolean(sgn(l)));
             vardata.set(v, new VarData(R_Undef, trailMarker(), trail_.size()));
             trail_.add(l);
-            seen.set(v);
+            //seen.set(v);
+            seen[v] = true;
         }
         clauseCounter.set(2);
+        if (ccmin_mode > 0) {
+            marked[0] = 1; // int at position 0 indicates the current local minimisation round
+        }
     }
 
     @Override
@@ -156,8 +169,30 @@ public class MiniSat implements SatFactory {
         assignment_.add(lUndef);
         vardata.add(VD_Undef);
         cinfo.add(ci);
-        seen.clear(v);
+        //seen.clear(v);
+        if (seen.length <= v) {
+            boolean[] tmp = seen;
+            seen = new boolean[(int) (tmp.length * 1.5)];
+            System.arraycopy(tmp, 0, seen, 0, tmp.length);
+        }
+        seen[v] = false;
         return v;
+    }
+
+    /**
+     * Reuse or create a temporary variable.
+     * A temporary variable is released upon backtrack.
+     *
+     * @return a variable
+     */
+    public int newTemporaryVariable() {
+        int var;
+        if (temporary_variables.size() > 0) {
+            var = temporary_variables.pop();
+        } else {
+            var = newVariable(new MiniSat.ChannelInfo(null, TMP_VAR_TYPE, -1, -1, false));
+        }
+        return MiniSat.makeLiteral(var, true);
     }
 
 
@@ -305,6 +340,10 @@ public class MiniSat implements SatFactory {
             for (int c = trail_.size() - 1; c >= trail_markers_.get(level); c--) {
                 int x = var(trail_.get(c));
                 assignment_.set(x, lUndef);
+                if (cinfo.get(x).cons_type == TMP_VAR_TYPE) {
+                    // recycle
+                    temporary_variables.push(x);
+                }
                 if (DEBUG > 0) {
                     if (DEBUG > 1)
                         System.out.printf("Unfix %s\n", printLit(trail_.get(c)));
@@ -334,7 +373,8 @@ public class MiniSat implements SatFactory {
         //todo simplifydb?
         for (int i = 0; i < trail_.size(); i++) {
             int x = var(trail_.get(i));
-            seen.set(x);
+            //seen.set(x);
+            seen[x] = true;
         }
         max_learnts = nClauses() * learntsize_factor;
         learntsize_adjust_confl = 100;
@@ -627,56 +667,189 @@ public class MiniSat implements SatFactory {
     public int analyze(Clause confl, TIntArrayList out_learnt) {
         int pathC = 0;
         int p = litUndef;
-
         // Generate conflict clause:
-        //
         analyseConflict(confl, out_learnt, p, pathC);
         replaceUnreliableLits(out_learnt);
-        // Simplify conflict clause:
-        //
         int i, j;
+        if (DEBUG > 1) System.out.printf("Before minimisation (%d) : %s\n", ccmin_mode, out_learnt);
+        max_literals += out_learnt.size();
+        // Simplify conflict clause:
         analyze_toclear.resetQuick();
         analyze_toclear.addAll(out_learnt);
-        /*if (ccmin_mode == 2) {
-            uint32_t abstract_level = 0;
-            for (i = 1; i < out_learnt.size(); i++)
-                abstract_level |= abstractLevel(var(out_learnt.get(i))); // (maintain an abstraction of levels involved in conflict)
+        if (ccmin_mode == 2) {
+            j = recursiveMinimisation(out_learnt);
+            out_learnt.remove(j, out_learnt.size() - j);
+        } else {
+            if (ccmin_mode == 1) {
+                j = localMinimisation(out_learnt);
+                out_learnt.remove(j, out_learnt.size() - j);
+            }
+        }
+        for (int k = 0; k < analyze_toclear.size(); k++) {
+            seen[var(analyze_toclear.get(k))] = false;    // ('seen[]' is now cleared)
+        }
+        tot_literals += out_learnt.size();
+        // Find correct backtrack level:
+        return getBacktrackLevel(out_learnt);
+    }
 
-            for (i = j = 1; i < out_learnt.size(); i++)
-                if (reason(var(out_learnt.get(i))) == CR_Undef || !litRedundant(out_learnt.get(i), abstract_level))
-                    out_learnt.set(j++, out_learnt.get(i));
-
-        } else */
-        if (ccmin_mode == 1) {
-            //todo fix ccmin_mode
-            for (i = j = 1; i < out_learnt.size(); i++) {
-                int x = var(out_learnt.get(i));
-
-                if (getConfl(x) == C_Undef)
-                    out_learnt.set(j++, out_learnt.get(i));
-                else {
-                    Clause c = getConfl(var(out_learnt.get(i)));
-                    for (int k = 1; k < c.size(); k++)
-                        if (!seen.get(var(c._g(k))) && level(var(c._g(k))) > rootlvl) {
-                            out_learnt.set(j++, out_learnt.get(i));
+    private int localMinimisation(TIntArrayList out_learnt) {
+        //System.out.println("Local...");
+        int j;
+        int i;
+        //*
+        if (marked.length < num_vars_) {
+            int tmp = marked[0];
+            marked = new int[num_vars_];
+            marked[0] = tmp;
+        }
+        final int localMinimisationRound = marked[0];
+        marked[0] += 2; // prepare next round
+        assert marked[0] > 0;
+        //noinspection UnnecessaryLocalVariable
+        final int notIncluded = localMinimisationRound;
+        final int included = localMinimisationRound + 1;
+        for (i = j = 1; i < out_learnt.size(); i++) {
+            Clause c = getConfl(out_learnt.get(i));
+            if (c == C_Undef) {
+                if (DEBUG > 1) System.out.printf("keep %s @ %d\n", out_learnt.get(i), j);
+                out_learnt.set(j++, out_learnt.get(i));
+            } else {
+                boolean keep = false;
+                top:
+                for (int k = 1; k < c.size(); k++) {
+                    int q = var(c._g(k));
+                    // first test the case of factor
+                    if (cinfo.get(q).cons_type == TMP_VAR_TYPE) {
+                        if (marked[q] == notIncluded) {
+                            keep = true;
                             break;
+                        } else if (marked[q] < localMinimisationRound) { // not marked
+                            Clause cf = getConfl(c._g(k));
+                            for (int l = 1; l < cf.size(); l++) {
+                                int r = var(cf._g(l));
+                                if (!seen[r] && level(r) > rootlvl) {
+                                    marked[q] = notIncluded;
+                                    keep = true;
+                                    break top;
+                                }
+                            }
+                            marked[q] = included;
                         }
+                    } else if (!seen[q] && level(q) > rootlvl) { // or root_level ?
+                        keep = true;
+                        break;
+                    }
+                }
+                if (keep) {
+                    out_learnt.set(j++, out_learnt.get(i));
+                    //if (DEBUG > 1)
+                        //System.out.printf("keep %s\n", out_learnt.get(i));
+                } else {
+                    //if (DEBUG > 1)
+                        //System.out.printf("ignore %s\n", out_learnt.get(i));
                 }
             }
-        } else
-            j = out_learnt.size();
+        }
+        return j;
+    }
 
-        max_literals += out_learnt.size();
-        out_learnt.remove(j, out_learnt.size() - j);
-        tot_literals += out_learnt.size();
+    private int recursiveMinimisation(TIntArrayList out_learnt) {
+        //System.out.println("Recursive...");
+        /*
+        int i, j;
+        BitSet abstract_level = new BitSet();
+        for (i = 1; i < out_learnt.size(); i++) {
+            int v = var(out_learnt.get(i));
+            abstract_level.set(level(v));
+        }
+        for (i = j = 1; i < out_learnt.size(); i++)
+            if (reason(var(out_learnt.get(i))) == C_Undef || !litRedundant(out_learnt.get(i), abstract_level)){
+                System.out.printf("keep %s\n", out_learnt.get(i));
+                out_learnt.set(j++, out_learnt.get(i));
+            }else{
+                System.out.printf("ignore %s\n", out_learnt.get(i));
+            }
+        return j;
+         /*/
+        int i;
+        int j;
+        // adapt size if needed
+        if (minRank.length < trailMarker()) {
+            minRank = new int[(int) (trailMarker() * 1.2)];
+        }
+        if (marked.length < num_vars_) {
+            int tmp = marked[0];
+            marked = new int[num_vars_];
+            marked[0] = tmp;
+        }
+        final int recursiveMinimisationRound = marked[0];
+        marked[0] += 3; // prepare next round
+        assert marked[0] > 0;
+        final int visited = recursiveMinimisationRound;
+        final int notDominated = recursiveMinimisationRound + 1;
+        final int dominated = recursiveMinimisationRound + 2;
+        // first, reset minRank (only concerned levels)
+        for (i = 1; i < out_learnt.size(); i++) {
+            int v = var(out_learnt.get(i));
+            minRank[level(v)] = Integer.MAX_VALUE;
+        }
+        // then compute levels and minranks
+        BitSet abstract_level = new BitSet();
+        for (i = 1; i < out_learnt.size(); i++) {
+            int v = var(out_learnt.get(i));
+            abstract_level.set(level(v)); // (maintain an abstraction of levels involved in conflict)
+            minRank[level(v)] = Math.min(minRank[level(v)], pos(v));
+            marked[v] = visited;
+            seen[v] = false;
+        }
 
-        // Find correct backtrack level:
-        //
-        int out_btlevel = getBacktrackLevel(out_learnt);
+        for (i = j = 1; i < out_learnt.size(); i++)
+            if (reason(var(out_learnt.get(i))) == C_Undef
+                    || !isDominated(out_learnt.get(i), out_learnt.get(i), abstract_level, minRank, marked, visited, dominated, notDominated)) {
+                //if (DEBUG > 1)
+                //System.out.printf("keep %s\n", out_learnt.get(i));
+                out_learnt.set(j++, out_learnt.get(i));
+            } else {
+                //if (DEBUG > 1)
+                //System.out.printf("ignore %s\n", out_learnt.get(i));
+            }
+        return j;
+        //*/
+    }
 
-        for (j = 0; j < analyze_toclear.size(); j++)
-            seen.clear(var(analyze_toclear.get(j)));    // ('seen[]' is now cleared)
-        return out_btlevel;
+    /* Check if 'p' can be removed. 'abstract_levels' is used to abort early if the algorithm is
+     * visiting literals at levels that cannot be removed later.
+     */
+    boolean litRedundant(int p, BitSet abstract_levels) {
+        analyze_stack.clear();
+        analyze_stack.push(p);
+        int top = analyze_toclear.size();
+        while (analyze_stack.size() > 0) {
+            assert (reason(var(analyze_stack.peek())) != C_Undef);
+            Clause c = getConfl(analyze_stack.peek());
+            analyze_stack.pop();
+
+            for (int i = 1; i < c.size(); i++) {
+                p = c._g(i);
+                if (!seen[var(p)] && level(var(p)) > rootlvl) {
+                    if (reason(var(p)) != C_Undef
+                            && abstract_levels.get(level(var(p)))) {
+                        seen[var(p)] = true;
+                        analyze_stack.push(p);
+                        analyze_toclear.add(p);
+                    } else {
+                        for (int j = top; j < analyze_toclear.size(); j++)
+                            seen[var(analyze_toclear.get(j))] = false;
+
+                        //analyze_toclear.shrink(analyze_toclear.size() - top);
+                        analyze_toclear.remove(top, analyze_toclear.size() - top);
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     private void analyseConflict(Clause confl, TIntList out_learnt, int p, int pathC) {
@@ -685,49 +858,128 @@ public class MiniSat implements SatFactory {
 
         do {
             assert (confl != C_Undef); // (otherwise should be UIP)
-            Clause c = confl;
-
-            if (DEBUG > 0) {
-                if (p != litUndef) {
-                    c._s(0, p);
-                }
-                if (DEBUG > 1)
-                    System.out.printf("%s\n", c.toString(this));
-                else System.out.printf("%s\n", c.toString());
-            }
-
-            if (c.learnt())
-                claBumpActivity(c);
-
-            for (int j = (p == litUndef) ? 0 : 1; j < c.size(); j++) {
-                int q = c._g(j);
-                int x = var(q);
-                if (!seen.get(x) && level(x) > rootlvl) {
-                    assert p == litUndef || pos(var(p)) > pos(x) : "chronological inconsistency :(" + printLit(p) + " @ " + pos(var(p)) +
-                            ") is explained by an older event (" + printLit(x) + " @ " + pos(x) + ") " + c;
-                    varBumpActivity(x);
-                    seen.set(x);
-                    if (DEBUG > 1) System.out.printf("mark %d\n", x);
-                    if (level(x) >= trailMarker()) {
-                        pathC++;
-                        if (DEBUG > 1) System.out.printf("path++ (%d)\n", pathC);
-                    } else {
-                        out_learnt.add(q);
-                        if (DEBUG > 1) System.out.printf("out %d\n", q);
-                    }
-                }
-            }
+            pathC = updateNogood(confl, out_learnt, p, pathC);
             // Select next clause to look at:
             //noinspection StatementWithEmptyBody
-            while (!seen.get(var(trail_.get(index--)))) ;
+            while (!seen[var(trail_.get(index--))]) ;
             p = trail_.get(index + 1);
             confl = getConfl(p);
-            seen.clear(var(p));
+            seen[var(p)] = false;
             if (DEBUG > 1) System.out.printf("clear %d l:%d\n", var(p), p);
             pathC--;
             if (DEBUG > 1) System.out.printf("path-- (%d)\n", pathC);
         } while (pathC > 0 || !cinfo.get(var(p)).reliable);
         out_learnt.set(0, neg(p));
+    }
+
+    private int updateNogood(Clause c, TIntList out_learnt, int p, int pathC) {
+        if (DEBUG > 0) {
+            if (p != litUndef) {
+                c._s(0, p);
+            }
+            if (DEBUG > 1)
+                System.out.printf("%s\n", c.toString(this));
+            else System.out.printf("%s\n", c.toString());
+        }
+
+        if (c.learnt())
+            claBumpActivity(c);
+
+        for (int j = (p == litUndef) ? 0 : 1; j < c.size(); j++) {
+            int q = c._g(j);
+            int x = var(q);
+            if (!seen[x] && level(x) > rootlvl) {
+                assert p == litUndef || pos(var(p)) > pos(x) : "chronological inconsistency :(" + printLit(p) + " @ " + pos(var(p)) +
+                        ") is explained by an older event (" + printLit(x) + " @ " + pos(x) + ") " + c;
+                varBumpActivity(x);
+                seen[x] = true;
+                if (DEBUG > 1) System.out.printf("mark %d\n", x);
+                if (level(x) >= trailMarker()) {
+                    pathC++;
+                    if (DEBUG > 1) System.out.printf("path++ (%d)\n", pathC);
+                    if (/*!cinfo.get(x).reliable && */cinfo.get(x).cons_type == TMP_VAR_TYPE) {
+                        pathC = updateNogood(getConfl(q), out_learnt, q, pathC);
+                    }
+                } else {
+                    out_learnt.add(q);
+                    if (DEBUG > 1) System.out.printf("out %d\n", q);
+                }
+            }
+        }
+        return pathC;
+    }
+
+    /**
+     * Check if 'p' can be removed. 'abstract_levels' is used to abort early if the algorithm is
+     * visiting literals at levels that cannot be removed later.
+     */
+//    boolean isDominated(int p, BitSet abstract_levels, int[] minRank, int[] marked, int visited, int dominated, int notDominated) {
+//        analyze_stack.clear();
+//        analyze_stack.push(p);
+//        marked[var(p)] = visited - 1; // init the loop
+//        while (analyze_stack.size() > 0) {
+//            int q = analyze_stack.pop();
+//            int v = var(q);
+//            //assert (reason(v) != C_Undef);
+//
+//            if (marked[v] >= visited) continue;
+//            marked[v] = visited;
+//
+//            /*if ((seen[v] && level(v) > 0) || (marked[v] == dominated)) {
+//                // return true
+//            } else if (marked[v] == notDominated) {
+//                return false;
+//            } else */
+//            if (marked[v] == notDominated
+//                    || reason(v) == C_Undef
+//                    || !abstract_levels.get(level(v))
+//                    || pos(v) < minRank[level(v)]) {
+//                marked[v] = notDominated;
+//                while(analyze_stack.size() > 0){
+//
+//                }
+//                return false;
+//            } else {
+//                Clause c = getConfl(q);
+//                for (int i = 1; i < c.size(); i++) {
+//                    int r = c._g(i);
+//                    if (marked[var(r)] < visited && level(v) > 0) {
+//                        analyze_stack.push(c._g(i));
+//                    }
+//                }
+//            }
+//            marked[v] = dominated;
+//        }
+//        return true;
+//    }
+
+    /**
+     * Check if 'p' can be removed. 'abstract_levels' is used to abort early if the algorithm is
+     * visiting literals at levels that cannot be removed later.
+     */
+    boolean isDominated(int p, int root, BitSet abstract_levels, int[] minRank, int[] marked, int visited, int dominated, int notDominated) {
+        int v = var(p);
+        if ((p != root && marked[v] == visited && level(v) > rootlvl) || (marked[v] == dominated)) {
+            return true;
+        } else if (marked[v] == notDominated
+                || reason(v) == C_Undef
+                || !abstract_levels.get(level(v))
+                || pos(v) < minRank[level(v)]) {
+            marked[v] = notDominated;
+            return false;
+        } else {
+            Clause c = getConfl(p);
+            for (int i = 1; i < c.size(); i++) {
+                int r = c._g(i);
+                if (level(var(r)) > rootlvl
+                        && !isDominated(r, root, abstract_levels, minRank, marked, visited, dominated, notDominated)) {
+                    marked[var(r)] = notDominated;
+                    return false;
+                }
+            }
+            marked[v] = dominated;
+            return true;
+        }
     }
 
     /**
@@ -746,24 +998,30 @@ public class MiniSat implements SatFactory {
             if (DEBUG > 0) {
                 System.out.printf("replacing %s in %s\n", p, out_learnt);
             }
-            Clause c = getConfl(neg(p));
-            temporary_add_vector_.add(p);
-            int at = out_learnt.size() - 1;
-            out_learnt.set(i, out_learnt.get(at));
-            out_learnt.removeAt(at);
-            i--;
-            for (int j = 1; j < c.size(); j++) {
-                int q = c._g(j);
-                if (!seen.get(var(q))) {
-                    seen.set(var(q));
-                    out_learnt.add(q);
-                }
-            }
+            i = replaceUnreliableLit(out_learnt, p, i);
         }
         while (!temporary_add_vector_.isEmpty()) {
-            seen.clear(var(temporary_add_vector_.removeAt(temporary_add_vector_.size() - 1)));
+            seen[var(temporary_add_vector_.removeAt(temporary_add_vector_.size() - 1))] = false;
         }
     }
+
+    private int replaceUnreliableLit(TIntList out_learnt, int p, int i) {
+        Clause c = getConfl(neg(p));
+        temporary_add_vector_.add(p);
+        int at = out_learnt.size() - 1;
+        out_learnt.set(i, out_learnt.get(at));
+        out_learnt.removeAt(at);
+        i--;
+        for (int j = 1; j < c.size(); j++) {
+            int q = c._g(j);
+            if (!seen[var(q)]) {
+                seen[var(q)] = true;
+                out_learnt.add(q);
+            }
+        }
+        return i;
+    }
+
 
     private int getBacktrackLevel(TIntList out_learnt) {
         int i;
@@ -871,7 +1129,7 @@ public class MiniSat implements SatFactory {
         return vardata.get(x).cr;
     }
 
-    int level(int x) {
+    public int level(int x) {
         return vardata.get(x).level;
     }
 
