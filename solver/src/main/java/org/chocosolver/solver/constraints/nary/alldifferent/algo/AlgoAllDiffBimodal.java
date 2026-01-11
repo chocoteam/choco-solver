@@ -13,6 +13,7 @@ import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.sat.MiniSat;
 import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.alldifferent.AllDifferent;
 import org.chocosolver.solver.exception.ContradictionException;

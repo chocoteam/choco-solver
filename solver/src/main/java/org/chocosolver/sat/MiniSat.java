@@ -108,8 +108,12 @@ public class MiniSat implements SatFactory {
     private final TIntStack analyze_stack = new TIntArrayStack();
     private final TIntArrayList temporary_add_vector_ = new TIntArrayList();
     public final TIntStack temporary_variables = new TIntArrayStack();
+    private int[] levels = new int[ccmin_mode == 2 ? 1 << 8 : 0];
     private int[] minRank = new int[ccmin_mode == 2 ? 1 << 8 : 0];
     private int[] marked = new int[ccmin_mode > 0 ? 1 << 8 : 0];
+    private int minimisationRound;
+    private int dominated;
+    private int notDominated;
 
     /**
      * Create a new instance of MiniSat solver.
@@ -139,7 +143,7 @@ public class MiniSat implements SatFactory {
         }
         clauseCounter.set(2);
         if (ccmin_mode > 0) {
-            marked[0] = 1; // int at position 0 indicates the current local minimisation round
+            marked[0] = 1; // int at position 0 indicates the current minimisation round
         }
     }
 
@@ -774,8 +778,9 @@ public class MiniSat implements SatFactory {
          /*/
         int i;
         int j;
-        // adapt size if needed
+        // adapt size if needed //TODO: change this at some point ?
         if (minRank.length < trailMarker()) {
+            levels = new int[(int) (trailMarker() * 1.2)];
             minRank = new int[(int) (trailMarker() * 1.2)];
         }
         if (marked.length < num_vars_) {
@@ -783,39 +788,86 @@ public class MiniSat implements SatFactory {
             marked = new int[num_vars_];
             marked[0] = tmp;
         }
-        final int recursiveMinimisationRound = marked[0];
-        marked[0] += 3; // prepare next round
         assert marked[0] > 0;
-        final int visited = recursiveMinimisationRound;
-        final int notDominated = recursiveMinimisationRound + 1;
-        final int dominated = recursiveMinimisationRound + 2;
-        // first, reset minRank (only concerned levels)
+        minimisationRound = marked[0];
+//        final int visited = recursiveMinimisationRound;
+        notDominated = marked[0];
+        dominated = marked[0] + 1;
+        marked[0] += 2; // prepare next round
+        // First, reset minRank (only concerned levels)
         for (i = 1; i < out_learnt.size(); i++) {
             int v = var(out_learnt.get(i));
             minRank[level(v)] = Integer.MAX_VALUE;
         }
         // then compute levels and minranks
-        BitSet abstract_level = new BitSet();
+//        BitSet abstract_level = new BitSet();
         for (i = 1; i < out_learnt.size(); i++) {
             int v = var(out_learnt.get(i));
-            abstract_level.set(level(v)); // (maintain an abstraction of levels involved in conflict)
+//            abstract_level.set(level(v)); // (maintain an abstraction of levels involved in conflict)
+            levels[level(v)] = minimisationRound;
             minRank[level(v)] = Math.min(minRank[level(v)], pos(v));
-            marked[v] = visited;
-            seen[v] = false;
+            marked[v] = dominated;
+            seen[v] = false; // Reinitialise 'seen' for the next conflict analysis
         }
 
         for (i = j = 1; i < out_learnt.size(); i++)
+            // Keep the literal in the no-good
             if (reason(var(out_learnt.get(i))) == C_Undef
-                    || !isDominated(out_learnt.get(i), out_learnt.get(i), abstract_level, minRank, marked, visited, dominated, notDominated)) {
+                    || !isDominated(out_learnt.get(i), out_learnt.get(i))) {
                 //if (DEBUG > 1)
                 //System.out.printf("keep %s\n", out_learnt.get(i));
                 out_learnt.set(j++, out_learnt.get(i));
-            } else {
+            }
+            // Remove the literal from the no-good
+            else {
                 //if (DEBUG > 1)
                 //System.out.printf("ignore %s\n", out_learnt.get(i));
             }
         return j;
         //*/
+    }
+
+    /**
+     * Check if 'p' can be removed from the no-good. 'levels' and 'minRank' are used to abort early if the algorithm is
+     * visiting literals that can not be dominated by the no-good.
+     */
+    boolean isDominated(int p, int root) {
+        int v = var(p); //TODO: what is the difference between v and p ?
+        // IF the literal is marked as dominated and is not the root OR the literal is from the initial propagation THEN we may remove the root from the no-good
+        if ((p != root && marked[v] == dominated) || (level(v) == rootlvl)) {
+            return true;
+        }
+        // ELSE-IF the literal is marked as notDominated OR it is a decision OR it can not be dominated by literals from the no-good THEN we must keep the root in the no-good
+        else if (marked[v] == notDominated
+                || reason(v) == C_Undef
+//                || !abstract_levels.get(level(v))
+                || levels[level(v)] != minimisationRound
+                || pos(v) < minRank[level(v)]) {
+            marked[v] = notDominated; // It is not necessary to mark the literal here, this is just an optimisation to avoid testing the other assertions in the future
+            return false;
+        }
+        // ELSE check the predecessors, but ignore the literals from the initial propagation
+        else {
+            Clause c = getConfl(p);
+            for (int i = 1; i < c.size(); i++) {
+                int r = c._g(i);
+                if (level(var(r)) > rootlvl
+                        && !isDominated(r, root)) {
+                    // The root is from the initial no-good, and literals from the initial no-good remain marked as dominated
+                    if (p != root) {
+                        assert marked[v] < minimisationRound; // We are not supposed to re-mark literals
+                        marked[v] = notDominated;
+                    }
+                    return false;
+                }
+            }
+            // The root is from the initial no-good, and literals from the initial no-good remain marked as dominated
+            if (p != root) {
+                assert marked[v] < minimisationRound; // We are not supposed to re-mark literals
+                marked[v] = dominated;
+            }
+            return true;
+        }
     }
 
     /* Check if 'p' can be removed. 'abstract_levels' is used to abort early if the algorithm is
@@ -953,34 +1005,6 @@ public class MiniSat implements SatFactory {
 //        return true;
 //    }
 
-    /**
-     * Check if 'p' can be removed. 'abstract_levels' is used to abort early if the algorithm is
-     * visiting literals at levels that cannot be removed later.
-     */
-    boolean isDominated(int p, int root, BitSet abstract_levels, int[] minRank, int[] marked, int visited, int dominated, int notDominated) {
-        int v = var(p);
-        if ((p != root && marked[v] == visited && level(v) > rootlvl) || (marked[v] == dominated)) {
-            return true;
-        } else if (marked[v] == notDominated
-                || reason(v) == C_Undef
-                || !abstract_levels.get(level(v))
-                || pos(v) < minRank[level(v)]) {
-            marked[v] = notDominated;
-            return false;
-        } else {
-            Clause c = getConfl(p);
-            for (int i = 1; i < c.size(); i++) {
-                int r = c._g(i);
-                if (level(var(r)) > rootlvl
-                        && !isDominated(r, root, abstract_levels, minRank, marked, visited, dominated, notDominated)) {
-                    marked[var(r)] = notDominated;
-                    return false;
-                }
-            }
-            marked[v] = dominated;
-            return true;
-        }
-    }
 
     /**
      * Some lits cannot be used in clause (the ones related to instantiation in lazy lits vars).
