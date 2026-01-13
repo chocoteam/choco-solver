@@ -17,9 +17,7 @@ import gnu.trove.stack.array.TIntArrayStack;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.variables.impl.LitVar;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.Comparator;
+import java.util.*;
 
 /**
  * <p>A MiniSat solver.</p>
@@ -1043,7 +1041,7 @@ public class MiniSat implements SatFactory {
     boolean isDominated(int p, int root) {
         int v = var(p);
         // IF the literal is marked as dominated and is not the root OR the literal is from the initial propagation THEN we may remove the root from the no-good
-        if ((p != root && mark[v] == dominated) || (level(v) == rootlvl)) {
+        if ((p != root && mark[v] == dominated) || (level(v) <= rootlvl)) {
             return true;
         }
         // ELSE-IF the literal is marked as notDominated OR it is a decision OR it can not be dominated by literals from the no-good THEN we must keep the root in the no-good
@@ -1058,6 +1056,11 @@ public class MiniSat implements SatFactory {
         // ELSE check the predecessors, but ignore the literals from the initial propagation
         else {
             Clause c = getConfl(p);
+            // quick fix for recursive version -- no need to adapt to binary clause
+            // TODO: remove
+            if(c.size() == 3){
+                c = new Clause(new int[]{0, c._g(1), c._g(2)});
+            }
             for (int i = 1; i < c.size(); i++) {
                 int r = c._g(i);
                 if (level(var(r)) > rootlvl
