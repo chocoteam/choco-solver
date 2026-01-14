@@ -41,7 +41,7 @@ import java.util.Comparator;
 public class LazyClauseGeneration implements Learn {
     public static boolean VERBOSE = false;
     public static boolean SORT_LITS_ON_SOLUTION = false;
-    public static boolean SORT_LITS_ON_FAILURE = Settings.PARAM_SORT_LITS_ON_FAILURE;
+    private final boolean SORT_LITS_ON_FAILURE = Settings.PARAM_SORT_LITS_ON_FAILURE;
 
     private static final String ON_FAILURE = "On SAT failure,";
     private static final String ON_SOLUTION = "On solution,";
