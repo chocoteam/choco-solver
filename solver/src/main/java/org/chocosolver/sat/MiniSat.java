@@ -108,12 +108,9 @@ public class MiniSat implements SatFactory {
     public final TIntStack temporary_variables = new TIntArrayStack();
     private int[] levels = new int[ccmin_mode == 2 ? 1 << 8 : 0];
     private int[] minRank = new int[ccmin_mode == 2 ? 1 << 8 : 0];
-    private int[] mark = new int[ccmin_mode > 0 ? 1 << 8 : 0];
     private int minimisationRound;
-    private int included;
-    private int notIncluded;
-    private int dominated;
-    private int notDominated;
+    private int notKeep;
+    private int keep;
 
     /**
      * Create a new instance of MiniSat solver.
@@ -143,7 +140,7 @@ public class MiniSat implements SatFactory {
         }
         clauseCounter.set(2);
         if (ccmin_mode > 0) {
-            mark[0] = 1; // int at position 0 indicates the current minimisation round
+            minimisationRound = 1; // int at position 0 indicates the current minimisation round
         }
     }
 
@@ -792,111 +789,33 @@ public class MiniSat implements SatFactory {
         return i;
     }
 
-//    private int localMinimisation(TIntArrayList out_learnt) {
-//        //System.out.println("Local...");
-//        int j;
-//        int i;
-//        //*
-//        if (mark.length < num_vars_) {
-//            int tmp = mark[0];
-//            mark = new int[num_vars_];
-//            mark[0] = tmp;
-//        }
-//        assert mark[0] > 0;
-//        minimisationRound = mark[0];
-//        included = mark[0];
-//        notIncluded = mark[0] + 1;
-//        mark[0] += 2; // prepare next round
-//        //noinspection UnnecessaryLocalVariable
-//        for (i = j = 1; i < out_learnt.size(); i++) {
-//            Clause c = getConfl(out_learnt.get(i));
-//            if (c == C_Undef) { // The literal is a decision: keep it in the no-good
-//                if (DEBUG > 1) System.out.printf("keep %s @ %d\n", out_learnt.get(i), j);
-//                out_learnt.set(j++, out_learnt.get(i));
-//            } else { // The literal is not a decision: check its predecessors, but ignore the literals from the initial propagation
-//                boolean keep = false;
-//                top:
-//                for (int k = 1; k < c.size(); k++) {
-//                    int q = var(c._g(k));
-//                    // first test the case of factor
-//                    if (cinfo.get(q).cons_type == TMP_VAR_TYPE) {
-//                        if (mark[q] == notIncluded) {
-//                            keep = true;
-//                            break;
-//                        } else if (mark[q] < minimisationRound) { // not marked
-//                            Clause cf = getConfl(c._g(k));
-//                            for (int l = 1; l < cf.size(); l++) {
-//                                int r = var(cf._g(l));
-//                                assert cinfo.get(r).cons_type != TMP_VAR_TYPE : "Two factors are not supposed to be linked by an arc";
-//                                if (!seen[r] && level(r) > rootlvl) {
-//                                    mark[q] = notIncluded;
-//                                    keep = true;
-//                                    break top;
-//                                }
-//                            }
-//                            mark[q] = included;
-//                        }
-//                    } else if (!seen[q] && level(q) > rootlvl) { // or root_level ?
-//                        keep = true;
-//                        break;
-//                    }
-//                }
-//                if (keep) { // Keep the literal in the no-good
-//                    out_learnt.set(j++, out_learnt.get(i));
-//                    //if (DEBUG > 1)
-//                        //System.out.printf("keep %s\n", out_learnt.get(i));
-//                }
-//                else { // Remove the literal from the no-good
-//                    //if (DEBUG > 1)
-//                        //System.out.printf("ignore %s\n", out_learnt.get(i));
-//                }
-//            }
-//        }
-//        return j;
-//    }
-
     private int localMinimisation(TIntArrayList out_learnt) {
-        //System.out.println("Local...");
         int j;
         int i;
-        //*
-        if (mark.length < num_vars_) {
-            int tmp = mark[0];
-            mark = new int[num_vars_];
-            mark[0] = tmp;
-        }
-        assert mark[0] > 0;
-        minimisationRound = mark[0];
-        included = mark[0];
-        notIncluded = mark[0] + 1;
-        mark[0] += 2; // prepare next round
+        minimisationRound += 2;
+        assert minimisationRound > 0; // no underflow allowed
+        notKeep = minimisationRound;
+        keep = minimisationRound + 1;
 
         // Update the required structures
         for (i = 1; i < out_learnt.size(); i++) {
             int v = var(out_learnt.get(i));
-            mark[v] = minimisationRound; // Mark all literals from the initial no-good
-//            seen[v] = false; // Reinitialise 'seen' for the next conflict analysis
+            vardata.get(v).mark = minimisationRound; // Mark all literals from the initial no-good
         }
 
         for (i = j = 1; i < out_learnt.size(); i++) {
             // If the reason of the literal is not included in the initial no-good, then keep it in the no-good
             if (reason(var(out_learnt.get(i))) == C_Undef
-                    || !isIncluded(out_learnt.get(i))) {
-                //if (DEBUG > 1)
-                //System.out.printf("keep %s\n", out_learnt.get(i));
+                    || !isIncludedIterativeVersion(out_learnt.get(i))) {
                 assert level(var(out_learnt.get(i))) > rootlvl : "Not supposed to keep literals from the initial propagation";
                 out_learnt.set(j++, out_learnt.get(i));
             }
             // If the reason of the literal is included in the initial no-good, then remove it from the no-good
-            else {
-                //if (DEBUG > 1)
-                //System.out.printf("ignore %s\n", out_learnt.get(i));
-            }
         }
         return j;
     }
 
-    private boolean isIncluded(int p) {
+    private boolean isIncludedRecursiveVersion(int p) {
         Clause c = getConfl(p);
         for (int k = 1; k < c.size(); k++) {
             int q = c._g(k); // The literal (either negative or positive)
@@ -905,42 +824,66 @@ public class MiniSat implements SatFactory {
             if (level(v) > rootlvl && cinfo.get(v).cons_type == TMP_VAR_TYPE) { // The literal is a factor so we check its reason instead
                 assert c.size() == 2 : "Currently, all factors should have a unique literal in their reason";
                 assert cinfo.get(var(p)).cons_type != TMP_VAR_TYPE : "Two factors are not supposed to be linked by an arc";
-                if (mark[v] < minimisationRound) { // not marked
-                    if (isIncluded(q)) {
-                        mark[v] = included;
+                if (vardata.get(v).mark < minimisationRound) { // not marked
+                    if (isIncludedIterativeVersion(q)) {
+                        vardata.get(v).mark = notKeep;
                     } else {
-                        mark[v] = notIncluded;
+                        vardata.get(v).mark = keep;
                         return false;
                     }
-                } else if (mark[v] == notIncluded) {
+                } else if (vardata.get(v).mark == keep) {
                     return false;
                 }
-            } else if (level(v) > rootlvl && mark[v] < minimisationRound) { // The literal is neither a factor nor from the initial propagation but is not present in the initial no-good
+            } else if (level(v) > rootlvl && vardata.get(v).mark < minimisationRound) { // The literal is neither a factor nor from the initial propagation but is not present in the initial no-good
                 return false;
             }
         }
         return true;
     }
 
+    private boolean isIncludedIterativeVersion(int p_start) {
+        analyze_stack.clear();
+        analyze_stack.push(p_start);
+        while (analyze_stack.size() > 0) {
+            int p = analyze_stack.pop();
+            int v_p = var(p);
+            if ((p != p_start && vardata.get(v_p).mark >= minimisationRound) || (level(v_p) <= rootlvl)) continue;
+            Clause c = getConfl(p);
+            for (int k = 1; k < c.size(); k++) {
+                int q = c._g(k); // The literal (either negative or positive)
+                int v_q = var(q); // The boolean variable associated with the literal
+                if (level(v_q) <= rootlvl) continue;
+                if (cinfo.get(v_q).cons_type == TMP_VAR_TYPE) { // The literal is a factor so we check its reason instead
+                    assert c.size() == 2 : "Currently, all factors should have a unique literal in their reason";
+                    assert cinfo.get(var(p)).cons_type != TMP_VAR_TYPE : "Two factors are not supposed to be linked by an arc";
+                    if (vardata.get(v_q).mark < minimisationRound) { // not marked
+                        analyze_stack.push(q);
+                        vardata.get(v_q).parent = v_p;
+                    } else if (vardata.get(v_q).mark == keep) {
+                        int cur = v_p;
+                        while (cur != var(p_start)) {
+                            vardata.get(cur).mark = keep;
+                            cur = vardata.get(cur).parent;
+                        }
+                        return false;
+                    }
+                } else if (vardata.get(v_q).mark < minimisationRound) { // The literal is neither a factor nor from the initial propagation but is not present in the initial no-good
+                    int cur = v_p;
+                    while (cur != var(p_start)) {
+                        vardata.get(cur).mark = keep;
+                        cur = vardata.get(cur).parent;
+                    }
+                    return false;
+                }
+            }
+            if (p != p_start) {
+                vardata.get(v_p).mark = notKeep;
+            }
+        }
+        return true;
+    }
 
     private int recursiveMinimisation(TIntArrayList out_learnt) {
-        //System.out.println("Recursive...");
-        /*
-        int i, j;
-        BitSet abstract_level = new BitSet();
-        for (i = 1; i < out_learnt.size(); i++) {
-            int v = var(out_learnt.get(i));
-            abstract_level.set(level(v));
-        }
-        for (i = j = 1; i < out_learnt.size(); i++)
-            if (reason(var(out_learnt.get(i))) == C_Undef || !litRedundant(out_learnt.get(i), abstract_level)){
-                System.out.printf("keep %s\n", out_learnt.get(i));
-                out_learnt.set(j++, out_learnt.get(i));
-            }else{
-                System.out.printf("ignore %s\n", out_learnt.get(i));
-            }
-        return j;
-         /*/
         int i;
         int j;
         // adapt size if needed //TODO: change this at some point ?
@@ -948,16 +891,11 @@ public class MiniSat implements SatFactory {
             levels = new int[(int) (trailMarker() * 1.2)];
             minRank = new int[(int) (trailMarker() * 1.2)];
         }
-        if (mark.length < num_vars_) {
-            int tmp = mark[0];
-            mark = new int[num_vars_];
-            mark[0] = tmp;
-        }
-        assert mark[0] > 0;
-        minimisationRound = mark[0];
-        dominated = mark[0];
-        notDominated = mark[0] + 1;
-        mark[0] += 2; // prepare next round
+        minimisationRound += 2;
+        assert minimisationRound > 0; // no underflow allowed
+        notKeep = minimisationRound;
+        keep = minimisationRound + 1;
+
         // Reset minRank (only concerned levels)
         for (i = 1; i < out_learnt.size(); i++) {
             int v = var(out_learnt.get(i));
@@ -968,89 +906,36 @@ public class MiniSat implements SatFactory {
             int v = var(out_learnt.get(i));
             levels[level(v)] = minimisationRound;
             minRank[level(v)] = Math.min(minRank[level(v)], pos(v));
-            mark[v] = dominated;
-//            seen[v] = false; // Reinitialise 'seen' for the next conflict analysis
+            vardata.get(v).mark = notKeep;
         }
 
         for (i = j = 1; i < out_learnt.size(); i++) {
             // If the literal is not dominated by the initial no-good, then keep it in the no-good
             if (reason(var(out_learnt.get(i))) == C_Undef
-                    || !isDominated(out_learnt.get(i), out_learnt.get(i))) {
-                //if (DEBUG > 1)
-                //System.out.printf("keep %s\n", out_learnt.get(i));
+                    || !isDominatedIterativeVersion(out_learnt.get(i))) {
                 out_learnt.set(j++, out_learnt.get(i));
             }
             // If the literal is dominated by the initial no-good, then remove it from the no-good
-            else {
-                //if (DEBUG > 1)
-                //System.out.printf("ignore %s\n", out_learnt.get(i));
-            }
         }
         return j;
-        //*/
     }
-
-    /**
-     * Check if 'p' can be removed. 'abstract_levels' is used to abort early if the algorithm is
-     * visiting literals at levels that cannot be removed later.
-     */
-//    boolean isDominated(int p, BitSet abstract_levels, int[] minRank, int[] marked, int visited, int dominated, int notDominated) {
-//        analyze_stack.clear();
-//        analyze_stack.push(p);
-//        marked[var(p)] = visited - 1; // init the loop
-//        while (analyze_stack.size() > 0) {
-//            int q = analyze_stack.pop();
-//            int v = var(q);
-//            //assert (reason(v) != C_Undef);
-//
-//            if (marked[v] >= visited) continue;
-//            marked[v] = visited;
-//
-//            /*if ((seen[v] && level(v) > 0) || (marked[v] == dominated)) {
-//                // return true
-//            } else if (marked[v] == notDominated) {
-//                return false;
-//            } else */
-//            if (marked[v] == notDominated
-//                    || reason(v) == C_Undef
-//                    || !abstract_levels.get(level(v))
-//                    || pos(v) < minRank[level(v)]) {
-//                marked[v] = notDominated;
-//                while(analyze_stack.size() > 0){
-//
-//                }
-//                return false;
-//            } else {
-//                Clause c = getConfl(q);
-//                for (int i = 1; i < c.size(); i++) {
-//                    int r = c._g(i);
-//                    if (marked[var(r)] < visited && level(v) > 0) {
-//                        analyze_stack.push(c._g(i));
-//                    }
-//                }
-//            }
-//            marked[v] = dominated;
-//        }
-//        return true;
-//    }
 
     /**
      * Check if 'p' is dominated by the no-good in the implication graph. 'levels' and 'minRank' are used to abort early if the algorithm is
      * visiting literals that can not be dominated by the no-good.
      */
-    boolean isDominated(int p, int root) {
+    boolean isDominatedRecursiveVersion(int p, int root) {
         int v = var(p);
         // IF the literal is marked as dominated and is not the root OR the literal is from the initial propagation THEN we may remove the root from the no-good
-        if ((p != root && mark[v] == dominated) || (level(v) <= rootlvl)) {
+        if ((p != root && vardata.get(v).mark == notKeep) || (level(v) <= rootlvl)) {
             return true;
         }
         // ELSE-IF the literal is marked as notDominated OR it is a decision OR it can not be dominated by literals from the no-good THEN we must keep the root in the no-good
-        else if (mark[v] == notDominated
+        else if (vardata.get(v).mark == keep
                 || reason(v) == C_Undef
-//                || !abstract_levels.get(level(v))
                 || levels[level(v)] != minimisationRound
                 || pos(v) < minRank[level(v)]) {
-            mark[v] = notDominated; // It is not necessary to mark the literal here, this is just an optimisation to avoid testing the other assertions in the future
+            vardata.get(v).mark = keep; // It is not necessary to mark the literal here, this is just an optimisation to avoid testing the other assertions in the future
             return false;
         }
         // ELSE check the predecessors, but ignore the literals from the initial propagation
@@ -1058,57 +943,61 @@ public class MiniSat implements SatFactory {
             Clause c = getConfl(p);
             // quick fix for recursive version -- no need to adapt to binary clause
             // TODO: remove
-            if(c.size() == 3){
+            if (c.size() == 3) {
                 c = new Clause(new int[]{0, c._g(1), c._g(2)});
             }
             for (int i = 1; i < c.size(); i++) {
                 int r = c._g(i);
                 if (level(var(r)) > rootlvl
-                        && !isDominated(r, root)) {
+                        && !isDominatedRecursiveVersion(r, root)) {
                     if (p != root) { // The root is from the initial no-good, and literals from the initial no-good must remain marked as dominated
-                        assert mark[v] < minimisationRound : "Not supposed to re-mark literals";
-                        mark[v] = notDominated;
+                        assert vardata.get(v).mark < minimisationRound : "Not supposed to re-mark literals";
+                        vardata.get(v).mark = keep;
                     }
                     return false;
                 }
             }
             if (p != root) { // The root is from the initial no-good, and literals from the initial no-good are already marked as dominated
-                assert mark[v] < minimisationRound : "Not supposed to re-mark literals";
-                mark[v] = dominated;
+                assert vardata.get(v).mark < minimisationRound : "Not supposed to re-mark literals";
+                vardata.get(v).mark = notKeep;
             }
             return true;
         }
     }
 
-    /* Check if 'p' can be removed. 'abstract_levels' is used to abort early if the algorithm is
-     * visiting literals at levels that cannot be removed later.
-     */
-    boolean litRedundant(int p, BitSet abstract_levels) {
+    private boolean isDominatedIterativeVersion(int p_start) {
         analyze_stack.clear();
-        analyze_stack.push(p);
-        int top = analyze_toclear.size();
+        analyze_stack.push(p_start);
         while (analyze_stack.size() > 0) {
-            assert (reason(var(analyze_stack.peek())) != C_Undef);
-            Clause c = getConfl(analyze_stack.peek());
-            analyze_stack.pop();
-
-            for (int i = 1; i < c.size(); i++) {
-                p = c._g(i);
-                if (!seen[var(p)] && level(var(p)) > rootlvl) {
-                    if (reason(var(p)) != C_Undef
-                            && abstract_levels.get(level(var(p)))) {
-                        seen[var(p)] = true;
-                        analyze_stack.push(p);
-                        analyze_toclear.add(p);
-                    } else {
-                        for (int j = top; j < analyze_toclear.size(); j++)
-                            seen[var(analyze_toclear.get(j))] = false;
-
-                        //analyze_toclear.shrink(analyze_toclear.size() - top);
-                        analyze_toclear.remove(top, analyze_toclear.size() - top);
-                        return false;
+            int p = analyze_stack.pop();
+            int v_p = var(p);
+            // IF the literal is marked as dominated and is not the root OR the literal is from the initial propagation THEN we may remove the root from the no-good
+            if ((p != p_start && vardata.get(v_p).mark >= minimisationRound) || (level(v_p) <= rootlvl)) continue;
+            Clause c = getConfl(p);
+            for (int k = 1; k < c.size(); k++) {
+                int q = c._g(k); // The literal (either negative or positive)
+                int v_q = var(q); // The boolean variable associated with the literal
+                // IF the literal is marked as dominated and is not the root OR the literal is from the initial propagation THEN we may remove the root from the no-good
+                if ((vardata.get(v_q).mark == notKeep) || (level(v_q) <= rootlvl)) continue;
+                // ELSE-IF the literal is marked as notDominated OR it is a decision OR it can not be dominated by literals from the no-good THEN we must keep the root in the no-good
+                if (vardata.get(v_q).mark == keep
+                        || reason(v_q) == C_Undef
+                        || levels[level(v_q)] != minimisationRound
+                        || pos(v_q) < minRank[level(v_q)]) {
+                    vardata.get(v_q).mark = keep;
+                    int cur = v_p;
+                    while (cur != var(p_start)) {
+                        vardata.get(cur).mark = keep;
+                        cur = vardata.get(cur).parent;
                     }
+                    return false;
+                } else if (vardata.get(v_q).mark < minimisationRound) { // not marked
+                    analyze_stack.push(q);
+                    vardata.get(v_q).parent = v_p;
                 }
+            }
+            if (p != p_start) {
+                vardata.get(v_p).mark = notKeep;
             }
         }
         return true;
@@ -1410,6 +1299,8 @@ public class MiniSat implements SatFactory {
         private Reason cr;
         private int level;
         private int pos;
+        private int mark; // used in conflict minimisation, denotes status of a lit (visited, keep, notKeep)
+        private int parent; // used in conflict minimisation, denotes the parent lit
 
         public VarData(Reason cr, int level, int pos) {
             this.cr = cr;
