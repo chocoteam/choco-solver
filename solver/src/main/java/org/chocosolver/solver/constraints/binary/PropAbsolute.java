@@ -96,7 +96,7 @@ public class PropAbsolute extends Propagator<IntVar> {
             if (varIdx == 1) {
                 X.instantiateTo(Math.abs(Y.getValue()), this, lcg() ? Reason.r(Y.getValLit()) : Reason.undef());
                 setPassive();
-            } else if (Y.hasUnfixedEnumeratedDomain()) {
+            } else if (Y.hasEnumeratedDomain()) {
                 int val = X.getValue();
                 Y.updateLowerBound(-val, this, lcg() ? Reason.r(X.getValLit()) : Reason.undef());
                 Y.updateUpperBound(val, this, lcg() ? Reason.r(X.getValLit()) : Reason.undef());
