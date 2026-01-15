@@ -14,6 +14,7 @@ NEXT MILESTONE
 ### Other closed issues and pull requests:
 See [milestone 5.0.0-beta.2](https://github.com/chocoteam/choco-solver/milestone/41)
 
+- Performance improvement in PropXPlusYEqZ and PropAbsolute
 - Fix bug in ConflictOrderingSearch (monitor not plugged)
 - Performance improvement for LastConflict, ConflictOrderingSearch and StrategySequencer.
 - Fix bug : regular constraints parsed from XCSP now support negative values

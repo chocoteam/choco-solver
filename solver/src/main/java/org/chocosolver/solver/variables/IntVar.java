@@ -762,6 +762,14 @@ public interface IntVar extends ICause, Variable, ArExpression {
     boolean hasEnumeratedDomain();
 
     /**
+     * Indicates wether (or not) <code>this</code> has an enumerated domain (represented in extension) and is not a single value
+     * @return <code>true</code> if the domain is enumerated and the variable is not instantiated yet, <code>false</code> otherwise.
+     */
+    default boolean hasUnfixedEnumeratedDomain() {
+        return !isInstantiated() && hasEnumeratedDomain();
+    }
+
+    /**
      * Allow to monitor removed values of <code>this</code>.
      *
      * @param propagator the cause that requires to monitor delta
