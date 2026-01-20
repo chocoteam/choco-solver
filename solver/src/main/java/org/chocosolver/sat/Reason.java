@@ -57,18 +57,8 @@ public abstract class Reason implements ICause {
      * @return an undefined static reason
      * @implSpec In practice, this reason is static and thus should not be modified.
      */
-    public static Reason undef() {
+    public static Clause undef() {
         return UNDEF;
-    }
-
-    /**
-     * Create a reason from a clause
-     *
-     * @param cl a clause
-     * @return a reason
-     */
-    public static Reason r(Clause cl) {
-        return cl;
     }
 
     /**

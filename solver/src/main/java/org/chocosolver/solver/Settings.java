@@ -38,6 +38,8 @@ public class Settings {
     public static boolean PARAM_BICLIQUE_FACTORISATION = false;
     public static int PARAM_CLAUSE_MINIMISATION = 2;
     public static boolean PARAM_SORT_LITS_ON_FAILURE = false;
+    public static int PARAM_REDUCE_SAT_LEARNTS_CLAUSE_BASE = 1_000;
+    public static int PARAM_REDUCE_SAT_LEARNTS_CLAUSE_FACTOR = 100;
 
     private Predicate<Solver> modelChecker = s -> !ESat.FALSE.equals(s.isSatisfied());
 

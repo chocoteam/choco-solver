@@ -69,6 +69,8 @@ public class LazyClauseGeneration implements Learn {
      * Indicates whether the current clause comes from on a solution (or on a failure).
      */
     private boolean onSolution = false;
+    private long nextReductionCall = Settings.PARAM_REDUCE_SAT_LEARNTS_CLAUSE_BASE;
+    private int reductions = 0;
     /**
      * A temporary storage for learnt clauses.
      */
@@ -111,8 +113,10 @@ public class LazyClauseGeneration implements Learn {
         } else {
             nbRestarts = mSolver.getRestartCount();
         }
-        if (mSat.nLearnts() >= max_learnts) {
+        if(mSat.nLearnts() >= max_learnts || mSolver.getFailCount() > nextReductionCall){
             mSat.doReduceDB();
+            nextReductionCall += Settings.PARAM_REDUCE_SAT_LEARNTS_CLAUSE_BASE +
+                    (long) Settings.PARAM_REDUCE_SAT_LEARNTS_CLAUSE_FACTOR * (++reductions);
         }
     }
 

@@ -35,6 +35,13 @@ public class Clause extends Reason {
      * Activity of the clause (related to frequency of conflict)
      */
     double activity;
+
+    /**
+     * Literals block distance:
+     * "Given a clause C, and a partition of its literals into n subsets according to the current assignment,
+     * s.t. literals are partitioned w.r.t their decision level. The LBD of C is exactly n."
+     */
+    int lbd = Integer.MAX_VALUE;
     /**
      * A unique id
      */
@@ -75,7 +82,7 @@ public class Clause extends Reason {
                 ps[j++] = ps[i];
             }
         }
-        if(j < ps.length) {
+        if (j < ps.length) {
             ps = Arrays.copyOf(ps, j);
         }
         return ps;

@@ -53,8 +53,10 @@ public class MiniSat implements SatFactory {
     public static final int TMP_VAR_TYPE = 2;
     // undefined clause
     protected static ThreadLocal<Integer> clauseCounter = ThreadLocal.withInitial(() -> 0);
+    private final Comparator<Clause> comp = Comparator.<Clause>comparingInt(c -> -c.lbd)
+                    .thenComparingDouble(c -> c.activity);
     public static final Clause C_Undef = Clause.undef();
-    static final Reason R_Undef = Reason.undef();
+    static final Clause R_Undef = Reason.undef();
     static final VarData VD_Undef = new VarData(R_Undef, -1, -1);
     public Clause confl = C_Undef;
 
@@ -104,11 +106,11 @@ public class MiniSat implements SatFactory {
     private final TIntStack analyze_stack = new TIntArrayStack();
     private final TIntArrayList temporary_add_vector_ = new TIntArrayList();
     public final TIntStack temporary_variables = new TIntArrayStack();
-    private int[] levels = new int[ccmin_mode == 2 ? 1 << 8 : 0];
+    private long[] levels = new long[ccmin_mode == 2 ? 1 << 8 : 0];
     private int[] minRank = new int[ccmin_mode == 2 ? 1 << 8 : 0];
-    private int analysisRound;
-    private int notKeep;
-    private int keep;
+    private long analysisRound;
+    private long notKeep;
+    private long keep;
 
     /**
      * Create a new instance of MiniSat solver.
@@ -314,6 +316,34 @@ public class MiniSat implements SatFactory {
         }
     }
 
+    /**
+     * Compute the literals blocks distance of the current clause
+     *
+     * @param cr a clause
+     */
+    private void computeLBD(Clause cr) {
+        if (cr.size() == 1) {
+            cr.lbd = 1;
+        } else if (cr.size() == 2) {
+            cr.lbd = level(var(cr._g(0))) == level(var(cr._g(1))) ? 1 : 2;
+        } else {
+            int maxLvl = level(var(cr._g(0)));
+            if (levels.length <= maxLvl) {
+                levels = new long[(int) (maxLvl * 1.2)];
+            }
+            analysisRound++;
+            assert analysisRound > 0;
+            int lbd = 0;
+            for (int i = 0; i < cr.size(); i++) {
+                if (levels[level(var(cr._g(i)))] != analysisRound) {
+                    lbd++;
+                    levels[level(var(cr._g(i)))] = analysisRound;
+                }
+            }
+            cr.lbd = Math.min(lbd, cr.lbd);
+        }
+    }
+
 
     // Backtrack to the previous level.
     public void cancel() {
@@ -364,6 +394,7 @@ public class MiniSat implements SatFactory {
         learntsize_adjust_confl = 100;
         learntsize_adjust_cnt = (int) learntsize_adjust_confl;
         simplify();
+        // todo: reset analysisRound and related structures
     }
 
     // The current value of a variable.
@@ -439,7 +470,7 @@ public class MiniSat implements SatFactory {
     }
 
     // Enqueue a literal. Assumes value of literal is undefined.
-    public void uncheckedEnqueue(int l, Reason from) {
+    public void uncheckedEnqueue(int l, Clause from) {
         assert valueLit(l) == lUndef : "l: " + printLit(l) + " from: " + from;
         assert isAssertingClause(this, from.getConflict()) : "the reason " + showReason(from) + " is not valid because it is not unit";
         int v = var(l);
@@ -461,6 +492,9 @@ public class MiniSat implements SatFactory {
             vd.set(from, trailMarker(), trail_.size());
         } else {
             vardata.set(v, new VarData(from, trailMarker(), trail_.size()));
+        }
+        if (from.learnt()) {
+            computeLBD(from);
         }
         trail_.add(l);
         cinfo.get(v).channel(sgn(l));
@@ -872,7 +906,7 @@ public class MiniSat implements SatFactory {
         int j;
         // adapt size if needed //TODO: change this at some point ?
         if (minRank.length < trailMarker()) {
-            levels = new int[(int) (trailMarker() * 1.2)];
+            levels = new long[(int) (trailMarker() * 1.2)];
             minRank = new int[(int) (trailMarker() * 1.2)];
         }
 //        analysisRound += 2;
@@ -1067,18 +1101,20 @@ public class MiniSat implements SatFactory {
     public void doReduceDB() {
         int i, j;
         double extra_lim = cla_inc / learnts.size();    // Remove any clause below this activity
-
         learnts.subList(learnt_first_removable, learnts.size())  // only removable clauses
-                .sort(Comparator.comparingDouble(c -> c.activity));
+                .sort(comp);
         // Don't delete binary or locked clauses or unforgettable clauses.
         // From the rest, delete clauses from the first half
         // and clauses with activity smaller than 'extra_lim':
+        int deleted = (learnts.size() - learnt_first_removable) / 2;
         for (i = j = learnt_first_removable; i < learnts.size(); i++) {
             Clause c = learnts.get(i);
-            if (c.size() > 2 && !locked(c) && (i < learnts.size() / 2 || c.activity < extra_lim))
+            if (c.size() > 2 && !locked(c) && deleted >= 0){ //&& (c.activity < extra_lim)) {
                 removeClause(learnts.get(i));
-            else
+                deleted--;
+            } else {
                 learnts.set(j++, learnts.get(i));
+            }
         }
         int n = learnts.size();
         learnts.subList(j, n).clear();
@@ -1283,7 +1319,7 @@ public class MiniSat implements SatFactory {
         private Reason cr;
         private int level;
         private int pos;
-        private int mark; // used in conflict minimisation, denotes status of a lit (analysisRound, keep, notKeep)
+        private long mark; // used in conflict minimisation, denotes status of a lit (analysisRound, keep, notKeep)
         private int parent; // used in conflict minimisation, denotes the parent lit
 
         public VarData(Reason cr, int level, int pos) {
