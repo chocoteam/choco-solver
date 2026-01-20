@@ -101,8 +101,6 @@ public class MiniSat implements SatFactory {
     private int clauses_literals;
     private int learnts_literals;
     double max_learnts;
-//    private boolean[] seen = new boolean[1 << 10];
-//    private final TIntArrayList analyze_toclear = new TIntArrayList();
     private final TIntStack analyze_stack = new TIntArrayStack();
     private final TIntArrayList temporary_add_vector_ = new TIntArrayList();
     public final TIntStack temporary_variables = new TIntArrayStack();
@@ -127,21 +125,14 @@ public class MiniSat implements SatFactory {
             assignment_.set(v, makeBoolean(sgn(l)));
             vardata.set(v, new VarData(R_Undef, trailMarker(), trail_.size()));
             trail_.add(l);
-            //seen.set(v);
-            seen[v] = true;
             // false literal
             v = newVariable();
             l = makeLiteral(v, false);
             assignment_.set(v, makeBoolean(sgn(l)));
             vardata.set(v, new VarData(R_Undef, trailMarker(), trail_.size()));
             trail_.add(l);
-            //seen.set(v);
-            seen[v] = true;
         }
         clauseCounter.set(2);
-//        if (ccmin_mode > 0) {
-//            analysisRound = 1; // int at position 0 indicates the current minimisation round
-//        }
         analysisRound = 1; // Starts at 1 so that 0 means unvisited
     }
 
@@ -171,13 +162,6 @@ public class MiniSat implements SatFactory {
         assignment_.add(lUndef);
         vardata.add(VD_Undef);
         cinfo.add(ci);
-        //seen.clear(v);
-//        if (seen.length <= v) {
-//            boolean[] tmp = seen;
-//            seen = new boolean[(int) (tmp.length * 1.5)];
-//            System.arraycopy(tmp, 0, seen, 0, tmp.length);
-//        }
-//        seen[v] = false;
         return v;
     }
 
@@ -375,8 +359,6 @@ public class MiniSat implements SatFactory {
         //todo simplifydb?
         for (int i = 0; i < trail_.size(); i++) {
             int x = var(trail_.get(i));
-            //seen.set(x);
-            seen[x] = true;
         }
         max_learnts = nClauses() * learntsize_factor;
         learntsize_adjust_confl = 100;
@@ -681,9 +663,6 @@ public class MiniSat implements SatFactory {
         max_literals += out_learnt.size();
 
         // Simplify conflict clause:
-//        for (int k = 0; k < out_learnt.size(); k++) {
-//            seen[var(out_learnt.get(k))] = false;    // ('seen[]' is now cleared)
-//        }
         if (ccmin_mode == 1) {
             j = localMinimisation(out_learnt);
             out_learnt.remove(j, out_learnt.size() - j);
@@ -706,11 +685,9 @@ public class MiniSat implements SatFactory {
             pathC = updateNogood(confl, out_learnt, p, pathC);
             // Select next clause to look at:
             //noinspection StatementWithEmptyBody
-//            while (!seen[var(trail_.get(index--))]) ;
             while (vardata.get(var(trail_.get(index--))).mark != analysisRound) ;
             p = trail_.get(index + 1);
             confl = getConfl(p);
-//            seen[var(p)] = false;
             vardata.get(var(p)).mark--;
             if (DEBUG > 1) System.out.printf("clear %d l:%d\n", var(p), p);
             pathC--;
@@ -735,12 +712,10 @@ public class MiniSat implements SatFactory {
         for (int j = (p == litUndef) ? 0 : 1; j < c.size(); j++) {
             int q = c._g(j);
             int x = var(q);
-//            if (!seen[x] && level(x) > rootlvl) {
             if (vardata.get(x).mark != analysisRound && level(x) > rootlvl) {
                 assert p == litUndef || pos(var(p)) > pos(x) : "chronological inconsistency :(" + printLit(p) + " @ " + pos(var(p)) +
                         ") is explained by an older event (" + printLit(x) + " @ " + pos(x) + ") " + c;
                 varBumpActivity(x);
-//                seen[x] = true;
                 vardata.get(x).mark = analysisRound;
                 if (DEBUG > 1) System.out.printf("mark %d\n", x);
                 if (level(x) >= trailMarker()) {
@@ -777,7 +752,6 @@ public class MiniSat implements SatFactory {
             i = replaceUnreliableLit(out_learnt, p, i);
         }
         while (!temporary_add_vector_.isEmpty()) {
-//            seen[var(temporary_add_vector_.removeAt(temporary_add_vector_.size() - 1))] = false;
             vardata.get(var(temporary_add_vector_.removeAt(temporary_add_vector_.size() - 1))).mark--;
         }
     }
@@ -791,9 +765,7 @@ public class MiniSat implements SatFactory {
         i--;
         for (int j = 1; j < c.size(); j++) {
             int q = c._g(j);
-//            if (!seen[var(q)]) {
             if (vardata.get(var(q)).mark != analysisRound) {
-//                seen[var(q)] = true;
                 vardata.get(var(q)).mark = analysisRound;
                 out_learnt.add(q);
             }
@@ -1318,7 +1290,7 @@ public class MiniSat implements SatFactory {
             this.cr = cr;
             this.level = level;
             this.pos = pos;
-            //TODO shouldn't we initialise mark to 0 ?
+            this.mark = 0;
         }
 
         private void set(Reason cr, int level, int pos) {
