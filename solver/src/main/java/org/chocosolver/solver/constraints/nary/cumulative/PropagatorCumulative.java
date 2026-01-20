@@ -442,6 +442,7 @@ public class PropagatorCumulative extends Propagator<IntVar> {
                 if (capacity.getUB() - height.getLB() < profile.getHeightRectangle(j)) {
                     final Reason reason;
                     if (lcg()) {
+                        //TODO: factorise
                         literals.clear();
                         final int end = Math.min(task.getEct(), profile.getEndRectangle(j));
                         literals.add(getNegGeqLit(task.getEnd(), end));
@@ -477,6 +478,7 @@ public class PropagatorCumulative extends Propagator<IntVar> {
                 if (capacity.getUB() - height.getLB() < profile.getHeightRectangle(j)) {
                     final Reason reason;
                     if (lcg()) {
+                        //TODO Factorise
                         literals.clear();
                         final int begin = Math.max(profile.getStartRectangle(j), task.getLst());
                         literals.add(getNegLeqLit(task.getStart(), begin));
@@ -601,6 +603,7 @@ public class PropagatorCumulative extends Propagator<IntVar> {
                 int j = profile.find(task.getLst());
                 while (j < profile.size() && profile.getStartRectangle(j) < task.getEct()) {
                     if (lcg()) {
+                        //TODO: factorise ?
                         literals.clear();
                         final int begin = Math.max(profile.getStartRectangle(j), task.getLst());
                         literals.add(getNegGeqLit(task.getEnd(), begin));

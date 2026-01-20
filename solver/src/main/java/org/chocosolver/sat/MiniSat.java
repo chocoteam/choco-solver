@@ -101,14 +101,14 @@ public class MiniSat implements SatFactory {
     private int clauses_literals;
     private int learnts_literals;
     double max_learnts;
-    private boolean[] seen = new boolean[1 << 10];
-    private final TIntArrayList analyze_toclear = new TIntArrayList();
+//    private boolean[] seen = new boolean[1 << 10];
+//    private final TIntArrayList analyze_toclear = new TIntArrayList();
     private final TIntStack analyze_stack = new TIntArrayStack();
     private final TIntArrayList temporary_add_vector_ = new TIntArrayList();
     public final TIntStack temporary_variables = new TIntArrayStack();
     private int[] levels = new int[ccmin_mode == 2 ? 1 << 8 : 0];
     private int[] minRank = new int[ccmin_mode == 2 ? 1 << 8 : 0];
-    private int minimisationRound;
+    private int analysisRound;
     private int notKeep;
     private int keep;
 
@@ -139,9 +139,10 @@ public class MiniSat implements SatFactory {
             seen[v] = true;
         }
         clauseCounter.set(2);
-        if (ccmin_mode > 0) {
-            minimisationRound = 1; // int at position 0 indicates the current minimisation round
-        }
+//        if (ccmin_mode > 0) {
+//            analysisRound = 1; // int at position 0 indicates the current minimisation round
+//        }
+        analysisRound = 1; // Starts at 1 so that 0 means unvisited
     }
 
     @Override
@@ -171,12 +172,12 @@ public class MiniSat implements SatFactory {
         vardata.add(VD_Undef);
         cinfo.add(ci);
         //seen.clear(v);
-        if (seen.length <= v) {
-            boolean[] tmp = seen;
-            seen = new boolean[(int) (tmp.length * 1.5)];
-            System.arraycopy(tmp, 0, seen, 0, tmp.length);
-        }
-        seen[v] = false;
+//        if (seen.length <= v) {
+//            boolean[] tmp = seen;
+//            seen = new boolean[(int) (tmp.length * 1.5)];
+//            System.arraycopy(tmp, 0, seen, 0, tmp.length);
+//        }
+//        seen[v] = false;
         return v;
     }
 
@@ -669,15 +670,20 @@ public class MiniSat implements SatFactory {
         int pathC = 0;
         int p = litUndef;
         // Generate conflict clause:
+        analysisRound += 2; // Reset the marks
+        notKeep = analysisRound;
+        keep = analysisRound + 1;
+        assert analysisRound > 0; // no underflow allowed
         analyseConflict(confl, out_learnt, p, pathC);
         replaceUnreliableLits(out_learnt);
-        int i, j;
+        int j;
         if (DEBUG > 1) System.out.printf("Before minimisation (%d) : %s\n", ccmin_mode, out_learnt);
         max_literals += out_learnt.size();
+
         // Simplify conflict clause:
-        for (int k = 0; k < out_learnt.size(); k++) {
-            seen[var(out_learnt.get(k))] = false;    // ('seen[]' is now cleared)
-        }
+//        for (int k = 0; k < out_learnt.size(); k++) {
+//            seen[var(out_learnt.get(k))] = false;    // ('seen[]' is now cleared)
+//        }
         if (ccmin_mode == 1) {
             j = localMinimisation(out_learnt);
             out_learnt.remove(j, out_learnt.size() - j);
@@ -685,9 +691,8 @@ public class MiniSat implements SatFactory {
             j = recursiveMinimisation(out_learnt);
             out_learnt.remove(j, out_learnt.size() - j);
         }
-//        analyze_toclear.resetQuick();
-//        analyze_toclear.addAll(out_learnt);
         tot_literals += out_learnt.size();
+
         // Find correct backtrack level:
         return getBacktrackLevel(out_learnt);
     }
@@ -701,10 +706,12 @@ public class MiniSat implements SatFactory {
             pathC = updateNogood(confl, out_learnt, p, pathC);
             // Select next clause to look at:
             //noinspection StatementWithEmptyBody
-            while (!seen[var(trail_.get(index--))]) ;
+//            while (!seen[var(trail_.get(index--))]) ;
+            while (vardata.get(var(trail_.get(index--))).mark != analysisRound) ;
             p = trail_.get(index + 1);
             confl = getConfl(p);
-            seen[var(p)] = false;
+//            seen[var(p)] = false;
+            vardata.get(var(p)).mark--;
             if (DEBUG > 1) System.out.printf("clear %d l:%d\n", var(p), p);
             pathC--;
             if (DEBUG > 1) System.out.printf("path-- (%d)\n", pathC);
@@ -728,11 +735,13 @@ public class MiniSat implements SatFactory {
         for (int j = (p == litUndef) ? 0 : 1; j < c.size(); j++) {
             int q = c._g(j);
             int x = var(q);
-            if (!seen[x] && level(x) > rootlvl) {
+//            if (!seen[x] && level(x) > rootlvl) {
+            if (vardata.get(x).mark != analysisRound && level(x) > rootlvl) {
                 assert p == litUndef || pos(var(p)) > pos(x) : "chronological inconsistency :(" + printLit(p) + " @ " + pos(var(p)) +
                         ") is explained by an older event (" + printLit(x) + " @ " + pos(x) + ") " + c;
                 varBumpActivity(x);
-                seen[x] = true;
+//                seen[x] = true;
+                vardata.get(x).mark = analysisRound;
                 if (DEBUG > 1) System.out.printf("mark %d\n", x);
                 if (level(x) >= trailMarker()) {
                     pathC++;
@@ -768,7 +777,8 @@ public class MiniSat implements SatFactory {
             i = replaceUnreliableLit(out_learnt, p, i);
         }
         while (!temporary_add_vector_.isEmpty()) {
-            seen[var(temporary_add_vector_.removeAt(temporary_add_vector_.size() - 1))] = false;
+//            seen[var(temporary_add_vector_.removeAt(temporary_add_vector_.size() - 1))] = false;
+            vardata.get(var(temporary_add_vector_.removeAt(temporary_add_vector_.size() - 1))).mark--;
         }
     }
 
@@ -781,8 +791,10 @@ public class MiniSat implements SatFactory {
         i--;
         for (int j = 1; j < c.size(); j++) {
             int q = c._g(j);
-            if (!seen[var(q)]) {
-                seen[var(q)] = true;
+//            if (!seen[var(q)]) {
+            if (vardata.get(var(q)).mark != analysisRound) {
+//                seen[var(q)] = true;
+                vardata.get(var(q)).mark = analysisRound;
                 out_learnt.add(q);
             }
         }
@@ -792,16 +804,16 @@ public class MiniSat implements SatFactory {
     private int localMinimisation(TIntArrayList out_learnt) {
         int j;
         int i;
-        minimisationRound += 2;
-        assert minimisationRound > 0; // no underflow allowed
-        notKeep = minimisationRound;
-        keep = minimisationRound + 1;
+//        analysisRound += 2;
+//        assert analysisRound > 0; // no underflow allowed
+//        notKeep = analysisRound;
+//        keep = analysisRound + 1;
 
         // Update the required structures
-        for (i = 1; i < out_learnt.size(); i++) {
-            int v = var(out_learnt.get(i));
-            vardata.get(v).mark = minimisationRound; // Mark all literals from the initial no-good
-        }
+//        for (i = 1; i < out_learnt.size(); i++) {
+//            int v = var(out_learnt.get(i));
+//            vardata.get(v).mark = analysisRound; // Mark all literals from the initial no-good
+//        }
 
         for (i = j = 1; i < out_learnt.size(); i++) {
             // If the reason of the literal is not included in the initial no-good, then keep it in the no-good
@@ -824,7 +836,7 @@ public class MiniSat implements SatFactory {
             if (level(v) > rootlvl && cinfo.get(v).cons_type == TMP_VAR_TYPE) { // The literal is a factor so we check its reason instead
                 assert c.size() == 2 : "Currently, all factors should have a unique literal in their reason";
                 assert cinfo.get(var(p)).cons_type != TMP_VAR_TYPE : "Two factors are not supposed to be linked by an arc";
-                if (vardata.get(v).mark < minimisationRound) { // not marked
+                if (vardata.get(v).mark < analysisRound) { // not marked
                     if (isIncludedIterativeVersion(q)) {
                         vardata.get(v).mark = notKeep;
                     } else {
@@ -834,7 +846,7 @@ public class MiniSat implements SatFactory {
                 } else if (vardata.get(v).mark == keep) {
                     return false;
                 }
-            } else if (level(v) > rootlvl && vardata.get(v).mark < minimisationRound) { // The literal is neither a factor nor from the initial propagation but is not present in the initial no-good
+            } else if (level(v) > rootlvl && vardata.get(v).mark < analysisRound) { // The literal is neither a factor nor from the initial propagation but is not present in the initial no-good
                 return false;
             }
         }
@@ -847,7 +859,7 @@ public class MiniSat implements SatFactory {
         while (analyze_stack.size() > 0) {
             int p = analyze_stack.pop();
             int v_p = var(p);
-            if ((p != p_start && vardata.get(v_p).mark >= minimisationRound) || (level(v_p) <= rootlvl)) continue;
+            if ((p != p_start && vardata.get(v_p).mark >= analysisRound) || (level(v_p) <= rootlvl)) continue;
             Clause c = getConfl(p);
             for (int k = 1; k < c.size(); k++) {
                 int q = c._g(k); // The literal (either negative or positive)
@@ -855,8 +867,8 @@ public class MiniSat implements SatFactory {
                 if (level(v_q) <= rootlvl) continue;
                 if (cinfo.get(v_q).cons_type == TMP_VAR_TYPE) { // The literal is a factor so we check its reason instead
                     assert c.size() == 2 : "Currently, all factors should have a unique literal in their reason";
-                    assert cinfo.get(var(p)).cons_type != TMP_VAR_TYPE : "Two factors are not supposed to be linked by an arc";
-                    if (vardata.get(v_q).mark < minimisationRound) { // not marked
+                    assert cinfo.get(var(p)).cons_type != TMP_VAR_TYPE : "Currently, two factors are not supposed to be linked by an arc";
+                    if (vardata.get(v_q).mark < analysisRound) { // not marked
                         analyze_stack.push(q);
                         vardata.get(v_q).parent = v_p;
                     } else if (vardata.get(v_q).mark == keep) {
@@ -867,7 +879,7 @@ public class MiniSat implements SatFactory {
                         }
                         return false;
                     }
-                } else if (vardata.get(v_q).mark < minimisationRound) { // The literal is neither a factor nor from the initial propagation but is not present in the initial no-good
+                } else if (vardata.get(v_q).mark < analysisRound) { // The literal is neither a factor nor from the initial propagation but is not present in the initial no-good
                     int cur = v_p;
                     while (cur != var(p_start)) {
                         vardata.get(cur).mark = keep;
@@ -891,10 +903,10 @@ public class MiniSat implements SatFactory {
             levels = new int[(int) (trailMarker() * 1.2)];
             minRank = new int[(int) (trailMarker() * 1.2)];
         }
-        minimisationRound += 2;
-        assert minimisationRound > 0; // no underflow allowed
-        notKeep = minimisationRound;
-        keep = minimisationRound + 1;
+//        analysisRound += 2;
+//        assert analysisRound > 0; // no underflow allowed
+//        notKeep = analysisRound;
+//        keep = analysisRound + 1;
 
         // Reset minRank (only concerned levels)
         for (i = 1; i < out_learnt.size(); i++) {
@@ -904,9 +916,9 @@ public class MiniSat implements SatFactory {
         // Update the required structures
         for (i = 1; i < out_learnt.size(); i++) {
             int v = var(out_learnt.get(i));
-            levels[level(v)] = minimisationRound;
+            levels[level(v)] = analysisRound;
             minRank[level(v)] = Math.min(minRank[level(v)], pos(v));
-            vardata.get(v).mark = notKeep;
+//            vardata.get(v).mark = notKeep;
         }
 
         for (i = j = 1; i < out_learnt.size(); i++) {
@@ -933,7 +945,7 @@ public class MiniSat implements SatFactory {
         // ELSE-IF the literal is marked as notDominated OR it is a decision OR it can not be dominated by literals from the no-good THEN we must keep the root in the no-good
         else if (vardata.get(v).mark == keep
                 || reason(v) == C_Undef
-                || levels[level(v)] != minimisationRound
+                || levels[level(v)] != analysisRound
                 || pos(v) < minRank[level(v)]) {
             vardata.get(v).mark = keep; // It is not necessary to mark the literal here, this is just an optimisation to avoid testing the other assertions in the future
             return false;
@@ -951,14 +963,14 @@ public class MiniSat implements SatFactory {
                 if (level(var(r)) > rootlvl
                         && !isDominatedRecursiveVersion(r, root)) {
                     if (p != root) { // The root is from the initial no-good, and literals from the initial no-good must remain marked as dominated
-                        assert vardata.get(v).mark < minimisationRound : "Not supposed to re-mark literals";
+                        assert vardata.get(v).mark < analysisRound : "Not supposed to re-mark literals";
                         vardata.get(v).mark = keep;
                     }
                     return false;
                 }
             }
             if (p != root) { // The root is from the initial no-good, and literals from the initial no-good are already marked as dominated
-                assert vardata.get(v).mark < minimisationRound : "Not supposed to re-mark literals";
+                assert vardata.get(v).mark < analysisRound : "Not supposed to re-mark literals";
                 vardata.get(v).mark = notKeep;
             }
             return true;
@@ -972,7 +984,7 @@ public class MiniSat implements SatFactory {
             int p = analyze_stack.pop();
             int v_p = var(p);
             // IF the literal is marked as dominated and is not the root OR the literal is from the initial propagation THEN we may remove the root from the no-good
-            if ((p != p_start && vardata.get(v_p).mark >= minimisationRound) || (level(v_p) <= rootlvl)) continue;
+            if ((p != p_start && vardata.get(v_p).mark >= analysisRound) || (level(v_p) <= rootlvl)) continue;
             Clause c = getConfl(p);
             for (int k = 1; k < c.size(); k++) {
                 int q = c._g(k); // The literal (either negative or positive)
@@ -982,7 +994,7 @@ public class MiniSat implements SatFactory {
                 // ELSE-IF the literal is marked as notDominated OR it is a decision OR it can not be dominated by literals from the no-good THEN we must keep the root in the no-good
                 if (vardata.get(v_q).mark == keep
                         || reason(v_q) == C_Undef
-                        || levels[level(v_q)] != minimisationRound
+                        || levels[level(v_q)] != analysisRound
                         || pos(v_q) < minRank[level(v_q)]) {
                     vardata.get(v_q).mark = keep;
                     int cur = v_p;
@@ -991,7 +1003,7 @@ public class MiniSat implements SatFactory {
                         cur = vardata.get(cur).parent;
                     }
                     return false;
-                } else if (vardata.get(v_q).mark < minimisationRound) { // not marked
+                } else if (vardata.get(v_q).mark < analysisRound) { // not marked
                     analyze_stack.push(q);
                     vardata.get(v_q).parent = v_p;
                 }
@@ -1299,13 +1311,14 @@ public class MiniSat implements SatFactory {
         private Reason cr;
         private int level;
         private int pos;
-        private int mark; // used in conflict minimisation, denotes status of a lit (visited, keep, notKeep)
+        private int mark; // used in conflict minimisation, denotes status of a lit (analysisRound, keep, notKeep)
         private int parent; // used in conflict minimisation, denotes the parent lit
 
         public VarData(Reason cr, int level, int pos) {
             this.cr = cr;
             this.level = level;
             this.pos = pos;
+            //TODO shouldn't we initialise mark to 0 ?
         }
 
         private void set(Reason cr, int level, int pos) {
