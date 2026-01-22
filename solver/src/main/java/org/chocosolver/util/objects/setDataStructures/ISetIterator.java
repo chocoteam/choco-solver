@@ -47,6 +47,13 @@ public interface ISetIterator extends Iterator<Integer> {
 	}
 
 	/**
+	 * Inform the iterator that the set has been cleared
+	 */
+	default void notifyCleared() {
+		// nothing to do by default
+	}
+
+	/**
 	 * Returns the next int in the iteration.
 	 *
 	 * Beware : avoids autoboxing
