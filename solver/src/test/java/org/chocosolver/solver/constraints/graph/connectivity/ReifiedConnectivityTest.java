@@ -14,7 +14,7 @@ import java.util.*;
 
 public class ReifiedConnectivityTest {
 
-    @Test
+    @Test(groups="5m", timeOut=300000)
     public void testReifiedConnectivity() {
         SetType[] setTypes = new SetType[]{
                 SetType.BIPARTITESET,
