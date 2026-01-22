@@ -12,6 +12,8 @@ package org.chocosolver.util.objects.setDataStructures.swapList;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.util.objects.setDataStructures.*;
 
+import java.util.Arrays;
+
 /**
  * Bipartite set of integers:
  *
@@ -30,8 +32,9 @@ public class Set_Swap extends AbstractSet implements ISet.WithOffset {
 
 	private int size;
     private final int mapOffset;
-	private int[] values, map;
-	private final ISetIterator iter = makeReusableIterator();
+	private int[] values;
+	private int[] map;
+	private final MyISetIterator iter = new MyISetIterator();
 
 	//***********************************************************************************
 	// CONSTRUCTOR
@@ -41,12 +44,12 @@ public class Set_Swap extends AbstractSet implements ISet.WithOffset {
 	 * Creates an empty bipartite set having numbers greater or equal than <code>offSet</code> (possibly < 0)
 	 * @param offSet smallest allowed value in this set (possibly < 0)
 	 */
-	public Set_Swap(int offSet){
+	public Set_Swap(int offSet) {
 		mapOffset = offSet;
 		size = 0;
 		values = new int[16];
 		map = new int[16];
-		for(int i=0;i<map.length;i++)map[i] = -1;
+		Arrays.fill(map, -1);
 	}
 
 	//***********************************************************************************
@@ -104,27 +107,39 @@ public class Set_Swap extends AbstractSet implements ISet.WithOffset {
 		if (!contains(element)) {
 			return false;
 		}
-		iter.notifyRemoving(element);
 		int size = size();
 		if (size > 1) {
 			int idx = map[element-mapOffset];
-			int replacer = values[size - 1];
-			map[replacer-mapOffset] = idx;
-			values[idx] = replacer;
-			map[element-mapOffset] = size - 1;
-			values[size - 1] = element;
+			swap(idx, size-1);
+			if (iter.idx < size()) {
+				if (idx == iter.idx - 1) {
+					iter.idx--;
+				} else if (idx < iter.idx - 1) {
+					swap(idx, iter.idx - 1);
+					iter.idx--;
+				}
+			}
 		}
 		addSize(-1);
 		notifyObservingElementRemoved(element);
 		return true;
 	}
 
+	private void swap(int idx1, int idx2) {
+		int value1 = values[idx1];
+		int value2 = values[idx2];
+		map[value2 - mapOffset] = idx1;
+		values[idx1] = value2;
+		map[value1 - mapOffset] = idx2;
+		values[idx2] = value1;
+	}
+
 	@Override
 	public boolean contains(int element) {
-		if(element<mapOffset || element >= mapOffset+map.length){
+		if (element < mapOffset || element >= mapOffset + map.length) {
 			return false;
 		}
-		return map[element-mapOffset] >= 0 && map[element-mapOffset] < size() && values[map[element-mapOffset]] == element;
+		return map[element - mapOffset] >= 0 && map[element - mapOffset] < size() && values[map[element - mapOffset]] == element;
 	}
 
 	@Override
@@ -197,31 +212,22 @@ public class Set_Swap extends AbstractSet implements ISet.WithOffset {
 		return new FixedIntArrayIterator(toArray());
 	}
 
-	private ISetIterator makeReusableIterator() {
-		return new ISetIterator() {
-			private int idx;
+	private class MyISetIterator implements ISetIterator {
+		private int idx;
 
-			@Override
-			public void reset() {
-				idx = 0;
-			}
+		@Override
+		public void reset() {
+			idx = 0;
+		}
 
-			@Override
-			public void notifyRemoving(int item) {
-				if (idx > 0 && item == values[idx - 1]) {
-					idx--;
-				}
-			}
+		@Override
+		public boolean hasNext() {
+			return idx < size();
+		}
 
-			@Override
-			public boolean hasNext() {
-				return idx < size();
-			}
-
-			@Override
-			public int nextInt() {
-				return values[idx++];
-			}
-		};
+		@Override
+		public int nextInt() {
+			return values[idx++];
+		}
 	}
 }

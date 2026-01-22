@@ -29,7 +29,7 @@ public class Set_Swap2 extends AbstractSet {
 
     private int size;
     protected final TIntArrayList values;
-    protected final ISetIterator iter = makeReusableIterator();
+    protected final Swap2SetIterator iter = new Swap2SetIterator();
 
     //***********************************************************************************
 	// CONSTRUCTOR
@@ -60,18 +60,32 @@ public class Set_Swap2 extends AbstractSet {
 
     @Override
     public boolean remove(int element) {
-        int pos = values.indexOf(element);
-        int s = size();
-        if(pos > -1 && pos < s){
-            iter.notifyRemoving(element);
-            s--;
-            int t = values.get(s);
-            values.set(pos, t);
-            values.set(s, element);
-            addSize(-1);
-            notifyObservingElementRemoved(element);
-            return true;
-        }else return false;
+        int idx = values.indexOf(element);
+        if (idx <= -1 || idx >= size()) {
+            return false;
+        }
+        int size = size();
+        if (size > 1) {
+            swap(idx, size-1);
+            if (iter.idx < size()) {
+                if (idx == iter.idx - 1) {
+                    iter.idx--;
+                } else if (idx < iter.idx - 1) {
+                    swap(idx, iter.idx - 1);
+                    iter.idx--;
+                }
+            }
+        }
+        addSize(-1);
+        notifyObservingElementRemoved(element);
+        return true;
+    }
+
+    private void swap(int idx1, int idx2) {
+        int value1 = values.get(idx1);
+        int value2 = values.get(idx2);
+        values.set(idx1, value2);
+        values.set(idx2, value1);
     }
 
     @Override
@@ -148,31 +162,23 @@ public class Set_Swap2 extends AbstractSet {
         return new FixedIntArrayIterator(toArray());
     }
 
-    protected ISetIterator makeReusableIterator() {
-        return new ISetIterator() {
-            private int idx;
+    private class Swap2SetIterator implements ISetIterator {
 
-            @Override
-            public void reset() {
-                idx = 0;
-            }
+        private int idx;
 
-            @Override
-            public void notifyRemoving(int item) {
-                if (idx > 0 && item == values.get(idx - 1)) {
-                    idx--;
-                }
-            }
+        @Override
+        public void reset() {
+            idx = 0;
+        }
 
-            @Override
-            public boolean hasNext() {
-                return idx < size();
-            }
+        @Override
+        public boolean hasNext() {
+            return idx < size();
+        }
 
-            @Override
-            public int nextInt() {
-                return values.get(idx++);
-            }
-        };
+        @Override
+        public int nextInt() {
+            return values.get(idx++);
+        }
     }
 }

@@ -35,7 +35,7 @@ public class Set_LinkedList extends AbstractSet {
 	private IntCell last;
 	private int size;
 	private IntCell poolGC;
-	private final ISetIterator iter = makeReusableIterator();
+	private final ListSetIterator iter = new ListSetIterator();
 
 	//***********************************************************************************
 	// METHODS
@@ -126,7 +126,6 @@ public class Set_LinkedList extends AbstractSet {
 
 	@Override
 	public void clear() {
-		iter.notifyCleared();
 		if (first != null) {
 			last.next = poolGC;
 			poolGC = first;
@@ -196,42 +195,6 @@ public class Set_LinkedList extends AbstractSet {
 		return new FixedIntArrayIterator(toArray());
 	}
 
-	private ISetIterator makeReusableIterator() {
-		return new ISetIterator() {
-
-			private IntCell nextCell = first;
-
-			@Override
-			public void reset() {
-				nextCell = first;
-			}
-
-			@Override
-			public void notifyRemoving(int item) {
-				if (nextCell != null && nextCell.element == item) {
-					nextCell = nextCell.next;
-				}
-			}
-
-			@Override
-			public void notifyCleared() {
-				nextCell = null;
-			}
-
-			@Override
-			public boolean hasNext() {
-				return nextCell != null;
-			}
-
-			@Override
-			public int nextInt() {
-				int e = nextCell.element;
-				nextCell = nextCell.next;
-				return e;
-			}
-		};
-	}
-
 	//***********************************************************************************
 	// STRUCTURE
 	//***********************************************************************************
@@ -253,6 +216,34 @@ public class Set_LinkedList extends AbstractSet {
 		@Override
 		public String toString() {
 			return element + "";
+		}
+	}
+
+	private class ListSetIterator implements ISetIterator {
+
+		private IntCell nextCell = first;
+
+		@Override
+		public void reset() {
+			nextCell = first;
+		}
+
+		public void notifyRemoving(int item) {
+			if (nextCell != null && nextCell.element == item) {
+				nextCell = nextCell.next;
+			}
+		}
+
+		@Override
+		public boolean hasNext() {
+			return nextCell != null && size() > 0;
+		}
+
+		@Override
+		public int nextInt() {
+			int e = nextCell.element;
+			nextCell = nextCell.next;
+			return e;
 		}
 	}
 }
