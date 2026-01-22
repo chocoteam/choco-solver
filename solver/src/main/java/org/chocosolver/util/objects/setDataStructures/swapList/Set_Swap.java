@@ -10,10 +10,7 @@
 package org.chocosolver.util.objects.setDataStructures.swapList;
 
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.util.objects.setDataStructures.AbstractSet;
-import org.chocosolver.util.objects.setDataStructures.ISet;
-import org.chocosolver.util.objects.setDataStructures.ISetIterator;
-import org.chocosolver.util.objects.setDataStructures.SetType;
+import org.chocosolver.util.objects.setDataStructures.*;
 
 /**
  * Bipartite set of integers:
@@ -34,7 +31,7 @@ public class Set_Swap extends AbstractSet implements ISet.WithOffset {
 	private int size;
     private final int mapOffset;
 	private int[] values, map;
-	private final ISetIterator iter = newIterator();
+	private final ISetIterator iter = makeReusableIterator();
 
 	//***********************************************************************************
 	// CONSTRUCTOR
@@ -178,6 +175,13 @@ public class Set_Swap extends AbstractSet implements ISet.WithOffset {
 		return SetType.BIPARTITESET;
 	}
 
+	@Override
+	public int[] toArray(){
+		int[] valuesScreenshot = new int[size()];
+		System.arraycopy(values,0,valuesScreenshot,0,size());
+		return valuesScreenshot;
+	}
+
 	//***********************************************************************************
 	// ITERATOR
 	//***********************************************************************************
@@ -189,27 +193,34 @@ public class Set_Swap extends AbstractSet implements ISet.WithOffset {
 	}
 
 	@Override
-	public ISetIterator newIterator(){
+	public ISetIterator newIterator() {
+		return new FixedIntArrayIterator(toArray());
+	}
+
+	private ISetIterator makeReusableIterator() {
 		return new ISetIterator() {
 			private int idx;
+
 			@Override
 			public void reset() {
 				idx = 0;
 			}
+
 			@Override
 			public void notifyRemoving(int item) {
-				if(idx>0 && item == values[idx-1]){
+				if (idx > 0 && item == values[idx - 1]) {
 					idx--;
 				}
 			}
+
 			@Override
 			public boolean hasNext() {
 				return idx < size();
 			}
+
 			@Override
 			public int nextInt() {
-				idx ++;
-				return values[idx-1];
+				return values[idx++];
 			}
 		};
 	}

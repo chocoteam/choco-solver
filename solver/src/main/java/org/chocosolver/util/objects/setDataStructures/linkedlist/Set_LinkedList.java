@@ -9,7 +9,9 @@
  */
 package org.chocosolver.util.objects.setDataStructures.linkedlist;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.util.objects.setDataStructures.AbstractSet;
+import org.chocosolver.util.objects.setDataStructures.FixedIntArrayIterator;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
@@ -154,6 +156,17 @@ public class Set_LinkedList extends AbstractSet {
 		return SetType.LINKED_LIST;
 	}
 
+	@Override
+	public int[] toArray(){
+		TIntArrayList copy = new TIntArrayList();
+		IntCell current = first;
+		while (current != null) {
+			copy.add(current.element);
+			current = current.next;
+		}
+		return copy.toArray();
+	}
+
 	//***********************************************************************************
 	// ITERATOR
 	//***********************************************************************************
@@ -165,7 +178,11 @@ public class Set_LinkedList extends AbstractSet {
 	}
 
 	@Override
-	public ISetIterator newIterator(){
+	public ISetIterator newIterator() {
+		return new FixedIntArrayIterator(toArray());
+	}
+
+	private ISetIterator makeReusableIterator() {
 		return new ISetIterator() {
             int r =0;
 			private IntCell nextCell = first;

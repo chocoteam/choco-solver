@@ -11,6 +11,7 @@ package org.chocosolver.util.objects.setDataStructures.swapList;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.util.objects.setDataStructures.AbstractSet;
+import org.chocosolver.util.objects.setDataStructures.FixedIntArrayIterator;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
@@ -26,10 +27,9 @@ public class Set_Swap2 extends AbstractSet {
 	// VARIABLES
 	//***********************************************************************************
 
-    protected int size;
-    protected TIntArrayList values;
-    private final ISetIterator iter = newIterator();
-
+    private int size;
+    protected final TIntArrayList values;
+    protected final ISetIterator iter = makeReusableIterator();
 
     //***********************************************************************************
 	// CONSTRUCTOR
@@ -50,8 +50,8 @@ public class Set_Swap2 extends AbstractSet {
     @Override
     public boolean add(int element) {
         if(!contains(element)){
-            values.insert(size, element);
-            size++;
+            values.insert(size(), element);
+            addSize(1);
             notifyObservingElementAdded(element);
             return true;
         }
@@ -68,7 +68,7 @@ public class Set_Swap2 extends AbstractSet {
             int t = values.get(s);
             values.set(pos, t);
             values.set(s, element);
-            size--;
+            addSize(-1);
             notifyObservingElementRemoved(element);
             return true;
         }else return false;
@@ -85,9 +85,17 @@ public class Set_Swap2 extends AbstractSet {
         return size;
     }
 
+    protected void setSize(int s) {
+        size = s;
+    }
+
+    protected void addSize(int delta) {
+        size += delta;
+    }
+
     @Override
     public void clear() {
-        size = 0;
+        setSize(0);
         notifyObservingCleared();
     }
 
@@ -121,33 +129,49 @@ public class Set_Swap2 extends AbstractSet {
     }
 
     @Override
+    public int[] toArray(){
+        return values.toArray(0, size());
+    }
+
+    //***********************************************************************************
+    // ITERATOR
+    //***********************************************************************************
+
+    @Override
     public ISetIterator iterator(){
         iter.reset();
         return iter;
     }
 
     @Override
-    public ISetIterator newIterator(){
+    public ISetIterator newIterator() {
+        return new FixedIntArrayIterator(toArray());
+    }
+
+    protected ISetIterator makeReusableIterator() {
         return new ISetIterator() {
             private int idx;
+
             @Override
             public void reset() {
                 idx = 0;
             }
+
             @Override
             public void notifyRemoving(int item) {
-                if(idx>0 && item == values.get(idx-1)){
+                if (idx > 0 && item == values.get(idx - 1)) {
                     idx--;
                 }
             }
+
             @Override
             public boolean hasNext() {
                 return idx < size();
             }
+
             @Override
             public int nextInt() {
-                idx ++;
-                return values.get(idx-1);
+                return values.get(idx++);
             }
         };
     }
