@@ -2657,9 +2657,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     default Constraint table(IntVar[] vars, Tuples tuples) {
         String algo = "CT";
         long estimatedMem = 0;
-        long maxMem = ref().getSettings().getMaxSizeInMBToUseCompactTable();
+          long maxMem = ref().getSettings().getMaxSizeInMBToUseCompactTable();
         for (int i = 0; i < vars.length && tuples.isFeasible(); i++) {
-            estimatedMem += ((tuples.nbTuples() / 64L) * vars[i].getRange()) / 1024 / 1024; // in MB
+            // on word encoded 64 bits on a long (of 64 bits)
+            estimatedMem += ((tuples.nbTuples() / 64L) * vars[i].getRange()) * 64 / 1024 / 1024; // in MB
             if (estimatedMem < 0 || estimatedMem > maxMem) {
                 algo = "STR2+";
                 break;
