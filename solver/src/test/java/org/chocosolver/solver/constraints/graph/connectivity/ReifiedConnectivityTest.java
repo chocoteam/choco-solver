@@ -1,6 +1,7 @@
 package org.chocosolver.solver.constraints.graph.connectivity;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Providers;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
@@ -8,32 +9,42 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.SetType;
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.*;
 
 public class ReifiedConnectivityTest {
 
-    @Test(groups="5m", timeOut=300000)
-    public void testReifiedConnectivity() {
-        SetType[] setTypes = new SetType[]{
-                SetType.BIPARTITESET,
-                SetType.SMALLBIPARTITESET,
-                SetType.LINKED_LIST,
-                SetType.BITSET,
-                SetType.RANGESET
-        };
-        for (int k = 2; k < 8; k++) {
-            for (SetType setType : setTypes) {
-                buildModelAndSolve(k, setType);
-            }
-        }
+    @DataProvider
+    public Object[][] params() {
+        return Providers.merge(new Object[][]{
+                {SetType.BIPARTITESET},
+                {SetType.SMALLBIPARTITESET},
+                {SetType.LINKED_LIST},
+                {SetType.BITSET},
+                {SetType.RANGESET}
+        }, new Object[][]{
+                {2, 828, 367},
+                {3, 5895, 2582},
+                {4, 21179, 12384},
+                {5, 38201, 40704},
+                {6, 29592, 92768},
+                {7, 4752, 144896}
+        });
+    }
+
+
+    @Test(groups="10s", timeOut=60_000, dataProvider = "params")
+    public void testReifiedConnectivity(SetType setType, int k, int f, int nf) {
+        buildModelAndSolve(k, setType, f, nf);
     }
 
     /**
      * builds the model exactly as the Scala version does and enumerates all solutions
      */
-    private static void buildModelAndSolve(int k, SetType setType) {
+    private static void buildModelAndSolve(int k, SetType setType, int nbfree, int nbtif) {
         Model model = new Model();
 
         /* ------------------------------------------------------------------ *
@@ -802,6 +813,8 @@ public class ReifiedConnectivityTest {
             else
                 itf++;
         }
-        System.out.println("free: " + free +" itf: "+ itf);
+        //System.out.println("free: " + free +" itf: "+ itf);
+        Assert.assertEquals(free, nbfree);
+        Assert.assertEquals(itf, nbtif);
     }
 }
