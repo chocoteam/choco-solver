@@ -41,7 +41,7 @@ public class UGVarConnectivityHelper {
     private final List<int[]> bridges = new ArrayList<>();
 
     // --- constructor
-    public UGVarConnectivityHelper(UndirectedGraphVar g){
+    public UGVarConnectivityHelper(UndirectedGraphVar g) {
         this.g = g;
         this.n = g.getNbMaxNodes();
         this.fifo = new int[n];
@@ -78,12 +78,14 @@ public class UGVarConnectivityHelper {
         articulationPoints.clear();
         bridges.clear();
         ISet mNodes = g.getMandatoryNodes();
-        if(g.getMandatoryNodes().size()<2) return;
+        if (g.getMandatoryNodes().size() < 2) {
+            return;
+        }
 
         visited.clear();
         Arrays.fill(num, 0);
-        for(int root : mNodes) {
-            if(!visited.get(root)) {
+        for (int root : mNodes) {
+            if (!visited.get(root)) {
                 // root node init
                 visited.set(root);
                 // DFS from root
@@ -94,28 +96,29 @@ public class UGVarConnectivityHelper {
 
     /**
      * Computes ridge and articulation point detection linking mandatory nodes.
+     *
      * @param s root node, must be a mandatory node itself
      */
     private void computeMandatoryArticulationPointsAndBridgesFrom(int s) {
         assert g.getMandatoryNodes().contains(s);
         numOrder = 1;
         num[s] = numOrder++;
-        for (int next:g.getPotentialNeighborsOf(s)) {
+        for (int next : g.getPotentialNeighborsOf(s)) {
             if (num[next] == 0) {
                 int[] LowMand = doFindArticulation(next, s);
                 int lowN = LowMand[0];
                 int mandN = LowMand[1];
-                if(num[next] == lowN && mandN == 1 && !g.getMandatoryNeighborsOf(s).contains(next)){
-                    bridges.add(new int[]{s,next});
+                if (num[next] == lowN && mandN == 1 && !g.getMandatoryNeighborsOf(s).contains(next)) {
+                    bridges.add(new int[]{s, next});
                 }
             }
         }
     }
 
-    private int[] doFindArticulation (int s, int parent) {
+    private int[] doFindArticulation(int s, int parent) {
         int lowpt = num[s] = numOrder++;
-        int mand = g.getMandatoryNodes().contains(s)?1:0;
-        for (int next:g.getPotentialNeighborsOf(s)) {
+        int mand = g.getMandatoryNodes().contains(s) ? 1 : 0;
+        for (int next : g.getPotentialNeighborsOf(s)) {
             if (num[next] == 0) {
                 int[] LowMand = doFindArticulation(next, s);
                 int lowN = LowMand[0];
@@ -124,13 +127,13 @@ public class UGVarConnectivityHelper {
                 mand = Math.max(mand, mandN);
                 if (lowN >= num[s] && mandN == 1) {
                     articulationPoints.add(s);
-                    if(num[next] == lowN && !g.getMandatoryNeighborsOf(s).contains(next)){
-                        bridges.add(new int[]{s,next});
+                    if (num[next] == lowN && !g.getMandatoryNeighborsOf(s).contains(next)) {
+                        bridges.add(new int[]{s, next});
                     }
                 }
             } else if (num[next] < num[s] && next != parent) {
-                lowpt = Math.min(num[next],lowpt);
-                mand = Math.max(mand, g.getMandatoryNodes().contains(next)?1:0);
+                lowpt = Math.min(num[next], lowpt);
+                mand = Math.max(mand, g.getMandatoryNodes().contains(next) ? 1 : 0);
             }
         }
         return new int[]{lowpt, mand};

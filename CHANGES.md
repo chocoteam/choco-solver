@@ -21,6 +21,7 @@ See [milestone 5.0.0-beta.2](https://github.com/chocoteam/choco-solver/milestone
 - Fix bug : Unexpected behavior when using Task with scalar (#1114)
 - Replace Cumulative implementation by state-of-the-art implementation of TimeTabling and OverloadChecking
 - Fix bug : IntVar no longer extends Iterable to avoid errors in nested loops
+- Fix bug : Fix iterator issue when using ISet, especially within graph variables (#1174 and #1175)
 
 #### Contributors to this release:
 - [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
