@@ -133,8 +133,11 @@ public class AlgoAllDiffBimodal implements IAlldifferentAlgorithm {
         this.low = new int[D];
 
         // Specific data structures for generating the explanations
-        //TODO: only if LCG
-        this.sat = model.getSolver().getSat();
+        if(model.getSolver().isLCG()){
+            this.sat = model.getSolver().getSat();
+        }else{
+            this.sat = null;
+        }
         this.sccPartition = new int[D];
         this.sccIndices = new int[D]; //TODO: bounded by R + 1 ?
         this.numberOfSCCs = 0;
