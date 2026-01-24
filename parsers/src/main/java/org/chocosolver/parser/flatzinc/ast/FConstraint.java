@@ -1157,8 +1157,7 @@ public enum FConstraint {
                     for (int i = 0; i < n; i++) {
                         ends[i] = model.intVar(starts[i].getName() + "_" + durations[i].getName(),
                                 starts[i].getLB() + durations[i].getLB(),
-                                starts[i].getUB() + durations[i].getUB(),
-                                true);
+                                starts[i].getUB() + durations[i].getUB());
                         assert durations[i].getUB() >= 0 && resources[i].getUB() >= 0;
                         tasks[i] = new Task(starts[i], durations[i], ends[i]);
                     }
