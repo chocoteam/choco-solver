@@ -305,7 +305,7 @@ public class MiniSat implements SatFactory {
             }
             attachClause(cr);
             claBumpActivity(cr);
-            uncheckedEnqueue(learnt_clause.get(0), Reason.r(cr));
+            uncheckedEnqueue(learnt_clause.get(0), cr);
         }
         claDecayActivity();
 
@@ -683,14 +683,16 @@ public class MiniSat implements SatFactory {
     }
 
     public int analyze(Clause confl, TIntArrayList out_learnt) {
-        int pathC = 0;
+        int level = findConflictLevel();
+        cancelUntil(level);
+        if (level <= rootlvl) return level;
         int p = litUndef;
         // Generate conflict clause:
         analysisRound += 2; // Reset the marks
         notKeep = analysisRound;
         keep = analysisRound + 1;
         assert analysisRound > 0; // no underflow allowed
-        analyseConflict(confl, out_learnt, p, pathC);
+        analyseConflict(confl, out_learnt, p);
         replaceUnreliableLits(out_learnt);
         int j;
         if (DEBUG > 1) System.out.printf("Before minimisation (%d) : %s\n", ccmin_mode, out_learnt);
@@ -710,7 +712,8 @@ public class MiniSat implements SatFactory {
         return getBacktrackLevel(out_learnt);
     }
 
-    private void analyseConflict(Clause confl, TIntList out_learnt, int p, int pathC) {
+    private void analyseConflict(Clause confl, TIntList out_learnt, int p) {
+        int pathC = 0;
         out_learnt.add(litUndef);      // (leave room for the asserting literal)
         int index = trail_.size() - 1;
 
@@ -719,12 +722,13 @@ public class MiniSat implements SatFactory {
             pathC = updateNogood(confl, out_learnt, p, pathC);
             // Select next clause to look at:
             //noinspection StatementWithEmptyBody
-            while (vardata.get(var(trail_.get(index--))).mark != analysisRound) ;
+            while (vardata.get(var(trail_.get(index--))).mark != analysisRound);
             p = trail_.get(index + 1);
             confl = getConfl(p);
             vardata.get(var(p)).mark--;
             if (DEBUG > 1) System.out.printf("clear %d l:%d\n", var(p), p);
             pathC--;
+            //assert pathC >= 0 : "Something goes wrong with the UIP";
             if (DEBUG > 1) System.out.printf("path-- (%d)\n", pathC);
         } while (pathC > 0 || !cinfo.get(var(p)).reliable);
         out_learnt.set(0, neg(p));
@@ -754,7 +758,7 @@ public class MiniSat implements SatFactory {
                 if (DEBUG > 1) System.out.printf("mark %d\n", x);
                 if (level(x) >= trailMarker()) {
                     pathC++;
-                    if (DEBUG > 1) System.out.printf("path++ (%d)\n", pathC);
+                    if (DEBUG > 1) System.out.printf("path++ (%d -- %d >= %d)\n", pathC, level(x), trailMarker());
                     if (/*!cinfo.get(x).reliable && */cinfo.get(x).cons_type == TMP_VAR_TYPE) {
                         pathC = updateNogood(getConfl(q), out_learnt, q, pathC);
                     }
@@ -780,6 +784,7 @@ public class MiniSat implements SatFactory {
             if (cinfo.get(var(p)).reliable) {
                 continue;
             }
+            assert cinfo.get(var(p)).cons_type != TMP_VAR_TYPE : "no factor is allowed in a nogood";
             if (DEBUG > 0) {
                 System.out.printf("replacing %s in %s\n", p, out_learnt);
             }
@@ -872,7 +877,6 @@ public class MiniSat implements SatFactory {
                 int v_q = var(q); // The boolean variable associated with the literal
                 if (level(v_q) <= rootlvl) continue;
                 if (cinfo.get(v_q).cons_type == TMP_VAR_TYPE) { // The literal is a factor so we check its reason instead
-                    assert c.size() == 2 : "Currently, all factors should have a unique literal in their reason";
                     assert cinfo.get(var(p)).cons_type != TMP_VAR_TYPE : "Currently, two factors are not supposed to be linked by an arc";
                     if (vardata.get(v_q).mark < analysisRound) { // not marked
                         analyze_stack.push(q);

@@ -211,8 +211,6 @@ public class LazyClauseGeneration implements Learn {
         learnt_clause.resetQuick();
         if (mSat.confl != MiniSat.C_Undef) {
             Clause cl = mSat.confl;
-            level = mSat.findConflictLevel();
-            mSat.cancelUntil(level);
             level = mSat.analyze(cl, learnt_clause);
             if (VERBOSE)
                 System.out.printf("%s learn %s\n",
