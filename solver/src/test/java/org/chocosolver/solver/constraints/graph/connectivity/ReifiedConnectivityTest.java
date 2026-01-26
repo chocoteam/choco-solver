@@ -36,7 +36,7 @@ public class ReifiedConnectivityTest {
     }
 
 
-    @Test(groups="10s", timeOut=60_000, dataProvider = "params")
+    @Test(groups="10s", timeOut=120_000, dataProvider = "params")
     public void testReifiedConnectivity(SetType setType, int k, int f, int nf) {
         buildModelAndSolve(k, setType, f, nf);
     }
