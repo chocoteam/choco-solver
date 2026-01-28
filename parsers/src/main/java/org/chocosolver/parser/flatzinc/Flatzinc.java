@@ -102,11 +102,14 @@ public class Flatzinc extends RegParser {
         defaultSettings = Settings.prod()
                 .setMinCardinalityForSumDecomposition(256)
                 .setLCG(lcg)
-                .setNbMaxLearntClauses(100_000)
+                .setNbMaxLearntClauses(20_000)
                 //.setIntVarLazyLitWithWeakBounds(false)
                 .set("adhocReification", true)
-                .setWarnUser(false)
-        ;
+                .setWarnUser(false);
+        Settings.PARAM_BICLIQUE_FACTORISATION = Boolean.getBoolean("bcf");
+        Settings.PARAM_CLAUSE_MINIMISATION = Integer.getInteger("ccmin", 0);
+        Settings.PARAM_REDUCE_SAT_LEARNTS_CLAUSE_BASE = Integer.getInteger("lcbase", 20000);;
+        Settings.PARAM_REDUCE_SAT_LEARNTS_CLAUSE_FACTOR = Integer.getInteger("lcfactor", 5000);
     }
 
     @Override
