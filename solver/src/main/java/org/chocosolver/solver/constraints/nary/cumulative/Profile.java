@@ -130,7 +130,8 @@ public class Profile {
             min = Math.min(min, tasks[i].getEst());
             max = Math.max(max, tasks[i].getLct());
         }
-        if (max - min < activeTasks.cardinality() * activeTasks.cardinality()) {
+        if (!tasks[0].getStart().getModel().getSolver().isLCG()
+                && max - min < activeTasks.cardinality() * activeTasks.cardinality()) {
             buildProfileNaive(tasks, tasksHeights, activeTasks);
         } else {
             buildProfileSweep(tasks, tasksHeights, activeTasks);

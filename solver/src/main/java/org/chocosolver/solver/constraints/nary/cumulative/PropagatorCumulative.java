@@ -400,9 +400,6 @@ public class PropagatorCumulative extends Propagator<IntVar> {
             final int begin,
             final int end
     ) {
-        //TODO: factorise
-        // get the factor, if it exists
-
         // Create the corresponding factor
         if (bicliqueFactorisation) {
             if (!factorExists(begin)) {
@@ -411,8 +408,8 @@ public class PropagatorCumulative extends Propagator<IntVar> {
                 int m = 1;
                 for (int k = 0; k < indexesTask.size(); ++k) {
                     final int i = indexesTask.getQuick(k);
-                    r[m++] = getNegGeqLit(tasks[i].getEnd(), Math.min(tasks[i].getEnd().getLB(), end));
-                    r[m++] = getNegLeqLit(tasks[i].getStart(), Math.max(tasks[i].getStart().getUB(), begin));
+                    r[m++] = getNegGeqLit(tasks[i].getEnd(), end);
+                    r[m++] = getNegLeqLit(tasks[i].getStart(), begin);
                     r[m++] = tasks[i].getDuration().getMinLit();
                     r[m++] = heights[i].getMinLit();
                 }
@@ -423,8 +420,8 @@ public class PropagatorCumulative extends Propagator<IntVar> {
         } else {
             for (int k = 0; k < indexesTask.size(); ++k) {
                 final int i = indexesTask.getQuick(k);
-                literals.add(getNegGeqLit(tasks[i].getEnd(), Math.min(tasks[i].getEnd().getLB(), end)));
-                literals.add(getNegLeqLit(tasks[i].getStart(), Math.max(tasks[i].getStart().getUB(), begin)));
+                literals.add(getNegGeqLit(tasks[i].getEnd(), end));
+                literals.add(getNegLeqLit(tasks[i].getStart(), begin));
                 literals.add(tasks[i].getDuration().getMinLit());
                 literals.add(heights[i].getMinLit());
             }
@@ -503,20 +500,27 @@ public class PropagatorCumulative extends Propagator<IntVar> {
         if (!task.getStart().isInstantiated()) {
             int j = profile.find(task.getEst());
             while (j < profile.size() && profile.getStartRectangle(j) < Math.min(task.getEct(), task.getLst())) {
-                if (capacity.getUB() - height.getLB() < profile.getHeightRectangle(j)) {
-                    final Reason reason;
+                if (capacity.getUB() - height.getLB() < profile.getHeightRectangle(j)
+                        && task.getEst() < profile.getEndRectangle(j)) {
                     if (lcg()) {
-                        literals.clear();
-                        final int end = Math.min(task.getEct(), profile.getEndRectangle(j));
-                        literals.add(getNegGeqLit(task.getEnd(), end));
-                        literals.add(task.getDuration().getMinLit());
-                        literals.add(height.getMinLit());
-                        addLiteralsCapacityAndTasks(literals, profile.getIndexesTaskRectangle(j), end - 1, end);
-                        reason = buildReason(literals);
+                        int end;
+                        do {
+                            literals.clear();
+                            end = Math.min(task.getEct(), profile.getEndRectangle(j)); // time point for pointwise explanation
+                            literals.add(getNegGeqLit(task.getEnd(), end));
+                            literals.add(task.getDuration().getMinLit());
+                            literals.add(height.getMinLit());
+                            addLiteralsCapacityAndTasks(literals, profile.getIndexesTaskRectangle(j), end - 1, end);
+                            if(filterEst(task, height, end, this, buildReason(literals))){
+                                hasFiltered = true;
+                            }else{
+                                assert false; // this should never happen
+                                break;
+                            }
+                        } while (end < profile.getEndRectangle(j));
                     } else {
-                        reason = Reason.undef();
+                        hasFiltered |= filterEst(task, height, Math.min(task.getLst(), profile.getEndRectangle(j)), this);
                     }
-                    hasFiltered |= filterEst(task, height, Math.min(task.getLst(), profile.getEndRectangle(j)), this, reason);
                 }
                 j++;
             }
@@ -534,30 +538,37 @@ public class PropagatorCumulative extends Propagator<IntVar> {
      * @throws ContradictionException when a filtering error is encountered
      */
     private boolean scalableTimeTableFilterLct(final Task task, final IntVar height) throws ContradictionException {
-        boolean hasFiltered = false;
-        if (!task.getEnd().isInstantiated()) {
-            int j = profile.find(task.getLct() - 1);
-            while (j >= 1 && profile.getEndRectangle(j) > Math.max(task.getLst(), task.getEct())) {
-                if (capacity.getUB() - height.getLB() < profile.getHeightRectangle(j)) {
-                    final Reason reason;
-                    if (lcg()) {
-                        literals.clear();
-                        final int begin = Math.max(profile.getStartRectangle(j), task.getLst());
-                        literals.add(getNegLeqLit(task.getStart(), begin));
-                        literals.add(task.getDuration().getMinLit());
-                        literals.add(height.getMinLit());
-                        addLiteralsCapacityAndTasks(literals, profile.getIndexesTaskRectangle(j), begin, begin + 1);
-                        reason = buildReason(literals);
-                    } else {
-                        reason = Reason.undef();
+            boolean hasFiltered = false;
+            if (!task.getEnd().isInstantiated()) {
+                int j = profile.find(task.getLct() - 1);
+                while (j >= 1 && profile.getEndRectangle(j) > Math.max(task.getLst(), task.getEct())) {
+                    if (capacity.getUB() - height.getLB() < profile.getHeightRectangle(j)
+                            && task.getLct() > profile.getStartRectangle(j)) {
+                        if (lcg()) {
+                            int begin;
+                            do {
+                                begin = Math.max(profile.getStartRectangle(j), task.getLst()); // time point for pointwise explanation
+                                literals.clear();
+                                literals.add(getNegLeqLit(task.getStart(), begin));
+                                literals.add(task.getDuration().getMinLit());
+                                literals.add(height.getMinLit());
+                                addLiteralsCapacityAndTasks(literals, profile.getIndexesTaskRectangle(j), begin, begin + 1);
+                                if (filterLct(task, height, begin, this, buildReason(literals))) {
+                                    hasFiltered = true;
+                                } else {
+                                    assert false; // this should never happen
+                                    break;
+                                }
+                            } while (begin > profile.getStartRectangle(j));
+                        } else {
+                            hasFiltered |= filterLct(task, height, Math.max(profile.getStartRectangle(j), task.getEct()), this);
+                        }
                     }
-                    hasFiltered |= filterLct(task, height, Math.max(profile.getStartRectangle(j), task.getEct()), this, reason);
+                    j--;
                 }
-                j--;
             }
+            return hasFiltered;
         }
-        return hasFiltered;
-    }
 
     /**
      * Computes the ttAfter map, which, to a given time point, associates the total amount of energy in the profile
