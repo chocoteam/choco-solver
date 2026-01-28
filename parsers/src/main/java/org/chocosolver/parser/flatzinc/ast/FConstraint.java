@@ -22,6 +22,7 @@ import org.chocosolver.solver.expression.discrete.logical.LoExpression;
 import org.chocosolver.solver.expression.discrete.logical.NaLoExpression;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.ArrayList;
@@ -1702,6 +1703,9 @@ public enum FConstraint {
             for (int[] couple : t) {
                 tuples.add(couple);
             }
+            if(x.length == 1) {
+                model.member(x[0], ArrayUtils.flatten(tuples.toMatrix())).post();
+            } else
             if (x.length == 2) {
                 model.table(x[0], x[1], tuples).post();
             } else {
