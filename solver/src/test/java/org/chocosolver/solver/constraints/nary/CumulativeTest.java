@@ -208,13 +208,13 @@ public class CumulativeTest {
 
         Task[] tasks = IntStream.range(0, 4)
                 .mapToObj(i -> new Task(
-                        model.intVar("s" + i, s[i][0], s[i][1]),
-                        model.intVar("d" + i, d[i][0], d[i][1]),
-                        model.intVar("e" + i, e[i][0], e[i][1])))
+                        model.intVar("s" + (i+1), s[i][0], s[i][1]),
+                        model.intVar("d" + (i+1), d[i][0], d[i][1]),
+                        model.intVar("e" + (i+1), e[i][0], e[i][1])))
                 .toArray(Task[]::new);
 
         IntVar[] height = IntStream.range(0, 4)
-                .mapToObj(i -> model.intVar("h" + i, h[i][0], h[i][1]))
+                .mapToObj(i -> model.intVar("h" + (i+1), h[i][0], h[i][1]))
                 .toArray(IntVar[]::new);
 
         model.cumulative(tasks, height, model.intVar(5)).post();
@@ -222,6 +222,40 @@ public class CumulativeTest {
         solver.findAllSolutions();
 
         Assert.assertEquals(solver.getSolutionCount(), 8);
+    }
+
+    @Test(groups = "1s", dataProvider = "trueOrFalse", dataProviderClass = Providers.class)
+    public void testArticle(boolean lcg) {
+        Model model = new Model(Settings.dev().setLCG(lcg));
+        char[] n = new char[]{'a', 'b', 'c', 'd', 'e', 'f'};
+        int[] d = new int[]{2,6,2,2,5,6};
+        int[] h = new int[]{1,2,4,2,2,2};
+
+        Task[] tasks = IntStream.range(0, 6)
+                .mapToObj(i -> new Task(
+                        model.intVar("s" + n[i], 0,20),
+                        model.intVar("d" + n[i], d[i])))
+                .toArray(Task[]::new);
+        IntVar[] height = IntStream.range(0, 6)
+                .mapToObj(i -> model.intVar("h" + n[i], h[i]))
+                .toArray(IntVar[]::new);
+
+        for(int i = 0; i < tasks.length; i++){
+            tasks[i].getEnd().le(20).post();
+        }
+        model.cumulative(tasks, height, model.intVar(5)).post();
+        // precedence constraints
+        tasks[0].getEnd().le(tasks[1].getStart()).post();
+        tasks[1].getEnd().le(tasks[2].getStart()).post();
+        tasks[3].getEnd().le(tasks[4].getStart()).post();
+        // additional constraints
+        tasks[2].getStart().le(9).post();
+        tasks[4].getStart().le(4).post();
+
+        Solver solver = model.getSolver();
+        solver.findAllSolutions();
+
+        Assert.assertEquals(solver.getSolutionCount(), 87);
     }
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "provideFilterHeight")
@@ -263,7 +297,7 @@ public class CumulativeTest {
 
     @DataProvider(name = "provideRcpsp")
     private Object[][] provideRcpsp() {
-        return new Object[][]{j3010_1(), j3010_4(), j3017_5()};
+        return Providers.merge(new Object[][]{j3010_1(), j3010_4(), j3017_5()}, Providers.trueOrFalse());
     }
 
     private Object[] j3010_1() {
@@ -497,10 +531,11 @@ public class CumulativeTest {
             int[] durations,
             int[][] resourcesConsumption,
             int[][] successors,
-            int optimalMakespan
+            int optimalMakespan,
+            boolean lcg
     ) {
         int size = durations.length;
-        Model model = new Model();
+        Model model = new Model(Settings.init().setLCG(lcg));
         Task[] tasks = new Task[size];
         IntVar[] starts = new IntVar[size];
         int hor = Arrays.stream(durations).sum();
@@ -551,7 +586,7 @@ public class CumulativeTest {
 
     @DataProvider(name = "provideJssp")
     private Object[][] provideJssp() {
-        return new Object[][]{ft06()};
+        return Providers.merge(new Object[][]{ft06()}, Providers.trueOrFalse());
     }
 
     private Object[] ft06() {
@@ -580,10 +615,11 @@ public class CumulativeTest {
             int[][] durations,
             int[][] idMachines,
             int nbMachines,
-            int optimalMakespan
+            int optimalMakespan,
+            boolean lcg
     ) {
         int size = durations.length;
-        Model model = new Model();
+        Model model = new Model(Settings.init().setLCG(lcg));
         Task[] tasks = new Task[durations.length * nbMachines];
         Task[][] tasksPerJob = new Task[size][];
         int hor = Arrays.stream(durations).flatMapToInt(Arrays::stream).sum();
