@@ -327,7 +327,7 @@ public class MiniSat implements SatFactory {
         } else if (cr.size() == 2) {
             cr.lbd = level(var(cr._g(0))) == level(var(cr._g(1))) ? 1 : 2;
         } else {
-            int maxLvl = level(var(cr._g(0)));
+            int maxLvl = level(var(cr._g(0))) + 1;
             if (levels.length <= maxLvl) {
                 levels = new long[(int) (maxLvl * 1.2)];
             }
@@ -386,10 +386,6 @@ public class MiniSat implements SatFactory {
     }
 
     public void topLevelCleanUp() {
-        //todo simplifydb?
-        for (int i = 0; i < trail_.size(); i++) {
-            int x = var(trail_.get(i));
-        }
         max_learnts = nClauses() * learntsize_factor;
         learntsize_adjust_confl = 100;
         learntsize_adjust_cnt = (int) learntsize_adjust_confl;
@@ -727,17 +723,21 @@ public class MiniSat implements SatFactory {
             confl = getConfl(p);
             vardata.get(var(p)).mark--;
             if (DEBUG > 1) System.out.printf("clear %d l:%d\n", var(p), p);
-            pathC--;
-            //assert pathC >= 0 : "Something goes wrong with the UIP";
+            // Ignore the type of the literal when the biclique factorisation is inactive
+            if (!Settings.PARAM_BICLIQUE_FACTORISATION
+                    || cinfo.get(var(p)).cons_type != TMP_VAR_TYPE) {
+                pathC--;
+            }
+            assert pathC >= 0 : "Something goes wrong with the UIP";
             if (DEBUG > 1) System.out.printf("path-- (%d)\n", pathC);
         } while (pathC > 0 || !cinfo.get(var(p)).reliable);
         out_learnt.set(0, neg(p));
     }
 
-    private int updateNogood(Clause c, TIntList out_learnt, int p, int pathC) {
+    private int updateNogood(Clause c, TIntList out_learnt, int lit_p, int pathC) {
         if (DEBUG > 0) {
-            if (p != litUndef) {
-                c._s(0, p);
+            if (lit_p != litUndef) {
+                c._s(0, lit_p);
             }
             if (DEBUG > 1)
                 System.out.printf("%s\n", c.toString(this));
@@ -746,25 +746,51 @@ public class MiniSat implements SatFactory {
 
         if (c.learnt())
             claBumpActivity(c);
+        // Check the type of the literal only if the biclique factorisation is active
+        if (Settings.PARAM_BICLIQUE_FACTORISATION
+                && lit_p != litUndef && cinfo.get(var(lit_p)).cons_type == TMP_VAR_TYPE) {
+            // if this is a factor, then it should have been already expanded
+            return pathC;
+        }
+        for (int j = (lit_p == litUndef) ? 0 : 1; j < c.size(); j++) {
+            int lit_q = c._g(j);
+            int var_q = var(lit_q);
+            if (level(var_q) > rootlvl) {
+                assert lit_p == litUndef || pos(var(lit_p)) > pos(var_q) : "chronological inconsistency :(" + printLit(lit_q) + " @ " + pos(lit_q) +
+                        ") is explained by an older event (" + printLit(lit_q) + " @ " + pos(var_q) + ") " + c;
+                pathC = updateNogoodRec(out_learnt, lit_q, pathC);
+            }
+        }
+        return pathC;
+    }
 
-        for (int j = (p == litUndef) ? 0 : 1; j < c.size(); j++) {
-            int q = c._g(j);
-            int x = var(q);
-            if (vardata.get(x).mark != analysisRound && level(x) > rootlvl) {
-                assert p == litUndef || pos(var(p)) > pos(x) : "chronological inconsistency :(" + printLit(p) + " @ " + pos(var(p)) +
-                        ") is explained by an older event (" + printLit(x) + " @ " + pos(x) + ") " + c;
-                varBumpActivity(x);
-                vardata.get(x).mark = analysisRound;
-                if (DEBUG > 1) System.out.printf("mark %d\n", x);
-                if (level(x) >= trailMarker()) {
-                    pathC++;
-                    if (DEBUG > 1) System.out.printf("path++ (%d -- %d >= %d)\n", pathC, level(x), trailMarker());
-                    if (/*!cinfo.get(x).reliable && */cinfo.get(x).cons_type == TMP_VAR_TYPE) {
-                        pathC = updateNogood(getConfl(q), out_learnt, q, pathC);
+    private int updateNogoodRec(TIntList out_learnt, int lit_p, int pathC) {
+        int var_p = var(lit_p);
+        if (vardata.get(var_p).mark != analysisRound) {
+            if (DEBUG > 1) System.out.printf("mark %d\n", var_p);
+            vardata.get(var_p).mark = analysisRound;
+            // Check the type of the literal only if the biclique factorisation is active
+            if (Settings.PARAM_BICLIQUE_FACTORISATION &&
+                    cinfo.get(var_p).cons_type == TMP_VAR_TYPE) {
+                // we recursively expand the factor to get the real reason
+                Clause c = getConfl(lit_p);
+                for (int j = (lit_p == litUndef) ? 0 : 1; j < c.size(); j++) {
+                    int lit_q = c._g(j);
+                    int var_q = var(lit_q);
+                    if (level(var_q) > rootlvl) {
+                        assert lit_p == litUndef || pos(var(lit_p)) > pos(var_q) : "chronological inconsistency :(" + printLit(lit_q) + " @ " + pos(lit_q) +
+                                ") is explained by an older event (" + printLit(lit_q) + " @ " + pos(var_q) + ") " + c;
+                        pathC = updateNogoodRec(out_learnt, lit_q, pathC);
                     }
+                }
+            } else {
+                varBumpActivity(var_p);
+                if (level(var_p) >= trailMarker()) {
+                    if (DEBUG > 1) System.out.printf("path++ (%d -- %d >= %d)\n", pathC, level(var_p), trailMarker());
+                    pathC++;
                 } else {
-                    out_learnt.add(q);
-                    if (DEBUG > 1) System.out.printf("out %d\n", q);
+                    out_learnt.add(lit_p);
+                    if (DEBUG > 1) System.out.printf("out %d\n", lit_p);
                 }
             }
         }
@@ -815,16 +841,6 @@ public class MiniSat implements SatFactory {
     private int localMinimisation(TIntArrayList out_learnt) {
         int j;
         int i;
-//        analysisRound += 2;
-//        assert analysisRound > 0; // no underflow allowed
-//        notKeep = analysisRound;
-//        keep = analysisRound + 1;
-
-        // Update the required structures
-//        for (i = 1; i < out_learnt.size(); i++) {
-//            int v = var(out_learnt.get(i));
-//            vardata.get(v).mark = analysisRound; // Mark all literals from the initial no-good
-//        }
 
         for (i = j = 1; i < out_learnt.size(); i++) {
             // If the reason of the literal is not included in the initial no-good, then keep it in the no-good
@@ -845,7 +861,6 @@ public class MiniSat implements SatFactory {
             int v = var(q); // The boolean variable associated with the literal
             //TODO: replace this test by a "reliable" test ?
             if (level(v) > rootlvl && cinfo.get(v).cons_type == TMP_VAR_TYPE) { // The literal is a factor so we check its reason instead
-                assert c.size() == 2 : "Currently, all factors should have a unique literal in their reason";
                 assert cinfo.get(var(p)).cons_type != TMP_VAR_TYPE : "Two factors are not supposed to be linked by an arc";
                 if (vardata.get(v).mark < analysisRound) { // not marked
                     if (isIncludedIterativeVersion(q)) {
@@ -1323,7 +1338,7 @@ public class MiniSat implements SatFactory {
         private Reason cr;
         private int level;
         private int pos;
-        private long mark; // used in conflict minimisation, denotes status of a lit (analysisRound, keep, notKeep)
+        private long mark; // used in conflict analysis, denotes status of a lit (analysisRound, keep, notKeep)
         private int parent; // used in conflict minimisation, denotes the parent lit
 
         public VarData(Reason cr, int level, int pos) {
