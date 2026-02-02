@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -15,6 +15,7 @@ import org.chocosolver.solver.Solver;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Random;
 
 /**
  * A search monitor to send data to <a href="https://github.com/cp-profiler/cp-profiler">cp-profiler</a>.
@@ -62,7 +63,11 @@ public class CPProfiler extends SearchViz {
      */
     public CPProfiler(Solver aSolver, int executionId, int port, boolean sendDomain) {
         super(aSolver, sendDomain);
-        connect(aSolver.getModelName(), executionId, port);
+        if (executionId == -1) {
+            executionId = (int) System.currentTimeMillis();
+        }
+        connect(aSolver.getModelName()+"_"+ Long.toString(Math.abs(new Random().nextLong()), 36).substring(0, 5)
+                , executionId, port);
     }
 
     protected boolean connect(String label, int executionId, int port) {
@@ -116,6 +121,18 @@ public class CPProfiler extends SearchViz {
         }
     }
 
+    /**
+     * Send a message to cp-profiler
+     *
+     * @param nc     current node's identifier
+     * @param pid    identifier of node's parent
+     * @param alt    which of its siblings the node is (0 for the left-most)
+     * @param kid    number of children
+     * @param rid    number of restarts so far
+     * @param status determines the node's type (solution, failure, branching etc)
+     * @param label  some text-based information to go along with the node (ie branching decision
+     * @param info   complementary information (eg variable domains)
+     */
     private void send(int nc, int pid, int alt, int kid, int rid, Message.NodeStatus status, String label, String info) {
         try {
             connector.createNode(nc, pid, rid, alt, kid, status)

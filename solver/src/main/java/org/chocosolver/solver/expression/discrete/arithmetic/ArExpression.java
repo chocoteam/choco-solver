@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -330,6 +330,17 @@ public interface ArExpression {
                 e.extractVar(variables);
             }
         }
+    }
+
+    /**
+     * @return the maximum depth of this expression, ie the maximum number of nested expressions
+     */
+    default int maxDepth() {
+        int max = 0;
+        for (ArExpression e : getExpressionChild()) {
+            max = Math.max(max, e.maxDepth());
+        }
+        return max + 1;
     }
 
     /**
@@ -764,7 +775,6 @@ public interface ArExpression {
 
         @Override
         public void extractVar(HashSet<IntVar> variables) {
-            variables.add(this.intVar());
         }
 
         @Override

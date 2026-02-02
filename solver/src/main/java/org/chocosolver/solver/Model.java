@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -50,7 +50,7 @@ import java.util.stream.StreamSupport;
  * @see org.chocosolver.solver.constraints.Constraint
  * @since 0.01
  */
-public final class Model implements IModel {
+public class Model implements IModel {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// PRIVATE FIELDS /////////////////////////////////////////////////////////////
@@ -983,7 +983,7 @@ public final class Model implements IModel {
                             "A call to Model.post(Constraint) is more appropriate.");
                 } else {
                     for (Propagator<?> p : c.getPropagators()) {
-                        getSolver().getEngine().execute(p);
+                        getSolver().getEngine().execute(p, false);
                     }
                 }
             }

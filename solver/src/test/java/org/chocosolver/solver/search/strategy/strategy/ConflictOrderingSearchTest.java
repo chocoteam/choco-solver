@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -42,7 +42,7 @@ public class ConflictOrderingSearchTest {
     public void before() {
         model = new Model();
         mvars = model.intVarArray(10, 0, 5);
-        cos = new ConflictOrderingSearch(model, Search.inputOrderLBSearch(mvars));
+        cos = new ConflictOrderingSearch<>(model, Search.inputOrderLBSearch(mvars));
     }
 
 

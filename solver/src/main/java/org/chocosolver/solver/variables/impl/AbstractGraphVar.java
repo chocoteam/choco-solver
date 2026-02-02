@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -22,6 +22,7 @@ import org.chocosolver.solver.variables.impl.scheduler.GraphEvtScheduler;
 import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.graphs.IGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 
 public abstract class AbstractGraphVar<E extends IGraph> extends AbstractVariable implements GraphVar<E> {
 
@@ -63,7 +64,9 @@ public abstract class AbstractGraphVar<E extends IGraph> extends AbstractVariabl
             return false;
         }
         ISet suc;
-        for (int i : getUB().getNodes()) {
+        ISetIterator iterator = getUB().getNodes().newIterator();
+        while (iterator.hasNext()) {
+            int i = iterator.next();
             suc = UB.getSuccessorsOf(i);
             if (suc.size() != getLB().getSuccessorsOf(i).size()) {
                 return false;

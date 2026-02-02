@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -27,8 +27,6 @@ import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
-
-import java.util.Iterator;
 
 import static org.chocosolver.sat.MiniSat.C_Undef;
 
@@ -115,10 +113,10 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar, Lit
 
     @Override
     public int getLit(int val, int type) {
-        if (val < getLB()) {
+        if (val < min0) {
             return 1 ^ (type & 1);  // undefined, undefined, true, false
         }
-        if (val > getUB()) {
+        if (val > max0) {
             return type & 1;  // undefined, undefined, false, true
         }
         switch (type) {
@@ -359,11 +357,6 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar, Lit
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         return var.monitorDelta(propagator);
-    }
-
-    @Override
-    public Iterator<Integer> iterator() {
-        return var.iterator();
     }
 
     @Override

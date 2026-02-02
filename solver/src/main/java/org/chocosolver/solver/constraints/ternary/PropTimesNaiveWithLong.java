@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -64,24 +64,25 @@ public class PropTimesNaiveWithLong extends Propagator<IntVar> {
         return ESat.UNDEFINED;
     }
 
-    private boolean div(IntVar var, int a, int b, int c, int d) throws ContradictionException {
+    private boolean div(IntVar var, long a, long b, long c, long d) throws ContradictionException {
         long min, max;
 
         if (a <= 0 && b >= 0 && c <= 0 && d >= 0) { // case 1
             min = MIN;
             max = MAX;
             return var.updateLowerBound(min, this) | var.updateUpperBound(max, this);
-        } else if (c == 0 && d == 0 && (a > 0 || b < 0)) // case 2
-            fails(); // TODO: could be more precise, for explanation purpose
-        else if (c < 0 && d > 0 && (a > 0 || b < 0)) { // case 3
-            max = Math.max(Math.abs(a), Math.abs(b));
-            min = -max;
-            return var.updateLowerBound(min, this) | var.updateUpperBound(max, this);
-        } else if (c == 0 && d != 0 && (a > 0 || b < 0)) // case 4 a
-            return div(var, a, b, 1, d);
-        else if (c != 0 && d == 0 && (a > 0 || b < 0)) // case 4 b
-            return div(var, a, b, c, -1);
-        else { // if (c > 0 || d < 0) { // case 5
+        } else if (a > 0 || b < 0) {
+            if (c == 0 && d == 0) // case 2
+                fails(); // TODO: could be more precise, for explanation purpose
+            else if (c < 0 && d > 0) { // case 3
+                max = Math.max(Math.abs(a), Math.abs(b));
+                min = -max;
+                return var.updateLowerBound(min, this) | var.updateUpperBound(max, this);
+            } else if (c == 0) // case 4 a
+                return div(var, a, b, 1, d);
+            else if (d == 0) // case 4 b
+                return div(var, a, b, c, -1);
+        } else { // if (c > 0 || d < 0) { // case 5
             float ac = (float) a / c, ad = (float) a / d,
                     bc = (float) b / c, bd = (float) b / d;
             float low = Math.min(Math.min(ac, ad), Math.min(bc, bd));
@@ -94,7 +95,7 @@ public class PropTimesNaiveWithLong extends Propagator<IntVar> {
         return false;
     }
 
-    private boolean mul(IntVar var, int a, int b, int c, int d) throws ContradictionException {
+    private boolean mul(IntVar var, long a, long b, long c, long d) throws ContradictionException {
         long min = Math.min(Math.min(a * c, a * d), Math.min(b * c, b * d));
         long max = Math.max(Math.max(a * c, a * d), Math.max(b * c, b * d));
         return var.updateLowerBound(min, this) | var.updateUpperBound(max, this);

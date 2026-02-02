@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -672,10 +672,10 @@ public interface ISatFactory extends ISelf<Model> {
         MiniSat sat = sat();
         sat.beforeAddingClauses();
         if (!tuples.isFeasible()) {
-            TIntList c = new TIntArrayList();
+            TIntArrayList c = new TIntArrayList();
             for (int i = 0; i < tuples.nbTuples(); i++) {
                 int[] t = tuples.get(i);
-                c.clear();
+                c.resetQuick();
                 for (int j = 0; j < vars.length; j++) {
                     c.add(vars[j].getLit(t[j], IntVar.LR_NE));
                 }

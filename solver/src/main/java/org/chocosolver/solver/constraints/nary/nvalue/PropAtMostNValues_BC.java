@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -109,7 +109,7 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
 
     private void sortLB() {
         for (int i = 0; i < nbMaxValues; i++) {
-            bound[i].clear();
+            bound[i].resetQuick();
         }
         for (int i = 0; i < n; i++) {
             bound[minVal[i] - minValue].add(i);
@@ -118,7 +118,7 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
 
     private void sortUB() {
         for (int i = 0; i < nbMaxValues; i++) {
-            bound[i].clear();
+            bound[i].resetQuick();
         }
         for (int i = 0; i < n; i++) {
             bound[maxVal[i] - minValue].add(i);
@@ -157,12 +157,12 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
         }
         boolean hasChanged = vars[n].updateLowerBound(nbKer, this);
         if (nbKer == vars[n].getUB()) {
-            stamp.clear();
+            stamp.resetQuick();
             for (int i = 0; i < n; i++) {
                 node = orderedNodes[i];
                 if (kerRepresentant.get(node)) {
                     hasChanged |= updateKer(minVal[node], true);
-                    stamp.clear();
+                    stamp.resetQuick();
                 }
                 stamp.add(node);
             }
@@ -199,12 +199,12 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
         }
         boolean hasChanged = vars[n].updateLowerBound(nbKer, this);
         if (nbKer == vars[n].getUB()) {
-            stamp.clear();
+            stamp.resetQuick();
             for (int i = 0; i < n; i++) {
                 node = orderedNodes[i];
                 if (kerRepresentant.get(node)) {
                     hasChanged |= updateKer(maxVal[node], false);
-                    stamp.clear();
+                    stamp.resetQuick();
                 }
                 stamp.add(node);
             }

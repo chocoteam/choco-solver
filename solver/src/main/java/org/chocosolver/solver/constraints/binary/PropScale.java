@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -63,7 +63,7 @@ public class PropScale extends Propagator<IntVar> {
             int zub = X.getUB();
             for (int v = X.getLB(); v <= zub; v = X.nextValue(v)) {
                 if (!Z.contains(v * Y)) {
-                    X.removeValue(v, this, lcg() ? Reason.r(Z.getLit(v * Y, IntVar.LR_NE)) : Reason.undef());
+                    X.removeValue(v, this, lcg() ? Reason.r(Z.getLit(v * Y, IntVar.LR_EQ)) : Reason.undef());
                 }
             }
             int v = Z.getLB();
@@ -73,7 +73,7 @@ public class PropScale extends Propagator<IntVar> {
                     Z.removeValue(v, this, Reason.undef());
                 }
                 if (!X.contains(v / Y)) {
-                    Z.removeValue(v, this, lcg() ? Reason.r(X.getLit(v / Y, IntVar.LR_NE)) : Reason.undef());
+                    Z.removeValue(v, this, lcg() ? Reason.r(X.getLit(v / Y, IntVar.LR_EQ)) : Reason.undef());
                 }
             }
         } else if (hasChanged && Z.hasEnumeratedDomain()) {

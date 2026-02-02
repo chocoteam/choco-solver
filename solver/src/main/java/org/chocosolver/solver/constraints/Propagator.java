@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -624,7 +624,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
 
     @Override
     public Function<Reason, Reason> manageReification() {
-        if (isReified() && reifVar.isInstantiated()) {
+        if (model.getSolver().isLCG() && isReified() && reifVar.isInstantiated()) {
             return r -> Reason.gather(r, reifVar.isInstantiated() ? reifVar.getValLit() : 1);
         } else {
             return ICause.super.manageReification();

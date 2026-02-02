@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -91,7 +91,7 @@ public class RealStrategy extends AbstractStrategy<RealVar> {
             return null;
         }
         double value = valueIterator.selectValue(variable);
-        return variable.getModel().getSolver().getDecisionPath().makeRealDecision(variable, value, epsilon, leftFirst);
+        return decisionPath.makeRealDecision(variable, value, epsilon, leftFirst);
     }
 
     @SuppressWarnings({"unchecked"})

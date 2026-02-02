@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -10,8 +10,10 @@
 package org.chocosolver.solver.constraints.ternary;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
@@ -77,5 +79,33 @@ public class DivTest extends AbstractTernaryTest {
         Solver r = s.getSolver();
         r.solve();
         Assert.assertEquals(r.getSolutionCount(), 1);
+    }
+
+    @Test(groups = "1s", timeOut = 2000)
+    public void testSlow() {
+        Model model = new Model();
+
+        // Compute lost potential
+        int deadline = 50460;
+        IntVar jobPackageStart = model.intVar(0, 879840);
+        int cost = 72000; // if <10 000, very fast
+        int period = 103680;
+
+        model.arithm(jobPackageStart, "<=", deadline).post();
+
+        ArExpression deviation = model.intVar(deadline).sub(jobPackageStart);
+        deviation = deviation.div(60);
+        period = (int) Math.round(period / 60.0);
+
+        // Warning : PropDivXYZ very slow (initial propagation)
+        IntVar potential = deviation.mul(cost).div(period).intVar(); // if we remove .mul(cost) or .div(period), very
+        // fast
+
+        Solver solver = model.getSolver();
+        Solution sol = solver.findOptimalSolution(potential, false);
+        //		very slow :
+        //			Building time : 14,074s
+        //			Resolution time : 32,093s
+        //			Time to best solution : 32,084s
     }
 }

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -93,7 +93,7 @@ public class IntStrategy extends AbstractStrategy<IntVar> {
             return null;
         }
         int value = valueSelector.selectValue(variable);
-        return variable.getModel().getSolver().getDecisionPath().makeIntDecision(variable, decisionOperator, value);
+        return decisionPath.makeIntDecision(variable, decisionOperator, value);
     }
 
     @SuppressWarnings({"unchecked"})

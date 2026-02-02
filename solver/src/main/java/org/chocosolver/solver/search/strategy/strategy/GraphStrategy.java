@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -60,11 +60,11 @@ public class GraphStrategy<G extends GraphVar<?>> extends AbstractStrategy<G> {
         }
         assert !g.isInstantiated();
         if (nodeOrEdgeSelector.nextIsNode(g)) {
-            return g.getModel().getSolver().getDecisionPath().makeGraphNodeDecision(g, operator, nodeSelector.selectNode(g));
+            return decisionPath.makeGraphNodeDecision(g, operator, nodeSelector.selectNode(g));
         } else {
             int[] edge = edgeSelector.selectEdge(g);
             assert edge.length == 2;
-            return g.getModel().getSolver().getDecisionPath().makeGraphEdgeDecision(g, operator, edge[0], edge[1]);
+            return decisionPath.makeGraphEdgeDecision(g, operator, edge[0], edge[1]);
         }
     }
 }

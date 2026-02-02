@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -22,7 +22,7 @@ import java.util.function.Supplier;
  *
  * @author Jean-Guillaume FAGES
  */
-public interface IConstraintFactory extends IIntConstraintFactory, IRealConstraintFactory, ISetConstraintFactory, IGraphConstraintFactory {
+public interface IConstraintFactory extends IIntConstraintFactory, IRealConstraintFactory, ISchedulingFactory, ISetConstraintFactory, IGraphConstraintFactory {
 
     /**
      * Create a constraint that acts as an observer.

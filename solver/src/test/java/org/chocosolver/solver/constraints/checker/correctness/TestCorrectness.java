@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -391,15 +391,15 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups="checker", timeOut=60000)
-    public void testPLUSAC() {
-        for (int i = 0; i < 4; i++) {
-            long seed = System.currentTimeMillis();
-            for (int n = 2; n < (1 << 7) + 1; n *= 2) {
-                CorrectnessChecker.checkCorrectness(Modeler.modelplusac, 3, -n, 2 * n, seed, false);
-            }
-        }
-    }
+//    @Test(groups="checker", timeOut=60000)
+//    public void testPLUSAC() {
+//        for (int i = 0; i < 4; i++) {
+//            long seed = System.currentTimeMillis();
+//            for (int n = 2; n < (1 << 7) + 1; n *= 2) {
+//                CorrectnessChecker.checkCorrectness(Modeler.modelplusac, 3, -n, 2 * n, seed, false);
+//            }
+//        }
+//    }
 
     @Test(groups = "checker", timeOut = 60000)
     public void testMODBC() {

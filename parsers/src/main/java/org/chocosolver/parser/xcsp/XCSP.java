@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -14,6 +14,8 @@ import org.chocosolver.parser.RegParser;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.restart.InnerOuterCutoff;
+import org.chocosolver.solver.search.restart.Restarter;
 import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.SearchParams;
@@ -70,7 +72,7 @@ public class XCSP extends RegParser {
     public void createSolver() {
         super.createSolver();
         if (level.isLoggable(Level.COMPET)) {
-            System.out.printf("c Choco-solver%s (5.0.0-beta.1, 250217_17:45)\n", lcg? " with LCG" : "");
+            System.out.printf("c Choco-solver%s (5.0.0, 260202_14:43)\n", lcg? " with LCG" : "");
         }
         String iname = Paths.get(instance).getFileName().toString();
         parsers = new XCSPParser[nb_cores];
@@ -134,7 +136,17 @@ public class XCSP extends RegParser {
     public void parse(Model target, XCSPParser parser) throws Exception {
         parser.model(target, instance);
         // and define a search strategy
-        freesearch(target.getSolver());
+        BlackBoxConfigurator bb = BlackBoxConfigurator.init();
+        // variable selection
+        bb.setIntVarStrategy(Search::roundRobinSearch)
+                .setRestartPolicy(s -> new Restarter(new InnerOuterCutoff(50, 1.01, 1.01),
+                        c -> s.getFailCount() >= c, 50_000, true))
+                .setNogoodOnRestart(!lcg)
+                .setRestartOnSolution(lcg)
+                .setRefinedPartialAssignmentGeneration(false)
+                .setExcludeObjective(true)
+                .setExcludeViews(false);
+        bb.make(target);
     }
 
 
@@ -264,6 +276,9 @@ public class XCSP extends RegParser {
             try {
                 output.insert(0, "s SATISFIABLE\n");
                 new SolutionChecker(true, instance, new ByteArrayInputStream(output.toString().getBytes()));
+//                new SolutionChecker(instance, new ByteArrayInputStream(output.toString().getBytes()),
+//                        solver.getObjectiveManager().isOptimization() ? solver.getObjectiveManager().getBestSolutionValue().longValue() : null,
+//                        null, true);
             } catch (Exception e) {
                 throw new RuntimeException("wrong solution found twice");
             }
@@ -329,6 +344,9 @@ public class XCSP extends RegParser {
         if (cs) {
             try {
                 new SolutionChecker(true, instance, new ByteArrayInputStream(output.toString().getBytes()));
+//                new SolutionChecker(instance, new ByteArrayInputStream(output.toString().getBytes()),
+//                                        solver.getObjectiveManager().isOptimization() ? solver.getObjectiveManager().getBestSolutionValue().longValue() : null,
+//                                        null, true);
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -40,5 +40,27 @@ public interface Policy {
      * @param reward reward obtained playing {@code reward}
      */
     void update(int action, double reward);
+
+    class NextModuloN implements Policy {
+
+        int n;
+
+        public NextModuloN(int n) {
+            this.n = n;
+        }
+
+        @Override
+        public void init() {
+        }
+
+        @Override
+        public int nextAction(int step) {
+            return step % n;
+        }
+
+        @Override
+        public void update(int action, double reward) {
+        }
+    }
 
 }

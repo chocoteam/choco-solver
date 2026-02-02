@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -142,11 +142,11 @@ public interface ISet extends Iterable<Integer>{
      * Copies the set in an array if integers
      * @return an array containing every integer of the set
      */
-    default int[] toArray(){
+    default int[] toArray() {
         int[] a = new int[size()];
         int idx = 0;
-        ISetIterator iter = iterator();
-        while(iter.hasNext()){
+        ISetIterator iter = newIterator();
+        while (iter.hasNext()) {
             a[idx++] = iter.nextInt();
         }
         return a;

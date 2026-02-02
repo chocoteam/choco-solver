@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -256,7 +256,7 @@ public class ConnectivityFinder {
             numOfNode = new int[n];
             inf = new int[n];
         }
-        articulations.clear();
+        articulations.resetQuick();
         ISet act = graph.getNodes();
         ISetIterator iter = act.iterator();
         while (iter.hasNext()) {

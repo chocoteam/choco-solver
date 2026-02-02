@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -10,6 +10,9 @@
 package org.chocosolver.solver.variables.view.integer;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Providers;
+import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
@@ -213,5 +216,20 @@ public class IntAffineViewTest {
         IntVar y = m.neg(m.offset(x, 5));
         assertEquals(-8, y.getLB());
         assertEquals(-6, y.getUB());
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProviderClass = Providers.class, dataProvider = "trueOrFalse")
+    public void testViewAndReification(boolean lcg) {
+        Model m = new Model(Settings.init().setLCG(lcg));
+        IntVar x = m.intVar("x", -1, 6);
+        IntVar y = m.intView(1, x, -5);
+        BoolVar b = m.member(y, 0, 0).reify();
+        m.member(x, 1,1).reifyWith(b.not());
+        m.getSolver().setSearch(inputOrderLBSearch(x, y));
+        while (m.getSolver().solve()) {
+//            System.out.printf("x=%d, y=%d, b=%b%n", x.getValue(), y.getValue(), b.getValue());
+        };
+        assertEquals(m.getSolver().getSolutionCount(), 2);
+        assertEquals(m.getSolver().getFailCount(), 2);
     }
 }

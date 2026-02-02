@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -11,9 +11,7 @@ package org.chocosolver.solver.constraints.nary.sum;
 
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ConstraintsName;
-import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.ternary.PropXplusYeqZ;
 
 /**
  * <p>
@@ -42,14 +40,6 @@ public class SumConstraint extends Constraint {
         if (propagators[0] instanceof PropSum) {
             PropSum me = (PropSum) propagators[0];
             return new SumConstraint(me.opposite());
-        } else if (propagators[0] instanceof PropXplusYeqZ) {
-            PropXplusYeqZ me = (PropXplusYeqZ) propagators[0];
-            return new SumConstraint(new PropSum(
-                    me.getVars(),
-                    2,
-                    Operator.NQ,
-                    0
-            ));
         }
         return super.makeOpposite();
     }

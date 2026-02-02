@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -46,7 +46,7 @@ public class PropXeqCHalfReif extends Propagator<IntVar> {
         if (vIdx < 1) {
             return IntEventType.all();
         }
-        return IntEventType.INCLOW.getMask();
+        return IntEventType.INSTANTIATE.getMask();
     }
 
     @Override
@@ -60,7 +60,15 @@ public class PropXeqCHalfReif extends Propagator<IntVar> {
         }
         // if b is undefined and x does not contain c, b must be false
         else if (!x.contains(c)) {
-            b.setToFalse(this, lcg() ? Reason.r(x.getLit(c, IntVar.LR_EQ)) : Reason.undef());
+            if(x.hasEnumeratedDomain()) {
+                b.setToFalse(this, lcg() ? Reason.r(x.getLit(c, IntVar.LR_EQ)) : Reason.undef());
+            }else{
+                if(x.getUB() < c){
+                    b.setToFalse(this, lcg() ? Reason.r(x.getMaxLit()) : Reason.undef());
+                } else if (x.getLB() > c) {
+                    b.setToFalse(this, lcg() ? Reason.r(x.getMinLit()) : Reason.undef());
+                }
+            }
             setPassive();
         }
     }

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -187,11 +187,7 @@ public interface IViewFactory extends ISelf<Model> {
             int ub = max(-var.getLB(), var.getUB());
             String name = "|" + var.getName() + "|";
             IntVar abs;
-            if (var.hasEnumeratedDomain()) {
-                abs = ref().intVar(name, 0, ub, false);
-            } else {
-                abs = ref().intVar(name, 0, ub, true);
-            }
+            abs = ref().intVar(name, 0, ub);
             ref().absolute(abs, var).post();
             return abs;
         }

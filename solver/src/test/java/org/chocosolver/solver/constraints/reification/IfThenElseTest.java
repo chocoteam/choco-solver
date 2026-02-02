@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -10,6 +10,7 @@
 package org.chocosolver.solver.constraints.reification;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Providers;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.BoolVar;
@@ -52,10 +53,60 @@ public class IfThenElseTest {
         model.ifThenElseDec(c, x, y);
         Solver solver = model.getSolver();
         //solver.showSolutions();
-        solver.setSearch(Search.randomSearch(ArrayUtils.append(c, x,new IntVar[]{y}), 0));
+        solver.setSearch(Search.randomSearch(ArrayUtils.append(c, x, new IntVar[]{y}), 0));
         while (solver.solve()) {
             //System.out.printf("%s %s %s%n", Arrays.toString(c), Arrays.toString(x), y);
         }
         Assert.assertEquals(solver.getSolutionCount(), 180);
+    }
+
+    @Test(groups = "1s", dataProvider = "random", dataProviderClass = Providers.class)
+    @Providers.Arguments(values = {"0", "20", "1"})
+    public void test3(long seed) {
+        Model model = new Model();
+        BoolVar[] c = new BoolVar[]{
+                model.boolVar("c1"),
+                model.boolVar("c2"),
+                model.boolVar(true)
+        };
+        IntVar[] x = new IntVar[]{
+                model.intVar("x1", new int[]{0, 4}),
+                model.intVar("x1", new int[]{0, 6}),
+                model.intVar("x2", 10),
+        };
+        IntVar y = model.intVar("y", 1, 10);
+        model.ifThenElseDec(c, x, y);
+        Solver solver = model.getSolver();
+        //solver.showSolutions();
+        solver.setSearch(Search.randomSearch(ArrayUtils.append(c, x, new IntVar[]{y}), seed));
+        while (solver.solve()) {
+//            System.out.printf("%s %s %s%n", Arrays.toString(c), Arrays.toString(x), y);
+        }
+        Assert.assertEquals(solver.getSolutionCount(), 10);
+    }
+
+    @Test(groups = "1s", dataProvider = "random", dataProviderClass = Providers.class)
+    @Providers.Arguments(values = {"0", "20", "1"})
+    public void test4(long seed) {
+        Model model = new Model();
+        BoolVar[] c = new BoolVar[]{
+                model.boolVar("c1"),
+                model.boolVar("c2"),
+                model.boolVar(true)
+        };
+        BoolVar[] x = new BoolVar[]{
+                model.boolVar("x1"),
+                model.boolVar("x2"),
+                model.boolVar("x3")
+        };
+        IntVar y = model.intVar("y", 0, 1);
+        model.ifThenElseDec(c, x, y);
+        Solver solver = model.getSolver();
+        //solver.showSolutions();
+        solver.setSearch(Search.randomSearch(ArrayUtils.append(c, x, new IntVar[]{y}), seed));
+        while (solver.solve()) {
+            //System.out.printf("%s %s %s%n", Arrays.toString(c), Arrays.toString(x), y);
+        }
+        Assert.assertEquals(solver.getSolutionCount(), 32);
     }
 }

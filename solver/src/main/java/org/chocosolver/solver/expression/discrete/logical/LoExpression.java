@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -99,6 +99,14 @@ public abstract class LoExpression implements ReExpression {
      * @return a Model object
      */
     public abstract Model getModel();
+
+    /**
+     * Return the operator of this logical expression
+     * @return the operator of this logical expression
+     */
+    public Operator getOperator() {
+        return op;
+    }
 
     /**
      * @return the logical expression as an {@link BoolVar}.

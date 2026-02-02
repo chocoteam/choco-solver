@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -96,6 +96,7 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
     @Override
     public boolean instantiateTo(int value, ICause cause, Reason reason) throws ContradictionException {
         if (!isInstantiatedTo(value)) {
+            reason = cause.manageReification().apply(reason); // to deal with reification of the earliest cause
             boolean done = var.instantiateTo(1 - value, this, reason);
             notifyPropagators(IntEventType.INSTANTIATE, cause);
             return done;

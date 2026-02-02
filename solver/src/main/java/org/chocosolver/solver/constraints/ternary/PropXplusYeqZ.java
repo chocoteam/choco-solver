@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -18,6 +18,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
+import java.util.Arrays;
+
 /**
  * A propagator to ensure that X + Y = Z holds, where X, Y and Z are IntVar.
  * This propagator ensures AC when all variables are enumerated, BC otherwise.
@@ -32,21 +34,10 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
 
     private static final int THRESHOLD = 300;
     /**
-     * Position of X in {@link #vars}
+     * Set to <tt>true</tt> if at least two variables from X, Y and Z are either fixed or bounded
+     * Or if LCG is used, as AC is not explained yet
      */
-    private final int x = 0;
-    /**
-     * Position of Y in {@link #vars}
-     */
-    private final int y = 1;
-    /**
-     * Position of Z in {@link #vars}
-     */
-    private final int z = 2;
-    /**
-     * Set to <tt>true</tt> if X, Y and Z are bounded
-     */
-    private final boolean allbounded;
+    private final boolean isRangeOnly;
     /**
      * Temporary structure to ease filtering
      */
@@ -61,7 +52,9 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
      */
     public PropXplusYeqZ(IntVar X, IntVar Y, IntVar Z) {
         super(new IntVar[]{X, Y, Z}, PropagatorPriority.TERNARY, false);
-        allbounded = (!X.hasEnumeratedDomain() & !Y.hasEnumeratedDomain() & !Z.hasEnumeratedDomain());
+        isRangeOnly = lcg() || Arrays.stream(vars)
+                .filter(v -> !v.hasUnfixedEnumeratedDomain())
+                .count() >= 2;
         set = new IntIterableRangeSet();
     }
 
@@ -70,89 +63,86 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
         /*while */
         boolean loop;
         do {
-            loop = filterPlus(z, x, y);
-            loop |= filterMinus(x, z, y);
-            loop |= filterMinus(y, z, x);
-            loop &= (allbounded || lcg()); // loop only when BC is selected
+            loop = filterPlus();
+            loop |= filterMinus(0); // x is at pos 0 in vars
+            loop |= filterMinus(1); // y is at pos 1 in vars
         } while (loop);
     }
 
     /**
-     * Remove from vars[vr] holes resulting of vars[v1] + vars[v2]
+     * Remove from vars[2] holes resulting of vars[0] + vars[1]
      *
-     * @param vr position of in vars
-     * @param v1 position of in vars
-     * @param v2 position of in vars
      * @return <tt>true</tt> if vars[vr] has changed
      * @throws ContradictionException if failure occurs
      */
-    private boolean filterPlus(int vr, int v1, int v2) throws ContradictionException {
-        int lb = vars[v1].getLB() + vars[v2].getLB();
-        int ub = vars[v1].getUB() + vars[v2].getUB();
-        boolean change = vars[vr].updateLowerBound(lb, this,
-                lcg() ? Reason.r(vars[v1].getMinLit(), vars[v2].getMinLit()) : Reason.undef());
-        change |= vars[vr].updateUpperBound(ub, this,
-                lcg() ? Reason.r(vars[v1].getMaxLit(), vars[v2].getMaxLit()) : Reason.undef());
-        if (!allbounded) {
-            if ((long) vars[v1].getDomainSize() * vars[v2].getDomainSize() > THRESHOLD || lcg()) return change;
+    private boolean filterPlus() throws ContradictionException {
+        int lb = vars[0].getLB() + vars[1].getLB();
+        int ub = vars[0].getUB() + vars[1].getUB();
+        boolean change = vars[2].updateLowerBound(lb, this,
+                lcg() ? Reason.r(vars[0].getMinLit(), vars[1].getMinLit()) : Reason.undef());
+        change |= vars[2].updateUpperBound(ub, this,
+                lcg() ? Reason.r(vars[0].getMaxLit(), vars[1].getMaxLit()) : Reason.undef());
+        if (isAC(vars[0], vars[1])) {
             set.clear();
-            int ub1 = vars[v1].getUB();
-            int ub2 = vars[v2].getUB();
-            int l1 = vars[v1].getLB();
-            int u1 = vars[v1].nextValueOut(l1) - 1;
+            int ub1 = vars[0].getUB();
+            int ub2 = vars[1].getUB();
+            int l1 = vars[0].getLB();
+            int u1 = vars[0].nextValueOut(l1) - 1;
             while (u1 <= ub1) {
-                int l2 = vars[v2].getLB();
-                int u2 = vars[v2].nextValueOut(l2) - 1;
+                int l2 = vars[1].getLB();
+                int u2 = vars[1].nextValueOut(l2) - 1;
                 while (u2 <= ub2) {
                     set.addBetween(l1 + l2, u1 + u2);
-                    l2 = vars[v2].nextValue(u2);
-                    u2 = vars[v2].nextValueOut(l2) - 1;
+                    l2 = vars[1].nextValue(u2);
+                    u2 = vars[1].nextValueOut(l2) - 1;
                 }
-                l1 = vars[v1].nextValue(u1);
-                u1 = vars[v1].nextValueOut(l1) - 1;
+                l1 = vars[0].nextValue(u1);
+                u1 = vars[0].nextValueOut(l1) - 1;
+            }
+            vars[2].removeAllValuesBut(set, this); // todo explain
+        }
+        return change;
+    }
+
+    /**
+     * Remove from vars[vr] holes resulting of vars[2] - vars[1- vr]
+     *
+     * @param vr position of in vars
+     * @return <tt>true</tt> if vars[vr] has changed
+     * @throws ContradictionException if failure occurs
+     */
+    private boolean filterMinus(int vr) throws ContradictionException {
+        int vo = 1 - vr;
+        int lb = vars[2].getLB() - vars[vo].getUB();
+        int ub = vars[2].getUB() - vars[vo].getLB();
+        boolean change = vars[vr].updateLowerBound(lb, this,
+                lcg() ? Reason.r(vars[2].getMinLit(), vars[vo].getMaxLit()) : Reason.undef());
+        change |= vars[vr].updateUpperBound(ub, this,
+                lcg() ? Reason.r(vars[2].getMaxLit(), vars[vo].getMinLit()) : Reason.undef());
+        if (isAC(vars[2], vars[vo])) {
+            set.clear();
+            int ub1 = vars[2].getUB();
+            int ub2 = vars[vo].getUB();
+            int l1 = vars[2].getLB();
+            int u1 = vars[2].nextValueOut(l1) - 1;
+            while (u1 <= ub1) {
+                int l2 = vars[vo].getLB();
+                int u2 = vars[vo].nextValueOut(l2) - 1;
+                while (u2 <= ub2) {
+                    set.addBetween(l1 - u2, u1 - l2);
+                    l2 = vars[vo].nextValue(u2);
+                    u2 = vars[vo].nextValueOut(l2) - 1;
+                }
+                l1 = vars[2].nextValue(u1);
+                u1 = vars[2].nextValueOut(l1) - 1;
             }
             vars[vr].removeAllValuesBut(set, this); // todo explain
         }
         return change;
     }
 
-    /**
-     * Remove from vars[vr] holes resulting of vars[v1] - vars[v2]
-     *
-     * @param vr position of in vars
-     * @param v1 position of in vars
-     * @param v2 position of in vars
-     * @return <tt>true</tt> if vars[vr] has changed
-     * @throws ContradictionException if failure occurs
-     */
-    private boolean filterMinus(int vr, int v1, int v2) throws ContradictionException {
-        int lb = vars[v1].getLB() - vars[v2].getUB();
-        int ub = vars[v1].getUB() - vars[v2].getLB();
-        boolean change = vars[vr].updateLowerBound(lb, this,
-                lcg() ? Reason.r(vars[v1].getMinLit(), vars[v2].getMaxLit()) : Reason.undef());
-        change |= vars[vr].updateUpperBound(ub, this,
-                lcg() ? Reason.r(vars[v1].getMaxLit(), vars[v2].getMinLit()) : Reason.undef());
-        if (!allbounded) {
-            if ((long) vars[v1].getDomainSize() * vars[v2].getDomainSize() > THRESHOLD || lcg()) return change;
-            set.clear();
-            int ub1 = vars[v1].getUB();
-            int ub2 = vars[v2].getUB();
-            int l1 = vars[v1].getLB();
-            int u1 = vars[v1].nextValueOut(l1) - 1;
-            while (u1 <= ub1) {
-                int l2 = vars[v2].getLB();
-                int u2 = vars[v2].nextValueOut(l2) - 1;
-                while (u2 <= ub2) {
-                    set.addBetween(l1 - u2, u1 - l2);
-                    l2 = vars[v2].nextValue(u2);
-                    u2 = vars[v2].nextValueOut(l2) - 1;
-                }
-                l1 = vars[v1].nextValue(u1);
-                u1 = vars[v1].nextValueOut(l1) - 1;
-            }
-            vars[vr].removeAllValuesBut(set, this); // todo explain
-        }
-        return change;
+    private boolean isAC(IntVar v1, IntVar v2) {
+        return !isRangeOnly && (long) v1.getDomainSize() * v2.getDomainSize() < THRESHOLD;
     }
 
     @Override

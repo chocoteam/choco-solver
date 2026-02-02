@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -114,11 +114,6 @@ public class ParallelPortfolio {
     private final List<Model> models;
 
     /**
-     * whether or not to use default search configurations for the different threads
-     **/
-    private final boolean searchAutoConf;
-
-    /**
      * This manager is used to synchronize nogood sharing.
      */
     private NogoodStealer manager = NogoodStealer.NONE;
@@ -129,9 +124,15 @@ public class ParallelPortfolio {
     private boolean isPrepared = false;
 
     /**
-     * List of {@link Model}s to be executed in parallel.
+     * Stores whether the solvers' search heuristics is reliable.
+     * That is, whether the solver is expected to prove the absence of a solution.
      */
     private final HashMap<Model, Boolean> reliableness;
+
+    /**
+     * Stores whether the search heuristics of the different solvers should be changed automatically.
+     */
+    private final HashMap<Model, Boolean> unalterable;
 
     private final AtomicBoolean solverTerminated = new AtomicBoolean(false);
     private final AtomicBoolean solutionFound = new AtomicBoolean(false);
@@ -152,11 +153,14 @@ public class ParallelPortfolio {
      *
      * @param searchAutoConf changes the search heuristics of the different solvers, except the first one (true by default).
      *                       Must be set to false if search heuristics of the different threads are specified manually, so that they are not erased
+     * @deprecated the 'searchAutoConf' parameter is ignored, this is now configured when a model is added.
+     * @see ParallelPortfolio#addModel(Model, boolean, boolean) 
      */
+    @Deprecated
     public ParallelPortfolio(boolean searchAutoConf) {
         this.models = new ArrayList<>();
         this.reliableness = new HashMap<>();
-        this.searchAutoConf = searchAutoConf;
+        this.unalterable = new HashMap<>();
     }
 
     /**
@@ -187,13 +191,13 @@ public class ParallelPortfolio {
     /**
      * <p>
      * Adds a model to the list of models to run in parallel.
-     * The model can either be a fresh one, ready for populating, or a populated one.
+     * The model can either be fresh, ready for populating, or a populated one.
      * </p>
      * <p>
      * <b>Important:</b>
      *  <ul>
      *      <li>the populating process is not managed by this ParallelPortfolio
-     *  and should be done externally, with a dedicated method for example.
+     *  and should be done externally, with a dedicated method, for example.
      *  </li>
      *  <li>
      *      when dealing with optimization problems, the objective variables <b>HAVE</b> to be declared eagerly with
@@ -204,9 +208,11 @@ public class ParallelPortfolio {
      * </p>
      *
      * @param model a model to add
+     * @implSpec This method is equivalent to calling {@link #addModel(Model, boolean, boolean)} with
+     * {@code unalterable} set to {@code false} and {@code reliable} set to {@code true}.
      */
     public void addModel(Model model) {
-        addModel(model, true);
+        addModel(model, false, true);
     }
 
     /**
@@ -241,11 +247,13 @@ public class ParallelPortfolio {
      * </p>
      *
      * @param model    a model to add
+     * @param unalterable set to {@code true} if the model's search heuristics should not be changed automatically.
      * @param reliable set to {@code true} if the model is reliable.
      */
-    public void addModel(Model model, boolean reliable) {
+    public void addModel(Model model, boolean unalterable, boolean reliable) {
         this.models.add(model);
         this.reliableness.put(model, reliable);
+        this.unalterable.put(model, unalterable);
     }
 
     /**
@@ -279,7 +287,7 @@ public class ParallelPortfolio {
             })).get();
         } catch (InterruptedException | ExecutionException | SolverException e) {
             getSolverRunning().decrementAndGet();
-            //If a InvalidSolutionException occurs and at least one model is not reliable
+            //If an InvalidSolutionException occurs and at least one model is not reliable
             // the exception may come from this model and should be ignored
             if (e.getCause() instanceof InvalidSolutionException) {
                 InvalidSolutionException ex = (InvalidSolutionException) e.getCause();
@@ -391,12 +399,14 @@ public class ParallelPortfolio {
     public void prepare() {
         isPrepared = true;
         check();
+        int searchID = 0;
         for (int i = 0; i < models.size(); i++) {
-            Solver s = models.get(i).getSolver();
-            s.addStopCriterion(() -> getSolverTerminated().get());
-            s.plugMonitor((IMonitorSolution) () -> updateFromSolution(s.getModel()));
-            if (searchAutoConf) {
-                configureModel(i);
+            Model model = models.get(i);
+            Solver solver = model.getSolver();
+            solver.addStopCriterion(() -> getSolverTerminated().get());
+            solver.plugMonitor((IMonitorSolution) () -> updateFromSolution(solver.getModel()));
+            if (!unalterable.get(model)) {
+                configureModel(model, searchID++);
             }
         }
     }
@@ -421,8 +431,7 @@ public class ParallelPortfolio {
         }
     }
 
-    private void configureModel(int workerID) {
-        Model worker = getModels().get(workerID);
+    private void configureModel(Model worker, int searchID) {
         ResolutionPolicy policy = worker.getResolutionPolicy();
         boolean opt = policy != ResolutionPolicy.SATISFACTION;
         BlackBoxConfigurator bb = BlackBoxConfigurator.init();
@@ -435,7 +444,7 @@ public class ParallelPortfolio {
         Function<Model, IntValueSelector> intValSel;
         SearchParams.VarSelConf intVarConf;
         BiFunction<IntVar[], IntValueSelector, AbstractStrategy<IntVar>> intVarSel;
-        switch (workerID) {
+        switch (searchID) {
             case 0:
                 intValConf = new SearchParams.ValSelConf(
                         SearchParams.ValueSelection.MIN, opt, 16, true);

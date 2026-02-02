@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -249,10 +249,24 @@ public final class FVariable {
     private static SetVar buildWithSet(String name, DSet type, Expression expression, Datas datas, Model model) {
         Declaration what = type.getWhat();
         SetVar sv = null;
-        if(expression != null){
-            Exit.log("Unknown expression");
+        int[] ub = null;
+        if(expression != null) {
+            switch (expression.getTypeOf()) {
+                case SET_B:
+                    DInt2 bounds = (DInt2) what;
+                    ub = new int[bounds.getUpp() - bounds.getLow() + 1];
+                    for (int i = 0; i < ub.length; i++) {
+                        ub[i] = i + bounds.getLow();
+                    }
+                    break;
+                case SET_L:
+                    DManyInt mint = (DManyInt) what;
+                    ub = mint.getValues();
+                    break;
+                default:
+                    Exit.log("Unknown expression");
+            }
         }else {
-            int[] ub = null;
             switch (what.typeOf) {
                 case INT2:
                     DInt2 bounds = (DInt2) what;
@@ -269,9 +283,9 @@ public final class FVariable {
                     Exit.log("Unknown set type");
                     break;
             }
-            if(ub != null){
-                sv = model.setVar(DEBUG ? name : NO_NAME, new int[]{}, ub);
-            }
+        }
+        if(ub != null){
+            sv = model.setVar(DEBUG ? name : NO_NAME, new int[]{}, ub);
         }
         datas.register(name, sv);
         return sv;

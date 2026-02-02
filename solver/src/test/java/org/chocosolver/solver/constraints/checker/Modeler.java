@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -670,7 +670,7 @@ public interface Modeler {
                 h[i] = vars[i + 3 * k];
             }
             IntVar capa = vars[vars.length - 1];
-            model.cumulative(tasks, h, capa, (boolean)parameters).post();
+            model.cumulative(tasks, h, capa).post();
             model.getSolver().setSearch(randomSearch(vars, 0));
             return model;
         }
@@ -898,26 +898,26 @@ public interface Modeler {
         }
     };
 
-    Modeler modelplusac = new Modeler() {
-        @Override
-        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Model s = new Model("plus" + n);
-            IntVar[] vars = new IntVar[n];
-            for (int i = 0; i < vars.length; i++) {
-                vars[i] = s.intVar("X_" + i, domains[i]);
-                if (map != null) map.put(domains[i], vars[i]);
-            }
-
-            s.arithm(vars[0], "+", vars[1], "=", vars[2]).post();
-            s.getSolver().setSearch(randomSearch(vars, 0));
-            return s;
-        }
-
-        @Override
-        public String name() {
-            return "X+Y=Z (ac)";
-        }
-    };
+//    Modeler modelplusac = new Modeler() {
+//        @Override
+//        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+//            Model s = new Model("plus" + n);
+//            IntVar[] vars = new IntVar[n];
+//            for (int i = 0; i < vars.length; i++) {
+//                vars[i] = s.intVar("X_" + i, domains[i]);
+//                if (map != null) map.put(domains[i], vars[i]);
+//            }
+//
+//            s.arithm(vars[0], "+", vars[1], "=", vars[2]).post();
+//            s.getSolver().setSearch(randomSearch(vars, 0));
+//            return s;
+//        }
+//
+//        @Override
+//        public String name() {
+//            return "X+Y=Z (ac)";
+//        }
+//    };
 
     Modeler modelmodulobc = new Modeler() {
         @Override

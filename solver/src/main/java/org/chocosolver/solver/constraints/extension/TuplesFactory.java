@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -103,6 +103,70 @@ public class TuplesFactory {
     }
 
     /**
+     * A method that generates all tuples from a set of variables and stores (and returns) the valid tuples wrt to the <code>filter</code>.
+     * One may keep in mind that tuples generation directly depends on the product of domain cardinality, but also on the algorithm defines in the filter.
+     *
+     * @param filter   tuple validator
+     * @param vars     concerned variables
+     * @return two Tuples objects, the first one contains the valid tuples and the second one contains the invalid tuples
+     */
+    public static Tuples[] generateTuples(TupleValidator filter, IntVar... vars) {
+        Tuples[] tuples = new Tuples[2];
+        tuples[0] = new Tuples(true);
+        tuples[1] = new Tuples(false);
+        int n = vars.length;
+        int[] cvalue = new int[n];
+        int[] t = new int[n];
+        for (int j = 0; j < n; j++) {
+            t[j] = cvalue[j] = vars[j].getLB();
+        }
+        while (true) {
+            if (filter.valid(t)) {
+                tuples[0].add(t.clone());
+            } else {
+                tuples[1].add(t.clone());
+            }
+            int j;
+            for (j = 0; j < n; j++) {
+                int v = t[j] = cvalue[j] = vars[j].nextValue(cvalue[j]);
+                if (v < Integer.MAX_VALUE) {
+                    break;
+                }
+                t[j] = cvalue[j] = vars[j].getLB();
+            }
+            if (j == n) break;
+        }
+        return tuples;
+
+    }
+
+    /**
+     * Randomly generate <i>n</i> tuples from <i>vars</i> and return the number of tuples that are valid according to <i>filter</i>
+     * as the ratio of valid tuples over the total number of tuples.
+     * @param n number of tuples to generate
+     * @param filter tuple validator
+     * @param vars concerned variables
+     * @return the ratio of valid tuples over the total number of tuples
+     */
+    public static double sample(int n, Random rnd, TupleValidator filter, IntVar... vars){
+        int valid = 0;
+        for (int i = 0; i < n; i++) {
+            int[] t = new int[vars.length];
+            for (int j = 0; j < vars.length; j++) {
+                int v = vars[j].getLB() + rnd.nextInt(vars[j].getUB() - vars[j].getLB() + 1);
+                while(!vars[j].contains(v)){
+                    v = vars[j].getLB() + rnd.nextInt(vars[j].getUB() - vars[j].getLB() + 1);
+                }
+                t[j] = v;
+            }
+            if (filter.valid(t)) {
+                valid++;
+            }
+        }
+        return ((double) valid) / n;
+    }
+
+    /**
      * A method that randomly generates tuples from a set of variables.
      *
      * @param proba  probability to keep a tuple in Tuples (0 < proba < 1)
@@ -120,7 +184,7 @@ public class TuplesFactory {
      * </p>
      */
     public static Tuples randomTuples(final double proba, final Random random, IntVar... vars) {
-        return generateTuples(vs -> random.nextDouble() < proba, true,vars);
+        return generateTuples(vs -> random.nextDouble() < proba, true, vars);
     }
 
     // BEWARE: PLEASE, keep signatures sorted by increasing arity and alphabetical order!!

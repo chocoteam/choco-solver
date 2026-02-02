@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -319,8 +319,8 @@ public class ObjectiveTest {
             best = objective.getValue();
         }
         assertEquals(best, 34);
-        assertEquals(model.getSolver().getSolutionCount(), 10);
-        assertEquals(model.getSolver().getNodeCount(), 1475);
+        assertEquals(model.getSolver().getSolutionCount(), 8);
+        assertEquals(model.getSolver().getNodeCount(), 1807);
     }
     
     

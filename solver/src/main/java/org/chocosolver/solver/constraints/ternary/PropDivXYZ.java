@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -19,6 +19,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.MathUtils;
 
+import static org.chocosolver.solver.variables.IntVar.LR_EQ;
 import static org.chocosolver.solver.variables.IntVar.LR_NE;
 
 /**
@@ -104,7 +105,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
                     // sZ = 0 && sX!=0 => |x| < |y|
                     if (Z.isInstantiatedTo(0) && !X.contains(0)) {
                         hasChanged |= absX.updateUpperBound(absY.getUB() - 1, this,
-                                lcg() ? Reason.r(0, Z.getValLit(), X.getLit(0, LR_NE), absY.getMaxLit()) : Reason.undef());
+                                lcg() ? Reason.r(0, Z.getValLit(), X.getLit(0, LR_EQ), absY.getMaxLit()) : Reason.undef());
                     }
                     break;
                 case 5: // X and Z are instanciated
@@ -366,7 +367,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
         }
         if (!b.contains(0)) {
             res |= a.removeValue(0, this,
-                    lcg() ? Reason.gather(r, b.getLit(0, LR_NE)) : Reason.undef());
+                    lcg() ? Reason.gather(r, b.getLit(0, LR_EQ)) : Reason.undef());
         }
         return res;
     }

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -153,7 +153,7 @@ public class PropAtMostNValues extends Propagator<IntVar> {
     //***********************************************************************************
 
     private void filterK1Rule() throws ContradictionException {
-        dVar.clear();
+        dVar.resetQuick();
         for (int i = 0; i < n; i++) {
             if (!vars[i].isInstantiated()) {
                 if (emptyIntersectionWith(vars[i], instVals)) {

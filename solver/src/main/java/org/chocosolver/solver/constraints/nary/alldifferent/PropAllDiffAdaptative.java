@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -42,9 +42,10 @@ public class PropAllDiffAdaptative extends PropAllDiffAC {
      * enables to control the cardinality of the matching
      *
      * @param variables array of integer variables
+     * @param mode      name of the filtering algorithm
      */
-    public PropAllDiffAdaptative(IntVar[] variables) {
-        super(variables, !variables[0].getModel().getSolver().isLCG());
+    public PropAllDiffAdaptative(IntVar[] variables, AllDifferent.Consistency mode) {
+        super(variables, mode);
         rd = new Random(vars[0].getModel().getSeed());
         calls = success = 1;
     }

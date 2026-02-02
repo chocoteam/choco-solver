@@ -1,0 +1,13 @@
+#dir;name;solutions;best;nodes;fails
+2024;AztecDiamondSym-12_c24.xml.lzma;231;222316;18934;4061
+2024;BinPacking-n1c1w1a_c24.xml.lzma;1;25;100;50
+2024;Cargo-01-0s-1913_m17.xml.lzma;26;0;132928;88423
+2024;Charlotte-18-2_c24.xml.lzma;67;14627;77346;34456
+2024;Drinking-010000_c24.xml.lzma;1;1000;6859;0
+2024;FoolSolitaire-dec2-0-2.xml.lzma;2;21;182;108
+2024;SameQueensKnights-b-15_c24.xml.lzma;25;24;15266;6641
+# Pour stillLife, COS semble aider à trouver 76
+2024;StillLife-12-12_c24.xml.lzma;34;74;308794;151680
+2024;TestScheduling-t020m10r03-1_c24.xml.lzma;226;1876;2574;1300
+2024;TravelingTournament-galaxy06_c24.xml.lzma;16;1398;37040;25044
+2024;VRP_LC-10-05-20-s3_c24.xml.lzma;22;426;60298;27755

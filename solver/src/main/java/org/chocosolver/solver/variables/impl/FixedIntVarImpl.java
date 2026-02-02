@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -25,10 +25,7 @@ import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.iterators.EvtScheduler;
-import org.chocosolver.util.iterators.IntVarValueIterator;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
-
-import java.util.Iterator;
 
 /**
  * A IntVar with one domain value.
@@ -56,11 +53,6 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
      * Reusable iterator over ranges.
      */
     private DisposableRangeIterator _riterator;
-
-    /**
-     * Value iterator allowing for(int i:this) loops
-     */
-    private final IntVarValueIterator _javaIterator = new IntVarValueIterator(this);
 
     /**
      * Creates a variable whom domain is natively reduced to the singleton {<code>constante</code>}.
@@ -395,12 +387,6 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
             _riterator.topDownInit();
         }
         return _riterator;
-    }
-
-    @Override
-    public Iterator<Integer> iterator() {
-        _javaIterator.reset();
-        return _javaIterator;
     }
 
 }

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -119,7 +119,7 @@ public class DecisionPath extends DecisionMaker implements Serializable {
             for (int f = decisions.size() - 1; f >= t; f--) {
                 Decision<?> d = decisions.remove(f);
                 if (free) d.free();
-                if (caching) cache = d;
+                if (caching) cache = decisions.get(f-1);
             }
         }
     }
@@ -184,9 +184,9 @@ public class DecisionPath extends DecisionMaker implements Serializable {
             st.append(String.format("[%d/%d] %s",
                     decision.getArity() - decision.triesLeft() + 1, decision.getArity(), decision)
             );
-        } else if (cache != null) {
+        } else if (cache != null) { // for lcg only
             st.append(String.format("[%d/%d] %s",
-                    cache.getArity() - cache.triesLeft() + 1, cache.getArity(), cache)
+                    cache.getArity() - cache.triesLeft(), cache.getArity(), cache)
             );
             cache = null;
         } else {

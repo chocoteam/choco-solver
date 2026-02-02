@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -15,6 +15,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
 
 /**
  * <br/>
@@ -32,6 +34,7 @@ public class WarmStartTest {
         s.addHint(vars[6], 34);
         while (s.solve()) ;
         Assert.assertEquals(s.getSolutionCount(), 1);
+        assertEquals(s.getObjectiveManager().getBestSolutionValue(), 34);
     }
 
     @Test(groups = "1s")
@@ -42,7 +45,9 @@ public class WarmStartTest {
         s.addHint(vars[6], 34);
         s.removeHints();
         while (s.solve()) ;
-        Assert.assertEquals(s.getSolutionCount(), 10);
+        Assert.assertEquals(s.getSolutionCount(), 8);
+        assertEquals(s.getObjectiveManager().getBestSolutionValue(), 34);
+
     }
 
     @Test(groups = "1s")
@@ -53,10 +58,12 @@ public class WarmStartTest {
         s.addHint(vars[6], 34);
         while (s.solve()) ;
         Assert.assertEquals(s.getSolutionCount(), 1);
+        assertEquals(s.getObjectiveManager().getBestSolutionValue(), 34);
         s.removeHints();
         s.hardReset();
         while (s.solve()) ;
-        Assert.assertEquals(s.getSolutionCount(), 10);
+        Assert.assertEquals(s.getSolutionCount(), 8);
+        assertEquals(s.getObjectiveManager().getBestSolutionValue(), 34);
     }
 
 }

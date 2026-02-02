@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -118,7 +118,7 @@ public class PartialAssignmentGenerator<V extends Variable> extends AbstractStra
             }
             if (best.contains(currentVal)) {
                 //noinspection unchecked
-                return (Decision<V>) solver.getDecisionPath().makeIntDecision(
+                return (Decision<V>) decisionPath.makeIntDecision(
                         best, DecisionOperatorFactory.makeIntEq(), currentVal);
             }
         }

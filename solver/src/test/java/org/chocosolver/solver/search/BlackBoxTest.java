@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -42,7 +42,6 @@ public class BlackBoxTest {
                 {(Function<IntVar[], AbstractStrategy<IntVar>>) Search::failureRateBasedSearch},
                 {(Function<IntVar[], AbstractStrategy<IntVar>>) Search::failureLengthBasedSearch},
                 {(Function<IntVar[], AbstractStrategy<IntVar>>) Search::pickOnDom},
-                {(Function<IntVar[], AbstractStrategy<IntVar>>) Search::pickOnFil},
         };
     }
 
@@ -86,7 +85,7 @@ public class BlackBoxTest {
         Assert.assertEquals(solver.getSolutionCount(), 724);
     }
 
-    @Test(groups = "1s", dataProvider = "strategies")
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "strategies")
     public void testBios(Function<IntVar[], AbstractStrategy<IntVar>> strat) {
         int n = 2;
         Model model = new Model("all different");
@@ -112,7 +111,7 @@ public class BlackBoxTest {
     }
 
 
-    @Test(groups = "1s", dataProvider = "setstrategies")
+    @Test(groups = "1s", timeOut = 10000, dataProvider = "setstrategies")
     public void testSet(Function<SetVar[], AbstractStrategy<SetVar>> strat) {
         Model model = ProblemMaker.makeSteiner(7);
         SetVar[] vars = model.retrieveSetVars();

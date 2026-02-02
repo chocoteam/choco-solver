@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -18,8 +18,6 @@ import org.chocosolver.util.iterators.EvtScheduler;
  */
 public class BoolEvtScheduler implements EvtScheduler<IntEventType> {
 
-    private static final int[] DIS = new int[]{0, 1, -1, // INSTANTIATE
-    };
     private int i = 0;
 
     @Override
@@ -38,12 +36,12 @@ public class BoolEvtScheduler implements EvtScheduler<IntEventType> {
 
     @Override
     public boolean hasNext() {
-        return DIS[i] > -1;
+        return i < 2; // Only INSTANTIATE and BOUND
     }
 
     @Override
     public int next() {
-        return DIS[i++];
+        return i++;
     }
 
     @Override

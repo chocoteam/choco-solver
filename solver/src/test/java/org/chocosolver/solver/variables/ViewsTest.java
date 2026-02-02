@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -14,7 +14,7 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.sum.PropScalar;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
-import org.chocosolver.solver.search.strategy.selectors.values.IntDomainRandomBound;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainRandom;
 import org.chocosolver.solver.search.strategy.selectors.variables.Random;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -386,7 +386,7 @@ public class ViewsTest {
                 IntVar az = ref.intVar("az", 0, 2, false);
                 ref.absolute(az, z).post();
                 ref.getSolver().setSearch(
-                    intVarSearch(new Random<>(seed), new IntDomainRandomBound(seed), x, y, az));
+                    intVarSearch(new Random<>(seed), new IntDomainRandom(seed, true), x, y, az));
             }
             Model model = new Model();
             {
@@ -396,7 +396,7 @@ public class ViewsTest {
                 model.arithm(x, "-", y, "=", z).post();
                 IntVar az = model.abs(z);
                 model.getSolver().setSearch(
-                    intVarSearch(new Random<>(seed), new IntDomainRandomBound(seed), x, y, az));
+                    intVarSearch(new Random<>(seed), new IntDomainRandom(seed, true), x, y, az));
             }
             check(ref, model, seed, true, true);
         }

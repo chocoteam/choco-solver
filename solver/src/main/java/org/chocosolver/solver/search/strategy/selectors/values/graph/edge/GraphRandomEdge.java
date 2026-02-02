@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -28,8 +28,8 @@ public class GraphRandomEdge implements GraphEdgeSelector {
     }
 
     public int[] selectEdge(GraphVar g) {
-        pFrom.clear();
-        pTo.clear();
+        pFrom.resetQuick();
+        pTo.resetQuick();
         ISet envSuc, kerSuc;
         for (int i : g.getPotentialNodes()) {
             envSuc = g.getPotentialSuccessorsOf(i);

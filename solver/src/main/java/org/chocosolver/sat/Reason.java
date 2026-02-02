@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -12,7 +12,7 @@ package org.chocosolver.sat;
 import org.chocosolver.solver.ICause;
 
 /**
- * A class to explain a propagation.
+ * A class to explain a modification.
  * A reason is always associated with one or more literals.
  * <br/>
  *
@@ -26,7 +26,7 @@ public abstract class Reason implements ICause {
      */
     static final Clause UNDEF = new Clause(new int[]{0});
     /**
-     * A thread-local clause to explain a propagation with one literal.
+     * A thread-local clause to explain a modification with one literal.
      * This clause is static and can be reused in the same thread.
      */
     private final static ThreadLocal<Clause> short_expl_2 = ThreadLocal.withInitial(() -> new Clause(new int[]{0, 0}));
@@ -104,9 +104,9 @@ public abstract class Reason implements ICause {
      */
     public static Reason r(int... ps) {
         if (ps.length == 1) {
-            return new Reason1(ps[0]);
+            return r(ps[0]);
         } else if (ps.length == 2) {
-            return new Reason2(ps[0], ps[1]);
+            return r(ps[0], ps[1]);
         } else if (ps.length > 2) {
             assert ps[0] == 0 : "The first literal should be left empty for the asserting literal";
             return new Clause(ps);

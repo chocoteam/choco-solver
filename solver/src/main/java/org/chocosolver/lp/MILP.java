@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -169,7 +169,7 @@ public class MILP extends LinearProgram {
      */
     private boolean isIntegral(int i) {
         assert integers.get(i) : "non integer variable";
-        return Math.rint(x[i]) == x[i] && (!booleans.get(i) || !(x[i] > 1.));
+        return Math.abs(Math.rint(x[i]) - x[i]) < EPSILON;
     }
 
 
@@ -250,8 +250,8 @@ public class MILP extends LinearProgram {
                     // if the top decision can be refuted, then refute it
                     dropLast();
                     break;
-                default:
                 case 0:
+                default:
                     // otherwise do nothing
                     break;
             }

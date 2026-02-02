@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -33,65 +33,66 @@ import org.chocosolver.util.tools.ArrayUtils;
 @Explained(ignored = true, comment = "Turned into clauses")
 public class PropElement extends Propagator<IntVar> {
 
-    /**
-     * Table of values
-     */
-    private final int[] values;
+	/**
+	 * Table of values
+	 */
+	private final int[] values;
 
-    /**
-     * To match indices in {@link #values} and {@link #index}
-     */
-    private final int offset;
+	/**
+	 * To match indices in {@link #values} and {@link #index}
+	 */
+	private final int offset;
 
-    /**
-     * Index variable
-     */
-    private final IntVar index;
+	/**
+	 * Index variable
+	 */
+	private final IntVar index;
 
-    /**
-     * Resulting variable
-     */
-    private final IntVar result;
+	/**
+	 * Resulting variable
+	 */
+	private final IntVar result;
 
-    /**
-     * Set of forbidden indices and possible values
-     */
-    private final IntIterableBitSet fidx, pVals;
+	/**
+	 * Set of forbidden indices and possible values
+	 */
+	private final IntIterableBitSet fidx, pVals;
 
-    /**
-     * Create a propagator which ensures that VALUE = TABLE[INDEX-OFFSET] holds.
-     * @param value integer variable
-     * @param values array of ints
-     * @param index integer variable
-     * @param offset int
-     */
-    public PropElement(IntVar value, int[] values, IntVar index, int offset) {
-        super(ArrayUtils.toArray(value, index), PropagatorPriority.BINARY, false);
-        this.values = values;
-        this.offset = offset;
-        this.index = index;
-        this.result = value;
-        fidx = new IntIterableBitSet();
-        fidx.setOffset(index.getLB());
-        pVals = new IntIterableBitSet();
-        pVals.setOffset(result.getLB());
-    }
+	/**
+	 * Create a propagator which ensures that VALUE = TABLE[INDEX-OFFSET] holds.
+	 *
+	 * @param value  integer variable
+	 * @param values array of ints
+	 * @param index  integer variable
+	 * @param offset int
+	 */
+	public PropElement(IntVar value, int[] values, IntVar index, int offset) {
+		super(ArrayUtils.toArray(value, index), PropagatorPriority.BINARY, false);
+		this.values = values;
+		this.offset = offset;
+		this.index = index;
+		this.result = value;
+		fidx = new IntIterableBitSet();
+		fidx.setOffset(index.getLB());
+		pVals = new IntIterableBitSet();
+		pVals.setOffset(result.getLB());
+	}
 
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
 		index.updateBounds(offset, values.length - 1 + offset, this);
 		fidx.clear();
 		pVals.clear();
 		int iub = index.getUB();
 		for (int i = index.getLB(); i <= iub; i = index.nextValue(i)) {
 			int value = values[i - offset];
-			if (result.contains(value)){
+			if (result.contains(value)) {
 				pVals.add(value);
-			}else{
+			} else {
 				fidx.add(i);
 			}
 		}
-		result.removeAllValuesBut(pVals,this);
+		result.removeAllValuesBut(pVals, this);
 		if (!fidx.isEmpty()) {
 			index.removeValues(fidx, this);
 		}
@@ -100,57 +101,59 @@ public class PropElement extends Propagator<IntVar> {
 		}
 	}
 
-    @Override
-    public ESat isEntailed() {
-        if (index.getUB() < offset || index.getLB() >= offset + values.length) {
-            return ESat.FALSE;
-        }
-        if (isCompletelyInstantiated()) {
-            return ESat.eval(result.contains(values[index.getValue() - offset]));
-        } else if(result.isInstantiated()){
-            int val = result.getValue();
-            boolean foundVal = false;
-            boolean foundOther = false;
-            for(int i:index){
-                if(i>=offset && i<values.length + offset && values[i-offset] == val){
-                    foundVal = true;
-                    if(foundOther)break;
-                }else{
-                    foundOther = true;
-                    if(foundVal)break;
-                }
-            }
-            if(foundVal){
-                if(foundOther){
-                    return ESat.UNDEFINED;
-                }else{
-                    return ESat.TRUE;
-                }
-            }else{
-                return ESat.FALSE;
-            }
-        } else {
-            for(int i:index){
-                if(i>=offset && i<values.length + offset && result.contains(values[i-offset])){
-                    return ESat.UNDEFINED;
-                }
-            }
-            return ESat.FALSE;
-        }
-    }
+	@Override
+	public ESat isEntailed() {
+		if (index.getUB() < offset || index.getLB() >= offset + values.length) {
+			return ESat.FALSE;
+		}
+		if (isCompletelyInstantiated()) {
+			return ESat.eval(result.contains(values[index.getValue() - offset]));
+		} else if (result.isInstantiated()) {
+			int val = result.getValue();
+			boolean foundVal = false;
+			boolean foundOther = false;
+			int indexUB = index.getUB();
+			for (int i = index.getLB(); i <= indexUB; i = index.nextValue(i)) {
+				if (i >= offset && i < values.length + offset && values[i - offset] == val) {
+					foundVal = true;
+					if (foundOther) break;
+				} else {
+					foundOther = true;
+					if (foundVal) break;
+				}
+			}
+			if (foundVal) {
+				if (foundOther) {
+					return ESat.UNDEFINED;
+				} else {
+					return ESat.TRUE;
+				}
+			} else {
+				return ESat.FALSE;
+			}
+		} else {
+			int indexUB = index.getUB();
+			for (int i = index.getLB(); i <= indexUB; i = index.nextValue(i)) {
+				if (i >= offset && i < values.length + offset && result.contains(values[i - offset])) {
+					return ESat.UNDEFINED;
+				}
+			}
+			return ESat.FALSE;
+		}
+	}
 
-    public String toString() {
-        StringBuilder sb = new StringBuilder(32);
-        sb.append("element(").append(this.result).append(" = ");
-        sb.append(" <");
-        int i = 0;
-        for (; i < Math.min(this.values.length - 1, 5); i++) {
-            sb.append(this.values[i]).append(", ");
-        }
-        if (i == 5 && this.values.length - 1 > 5) sb.append("..., ");
-        sb.append(this.values[values.length - 1]);
-        sb.append("> [").append(this.index).append("])");
-        return sb.toString();
-    }
+	public String toString() {
+		StringBuilder sb = new StringBuilder(32);
+		sb.append("element(").append(this.result).append(" = ");
+		sb.append(" <");
+		int i = 0;
+		for (; i < Math.min(this.values.length - 1, 5); i++) {
+			sb.append(this.values[i]).append(", ");
+		}
+		if (i == 5 && this.values.length - 1 > 5) sb.append("..., ");
+		sb.append(this.values[values.length - 1]);
+		sb.append("> [").append(this.index).append("])");
+		return sb.toString();
+	}
 
 }

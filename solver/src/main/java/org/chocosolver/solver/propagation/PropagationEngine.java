@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -76,10 +76,6 @@ public class PropagationEngine {
      */
     protected Propagator<?> lastProp;
     /**
-     * The last scheduled variable
-     */
-    protected Variable lastVar;
-    /**
      * One bit per queue: true if the queue is not empty.
      */
     private int notEmpty;
@@ -108,11 +104,6 @@ public class PropagationEngine {
             awake_queue.addLast(propagator);
         }
     };
-
-    /**
-     * A propagation insight to collect information about the propagation
-     */
-    private PropagationInsight insight = PropagationInsight.VOID;
 
     /**
      * A seven-queue propagation engine.
@@ -226,28 +217,20 @@ public class PropagationEngine {
      */
     public void propagate() throws ContradictionException {
         propagateSat();
-        insight.clear();
         activatePropagators();
         do {
             manageModifications();
             for (int i = nextNotEmpty(); i > -1; i = nextNotEmpty()) {
                 assert !pro_queue[i].isEmpty() : "try to pop a propagator from an empty queue";
                 lastProp = pro_queue[i].pollFirst();
-                insight.cardinality(lastProp);
                 if (pro_queue[i].isEmpty()) {
                     notEmpty &= ~(1 << i);
                 }
                 // revision of the variable
                 lastProp.unschedule();
                 delayedPropagationType = 0;
-                try {
-                    propagateEvents();
-                    propagateSat();
-                    insight.update(lastProp, lastVar, false);
-                } catch (ContradictionException cex) {
-                    insight.update(lastProp, lastVar, true);
-                    throw cex;
-                }
+                propagateEvents();
+                propagateSat();
                 if (hybrid < 0b01) {
                     manageModifications();
                 }
@@ -288,24 +271,33 @@ public class PropagationEngine {
         int cw = model.getEnvironment().getWorldIndex(); // get current index
         dynPropagators.descending(cw, consumer);
         while (!awake_queue.isEmpty()) {
-            execute(awake_queue.pollFirst());
+            execute(awake_queue.pollFirst(), false);
         }
     }
 
     /**
-     * Execute 'coarse' propagation on a newly added propagator
-     * or one that should be propagated on backtrack
+     * Execute a propagator immediately, without scheduling it.
+     * If the propagator is stateless, that is, it has not been executed ever, it is set to active first.
+     * Then, if the propagator is active, that is not reified or passive, it is fully propagated.
+     * Finally, if the solver is in LCG mode, the SAT solver is propagated.
      *
      * @param propagator a propagator to propagate
      * @throws ContradictionException if propagation fails
+     * @implSpec In the case the propagator is activated by a reification,
+     * then {@link #onPropagatorExecution(Propagator)} is called after propagation.
      */
-    public void execute(Propagator<?> propagator) throws ContradictionException {
+    public void execute(Propagator<?> propagator, boolean activatedByReification) throws ContradictionException {
         if (propagator.isStateLess()) {
             propagator.setActive();
         }
         if (propagator.isActive()) {
+            // first, fully propagate the propagator
             model.getSolver().getMeasures().incPropagationCount();
             propagator.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
+            if (activatedByReification){
+                onPropagatorExecution(propagator);
+            }
+            // then, if required (LCG), propagate the SAT solver
             model.getSolver().getMeasures().incPropagationCount();
             propagateSat();
             while (!var_queue.isEmpty()) {
@@ -345,7 +337,6 @@ public class PropagationEngine {
             notEmpty = notEmpty & ~(1 << i);
         }
         lastProp = null;
-        lastVar = null;
     }
 
     /**
@@ -365,7 +356,6 @@ public class PropagationEngine {
             }
             assert found : variable + " not in scope of " + cause;
         }
-        insight.modifiy(variable);
         if (!variable.isScheduled()) {
             var_queue.addLast(variable);
             variable.schedule();
@@ -417,10 +407,6 @@ public class PropagationEngine {
         }
     }
 
-    public void setInsight(PropagationInsight insight) {
-        this.insight = insight;
-    }
-
     public void setHybrid(byte hybrid) {
         this.hybrid = hybrid;
     }
@@ -443,7 +429,6 @@ public class PropagationEngine {
         notEmpty = 0;
         init = false;
         lastProp = null;
-        lastVar = null;
     }
 
     public void ignoreModifications() {

@@ -2,7 +2,7 @@
 
     This file is part of choco-parsers, http://choco-solver.org/
 
-    Copyright (c) 2025, IMT Atlantique. All rights reserved.
+    Copyright (c) 2026, IMT Atlantique. All rights reserved.
 
     Licensed under the BSD 4-clause license.
 
@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.choco-solver</groupId>
         <artifactId>choco</artifactId>
-        <version>5.0.0-beta.1</version>
+        <version>5.0.0</version>
     </parent>
     <artifactId>choco-parsers</artifactId>
     <packaging>jar</packaging>
@@ -44,7 +44,7 @@
         <dependency>
             <groupId>org.xcsp</groupId>
             <artifactId>xcsp3-tools</artifactId>
-            <version>2.4</version>
+            <version>2.5</version>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
@@ -114,7 +114,37 @@
                                         <exclude>org/apache/fontbox/**</exclude>
                                     </excludes>
                                 </filter>
+                                <filter>
+                                    <artifact>junit:junit</artifact>
+                                    <excludes>
+                                        <exclude>**</exclude>
+                                    </excludes>
+                                </filter>
                             </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-licenses</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.outputDirectory}/META-INF</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>../target/classes/META-INF</directory>
+                                    <includes>
+                                        <include>THIRD-PARTY-LICENSES.txt</include>
+                                    </includes>
+                                </resource>
+                            </resources>
                         </configuration>
                     </execution>
                 </executions>

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -86,6 +86,6 @@ public class SetStrategy extends AbstractStrategy<SetVar> {
             return null;
         }
         assert !s.isInstantiated();
-        return s.getModel().getSolver().getDecisionPath().makeSetDecision(s, operator, valSelector.selectValue(s));
+        return decisionPath.makeSetDecision(s, operator, valSelector.selectValue(s));
     }
 }

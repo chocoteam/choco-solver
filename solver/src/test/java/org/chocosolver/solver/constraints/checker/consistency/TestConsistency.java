@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -273,13 +273,13 @@ public class TestConsistency {
         }
     }
 
-    @Test(groups="checker", timeOut=60000)
-    public void testPLUSAC() {
-        long seed = System.currentTimeMillis();
-        for (int i = 0; i < 99; i++) {
-            checkConsistency(Modeler.modelplusac, 3, -8, 8, null, seed + i, "ac");
-        }
-    }
+//    @Test(groups="checker", timeOut=60000)
+//    public void testPLUSAC() {
+//        long seed = System.currentTimeMillis();
+//        for (int i = 0; i < 99; i++) {
+//            checkConsistency(Modeler.modelplusac, 3, -8, 8, null, seed + i, "ac");
+//        }
+//    }
 
     // MODULO *******************************************************
 

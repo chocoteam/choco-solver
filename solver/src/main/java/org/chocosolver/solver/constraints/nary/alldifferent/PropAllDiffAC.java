@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -14,6 +14,8 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.nary.alldifferent.algo.AlgoAllDiffAC;
 import org.chocosolver.solver.constraints.nary.alldifferent.algo.AlgoAllDiffACFast;
+import org.chocosolver.solver.constraints.nary.alldifferent.algo.AlgoAllDiffBimodal;
+import org.chocosolver.solver.constraints.nary.alldifferent.algo.IAlldifferentAlgorithm;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -30,14 +32,14 @@ import org.chocosolver.util.ESat;
  *
  * @author Jean-Guillaume Fages
  */
-@Explained(partial = true, comment = "Fast algorithm not explained")
+@Explained(partial = true, comment = "AC_ZHANG not explained")
 public class PropAllDiffAC extends Propagator<IntVar> {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
-    protected AlgoAllDiffAC filter;
+    protected IAlldifferentAlgorithm filter;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -48,12 +50,21 @@ public class PropAllDiffAC extends Propagator<IntVar> {
      * enables to control the cardinality of the matching
      *
      * @param variables array of integer variables
+     * @param mode      name of the filtering algorithm
      */
-    public PropAllDiffAC(IntVar[] variables, boolean fast) {
+    public PropAllDiffAC(IntVar[] variables, AllDifferent.Consistency mode) {
         super(variables, PropagatorPriority.QUADRATIC, false);
-        this.filter = fast ?
-            new AlgoAllDiffACFast(variables, this):
-            new AlgoAllDiffAC(variables, this);
+        switch (mode) {
+            case AC_REGIN:
+                this.filter = new AlgoAllDiffAC(variables, this);
+                break;
+            case AC_ZHANG:
+                this.filter = new AlgoAllDiffACFast(variables, this);
+                break;
+            default:
+                this.filter = new AlgoAllDiffBimodal(variables, this, mode);
+                break;
+        }
     }
 
     //***********************************************************************************

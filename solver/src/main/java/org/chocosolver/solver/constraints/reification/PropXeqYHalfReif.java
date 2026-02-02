@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -48,7 +48,7 @@ public class PropXeqYHalfReif extends Propagator<IntVar> {
         if (vIdx < 2) {
             return IntEventType.all();
         }
-        return IntEventType.INCLOW.getMask();
+        return IntEventType.INSTANTIATE.getMask();
     }
 
     @Override
@@ -86,14 +86,14 @@ public class PropXeqYHalfReif extends Propagator<IntVar> {
                     for (int val = vars[0].getLB(); val <= ub; val = vars[0].nextValue(val)) {
                         if (!vars[1].contains(val)) {
                             vars[0].removeValue(val, this,
-                                    lcg() ? Reason.r(vars[1].getLit(val, IntVar.LR_NE), b.getValLit()) : Reason.undef());
+                                    lcg() ? Reason.r(vars[1].getLit(val, IntVar.LR_EQ), b.getValLit()) : Reason.undef());
                         }
                     }
                     ub = vars[1].getUB();
                     for (int val = vars[1].getLB(); val <= ub; val = vars[1].nextValue(val)) {
                         if (!vars[0].contains(val)) {
                             vars[1].removeValue(val, this,
-                                    lcg() ? Reason.r(vars[0].getLit(val, IntVar.LR_NE), b.getValLit()) : Reason.undef());
+                                    lcg() ? Reason.r(vars[0].getLit(val, IntVar.LR_EQ), b.getValLit()) : Reason.undef());
                         }
                     }
                 }
@@ -111,13 +111,29 @@ public class PropXeqYHalfReif extends Propagator<IntVar> {
                     break;
                 case 0b10:
                     if (!x.contains(y.getValue())) {
-                        b.setToFalse(this, lcg() ? Reason.r(y.getValLit(), x.getLit(y.getValue(), IntVar.LR_EQ)) : Reason.undef());
+                        if(x.hasEnumeratedDomain() && y.hasEnumeratedDomain()) {
+                            b.setToFalse(this, lcg() ? Reason.r(y.getValLit(), x.getLit(y.getValue(), IntVar.LR_EQ)) : Reason.undef());
+                        }else{
+                            if(x.getUB() < y.getValue()) {
+                                b.setToFalse(this, lcg() ? Reason.r(x.getMaxLit(), y.getValLit()) : Reason.undef());
+                            } else if (x.getLB() > y.getValue()) {
+                                b.setToFalse(this, lcg() ? Reason.r(x.getMinLit(), y.getValLit()) : Reason.undef());
+                            }
+                        }
                         setPassive();
                     }
                     break;
                 case 0b01:
                     if (!y.contains(x.getValue())) {
-                        b.setToFalse(this, lcg() ? Reason.r(x.getValLit(), y.getLit(x.getValue(), IntVar.LR_EQ)) : Reason.undef());
+                        if(x.hasEnumeratedDomain() && y.hasEnumeratedDomain()) {
+                            b.setToFalse(this, lcg() ? Reason.r(x.getValLit(), y.getLit(x.getValue(), IntVar.LR_EQ)) : Reason.undef());
+                        }else{
+                            if(y.getUB() < x.getValue()) {
+                                b.setToFalse(this, lcg() ? Reason.r(y.getMaxLit(), x.getValLit()) : Reason.undef());
+                            } else if (y.getLB() > x.getValue()) {
+                                b.setToFalse(this, lcg() ? Reason.r(y.getMinLit(), x.getValLit()) : Reason.undef());
+                            }
+                        }
                         setPassive();
                     }
                     break;

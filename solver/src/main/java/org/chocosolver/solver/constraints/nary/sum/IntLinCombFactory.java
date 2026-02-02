@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -14,7 +14,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
-import org.chocosolver.solver.constraints.ternary.PropXplusYeqZ;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.view.integer.IntAffineView;
@@ -248,27 +247,6 @@ public class IntLinCombFactory {
                     assert COEFFS[0] == -1 && COEFFS[1] == -1;
                     return s.arithm(VARS[0], "+", VARS[1], Operator.getFlip(OPERATOR.toString()), -RESULT);
                 }
-            case 3:
-                if(RESULT == 0 && OPERATOR == Operator.EQ) {
-                    // deal with X + Y = Z
-                    if ((COEFFS[0] == 1 && COEFFS[1] == 1 && COEFFS[2] == -1)
-                            || (COEFFS[0] == -1 && COEFFS[1] == -1 && COEFFS[2] == 1)) {
-                        return new SumConstraint(
-                                new PropXplusYeqZ(VARS[0], VARS[1], VARS[2]));
-                    }
-                    // deal with X + Z  = Y
-                    if ((COEFFS[0] == 1 && COEFFS[1] == -1 && COEFFS[2] == 1)
-                            || (COEFFS[0] == -1 && COEFFS[1] == 1 && COEFFS[2] == -1)) {
-                        return new SumConstraint(
-                                new PropXplusYeqZ(VARS[0], VARS[2], VARS[1]));
-                    }
-                    // deal with Y + Z  = X
-                    if ((COEFFS[0] == -1 && COEFFS[1] == 1 && COEFFS[2] == 1)
-                            || (COEFFS[0] == 1 && COEFFS[1] == -1 && COEFFS[2] == -1)) {
-                        return new SumConstraint(
-                                new PropXplusYeqZ(VARS[1], VARS[2], VARS[0]));
-                    }
-                }
             default:
                 int b = 0, e = VARS.length;
                 IntVar[] tmpV = new IntVar[e];
@@ -372,7 +350,9 @@ public class IntLinCombFactory {
                 return s.times(VARS[0], COEFFS[0], VARS[1]);
             }
         }
-        if (Operator.EQ == OPERATOR && VARS[VARS.length - 1].hasEnumeratedDomain() && TuplesFactory.canBeTupled(Arrays.copyOf(VARS, VARS.length - 1))) {
+        if (Operator.EQ == OPERATOR
+                && VariableUtils.allEnumerated(VARS)
+                && TuplesFactory.canBeTupled(Arrays.copyOf(VARS, VARS.length - 1))) {
             return s.table(VARS, TuplesFactory.scalar(Arrays.copyOf(VARS, VARS.length - 1), Arrays.copyOf(COEFFS, COEFFS.length - 1),
                     OPERATOR.toString(), VARS[VARS.length - 1], -COEFFS[COEFFS.length - 1], RESULT));
         }

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -38,7 +38,7 @@ public class PropAbsolute extends Propagator<IntVar> {
         super(ArrayUtils.toArray(X, Y), PropagatorPriority.BINARY, true);
         this.X = vars[0];
         this.Y = vars[1];
-        bothEnumerated = X.hasEnumeratedDomain() && Y.hasEnumeratedDomain();
+        bothEnumerated = X.hasUnfixedEnumeratedDomain() && Y.hasUnfixedEnumeratedDomain();
     }
 
     @Override
@@ -101,8 +101,8 @@ public class PropAbsolute extends Propagator<IntVar> {
                 Y.updateLowerBound(-val, this, lcg() ? Reason.r(X.getValLit()) : Reason.undef());
                 Y.updateUpperBound(val, this, lcg() ? Reason.r(X.getValLit()) : Reason.undef());
                 val--;
-                for (int v = -val; v <= val; v = Y.nextValue(v)) {
-                    Y.removeValue(v, this, lcg() ? Reason.r(X.getValLit()) : Reason.undef());
+                if (val >= 0) {
+                    removeInterval(Y, -val, val, lcg() ? Reason.r(X.getValLit()) : Reason.undef());
                 }
                 setPassive();
             } else {
@@ -112,7 +112,7 @@ public class PropAbsolute extends Propagator<IntVar> {
             if (IntEventType.isBound(mask)) {
                 setBounds();
             }
-            if (IntEventType.isRemove(mask) && bothEnumerated) {
+            if (bothEnumerated) {
                 enumeratedFiltering();
             }
         }
@@ -124,10 +124,9 @@ public class PropAbsolute extends Propagator<IntVar> {
         int min = X.getLB();
         Y.updateLowerBound(-max, this, lcg() ? Reason.r(X.getMaxLit()) : Reason.undef());
         Y.updateUpperBound(max, this, lcg() ? Reason.r(X.getMaxLit()) : Reason.undef());
-        for (int v = 1 - min; v <= min - 1; v = Y.nextValue(v)) {
-            Y.removeValue(v, this, lcg() ? Reason.r(X.getMinLit()) : Reason.undef());
+        if (1 - min <= min -1) {
+            removeInterval(Y, 1 - min, min - 1, lcg() ? Reason.r(X.getMinLit()) : Reason.undef());
         }
-        //if (!lcg()) Y.removeInterval(1 - min, min - 1, this);
         /////////////////////////////////////////////////
         int prevLB = X.getLB();
         int prevUB = X.getUB();
@@ -149,13 +148,8 @@ public class PropAbsolute extends Propagator<IntVar> {
                 int mN = -Y.previousValue(1);
                 X.updateLowerBound(Math.min(mP, mN), this);
             }
-            if(max >= -min){
-                X.updateLowerBound(-max, this,
-                        lcg() ? Reason.r(Y.getMaxLit()) : Reason.undef());
-            }else{
-                X.updateLowerBound(min, this,
-                        lcg() ? Reason.r(Y.getMinLit()) : Reason.undef());
-            }
+                X.updateUpperBound(Math.max(-min, max), this,
+                        lcg() ? Reason.r(Y.getMinLit(), Y.getMaxLit()) : Reason.undef());
         }
         if (prevLB != X.getLB() || prevUB != X.getUB()) setBounds();
     }
@@ -183,4 +177,13 @@ public class PropAbsolute extends Propagator<IntVar> {
     // EXPLANATIONS
     //***********************************************************************************
 
+    private void removeInterval(IntVar intVar, int fromIncl, int toIncl, Reason reason) throws ContradictionException {
+        if (!lcg()) {
+            intVar.removeInterval(fromIncl, toIncl, this);
+        } else {
+            for (int i=fromIncl; i<=toIncl; i++) {
+                intVar.removeValue(i, this, reason);
+            }
+        }
+    }
 }

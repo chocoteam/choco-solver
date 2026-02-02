@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -210,5 +210,15 @@ public class PropSat extends Propagator<Variable> {
         // since early deduction is not backtrackable.
 
     }
+
+    /**
+     * Reset the underlying SAT decorator.
+     * <p>
+     *     This method removes all learnt clauses and literals from the SAT solver.
+     */
+    public void reset(){
+        sat_.reset();
+    }
+
 
 }

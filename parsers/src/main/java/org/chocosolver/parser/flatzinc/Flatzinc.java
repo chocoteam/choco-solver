@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -71,8 +71,8 @@ public class Flatzinc extends RegParser {
     protected boolean oss = false;
 
     @Option(name = "-ocs", usage = "Opens the complementary search to all variables of the problem\n" +
-            "(default: OUTPUT, i.e., restricted to the variables declared in output).")
-    protected CompleteSearch ocs = CompleteSearch.OUTPUT;
+            "(default: ALL, i.e., complete the search with a search on all variables.).")
+    protected CompleteSearch ocs = CompleteSearch.ALL;
 
     //***********************************************************************************
     // VARIABLES
@@ -128,7 +128,7 @@ public class Flatzinc extends RegParser {
     @Override
     public void createSolver() {
         if (level.isLoggable(Level.COMPET)) {
-            System.out.printf("%% Choco-solver%s (5.0.0-beta.1, 250217_17:45)\n", lcg? " with LCG" : "");
+            System.out.printf("%% Choco-solver%s (5.0.0, 260202_14:43)\n", lcg? " with LCG" : "");
         }
         super.createSolver();
         datas = new Datas[nb_cores];

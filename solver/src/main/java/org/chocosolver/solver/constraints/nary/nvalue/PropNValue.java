@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -90,7 +90,7 @@ public class PropNValue extends Propagator<IntVar> {
 
     private void selectRandomWitness(int idxConcernedValue) {
         int value = concernedValues[idxConcernedValue];
-        listForRandomPick.clear();
+        listForRandomPick.resetQuick();
         for(int i = 0; i < n; i++) {
             if(vars[i].isInstantiatedTo(value)) {
                 mandatoryValues.add(value);

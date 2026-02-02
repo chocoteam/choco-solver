@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -11,9 +11,9 @@ package org.chocosolver.sat;
 
 import gnu.trove.list.TIntList;
 
-import java.util.stream.IntStream;
+import java.util.Arrays;
 
-import static org.chocosolver.sat.MiniSat.*;
+import static org.chocosolver.sat.MiniSat.clauseCounter;
 
 /**
  * Clause -- a simple class for representing a clause
@@ -55,7 +55,7 @@ public class Clause extends Reason {
         }
         this.learnt = learnt;
         this.id = clauseCounter.get();
-        clauseCounter.set(clauseCounter.get() + 1);
+        clauseCounter.set(id + 1);
     }
 
     /**
@@ -67,21 +67,18 @@ public class Clause extends Reason {
      * @return the reduced clause
      */
     private static int[] reduceOs(int[] ps) {
-        int nb0 = (int) IntStream.of(ps).filter(p -> p == 0).count();
-        if (nb0 <= 1) {
-            return ps;
-        } else {
-            int[] reduced = new int[ps.length - nb0 + 1];
-            int j = 0;
-            for (int i = 0; i < ps.length; i++) {
-                if (ps[i] != 0) {
-                    reduced[j++] = ps[i];
-                } else if (j == 0) {
-                    reduced[j++] = 0;
-                }
+        // move 0s to the end of the array
+        // the first 0 will be kept, the others will be removed
+        int j = 1;
+        for (int i = 1; i < ps.length; i++) {
+            if (ps[i] != 0) {
+                ps[j++] = ps[i];
             }
-            return reduced;
         }
+        if(j < ps.length) {
+            ps = Arrays.copyOf(ps, j);
+        }
+        return ps;
     }
 
     /**
@@ -104,13 +101,13 @@ public class Clause extends Reason {
         literals_ = ps.toArray();
         this.learnt = learnt;
         this.id = clauseCounter.get();
-        clauseCounter.set(clauseCounter.get() + 1);
+        clauseCounter.set(id + 1);
     }
 
     /**
      * Create a clause with a set of literals, not learnt
      *
-     * @param ps
+     * @param ps literals
      */
     Clause(TIntList ps) {
         this(ps, false);
@@ -169,7 +166,7 @@ public class Clause extends Reason {
         st.append("T").append(Thread.currentThread().getId());
         st.append("~#").append(id).append(" Size:").append(literals_.length).append(" - ");
         if (literals_.length > 0) {
-            st.append(literals_[0]).append(" ");
+            st.append(literals_[0]);
         }
         for (int i = 1; i < literals_.length; i++) {
             st.append(" ∨ ").append(literals_[i]);

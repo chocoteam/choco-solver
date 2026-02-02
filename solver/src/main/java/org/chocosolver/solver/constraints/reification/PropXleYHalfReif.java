@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -41,10 +41,13 @@ public class PropXleYHalfReif extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        if (vIdx == 1) {
+        if (vIdx == 0) {
+            return IntEventType.INCLOW.getMask();
+        } else if (vIdx == 1) {
             return IntEventType.DECUPP.getMask();
+        }else{
+            return IntEventType.INSTANTIATE.getMask();
         }
-        return IntEventType.INCLOW.getMask();
     }
 
     @Override
