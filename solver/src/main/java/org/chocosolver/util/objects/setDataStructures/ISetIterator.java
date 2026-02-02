@@ -38,15 +38,6 @@ public interface ISetIterator extends Iterator<Integer> {
 	void reset();
 
 	/**
-	 * Inform the iterator that value <code>item</code> has been removed
-	 * (may require to update iterator structure)
-	 * @param item removed value
-	 */
-	default void notifyRemoving(int item){
-		// nothing to do by default
-	}
-
-	/**
 	 * Returns the next int in the iteration.
 	 *
 	 * Beware : avoids autoboxing

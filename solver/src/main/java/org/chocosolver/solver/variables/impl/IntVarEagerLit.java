@@ -26,7 +26,6 @@ import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 import java.util.Arrays;
-import java.util.Iterator;
 
 import static org.chocosolver.sat.MiniSat.*;
 
@@ -72,7 +71,12 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
         lit_max = var.getUB();
 
         int capacity = lit_max - lit_min + 1;
-        if (capacity > 30 && (lit_max - lit_min) / var.getDomainSize() > 5) {
+        // if the underlying variable is a constant
+        if (capacity == 1) {
+            values = var.stream().toArray();
+            base_vlit = base_blit = -1;
+        } else if (capacity > 30 && (lit_max - lit_min) / var.getDomainSize() > 5) {
+            // if the domain is sparse
             values = var.stream().toArray();
             // init vlits
             base_vlit = 2 * (sat.nVars());
@@ -80,6 +84,7 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
             base_blit = 2 * (sat.nVars() + values.length) + 1;
             initSparseDomain();
         } else {
+            // if the domain is dense
             values = null;
             // init vlits
             base_vlit = 2 * (sat.nVars() - lit_min);
@@ -120,6 +125,12 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
         sat.newVariable(new MiniSat.ChannelInfo(this, 1, 1, lit_min - 1));
         for (int v : values) {
             sat.newVariable(new MiniSat.ChannelInfo(this, 1, 1, v));
+        }
+        for (int i = lit_min; i <= lit_min; i++) {
+            sat.cEnqueue(getGELit(i), Reason.undef());
+        }
+        for (int i = lit_max; i <= lit_max; i++) {
+            sat.cEnqueue(getLELit(i), Reason.undef());
         }
     }
 
@@ -176,8 +187,8 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
                 return u;
             case ROUND_UP:
                 return l;
-            default:
             case ROUND_NONE:
+            default:
                 return -1;
         }
     }
@@ -195,6 +206,9 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
                 if (values == null) {
                     return base_vlit + 2 * v;
                 } else {
+                    if (values.length == 1) {
+                        return values[0] == v ? 0 : 1;
+                    }
                     int u = findIndex(v, RoundMode.ROUND_NONE);
                     return (u == -1 ? 1 : base_vlit + 2 * u);
                 }
@@ -203,16 +217,35 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
                 if (values == null) {
                     return base_vlit + 2 * v + 1;
                 } else {
+                    if (values.length == 1) {
+                        return values[0] == v ? 1 : 0;
+                    }
                     int u = findIndex(v, RoundMode.ROUND_NONE);
                     return (u == -1 ? 0 : base_vlit + 2 * u + 1);
                 }
             }
             case LR_GE: {
-                int u = values == null ? v : findIndex(v, RoundMode.ROUND_UP);
+                int u;
+                if (values == null) {
+                    u = v;
+                } else {
+                    if (values.length == 1) {
+                        return values[0] > v ? 0 : 1;
+                    }
+                    u = findIndex(v, RoundMode.ROUND_UP);
+                }
                 return base_blit + 2 * u;
             }
             case LR_LE: {
-                int u = values == null ? v : findIndex(v, RoundMode.ROUND_DOWN);
+                int u;
+                if (values == null) {
+                    u = v;
+                } else {
+                    if (values.length == 1) {
+                        return values[0] < v ? 0 : 1;
+                    }
+                    u = findIndex(v, RoundMode.ROUND_DOWN);
+                }
                 return base_blit + 2 * u + 1;
             }
             default:
@@ -579,11 +612,6 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         return var.monitorDelta(propagator);
-    }
-
-    @Override
-    public Iterator<Integer> iterator() {
-        return var.iterator();
     }
 
     @Override

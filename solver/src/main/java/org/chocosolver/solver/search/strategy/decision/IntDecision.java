@@ -146,13 +146,13 @@ public class IntDecision extends Decision<IntVar> {
             return String.format("d_%d: %s%s%d",
                     getPosition(),
                     var.getName(),
-                    nonrefuted ? "=": '\\',
+                    nonrefuted ? "=": "!=",
                     value);
         } else if (assignment.getClass().equals(DecisionOperatorFactory.makeIntNeq().getClass())) {
             return String.format("d_%d: %s%s%d",
                     getPosition(),
                     var.getName(),
-                    nonrefuted ? "\u2260" : '=',
+                    nonrefuted ? "!=" : '=',
                     value);
         } else if (assignment.getClass().equals(DecisionOperatorFactory.makeIntSplit().getClass())) {
             return String.format("d_%d: %s%s%s%d,%d]",

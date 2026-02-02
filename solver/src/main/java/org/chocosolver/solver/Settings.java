@@ -49,7 +49,7 @@ public class Settings {
 
     private int maxTupleSizeForSubstitution = 10_000;
 
-    private int timeLimitForPreprocessing = -1;
+    private long maxSizeInMBToUseCompactTable = 1024L;
 
     private boolean sortPropagatorActivationWRTPriority = true;
 
@@ -118,7 +118,7 @@ public class Settings {
                 .setModelChecker(s -> true)
                 .setWarnUser(false)
                 .setCheckDeclaredConstraints(false)
-                .setCheckDeclaredViews(false)
+                .setCheckDeclaredViews(true)
                 .setCheckDeclaredMonitors(false)
                 .setPrintAllUndeclaredConstraints(false);
     }
@@ -307,26 +307,22 @@ public class Settings {
     }
 
     /**
-     * @return the time allocated for the preprocessing
+     * @return maximum estimated size, in MB, of the table to use compact table representation
      */
-    public long getTimeLimitForPreprocessing() {
-        return timeLimitForPreprocessing;
+    public long getMaxSizeInMBToUseCompactTable() {
+        return maxSizeInMBToUseCompactTable;
     }
 
     /**
-     * Set the time allocated for the preprocessing step.
-     * If the time limit is reached, the preprocessing is stopped and the resolution starts.
-     * Set a negative value to disable the time limit.
+     * Define the maximum estimated size, in MB, of the table to use compact table representation.
      *
-     * @param timeLimitForPreprocessing time limit for Strong Arc Consistency (in milliseconds)
+     * @param maxSizeInMBToUseCompactTable size threshold (in MB) to use compact table representation
      * @return the current instance
-     * @see org.chocosolver.solver.Solver#preprocessing(long)
      */
-    public Settings setTimeLimitForPreprocessing(int timeLimitForPreprocessing) {
-        this.timeLimitForPreprocessing = timeLimitForPreprocessing;
+    public Settings setMaxSizeInMBToUseCompactTable(int maxSizeInMBToUseCompactTable) {
+        this.maxSizeInMBToUseCompactTable = maxSizeInMBToUseCompactTable;
         return this;
     }
-
 
     /**
      * @return {@code true} if propagators are sorted wrt their priority on initial activation.
@@ -664,7 +660,7 @@ public class Settings {
      * when a bound is modified, the channeling is done with all known values between the previous and the new bound.
      * It provides stronger reasons, which are slower to compute but more informative.
      *
-     * @param intVarLazyLitWithWeakBounds
+     * @param intVarLazyLitWithWeakBounds weak chaining or not
      * @return the current instance
      */
     public Settings setIntVarLazyLitWithWeakBounds(boolean intVarLazyLitWithWeakBounds) {

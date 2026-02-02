@@ -187,11 +187,7 @@ public interface IViewFactory extends ISelf<Model> {
             int ub = max(-var.getLB(), var.getUB());
             String name = "|" + var.getName() + "|";
             IntVar abs;
-            if (var.hasEnumeratedDomain()) {
-                abs = ref().intVar(name, 0, ub, false);
-            } else {
-                abs = ref().intVar(name, 0, ub, true);
-            }
+            abs = ref().intVar(name, 0, ub);
             ref().absolute(abs, var).post();
             return abs;
         }

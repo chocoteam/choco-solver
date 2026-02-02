@@ -96,6 +96,6 @@ public class EnumDeltaMonitor extends TimeStampedObject implements IIntDeltaMoni
 
     @Override
     public int sizeApproximation() {
-        return last - first;
+        return delta.size() - (needReset()? 0 : this.last);
     }
 }

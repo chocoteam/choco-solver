@@ -40,7 +40,7 @@ public class PickOnDom<V extends Variable> extends AbstractCriterionBasedVariabl
     private final ArrayList<Variable> lVars;
 
     public PickOnDom(V[] vars) {
-        this(vars, 32);
+        this(vars, 20);
     }
 
     public PickOnDom(V[] vars, int flushRate) {

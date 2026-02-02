@@ -142,11 +142,11 @@ public interface ISet extends Iterable<Integer>{
      * Copies the set in an array if integers
      * @return an array containing every integer of the set
      */
-    default int[] toArray(){
+    default int[] toArray() {
         int[] a = new int[size()];
         int idx = 0;
-        ISetIterator iter = iterator();
-        while(iter.hasNext()){
+        ISetIterator iter = newIterator();
+        while (iter.hasNext()) {
             a[idx++] = iter.nextInt();
         }
         return a;

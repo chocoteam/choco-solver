@@ -23,9 +23,12 @@ import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * A blackbox declaration assistant.
@@ -225,11 +228,16 @@ public class BlackBoxConfigurator {
         List<SetVar> lsvars = new ArrayList<>(); // set variables
         List<GraphVar<?>> lgvars = new ArrayList<>(); // graph variables
         List<RealVar> lrvars = new ArrayList<>();// real variables.
+        if(model.getGroups().isEmpty()){
+            model.addAsGroup("default", model.getVars());
+        }
+        Set<Variable> inputVars = model.getGroups().stream().flatMap(g -> Arrays.stream(g.getVariables())).collect(Collectors.toSet());
         Variable[] variables = model.getVars();
         Variable objective = null;
         for (Variable var : variables) {
             if (VariableUtils.isConstant(var)) continue;
             if (VariableUtils.isView(var) && excludeViews) continue;
+            if (!inputVars.isEmpty() && !inputVars.contains(var)) continue;
             int type = var.getTypeAndKind();
             int kind = type & Variable.KIND;
             switch (kind) {
@@ -298,6 +306,9 @@ public class BlackBoxConfigurator {
         }
         AbstractStrategy<?> main = Search.sequencer(strats.toArray(new AbstractStrategy[0]));
         solver.addRestarter(restartPolicy.apply(solver));
+        if(restartOnSolution){
+            solver.setRestartOnSolutions();
+        }
         if (nogoodOnRestart) {
             solver.setNoGoodRecordingFromRestarts();
         }
@@ -368,8 +379,9 @@ public class BlackBoxConfigurator {
         return this;
     }
 
-    public void setRefinedPartialAssignmentGeneration(boolean rgpa) {
+    public BlackBoxConfigurator setRefinedPartialAssignmentGeneration(boolean rgpa) {
         this.generatePartialAssignment = rgpa;
+        return this;
     }
 
     public BlackBoxConfigurator setExcludeViews(boolean excludeViews) {

@@ -114,7 +114,11 @@ public class UnCReExpression implements ReExpression {
     @Override
     public void extractVar(HashSet<IntVar> variables) {
         e1.extractVar(variables);
-        variables.add(model.intVar(e2));
+    }
+
+    @Override
+    public ArExpression[] getExpressionChild() {
+        return new ArExpression[]{e1};
     }
 
     private static ArExpression.Operator detectOperator(ArExpression e) {

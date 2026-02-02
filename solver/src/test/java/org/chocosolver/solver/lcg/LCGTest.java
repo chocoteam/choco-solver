@@ -9,20 +9,15 @@
  */
 package org.chocosolver.solver.lcg;
 
-import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Providers;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.search.strategy.Search;
-import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
-import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
-import org.chocosolver.solver.search.strategy.selectors.variables.Random;
-import org.chocosolver.solver.search.strategy.strategy.SetStrategy;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -62,9 +57,9 @@ public class LCGTest {
                 .toArray(Object[][]::new);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////  NQUEEN  //////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////  NQUEEN  //////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @DataProvider
     public static Object[][] nqueen() {
@@ -136,6 +131,42 @@ public class LCGTest {
     }
 
     @Test(groups = "lcg", dataProvider = "nqueen", timeOut = 60000)
+    public void testNQueenAllSolutionsLim(boolean bounded, boolean view, int n, int s, long seed) {
+        // to ensure that prohibiting-solution clauses are not removed by the clause database reduction
+        Model model = new Model("LCG Queens enum",
+                Settings.init().setLCG(true)
+                        .setNbMaxLearntClauses(100)
+        );
+        IntVar[] vars = model.intVarArray("Q", n, 1, n, bounded);
+
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                model.arithm(vars[i], "!=", vars[j]).post();
+                if (view) {
+                    model.arithm(vars[i], "!=", vars[j], "+", j - i).post();
+                    model.arithm(vars[i], "!=", vars[j], "-", j - i).post();
+                } else {
+                    model.arithm(vars[i], "!=", model.intView(1, vars[j], j - i)).post();
+                    model.arithm(vars[i], "!=", model.intView(1, vars[j], -j + i)).post();
+                }
+            }
+        }
+        Solver solver = model.getSolver();
+        if (seed == 0) {
+            solver.setSearch(Search.inputOrderLBSearch(vars));
+        } else {
+            solver.setSearch(Search.randomSearch(vars, seed));
+        }
+        while (solver.solve()) {
+//            System.out.printf("#%d : %s%n",
+//                    solver.getSolutionCount(),
+//                    Arrays.toString(Arrays.stream(vars).mapToInt(IntVar::getValue).toArray()));
+        }
+        ;
+        Assert.assertEquals(solver.getSolutionCount(), s, "seed: " + seed);
+    }
+
+    @Test(groups = "lcg", dataProvider = "nqueen", timeOut = 60000)
     public void testNQueenOptim(boolean bounded, boolean view, int n, int s, long seed) {
         Model model = new Model("LCG Queens opt",
                 Settings.init()
@@ -168,9 +199,9 @@ public class LCGTest {
         Assert.assertEquals(solver.getObjectiveManager().getBestSolutionValue(), n + 1);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////  GOLOMB  //////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////  GOLOMB  //////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @DataProvider
     public static Object[][] alldiff() {
@@ -286,9 +317,9 @@ public class LCGTest {
         Assert.assertEquals(solver.getObjectiveManager().getBestSolutionValue(), o);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////  MILP  ////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////  MILP  ////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @DataProvider
     public static Object[][] milp() {
@@ -403,9 +434,9 @@ public class LCGTest {
 
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////  SCHUR LEMMA //////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////  SCHUR LEMMA //////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @DataProvider
     public static Object[][] schurlemma() {
@@ -561,9 +592,9 @@ public class LCGTest {
         Assert.assertEquals(solver.getSolutionCount(), 0);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////  REIFICATION //////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////  REIFICATION //////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Test(groups = "lcg", dataProvider = "seed", timeOut = 60000)
     public void testEq(long seed) {
@@ -665,5 +696,77 @@ public class LCGTest {
         }
         while (solver.solve()) ;
         Assert.assertEquals(solver.getSolutionCount(), 3);
+    }
+
+    @Test(groups = "lcg", timeOut = 60000)
+    public void testReification() {
+        Model model = new Model(Settings.init().setLCG(true));
+        IntVar[] x = model.intVarArray("x", 6, 0, 1);
+        IntVar[] y = model.intVarArray("y", 6, 0, 1);
+        BoolVar b = model.boolVar("b");
+        model.lexLessEq(x, y).reifyWith(b);
+
+        x[0].eq(1).post();
+        y[0].eq(1).post();
+        x[1].eq(0).post();
+        y[1].eq(0).post();
+        x[5].eq(1).post();
+        y[5].eq(1).post();
+
+        y[2].eq(0).post();
+        x[3].eq(0).post();
+        y[4].eq(0).post();
+
+        // if b is true and x[2] = 0, then x[4] = 1 and y[3] = 0
+        model.addClauses(
+                LogOp.implies(
+                        LogOp.and(b, model.isEq(x[2], 0)),
+                        LogOp.and(model.isEq(x[4], 1), model.isEq(y[3], 0))
+                ));
+//
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.inputOrderUBSearch(b, x[2], y[3], x[4]));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 5);
+    }
+
+    @Test(groups = "lcg", timeOut = 600000)
+    public void test685() {
+
+        for (int i = 1024; i >= 908; i /= 2) {
+            System.out.printf("Testing with range [%d,%d]%n", Short.MIN_VALUE / i, Short.MAX_VALUE / i);
+
+            //{a*b + c == 2020, a + b*c == 2021}
+            Model model = new Model(Settings.init().setLCG(true));
+            IntVar a = model.intVar("a", Short.MIN_VALUE / i, Short.MAX_VALUE / i);
+            IntVar b = model.intVar("b", Short.MIN_VALUE / i, Short.MAX_VALUE / i);
+            IntVar c = model.intVar("c", Short.MIN_VALUE / i, Short.MAX_VALUE / i);
+            a.mul(b).add(c).eq(20).post();
+            a.add(b.mul(c)).eq(21).post();
+            //model.displayVariableOccurrences();
+            //model.displayPropagatorOccurrences();
+            Solver solver = model.getSolver();
+            solver.showShortStatistics();
+            //solver.showDecisions(()->"");
+            while (solver.solve()) {
+                System.out.printf("a=%d b=%d c=%d%n", a.getValue(), b.getValue(), c.getValue());
+            }
+            Assert.assertEquals(solver.getSolutionCount(), 1);
+        }
+    }
+
+    @DataProvider
+    public Object[][] offsets() {
+        return new Object[][]{{0}, {1}};
+    }
+
+    @Test(groups = "lcg", timeOut = 600000, dataProvider = "offsets")
+    public void testJG1(int offset) {
+        // When the domain is sparse, the lit-based domain was not correctly instantiated
+        Model model = new Model(Settings.init().setLCG(true));
+        IntVar a = model.intVar("a", offset, 31);
+        IntVar b = model.intVar("b", new int[]{offset, 10, 20, 30});
+        model.arithm(a, "=", b).post();
+        model.getSolver().solve();
     }
 }

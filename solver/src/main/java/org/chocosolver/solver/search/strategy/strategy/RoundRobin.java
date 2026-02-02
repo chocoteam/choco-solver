@@ -16,14 +16,18 @@ import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactor
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainLast;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainSticky;
 import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.variables.VariableSelector;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.bandit.Policy;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalInt;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
+import java.util.function.ToDoubleBiFunction;
 
 /**
  * A search strategy that selects the next strategy to apply in a round-robin fashion.
@@ -36,16 +40,48 @@ import java.util.function.Function;
  */
 public class RoundRobin extends AbstractStrategy<IntVar> implements IMonitorRestart {
 
+    /**
+     * A strategy that does nothing but return null.
+     * It is used to set the main strategy to null in meta-strategies
+     */
+    private static class NullStrategy extends AbstractStrategy<IntVar> {
+
+        protected NullStrategy() {
+            super();
+        }
+
+        @Override
+        public Decision<IntVar> getDecision() {
+            return null;
+        }
+    }
+
+    // Singleton of the null strategy
+    public static final AbstractStrategy<IntVar> NULL_STRATEGY = new NullStrategy();
+
+    // Order of importance of the selectors, the smaller the index, the quicker the selector is changed
+    private static final int VALUE = 0;
+    private static final int VARIABLE = 1;
+    private static final int META = 2;
+
+
+    // the meta strategies to select the next strategy to apply
+    private final MetaStrategy<IntVar>[] metaStrategies;
     // the variable selectors to select the next variable to branch on
-    final VariableSelector<IntVar>[] variableSelectors;
-    // the index of the current combination
-    int currentCombination;
+    private final VariableSelector<IntVar>[] variableSelectors;
     // the value selectors to select the next value to assign to the selected variable
-    final IntValueSelector[] valueSelectors;
+    private final IntValueSelector[] valueSelectors;
+    Function<IntVar, OptionalInt> stickyFirst = v -> OptionalInt.empty();
     // true if the solution has to be saved
     Function<IntVar, OptionalInt> solutionFirst = v -> OptionalInt.empty();
     Function<IntVar, OptionalInt> bestFirst = v -> OptionalInt.empty();
-    final List<int[]> combinations;
+
+    private final Policy bandit;
+    private final ToDoubleBiFunction<Integer, Integer> reward;
+
+    private final List<int[]> combinations;
+    private int action;
+    private int step;
 
     /**
      * Creates a RoundRobin strategy.
@@ -56,33 +92,111 @@ public class RoundRobin extends AbstractStrategy<IntVar> implements IMonitorRest
      * @param variables              the variables to branch on
      * @param variableSelectors      the variable selectors
      * @param valueSelectors         the value selectors
-     * @param solutionSaving         true if the solution has to be saved
-     *                               (the first solution found is saved and used to guide the search)
-     * @param bestUntilFirstSolution true if the value selection is guided by the objective function
-     *                               until the first solution is found
+     * @param combinations           the combinations of meta, variable and value selectors
+     * @param stickyValSel           conditions(s) to apply sticky value selector
+     * @param solutionSaving         condition(s) to apply solution saving
+     * @param bestUntilFirstSolution condition(s) to apply best value selection
      */
     public RoundRobin(IntVar[] variables,
+                      MetaStrategy<IntVar>[] metaStrategies,
                       VariableSelector<IntVar>[] variableSelectors,
                       IntValueSelector[] valueSelectors,
-                      boolean solutionSaving,
-                      boolean bestUntilFirstSolution) {
+                      List<int[]> combinations,
+                      BooleanSupplier stickyValSel,
+                      BooleanSupplier solutionSaving,
+                      BooleanSupplier bestUntilFirstSolution,
+                      Policy bandit,
+                      ToDoubleBiFunction<Integer, Integer> reward) {
         super(variables);
+        this.metaStrategies = metaStrategies;
         this.variableSelectors = variableSelectors;
         this.valueSelectors = valueSelectors;
-        this.currentCombination = 0;
-        if (solutionSaving) {
-            Solution solution = vars[0].getModel().getSolver().defaultSolution();
-            solutionFirst = new IntDomainLast(solution, valueSelectors[0], null);
+
+        if (combinations == null) {
+            this.combinations = populate(this.metaStrategies, this.variableSelectors, this.valueSelectors);
+        } else {
+            this.combinations = combinations;
         }
-        if (bestUntilFirstSolution) {
-            bestFirst = new IntDomainBest(valueSelectors[0], v -> variables[0].getModel().getSolver().getSolutionCount() == 0);
-        }
-        this.combinations = new ArrayList<>();
-        for (int i = 0; i < variableSelectors.length; i++) {
-            for (int j = 0; j < valueSelectors.length; j++) {
-                combinations.add(new int[]{i, j});
+
+        this.action = 0;
+        this.step = 0;
+
+        stickyFirst = new IntDomainSticky(variables, valueSelectors[0],
+                (x, v) -> stickyValSel.getAsBoolean());
+        Solution solution = vars[0].getModel().getSolver().defaultSolution();
+        solutionFirst = new IntDomainLast(solution, valueSelectors[0],
+                (x, v) -> solutionSaving.getAsBoolean());
+        bestFirst = new IntDomainBest(valueSelectors[0],
+                v -> bestUntilFirstSolution.getAsBoolean());
+        this.bandit = bandit;
+        this.reward = reward;
+    }
+
+    /**
+     * Creates a RoundRobin strategy.
+     * The strategy selects the next variable to branch on using the variable selectors in the order they are given.
+     * The strategy selects the next value to assign to the selected variable using the value selectors in the order they are given.
+     * The selectors are changed on each restart.
+     *
+     * @param variables              the variables to branch on
+     * @param variableSelectors      the variable selectors
+     * @param valueSelectors         the value selectors
+     * @param stickyValSel           conditions(s) to apply sticky value selector
+     * @param solutionSaving         condition(s) to apply solution saving
+     * @param bestUntilFirstSolution condition(s) to apply best value selection
+     */
+    public RoundRobin(IntVar[] variables,
+                      MetaStrategy<IntVar>[] metaStrategies,
+                      VariableSelector<IntVar>[] variableSelectors,
+                      IntValueSelector[] valueSelectors,
+                      BooleanSupplier stickyValSel,
+                      BooleanSupplier solutionSaving,
+                      BooleanSupplier bestUntilFirstSolution,
+                      Policy bandit,
+                      ToDoubleBiFunction<Integer, Integer> reward) {
+        this(variables,
+                metaStrategies,
+                variableSelectors,
+                valueSelectors,
+                null,
+                stickyValSel,
+                solutionSaving,
+                bestUntilFirstSolution,
+                bandit,
+                reward);
+
+    }
+
+    public static List<int[]> populate(MetaStrategy<IntVar>[] metaStrategies,
+                                       VariableSelector<IntVar>[] variableSelectors,
+                                       IntValueSelector[] valueSelectors) {
+
+        int[][] sizes = new int[3][];
+        sizes[VALUE] = new int[valueSelectors.length];
+        sizes[VARIABLE] = new int[variableSelectors.length];
+        sizes[META] = new int[metaStrategies.length];
+
+        List<int[]> combinations = new ArrayList<>();
+        int n = sizes.length;
+        int[] tmp = new int[n];
+        while (true) {
+            // save the current indices
+            int[] currentIndices = new int[n];
+            System.arraycopy(tmp, 0, currentIndices, 0, n);
+            combinations.add(currentIndices);
+            int j;
+            for (j = 0; j < n; j++) {
+                tmp[j]++;
+                if (tmp[j] < sizes[j].length) {
+                    break;
+                }
+                tmp[j] = 0;
+            }
+            if (j == n) {
+                break;
             }
         }
+        return combinations;
     }
 
     @Override
@@ -92,6 +206,9 @@ public class RoundRobin extends AbstractStrategy<IntVar> implements IMonitorRest
             solver.plugMonitor(this);
         }
         boolean init = true;
+        for (MetaStrategy<IntVar> m : metaStrategies) {
+            init &= m.init();
+        }
         for (VariableSelector<IntVar> vs : variableSelectors) {
             init &= vs.init();
         }
@@ -100,6 +217,9 @@ public class RoundRobin extends AbstractStrategy<IntVar> implements IMonitorRest
 
     @Override
     public void remove() {
+        for (MetaStrategy<IntVar> m : metaStrategies) {
+            m.remove();
+        }
         for (VariableSelector<IntVar> vs : variableSelectors) {
             vs.remove();
         }
@@ -111,8 +231,17 @@ public class RoundRobin extends AbstractStrategy<IntVar> implements IMonitorRest
 
     @Override
     public Decision<IntVar> getDecision() {
-        IntVar variable = variableSelectors[combinations.get(currentCombination)[0]].getVariable(vars);
-        return computeDecision(variable);
+        int[] currentIndices = combinations.get(action);
+        //1. call the meta strategy
+        IntVar selectedVariable = null;
+        MetaStrategy<IntVar> metaStrategy = metaStrategies[currentIndices[META]];
+        selectedVariable = metaStrategy.getSelectedVariable();
+        if (selectedVariable == null) {
+            //2. call the strategy, if needed
+            VariableSelector<IntVar> strategy = variableSelectors[currentIndices[VARIABLE]];
+            selectedVariable = strategy.getVariable(vars);
+        }
+        return computeDecision(selectedVariable);
     }
 
     @Override
@@ -120,18 +249,34 @@ public class RoundRobin extends AbstractStrategy<IntVar> implements IMonitorRest
         if (variable == null || variable.isInstantiated()) {
             return null;
         }
+        int[] currentIndices = combinations.get(action);
+        // 3. apply best value selection, if the condition is met
         OptionalInt opt = bestFirst.apply(variable);
         if (!opt.isPresent()) {
-            opt = solutionFirst.apply(variable);
+            // 3. apply sticky value selection, if the condition is met
+            opt = stickyFirst.apply(variable);
         }
         if (!opt.isPresent()) {
-            opt = OptionalInt.of(valueSelectors[combinations.get(currentCombination)[1]].selectValue(variable));
+            //5. apply phase saving, if the condition is met
+            opt = solutionFirst.apply(variable);
+        }
+        //6. call the value selector
+        if (!opt.isPresent()) {
+            IntValueSelector valueSelector = valueSelectors[currentIndices[VALUE]];
+            opt = OptionalInt.of(valueSelector.selectValue(variable));
         }
         return decisionPath.makeIntDecision(variable, DecisionOperatorFactory.makeIntEq(), opt.getAsInt());
     }
 
     @Override
     public void afterRestart() {
-        this.currentCombination = (currentCombination + 1) % combinations.size();
+        step++;
+        bandit.update(action, reward.applyAsDouble(action, step));
+        action = bandit.nextAction(step);
+        /*System.out.printf("c Action %d : [%s, %s, %s]\n",
+                action,
+                metaStrategies[combinations.get(action)[META]].getClass().getSimpleName(),
+                variableSelectors[combinations.get(action)[VARIABLE]].getClass().getSimpleName(),
+                valueSelectors[combinations.get(action)[VALUE]].getClass().getSimpleName());*/
     }
 }

@@ -13,9 +13,11 @@ import org.chocosolver.memory.EnvironmentBuilder;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Providers;
 import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -149,5 +151,25 @@ public class TimesTest extends AbstractTernaryTest {
         IntVar i2 = model.intVar("b", new int[]{-2, -1});
         model.times(i1, i2, i1).post();
         Assert.assertFalse(model.getSolver().solve());
+    }
+
+    @Test(groups = "1s", dataProviderClass = Providers.class, dataProvider = "trueOrFalse", timeOut = 60000)
+    public void testJBSC1(boolean lcg){
+        Model model = new Model("model", Settings.dev().setLCG(lcg));
+
+        // X =b_0_[2] = [0,1]
+        BoolVar x = model.boolVar("x");
+        // IV_33 = {-1..0}
+        IntVar i1 = model.intVar("i1", new int[]{-1, 0});
+        // Y = 2.((IV_33≥0)) + 0[0,2]
+        IntVar y = model.intView(2, model.isGeq(i1, 0), 0);
+        //Z=nH2_0 = {0..2}
+        IntVar z = model.intVar("z", 0,2);
+
+        model.times(x, y, z).post();
+        Solver solver = model.getSolver();
+        solver.showSolutions(() -> String.format("%d x %d = %d", x.getValue(), y.getValue(), z.getValue()));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 4);
     }
 }

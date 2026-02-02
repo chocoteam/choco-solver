@@ -26,13 +26,13 @@ import org.chocosolver.util.procedure.UnaryIntProcedure;
  * @since 16/05/2017
  */
 @Explained(ignored = true, comment = "Turned into clauses")
-public class PropCompactTableStar extends PropCompactTable {
+public final class PropCompactTableStar extends PropCompactTable {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
-    private long[][][] inc_supports;
+    private ISupport[] inc_supports;
 
     //***********************************************************************************
     // CONSTRUCTOR
@@ -53,12 +53,13 @@ public class PropCompactTableStar extends PropCompactTable {
     // INITIALIZATION
     //***********************************************************************************
 
+    @Override
     protected UnaryIntProcedure<Integer> makeProcedure() {
         return new UnaryIntProcedure<Integer>() {
             int var, off;
 
             @Override
-            public UnaryIntProcedure set(Integer o) {
+            public UnaryIntProcedure<Integer> set(Integer o) {
                 var = o;
                 off = offset[var];
                 return this;
@@ -67,27 +68,28 @@ public class PropCompactTableStar extends PropCompactTable {
             @Override
             public void execute(int i) throws ContradictionException {
                 // main reason we re-wrote the class
-                currTable.addToMask((inc_supports[var][i - off]));
+                currTable.addToMask((inc_supports[var].get(i - off)));
             }
         };
     }
 
+    @Override
     protected void computeSupports(Tuples tuples) {
         int n = vars.length;
         offset = new int[n];
-        supports = new long[n][][];
-        inc_supports = new long[n][][];
+        supports = new ISupport[n];
+        inc_supports = new ISupport[n];
         residues = new int[n][];
         for (int i = 0; i < n; i++) {
             int lb = vars[i].getLB();
             int ub = vars[i].getUB();
             offset[i] = lb;
-            supports[i] = new long[ub - lb + 1][currTable.words.length];
-            inc_supports[i] = new long[ub - lb + 1][currTable.words.length];
+            supports[i] = ISupport.make(vars[i].getRange(), vars[i].getDomainSize(), currTable.words.length);
+            inc_supports[i] = ISupport.make(vars[i].getRange(), vars[i].getDomainSize(), currTable.words.length);
             residues[i] = new int[ub - lb + 1];
         }
         int wI = 0;
-        byte bI = 63;
+        byte bI = 0;
         int star = tuples.getStarValue();
         top:
         for (int ti = 0; ti < tuples.nbTuples(); ti++) {
@@ -101,17 +103,17 @@ public class PropCompactTableStar extends PropCompactTable {
             for (int i = 0; i < tuple.length; i++) {
                 int val = tuple[i];
                 if (val != star) {
-                    supports[i][val - offset[i]][wI] |= index;
-                    inc_supports[i][val - offset[i]][wI] |= index;
+                    supports[i].get(val - offset[i])[wI] |= index;
+                    inc_supports[i].get(val - offset[i])[wI] |= index;
                 } else {
-                    int u = supports[i].length + offset[i];
+                    int u = vars[i].getUB();
                     for (val = offset[i]; val <= u; val = vars[i].nextValue(val)) {
-                        supports[i][val - offset[i]][wI] |= index;
+                        supports[i].get(val - offset[i])[wI] |= index;
                     }
                 }
             }
-            if (--bI < 0) {
-                bI = 63;
+            if (++bI > 63) {
+                bI = 0;
                 wI++;
             }
         }

@@ -10,7 +10,7 @@
 # 1. Stage: Setup of Choco in the MiniZinc Challenge docker image
 
 # Using the MiniZinc Challenge docker image
-FROM minizinc/mznc2024:latest as build
+FROM minizinc/mznc2025:latest AS build
 
 # Install Java 21               @
 RUN apt-get update && \
@@ -23,7 +23,7 @@ RUN apt-get update && \
 # The following command is used to disable caching for the ADD command and the next ones
 ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
 # Copy Choco's files from the local repository
-COPY ./parsers/target/choco-parsers-*-light.jar /choco/choco.jar
+COPY ./parsers/target/choco-solver-*-light.jar /choco/choco.jar
 COPY ./parsers/src/main/minizinc/fzn-choco.py /choco/fzn-choco.py
 COPY ./parsers/src/main/minizinc/fzn-choco.sh /choco/fzn-choco.sh
 COPY ./parsers/src/main/minizinc/choco.msc /choco/choco.msc

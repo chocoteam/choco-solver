@@ -116,9 +116,7 @@ public class PropLocalConDis extends Propagator<IntVar> {
             for (int p = 0; p < propagators[0].length; p++) {
                 assert (propagators[0][p].isReifiedAndSilent());
                 propagators[0][p].setReifiedTrue();
-                //todo: solver.getEventObserver().activePropagator(bool, propagators[p]);
-                propagators[0][p].propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
-                model.getSolver().getEngine().onPropagatorExecution(propagators[0][p]);
+                model.getSolver().getEngine().execute(propagators[0][p], true);
             }
             change = false;
         }

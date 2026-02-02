@@ -82,10 +82,10 @@ public class PropConnected extends Propagator<UndirectedGraphVar> {
 
             // 2 --- enforce articulation points and bridges that link two mandatory nodes
             helper.computeMandatoryArticulationPointsAndBridges();
-            for(int ap:helper.getArticulationPoints()) {
+            for (int ap : helper.getArticulationPoints()) {
                 g.enforceNode(ap, this);
             }
-            for(int[] bridge:helper.getBridges()) {
+            for (int[] bridge : helper.getBridges()) {
                 g.enforceEdge(bridge[0], bridge[1], this);
             }
         }

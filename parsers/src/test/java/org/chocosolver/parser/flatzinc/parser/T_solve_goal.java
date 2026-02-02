@@ -98,6 +98,7 @@ public class T_solve_goal extends GrammarTest {
     public void testNestedSeq() throws IOException {
         datas.register("x", mSolver.intVar("x", 0, 10, true));
         datas.register("y", mSolver.intVar("y", 0, 10, true));
+        datas.register("p", mSolver.boolVar("p"));
         Flatzinc4Parser fp = parser(
                 "solve :: seq_search([\n" +
                         "    seq_search([\n" +

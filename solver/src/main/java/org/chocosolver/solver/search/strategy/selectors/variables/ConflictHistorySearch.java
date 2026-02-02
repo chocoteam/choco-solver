@@ -69,7 +69,7 @@ public class ConflictHistorySearch<V extends Variable>
      * @param seed seed for breaking ties randomly
      */
     public ConflictHistorySearch(V[] vars, long seed) {
-        super(vars, seed, Integer.MAX_VALUE);
+        super(vars, seed, 20);
     }
 
     @Override

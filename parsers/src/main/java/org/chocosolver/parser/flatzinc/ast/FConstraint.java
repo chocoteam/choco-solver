@@ -22,6 +22,7 @@ import org.chocosolver.solver.expression.discrete.logical.LoExpression;
 import org.chocosolver.solver.expression.discrete.logical.NaLoExpression;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.ArrayList;
@@ -752,25 +753,7 @@ public enum FConstraint {
 
             IntVar[] vars = exps.get(0).toIntVarArray(model);
             if (vars.length > 1) {
-                if(model.getSettings().isLCG()){
-                    if (model.getSettings().warnUser()) {
-                        model.getSolver().log().white().println(
-                                "Warning: fzn_alldifferent_except_0 constraint is decomposed (due to LCG).");
-                    }
-                    IntIterableRangeSet values = new IntIterableRangeSet();
-                    for(int i = 0; i < vars.length; i++){
-                        values.addAll(vars[i]);
-                    }
-                    values.add(0);
-                    int[] valuesArray = values.toArray();
-                    IntVar[] occurrences = new IntVar[valuesArray.length];
-                    for(int i = 0; i < valuesArray.length; i++){
-                        occurrences[i] = model.intVar(0, valuesArray[i] == 0?vars.length:1);
-                    }
-                    model.globalCardinality(vars, valuesArray, occurrences, true).post();
-                }else {
-                    model.allDifferentExcept0(vars).post();
-                }
+                model.allDifferentExcept0(vars).post();
             }
 
         }
@@ -1079,21 +1062,11 @@ public enum FConstraint {
             final IntVar[] resources = exps.get(2).toIntVarArray(model);
             final IntVar limit = exps.get(3).intVarValue(model);
             String decomp = (String) model.getHook("CUMULATIVE");
+            if (decomp == null) {
+                decomp = "GLB"; // TODO: make it configurable
+            }
             int n = starts.length;
             switch (decomp) {
-                case "GLB":
-                    final IntVar[] ends = new IntVar[n];
-                    Task[] tasks = new Task[n];
-                    for (int i = 0; i < n; i++) {
-                        ends[i] = model.intVar(starts[i].getName() + "_" + durations[i].getName(),
-                                starts[i].getLB() + durations[i].getLB(),
-                                starts[i].getUB() + durations[i].getUB(),
-                                true);
-                        assert durations[i].getUB() >= 0 && resources[i].getUB() >= 0;
-                        tasks[i] = new Task(starts[i], durations[i], ends[i]);
-                    }
-                    model.cumulative(tasks, resources, limit, true/*, Cumulative.Filter.NAIVETIME*/).post();
-                    break;
                 case "MZN":
                     model.cumulativeTimeDec(starts,
                             Arrays.stream(durations).mapToInt(IntVar::getUB).toArray(),
@@ -1177,6 +1150,20 @@ public enum FConstraint {
                                 "<=",
                                 -resources[i].getValue() + limit.getValue()).post();
                     }
+                    break;
+                case "GLB":
+                default:
+                    final IntVar[] ends = new IntVar[n];
+                    Task[] tasks = new Task[n];
+                    for (int i = 0; i < n; i++) {
+                        ends[i] = model.intVar(starts[i].getName() + "_" + durations[i].getName(),
+                                starts[i].getLB() + durations[i].getLB(),
+                                starts[i].getUB() + durations[i].getUB(),
+                                true);
+                        assert durations[i].getUB() >= 0 && resources[i].getUB() >= 0;
+                        tasks[i] = new Task(starts[i], durations[i], ends[i]);
+                    }
+                    model.cumulative(tasks, resources, limit/*, Cumulative.Filter.NAIVETIME*/).post();
                     break;
             }
         }
@@ -1716,6 +1703,9 @@ public enum FConstraint {
             for (int[] couple : t) {
                 tuples.add(couple);
             }
+            if(x.length == 1) {
+                model.member(x[0], ArrayUtils.flatten(tuples.toMatrix())).post();
+            } else
             if (x.length == 2) {
                 model.table(x[0], x[1], tuples).post();
             } else {

@@ -21,6 +21,7 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.loop.monitors.IMonitorUpBranch;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
+import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
@@ -170,7 +171,7 @@ public abstract class SearchViz implements IMonitorDownBranch, IMonitorUpBranch,
             if (last > 0) {
                 String pdec;
                 pdec = pretty(dp.getDecision(last - 1));
-                Decision dec = dp.getLastDecision();
+                Decision<?> dec = dp.getLastDecision();
                 int ari = dec.getArity();
                 sendNode(nc, pid_stack.peek(), alt_stack.pop(), ari, rid, pdec,
                         sendDomain? domainMessage.print():"");
@@ -220,24 +221,12 @@ public abstract class SearchViz implements IMonitorDownBranch, IMonitorUpBranch,
         nc = 0;
     }
 
-    private static String pretty(Decision dec) {
-        if (dec == null) {
-            return "ROOT";
+    private static String pretty(Decision<?> dec) {
+        if (dec == null || dec instanceof RootDecision) {
+            return "";
         } else {
             // to print decision correctly (since the previous one is sent)
-            int a = dec.getArity();
-            int b = dec.triesLeft();
-            dec.rewind();
-            while (dec.triesLeft() > b + 1) {
-                a--;
-                dec.buildNext();
-            }
-            String pretty = dec.toString();
-            while (a > b) {
-                b++;
-                dec.buildNext();
-            }
-            return pretty;
+            return dec.toString();
         }
     }
 }

@@ -14,13 +14,19 @@ NEXT MILESTONE
 ### Other closed issues and pull requests:
 See [milestone 5.0.0-beta.2](https://github.com/chocoteam/choco-solver/milestone/41)
 
+- Performance improvement in PropXPlusYEqZ and PropAbsolute
 - Fix bug in ConflictOrderingSearch (monitor not plugged)
 - Performance improvement for LastConflict, ConflictOrderingSearch and StrategySequencer.
 - Fix bug : regular constraints parsed from XCSP now support negative values
+- Fix bug : Unexpected behavior when using Task with scalar (#1114)
+- Replace Cumulative implementation by state-of-the-art implementation of TimeTabling and OverloadChecking
+- Fix bug : IntVar no longer extends Iterable to avoid errors in nested loops
+- Fix bug : Fix iterator issue when using ISet, especially within graph variables (#1174 and #1175)
 
 #### Contributors to this release:
 - [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
 - [Jean-Guillaume Fages](https://github.com/jgFages) (@jgFages)
+- [Arthur Godet](https://github.com/ArthurGodet) (@ArthurGodet)
 
 
 **Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v5.0.0-beta.1...v5.0.0-beta.2
@@ -69,23 +75,6 @@ See [milestone 5.0.0](https://github.com/chocoteam/choco-solver/milestone/40)
 ### Deprecated API (to be removed in next release):
 
 **Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v4.10.17...v4.10.18
-
-4.10.17 - 23 Sep 2024
- -------------------
- 
- ### Hotfix
- - Fix bug in `PropHybridTable` (#1102)
- 
- **Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v4.10.16...v4.10.17
-
-4.10.16 - 12 Sep 2024
--------------------
-
-### Hotfix
-- Fix bug in `IntAffineView` (#1101)
-
-**Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v4.10.15...v4.10.16
-
 
 4.10.17 - 23 Sep 2024
 -------------------

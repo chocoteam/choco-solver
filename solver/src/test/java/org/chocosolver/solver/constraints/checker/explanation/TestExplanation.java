@@ -18,6 +18,7 @@ import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.nary.PropIntValuePrecedeChain;
+import org.chocosolver.solver.constraints.nary.alldifferent.AllDifferent;
 import org.chocosolver.solver.constraints.nary.alldifferent.PropAllDiffAC;
 import org.chocosolver.solver.constraints.nary.alldifferent.PropAllDiffBC;
 import org.chocosolver.solver.constraints.nary.alldifferent.PropAllDiffInst;
@@ -29,10 +30,7 @@ import org.chocosolver.solver.constraints.nary.lex.PropLex;
 import org.chocosolver.solver.constraints.nary.min_max.PropMax;
 import org.chocosolver.solver.constraints.nary.min_max.PropMin;
 import org.chocosolver.solver.constraints.nary.sum.*;
-import org.chocosolver.solver.constraints.reification.PropXeqYHalfReif;
-import org.chocosolver.solver.constraints.reification.PropXinSHalfReif;
-import org.chocosolver.solver.constraints.reification.PropXleYHalfReif;
-import org.chocosolver.solver.constraints.reification.PropXneYHalfReif;
+import org.chocosolver.solver.constraints.reification.*;
 import org.chocosolver.solver.constraints.ternary.*;
 import org.chocosolver.solver.constraints.unary.*;
 import org.chocosolver.solver.search.SearchState;
@@ -42,7 +40,7 @@ import org.chocosolver.solver.search.strategy.strategy.FullyRandom;
 import org.chocosolver.solver.trace.IMessage;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.VariableUtils;
@@ -127,16 +125,21 @@ public class TestExplanation {
                 {PropXeqYHalfReif.class, new Class[]{IntVar.class, IntVar.class, BoolVar.class}, new Object[]{null, null, null}},
                 {PropXneYHalfReif.class, new Class[]{IntVar.class, IntVar.class, BoolVar.class}, new Object[]{null, null, null}},
                 {PropXinSHalfReif.class, new Class[]{IntVar.class, IntIterableRangeSet.class, BoolVar.class}, new Object[]{null, null, null}},
-                {PropXplusYeqZ.class, new Class[]{IntVar.class, IntVar.class, IntVar.class}, new Object[]{null, null, null}},
                 {PropAllDiffInst.class, new Class[]{IntVar[].class}, new Object[]{6}},
                 {PropAllDiffBC.class, new Class[]{IntVar[].class}, new Object[]{6}},
-                {PropAllDiffAC.class, new Class[]{IntVar[].class, boolean.class}, new Object[]{6, false}},
+                {PropAllDiffAC.class, new Class[]{IntVar[].class, AllDifferent.Consistency.class}, new Object[]{6, AllDifferent.Consistency.AC_REGIN}},
+                {PropAllDiffAC.class, new Class[]{IntVar[].class, AllDifferent.Consistency.class}, new Object[]{6, AllDifferent.Consistency.AC_TUNED}},
+                {PropAllDiffAC.class, new Class[]{IntVar[].class, AllDifferent.Consistency.class}, new Object[]{6, AllDifferent.Consistency.AC_CLASSIC}},
+                {PropAllDiffAC.class, new Class[]{IntVar[].class, AllDifferent.Consistency.class}, new Object[]{6, AllDifferent.Consistency.AC_COMPLEMENT}},
+                {PropAllDiffAC.class, new Class[]{IntVar[].class, AllDifferent.Consistency.class}, new Object[]{6, AllDifferent.Consistency.AC_PARTIAL}},
                 {PropLex.class, new Class[]{IntVar[].class, IntVar[].class, boolean.class}, new Object[]{5, 5, null}},
                 {PropElementV_fast.class, new Class[]{IntVar.class, IntVar[].class, IntVar.class}, new Object[]{null, 6, null}},
                 {PropEnumDomainChanneling.class, new Class[]{BoolVar[].class, IntVar.class, int.class}, new Object[]{5, null, null}},
                 {PropInverseChannelBC.class, new Class[]{IntVar[].class, IntVar[].class, int.class, int.class}, new Object[]{6, 6, 1, 1}},
                 {PropInverseChannelAC.class, new Class[]{IntVar[].class, IntVar[].class, int.class, int.class}, new Object[]{6, 6, 1, 1}},
                 {PropIntValuePrecedeChain.class, new Class[]{IntVar[].class, int.class, int.class}, new Object[]{6, 1, 3}},
+                {PropXeqCHalfReif.class, new Class[]{IntVar.class, int.class, BoolVar.class}, new Object[]{null, null, null}},
+                {PropAbsoluteLight.class, new Class[]{IntVar.class, IntVar.class}, new Object[]{null}},
                 //{PropCardinality.class, new Class[]{SetVar.class, IntVar.class}, new Object[]{null, null}}
         };
         return Providers.merge(objs, getSeeds());
@@ -146,6 +149,7 @@ public class TestExplanation {
     public Object[][] getConstraints() {
         Object[][] objs = new Object[][]{
                 {"allDifferent", new Class[]{IntVar[].class}, new Object[]{6}},
+                {"allDifferentExcept0", new Class[]{IntVar[].class}, new Object[]{6}},
                 {"allEqual", new Class[]{IntVar[].class}, new Object[]{6}},
                 {"allEqual", new Class[]{IntVar[].class}, new Object[]{6}},
                 {"among", new Class[]{IntVar.class, IntVar[].class, int[].class}, new Object[]{null, 6, 6}},
@@ -161,6 +165,7 @@ public class TestExplanation {
                 {"circuit", new Class[]{IntVar[].class, int.class}, new Object[]{6, null}},
                 {"count", new Class[]{IntVar.class, IntVar[].class, IntVar.class}, new Object[]{null, 6, null}},
                 {"count", new Class[]{int.class, IntVar[].class, IntVar.class}, new Object[]{null, 6, null}},
+                {"cumulative", new Class[]{Task[].class, IntVar[].class, IntVar.class, boolean.class, boolean.class}, new Object[]{6, 6, null, null, null}},
                 {"decreasing", new Class[]{IntVar[].class, int.class}, new Object[]{6, null}},
                 {"div", new Class[]{IntVar.class, IntVar.class, IntVar.class}, new Object[]{null, null, null}},
                 {"increasing", new Class[]{IntVar[].class, int.class}, new Object[]{6, null}},
@@ -186,7 +191,6 @@ public class TestExplanation {
                 {"times", new Class[]{IntVar.class, int.class, IntVar.class}, new Object[]{null, null, null}},
 
                 //not supported {"allDifferentExcept0", new Class[]{IntVar[].class}, new Object[]{6}},
-                //not supported {"cumulative", new Class[]{IntVar[].class, int[].class, int[].class, int.class}, new Object[]{6, 6, 6, null}},
                 //not supported {"diffN", new Class[]{IntVar[].class, IntVar[].class, IntVar[].class, IntVar[].class, boolean.class}, new Object[]{4, 4, 4, 4, null}},
                 //not supported {"knapsack", new Class[]{IntVar[].class, IntVar.class, IntVar.class, int[].class, int[].class}, new Object[]{4, null, null, 4, 4}},
                 // ignored {"clausesIntChanneling", new Class[]{IntVar.class, BoolVar[].class, BoolVar[].class}, new Object[]{null, 6, 6}},
@@ -229,6 +233,14 @@ public class TestExplanation {
                 } else if (IntVar[].class.isAssignableFrom(parameterType)) {
                     info[i] = 5;
                     classes[i] = "IntVar[].class";
+                    objects[i] = String.valueOf(6);
+                } else if (Task.class.isAssignableFrom(parameterType)) {
+                    info[i] = 5;
+                    classes[i] = "Task.class";
+                    objects[i] = null;
+                } else if (Task[].class.isAssignableFrom(parameterType)) {
+                    info[i] = 5;
+                    classes[i] = "Task[].class";
                     objects[i] = String.valueOf(6);
                 } else if (int.class.isAssignableFrom(parameterType)) {
                     info[i] = null;
@@ -441,6 +453,15 @@ public class TestExplanation {
                         variables.add(_variables[j]);
                     }
                     parameters[i] = _variables;
+                } else if (Task[].class == parameterType) {
+                    Task[] _tasks = new Task[(int) info[i]];
+                    for (int j = 0; j < _tasks.length; j++) {
+                        _tasks[j] = DomainBuilder.makeTask(model, rnd, variables.size());
+                        variables.add(_tasks[j].getStart());
+                        variables.add(_tasks[j].getDuration());
+                        variables.add(_tasks[j].getEnd());
+                    }
+                    parameters[i] = _tasks;
                 } else if (int[].class == parameterType) {
                     if (info[i] instanceof Integer) {
                         int[] _constants = new int[(int) info[i]];
@@ -467,6 +488,12 @@ public class TestExplanation {
                     IntVar _variable = DomainBuilder.makeIntVar(model, rnd, variables.size());
                     variables.add(_variable);
                     parameters[i] = _variable;
+                } else if (Task.class == parameterType) {
+                    Task _task = DomainBuilder.makeTask(model, rnd, variables.size());
+                    variables.add(_task.getStart());
+                    variables.add(_task.getDuration());
+                    variables.add(_task.getEnd());
+                    parameters[i] = _task;
                 } else if (Operator.class == parameterType) {
                     parameters[i] = Operator.get((String) info[i]);
                 } else if (IntIterableRangeSet.class == parameterType) {
@@ -477,6 +504,11 @@ public class TestExplanation {
                     } else {
                         parameters[i] = info[i];
                     }
+                }else {
+                    if (info[i] == null) {
+                        throw new UnsupportedOperationException("Unknown value for parameter "+ parameterType);
+                    }
+                    parameters[i] = info[i];
                 }
             }
             i++;

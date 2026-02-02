@@ -51,7 +51,7 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
             idms[0] = vars[0].monitorDelta(this);
             idms[1] = vars[1].monitorDelta(this);
             rem_proc = i -> vars[indexToFilter].removeValue(i, this,
-                    lcg() ? Reason.r(vars[1 - indexToFilter].getLit(i, IntVar.LR_NE)) : Reason.undef());
+                    lcg() ? Reason.r(vars[1 - indexToFilter].getLit(i, IntVar.LR_EQ)) : Reason.undef());
         }
     }
 
@@ -81,13 +81,13 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
             int ub = x.getUB();
             for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
                 if (!(y.contains(val))) {
-                    x.removeValue(val, this, lcg() ? Reason.r(y.getLit(val, IntVar.LR_NE)) : Reason.undef());
+                    x.removeValue(val, this, lcg() ? Reason.r(y.getLit(val, IntVar.LR_EQ)) : Reason.undef());
                 }
             }
             ub = y.getUB();
             for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
                 if (!(x.contains(val))) {
-                    y.removeValue(val, this, lcg() ? Reason.r(x.getLit(val, IntVar.LR_NE)) : Reason.undef());
+                    y.removeValue(val, this, lcg() ? Reason.r(x.getLit(val, IntVar.LR_EQ)) : Reason.undef());
                 }
             }
             idms[0].startMonitoring();

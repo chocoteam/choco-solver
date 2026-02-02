@@ -37,7 +37,7 @@ import java.util.stream.StreamSupport;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpression {
+public interface IntVar extends ICause, Variable, ArExpression {
 
     /**
      * Provide a minimum value for integer variable lower bound.
@@ -618,7 +618,9 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      *
      * @return the range of this domain
      */
-    int getRange();
+    default int getRange(){
+        return getUB() - getLB() + 1;
+    }
 
     /**
      * Returns the first value just after v in <code>this</code> which is <b>in</b> the domain.
@@ -758,6 +760,14 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return <code>true</code> if the domain is enumerated, <code>false</code> otherwise.
      */
     boolean hasEnumeratedDomain();
+
+    /**
+     * Indicates wether (or not) <code>this</code> has an enumerated domain (represented in extension) and is not a single value
+     * @return <code>true</code> if the domain is enumerated and the variable is not instantiated yet, <code>false</code> otherwise.
+     */
+    default boolean hasUnfixedEnumeratedDomain() {
+        return !isInstantiated() && hasEnumeratedDomain();
+    }
 
     /**
      * Allow to monitor removed values of <code>this</code>.

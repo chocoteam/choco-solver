@@ -624,7 +624,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
 
     @Override
     public Function<Reason, Reason> manageReification() {
-        if (isReified() && reifVar.isInstantiated()) {
+        if (model.getSolver().isLCG() && isReified() && reifVar.isInstantiated()) {
             return r -> Reason.gather(r, reifVar.isInstantiated() ? reifVar.getValLit() : 1);
         } else {
             return ICause.super.manageReification();

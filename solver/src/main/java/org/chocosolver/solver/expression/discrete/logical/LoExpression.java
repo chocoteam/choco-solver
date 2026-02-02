@@ -101,6 +101,14 @@ public abstract class LoExpression implements ReExpression {
     public abstract Model getModel();
 
     /**
+     * Return the operator of this logical expression
+     * @return the operator of this logical expression
+     */
+    public Operator getOperator() {
+        return op;
+    }
+
+    /**
      * @return the logical expression as an {@link BoolVar}.
      * If necessary, it creates intermediary variable and posts intermediary constraints
      */

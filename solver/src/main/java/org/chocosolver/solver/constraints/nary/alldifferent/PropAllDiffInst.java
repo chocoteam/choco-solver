@@ -9,7 +9,6 @@
  */
 package org.chocosolver.solver.constraints.nary.alldifferent;
 
-import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.stack.array.TIntArrayStack;
 import org.chocosolver.sat.Reason;
@@ -21,6 +20,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+
+import java.util.Arrays;
 
 /**
  * Propagator for AllDifferent that only reacts on instantiation
@@ -52,7 +53,7 @@ public class PropAllDiffInst extends Propagator<IntVar> {
     public PropAllDiffInst(IntVar[] variables) {
         super(variables, PropagatorPriority.UNARY, true);
         n = vars.length;
-        if (lcg()) {
+        if (lcg() && Arrays.stream(variables).allMatch(IntVar::hasEnumeratedDomain)) {
             IntIterableRangeSet set = new IntIterableRangeSet();
             for (IntVar var : vars) {
                 set.addAll(var);

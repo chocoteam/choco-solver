@@ -9,8 +9,6 @@
  */
 package org.chocosolver.solver.constraints.extension.nary;
 
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -18,6 +16,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.StoredSparseSet;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
+
+import java.util.BitSet;
 
 /**
  * Implementation based on "Maintaining GAC on adhoc r-ary constraints", Cheng and Yap, CP12.
@@ -27,8 +27,8 @@ import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
  */
 public class PropLargeMDDC extends Propagator<IntVar> {
 
-    private final TIntSet yes;
-    private final TIntSet[] sets;
+    private final BitSet yes;
+    private final BitSet[] sets;
     private final StoredSparseSet no;
     private final MultivaluedDecisionDiagram MDD;
     private final int nvars;
@@ -44,11 +44,11 @@ public class PropLargeMDDC extends Propagator<IntVar> {
         super(VARS, PropagatorPriority.QUADRATIC, false);
         this.MDD = MDD;
         this.nvars = vars.length;
-        this.yes = new TIntHashSet();
+        this.yes = new BitSet();
         this.no = new StoredSparseSet(VARS[0].getEnvironment());
-        this.sets = new TIntHashSet[nvars];
+        this.sets = new BitSet[nvars];
         for (int i = 0; i < nvars; i++) {
-            this.sets[i] = new TIntHashSet(vars[i].getDomainSize());
+            this.sets[i] = new BitSet(vars[i].getDomainSize());
         }
     }
 
@@ -80,22 +80,25 @@ public class PropLargeMDDC extends Propagator<IntVar> {
             int o = MDD.getOffset(i);
             int UB = vars[i].getUB();
             for (int j = vars[i].getLB(); j <= UB; j = vars[i].nextValue(j)) {
-                sets[i].add(j - o);
+                sets[i].set(j - o);
             }
         }
         mddcSeekSupport(0, 0);
         for (int i = 0; i < nvars; i++) {
             int o = MDD.getOffset(i);
-            int[] values = sets[i].toArray();
-            for (int j = 0; j < values.length; j++) {
-                vars[i].removeValue(values[j] + o, this);
+//            int[] values = sets[i].toArray();
+//            for (int j = 0; j < values.length; j++) {
+//                vars[i].removeValue(values[j] + o, this);
+//            }
+            for (int v = sets[i].nextSetBit(0); v > -1; v = sets[i].nextSetBit(v + 1)) {
+                vars[i].removeValue(v + o, this);
             }
         }
     }
 
     private boolean mddcSeekSupport(int node, int layer) {
         // If the node has already been visited
-        if (yes.contains(node)) return true;
+        if (yes.get(node)) return true;
         if (no.contains(node)) return false;
         // otherwise ...
         boolean res = false;
@@ -107,7 +110,7 @@ public class PropLargeMDDC extends Propagator<IntVar> {
             if (sG != MultivaluedDecisionDiagram.EMPTY && vars[layer].contains(i + o)
                     && (sG == MultivaluedDecisionDiagram.TERMINAL || mddcSeekSupport(sG, layer + 1))) {
                 res = true;
-                sets[layer].remove(i);
+                sets[layer].clear(i);
                 int l2 = layer;
                 while (l2 < nvars && sets[l2].isEmpty()) {
                     l2++;
@@ -116,7 +119,7 @@ public class PropLargeMDDC extends Propagator<IntVar> {
             }
         }
         if (res) {
-            yes.add(node);
+            yes.set(node);
         } else {
             no.add(node);
         }

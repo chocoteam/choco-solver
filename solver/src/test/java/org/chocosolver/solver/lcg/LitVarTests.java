@@ -595,5 +595,43 @@ public class LitVarTests {
         Assert.assertEquals(b.getLit(2, LR_LE), 1);
     }
 
+    @Test(groups = "{1s,lcg}")
+        public void testCste10() {
+        Model model = new Model("LCG testCste10",
+                Settings.init().setLCG(true)
+                        .setWarnUser(true));
+        int l = 10;
+        IntVar b = new IntVarEagerLit(new BitsetIntVarImpl("b", l, l, model));
+
+        Assert.assertEquals(b.getLit(l - 100, LR_EQ), 0);
+        Assert.assertEquals(b.getLit(l - 1, LR_EQ), 0);
+        Assert.assertEquals(b.getLit(l, LR_EQ), 1);
+        Assert.assertEquals(b.getLit(l + 1, LR_EQ), 0);
+        Assert.assertEquals(b.getLit(l + 100, LR_EQ), 0);
+
+        Assert.assertEquals(b.getLit(l - 100, LR_NE), 1);
+        Assert.assertEquals(b.getLit(l - 1, LR_NE), 1);
+        Assert.assertEquals(b.getLit(l, LR_NE), 0);
+        Assert.assertEquals(b.getLit(l + 1, LR_NE), 1);
+        Assert.assertEquals(b.getLit(l + 100, LR_NE), 1);
+
+        Assert.assertEquals(b.getLit(l - 100, LR_GE), 1);
+        Assert.assertEquals(b.getLit(l - 1, LR_GE), 1);
+        Assert.assertEquals(b.getLit(l, LR_GE), 1);
+        Assert.assertEquals(b.getLit(l + 1, LR_GE), 0);
+        Assert.assertEquals(b.getLit(l + 100, LR_GE), 0);
+
+        Assert.assertEquals(b.getLit(l - 100, LR_LE), 0);
+        Assert.assertEquals(b.getLit(l - 1, LR_LE), 0);
+        Assert.assertEquals(b.getLit(l, LR_LE), 1);
+        Assert.assertEquals(b.getLit(l + 1, LR_LE), 1);
+        Assert.assertEquals(b.getLit(l + 100, LR_LE), 1);
+
+        Assert.assertEquals(b.getMinLit(), MiniSat.neg(b.getLit(l, LR_GE)));
+        Assert.assertEquals(b.getMaxLit(), MiniSat.neg(b.getLit(l, LR_LE)));
+        Assert.assertEquals(b.getLit(l - 1, LR_LE), MiniSat.neg(b.getLit(l, LR_GE)));
+        Assert.assertEquals(b.getLit(l + 1, LR_GE), MiniSat.neg(b.getLit(l, LR_LE)));
+    }
+
 
 }

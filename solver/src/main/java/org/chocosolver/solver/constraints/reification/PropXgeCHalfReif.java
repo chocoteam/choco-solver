@@ -46,7 +46,7 @@ public class PropXgeCHalfReif extends Propagator<IntVar> {
         if (vIdx < 1) {
             return IntEventType.DECUPP.getMask();
         }
-        return IntEventType.INCLOW.getMask();
+        return IntEventType.INSTANTIATE.getMask();
     }
 
     @Override

@@ -50,7 +50,7 @@ import java.util.stream.StreamSupport;
  * @see org.chocosolver.solver.constraints.Constraint
  * @since 0.01
  */
-public final class Model implements IModel {
+public class Model implements IModel {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// PRIVATE FIELDS /////////////////////////////////////////////////////////////
@@ -983,7 +983,7 @@ public final class Model implements IModel {
                             "A call to Model.post(Constraint) is more appropriate.");
                 } else {
                     for (Propagator<?> p : c.getPropagators()) {
-                        getSolver().getEngine().execute(p);
+                        getSolver().getEngine().execute(p, false);
                     }
                 }
             }

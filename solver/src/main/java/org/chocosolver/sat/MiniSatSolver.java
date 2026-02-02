@@ -91,11 +91,11 @@ public final class MiniSatSolver extends MiniSat implements Dimacs {
         }
     }
 
-    public void addLearnt(TIntList learnt_clause) {
+    public void addLearnt(TIntList learnt_clause, boolean unforgettable) {
         for (int v = 0; v < nVars(); v++) {
             assert valueVar(v) != MiniSat.lUndef || order_heap.contains(v) : v + " not heaped";
         }
-        super.addLearnt(learnt_clause);
+        super.addLearnt(learnt_clause, unforgettable);
         varDecayActivity();
     }
 
@@ -195,7 +195,7 @@ public final class MiniSatSolver extends MiniSat implements Dimacs {
                 learnt_clause.resetQuick();
                 backtrack_level = analyze(confl, learnt_clause);
                 cancelUntil(backtrack_level);
-                addLearnt(learnt_clause);
+                addLearnt(learnt_clause, false);
 
             } else {
                 // NO CONFLICT

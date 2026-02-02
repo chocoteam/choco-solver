@@ -47,11 +47,11 @@ public class PropagationEngineObserver extends PropagationEngine {
      * @apiNote This is the main reason this class exists, to notify a propagation observer
      */
     @Override
-    public void execute(Propagator<?> propagator) throws ContradictionException {
+    public void execute(Propagator<?> propagator, boolean activatedByReification) throws ContradictionException {
         if (propagator.isStateLess() || propagator.isActive()) {
             observer.onCoarseEvent(propagator);
         }
-        super.execute(propagator);
+        super.execute(propagator, activatedByReification);
     }
 
     /**

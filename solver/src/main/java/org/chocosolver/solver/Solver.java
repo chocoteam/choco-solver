@@ -401,7 +401,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         M.setTopDecisionPosition(0);
         pushTrail(); // store state before initial propagation; w = 0 -> 1
         try {
-            checkTasks();
             mMeasures.incFixpointCount();
             // check sat
             if (isLCG() && !getSat().ok_) {
@@ -430,7 +429,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
             defaultSearch = true;
             mModel.getSettings().makeDefaultSearch(mModel);
         }
-        preprocessing(getModel().getSettings().getTimeLimitForPreprocessing());
         if (completeSearch && !defaultSearch) {
             BlackBoxConfigurator bb = BlackBoxConfigurator.init();
             bb.complete(mModel, M.getStrategy());
@@ -570,16 +568,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         }
     }
 
-    private void checkTasks() throws ContradictionException {
-        if (mModel.getHook(Model.TASK_SET_HOOK_NAME) != null) {
-            //noinspection unchecked
-            ArrayList<Task> tset = (ArrayList<Task>) mModel.getHook(Model.TASK_SET_HOOK_NAME);
-            for (int i = 0; i < tset.size(); i++) {
-                tset.get(i).ensureBoundConsistency();
-            }
-        }
-    }
-
     /**
      * Push a world on the environment's stack, and same for MiniSat if relevant
      */
@@ -599,63 +587,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
             // the second condition is required because of LCG
             // (more precisely LazyClauseGeneration.analyse() -> findConflictLevel())
             mSat.cancel();
-        }
-    }
-
-    /**
-     * This method is called after the initial propagation and before the search loop starts.
-     * It sequentially applies Arc Consistency on every combination of (variable, value).
-     * If a value is not supported by any other variable, it is removed from the domain of the variable.
-     * The method ends when the time limit is reached or when all combination have been checked.
-     *
-     * @implSpec A first propagation must have been done before calling this method.
-     */
-    public void preprocessing(long timeLimitInMS) {
-        if (!getEngine().isInitialized()) {
-            throw new SolverException("A call to solver.propagate() must be done before calling solver.preprocessing()");
-        }
-        if (timeLimitInMS > 0 && getModel().getSettings().warnUser()) {
-            logger.white().printf("Running preprocessing step (%dms).\n", timeLimitInMS);
-        }
-        long tl = System.currentTimeMillis() + timeLimitInMS;
-        IntVar[] ivars = mModel.retrieveIntVars(true);
-        loop:
-        for (int i = 0; i < ivars.length; i++) {
-            IntVar v = ivars[i];
-            if (!v.isInstantiated()) { // if the variable is not instantiated
-                DisposableValueIterator it = v.getValueIterator(true);
-                while (it.hasNext()) {
-                    if (System.currentTimeMillis() > tl) {
-                        break loop;
-                    }
-                    int a = it.next();
-                    if (!hasSupport(v, a)) {
-                        try {
-                            v.removeValue(a, Cause.Null);
-                            if (getModel().getSettings().warnUser()) {
-                                logger.white().printf("Preprocessing removed value %d from %s\n", a, v.getName());
-                            }
-                        } catch (ContradictionException e) {
-                            throw new SolverException("Preprocessing failed");
-                        }
-                    }
-                }
-                it.dispose();
-            }
-        }
-    }
-
-    private boolean hasSupport(IntVar var, int val) {
-        mModel.getEnvironment().worldPush();
-        try {
-            var.instantiateTo(val, Cause.Null);
-            mModel.getSolver().getEngine().propagate();
-            return true;
-        } catch (ContradictionException e) {
-            mModel.getSolver().getEngine().flush();
-            return false;
-        } finally {
-            mModel.getEnvironment().worldPop();
         }
     }
 
@@ -894,7 +825,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         if (!engine.isInitialized()) {
             engine.initialize();
         }
-        checkTasks();
         try {
             engine.propagate();
         } finally {

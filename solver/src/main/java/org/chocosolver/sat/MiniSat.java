@@ -12,6 +12,8 @@ package org.chocosolver.sat;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.stack.TIntStack;
+import gnu.trove.stack.array.TIntArrayStack;
 import org.chocosolver.solver.variables.impl.LitVar;
 
 import java.util.ArrayList;
@@ -81,9 +83,10 @@ public class MiniSat implements SatFactory {
     // Number of variables
     int num_vars_;
     int rootlvl = 0;
-    private final int ccmin_mode = 0; // Controls conflict clause minimization (0=none, 1=basic, 2=deep)
+    private final int ccmin_mode = 1; // Controls conflict clause minimization (0=none, 1=basic, 2=deep)
     private double cla_inc = 1;
     private final double clause_decay = 0.999;
+    int learnt_first_removable = 0; // index of first removable learnt clause (related to #reduceDB only).
 
     double learntsize_adjust_confl = 100;
     int learntsize_adjust_cnt = 100;
@@ -100,6 +103,7 @@ public class MiniSat implements SatFactory {
     double max_learnts;
     final BitSet seen = new BitSet();
     private final TIntArrayList analyze_toclear = new TIntArrayList();
+    private final TIntStack analyze_stack = new TIntArrayStack();
     private final TIntArrayList temporary_add_vector_ = new TIntArrayList();
 
     /**
@@ -120,7 +124,7 @@ public class MiniSat implements SatFactory {
             seen.set(v);
             // false literal
             v = newVariable();
-            l = makeLiteral(v, true);
+            l = makeLiteral(v, false);
             assignment_.set(v, makeBoolean(sgn(l)));
             vardata.set(v, new VarData(R_Undef, trailMarker(), trail_.size()));
             trail_.add(l);
@@ -255,12 +259,30 @@ public class MiniSat implements SatFactory {
         return addClause(temporary_add_vector_);
     }
 
-    public void addLearnt(TIntList learnt_clause) {
+    /**
+     * Add a learnt clause to the solver.
+     * If the param unforgettable is true, the clause will not be removed during {@link #doReduceDB()}.
+     * This is useful for clauses that prohibit certain parts of the search space (e.g. solution clauses).
+     *
+     * @param learnt_clause the clause to add
+     * @param unforgettable if true, the clause will not be removed during {@link #doReduceDB()}
+     */
+    public void addLearnt(TIntList learnt_clause, boolean unforgettable) {
         if (learnt_clause.size() == 1) {
             uncheckedEnqueue(learnt_clause.get(0));
         } else {
             Clause cr = new Clause(learnt_clause, true);
             learnts.add(cr);
+            if (unforgettable) { // in the case of a solution, for instance.
+                if (learnts.size() > 1) {
+                    // swap the clause with the first removable clause
+                    learnts.set(learnts.size() - 1, learnts.get(learnt_first_removable));
+                    // replace it by the new clause
+                    learnts.set(learnt_first_removable, cr);
+                }
+                // increment the index
+                learnt_first_removable++;
+            }
             attachClause(cr);
             claBumpActivity(cr);
             uncheckedEnqueue(learnt_clause.get(0), Reason.r(cr));
@@ -372,9 +394,33 @@ public class MiniSat implements SatFactory {
         trail_markers_.add(trail_.size());
     }
 
+    /**
+     * Indicates if all literals but one are false in the clause.
+     * By implication, the remaining literal is the asserting literal.
+     * By construction, the literal at index 0 is the asserting literal and should not be considered.
+     *
+     * @param sat the solver
+     * @param c   the clause to consider
+     * @return true if all literals but one (at index 0) are false, false otherwise
+     * @implNote This method can only be called on clauses learnt during propagation.
+     * Indeed, the method assumes that the literal at index 0 is the asserting literal and all other literals are false.
+     * In such situation, the clause is a reason (i.e. it is the reason of a propagation).
+     * If the clause has been propagated once (ie, is not a reason anymore), the clause may be in any order
+     * or may not be unit anymore.
+     */
+    private static boolean isAssertingClause(MiniSat sat, Clause c) {
+        for (int i = 1; i < c.size(); i++) {
+            if (sat.valueLit(c._g(i)) != MiniSat.lFalse) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     // Enqueue a literal. Assumes value of literal is undefined.
     public void uncheckedEnqueue(int l, Reason from) {
         assert valueLit(l) == lUndef : "l: " + printLit(l) + " from: " + from;
+        assert isAssertingClause(this, from.getConflict()) : "the reason " + showReason(from) + " is not valid because it is not unit";
         int v = var(l);
         if (assignment_.getQuick(v) == lUndef) {
             onLiteralPushed(l);
@@ -409,9 +455,11 @@ public class MiniSat implements SatFactory {
 
     public void cEnqueue(int l, Reason r) {
         assert valueLit(l) != lTrue;
+        assert r != null : "reason is null for " + printLit(l);
+        assert isAssertingClause(this, r.getConflict()) : "the reason " + showReason(r) + " is not valid because it is not unit";
         int v = var(l);
         if (valueLit(l) == lFalse) {
-            if (r == null || r == R_Undef) {
+            if (r == R_Undef) {
                 // assert(decisionLevel() == 0);
                 confl = C_Fail; // todo: check
             } else {
@@ -589,30 +637,26 @@ public class MiniSat implements SatFactory {
         replaceUnreliableLits(out_learnt);
         // Simplify conflict clause:
         //
-        int i, j = 1;
+        int i, j;
         analyze_toclear.resetQuick();
         analyze_toclear.addAll(out_learnt);
-        /*if (ccmin_mode == 2) {
-            uint32_t abstract_level = 0;
+        if (ccmin_mode == 2) {
+            int abstract_level = 0;
             for (i = 1; i < out_learnt.size(); i++)
                 abstract_level |= abstractLevel(var(out_learnt.get(i))); // (maintain an abstraction of levels involved in conflict)
 
             for (i = j = 1; i < out_learnt.size(); i++)
-                if (reason(var(out_learnt.get(i))) == CR_Undef || !litRedundant(out_learnt.get(i), abstract_level))
+                if (reason(var(out_learnt.get(i))) == C_Undef || !litRedundant(out_learnt.get(i), abstract_level))
                     out_learnt.set(j++, out_learnt.get(i));
 
-        } else */
-        if (ccmin_mode == 1) {
-            //todo fix ccmin_mode
+        } else if (ccmin_mode == 1) {
             for (i = j = 1; i < out_learnt.size(); i++) {
-                int x = var(out_learnt.get(i));
-
-                if (getConfl(x) == C_Undef)
+                Clause c = getConfl(out_learnt.get(i));
+                if (c == C_Undef)
                     out_learnt.set(j++, out_learnt.get(i));
                 else {
-                    Clause c = getConfl(var(out_learnt.get(i)));
                     for (int k = 1; k < c.size(); k++)
-                        if (!seen.get(var(c._g(k))) && level(var(c._g(k))) > rootlvl) {
+                        if (!seen.get(var(c._g(k))) && level(var(c._g(k))) > 0) { // or root_level ?
                             out_learnt.set(j++, out_learnt.get(i));
                             break;
                         }
@@ -659,7 +703,7 @@ public class MiniSat implements SatFactory {
                 int x = var(q);
                 if (!seen.get(x) && level(x) > rootlvl) {
                     assert p == litUndef || pos(var(p)) > pos(x) : "chronological inconsistency :(" + printLit(p) + " @ " + pos(var(p)) +
-                            ") is explained by a previous event (" + printLit(x) + " @ " + pos(x) + ") " + c;
+                            ") is explained by an older event (" + printLit(x) + " @ " + pos(x) + ") " + c;
                     varBumpActivity(x);
                     seen.set(x);
                     if (DEBUG > 1) System.out.printf("mark %d\n", x);
@@ -683,6 +727,40 @@ public class MiniSat implements SatFactory {
             if (DEBUG > 1) System.out.printf("path-- (%d)\n", pathC);
         } while (pathC > 0 || !cinfo.get(var(p)).reliable);
         out_learnt.set(0, neg(p));
+    }
+
+    /* Check if 'p' can be removed. 'abstract_levels' is used to abort early if the algorithm is
+     * visiting literals at levels that cannot be removed later.
+     */
+    boolean litRedundant(int p, int abstract_levels) {
+        analyze_stack.clear();
+        analyze_stack.push(p);
+        int top = analyze_toclear.size();
+        while (analyze_stack.size() > 0) {
+            assert (reason(var(analyze_stack.peek())) != C_Undef);
+            Clause c = getConfl(analyze_stack.peek());
+            analyze_stack.pop();
+
+            for (int i = 1; i < c.size(); i++) {
+                p = c._g(i);
+                if (!seen.get(var(p)) && level(var(p)) > 0) {
+                    if (reason(var(p)) != C_Undef && (abstractLevel(var(p)) & abstract_levels) != 0) {
+                        seen.set(var(p));
+                        analyze_stack.push(p);
+                        analyze_toclear.add(p);
+                    } else {
+                        for (int j = top; j < analyze_toclear.size(); j++)
+                            seen.clear(var(analyze_toclear.get(j)));
+
+                        //analyze_toclear.shrink(analyze_toclear.size() - top);
+                        analyze_toclear.remove(top, analyze_toclear.size() - top);
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -765,6 +843,10 @@ public class MiniSat implements SatFactory {
             Clause c = cs.get(i);
             if (satisfied(c)) {
                 removeClause(cs.get(i));
+                if (i < learnt_first_removable) { // maintain the index
+                    learnt_first_removable--;
+                    assert learnt_first_removable >= 0;
+                }
             } else {
                 cs.set(j++, cs.get(i));
 
@@ -796,10 +878,12 @@ public class MiniSat implements SatFactory {
         int i, j;
         double extra_lim = cla_inc / learnts.size();    // Remove any clause below this activity
 
-        learnts.sort(Comparator.comparingDouble(c -> c.activity));
-        // Don't delete binary or locked clauses. From the rest, delete clauses from the first half
+        learnts.subList(learnt_first_removable, learnts.size())  // only removable clauses
+                .sort(Comparator.comparingDouble(c -> c.activity));
+        // Don't delete binary or locked clauses or unforgettable clauses.
+        // From the rest, delete clauses from the first half
         // and clauses with activity smaller than 'extra_lim':
-        for (i = j = 0; i < learnts.size(); i++) {
+        for (i = j = learnt_first_removable; i < learnts.size(); i++) {
             Clause c = learnts.get(i);
             if (c.size() > 2 && !locked(c) && (i < learnts.size() / 2 || c.activity < extra_lim))
                 removeClause(learnts.get(i));
@@ -820,11 +904,15 @@ public class MiniSat implements SatFactory {
         return vardata.get(x).cr;
     }
 
-    int level(int x) {
+    public int level(int x) {
         return vardata.get(x).level;
     }
 
-    int pos(int x) {
+    int abstractLevel(int x) {
+        return 1 << (level(x) & 31);
+    }
+
+    public int pos(int x) {
         return vardata.get(x).pos;
     }
 
@@ -846,8 +934,8 @@ public class MiniSat implements SatFactory {
 
     void claBumpActivity(Clause c) {
         if ((c.activity += cla_inc) > 1e20d) {
-            // Rescale:
-            for (int i = 0; i < learnts.size(); i++) {
+            // Rescale, only clauses that can be removed with reduceDB
+            for (int i = learnt_first_removable; i < learnts.size(); i++) {
                 learnts.get(i).activity *= 1e-20d;
             }
             cla_inc *= 1e-20d;
@@ -963,8 +1051,8 @@ public class MiniSat implements SatFactory {
                 st.append("clause (");
                 Clause cl = (Clause) r;
                 for (int i = 1; i < cl.size(); i++) {
-                    if (i > 1) st.append(" ∧ ");
-                    st.append(printLit(neg(cl._g(i))));
+                    if (i > 1) st.append(" ∨ ");
+                    st.append(printLit(cl._g(i)));
                 }
                 st.append(")");
                 //st.append(" -> ").append(printLit(r.cl._g(0)));
@@ -973,11 +1061,11 @@ public class MiniSat implements SatFactory {
             //    ss << "absorbed binary clause?";
             //    break;
             case 2:
-                st.append("single literal ").append(printLit(neg(((Reason.Reason1) r).d1)));
+                st.append("single literal ").append(printLit(((Reason.Reason1) r).d1));
                 break;
             case 3:
-                st.append("two literals ").append(printLit(neg(((Reason.Reason2) r).d1)))
-                        .append(" ∧ ").append(printLit(neg(((Reason.Reason2) r).d2)));
+                st.append("two literals ").append(printLit(((Reason.Reason2) r).d1))
+                        .append(" ∨ ").append(printLit(((Reason.Reason2) r).d2));
                 break;
         }
         return st.toString();

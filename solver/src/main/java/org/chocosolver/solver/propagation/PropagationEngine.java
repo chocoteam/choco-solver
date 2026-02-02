@@ -271,24 +271,33 @@ public class PropagationEngine {
         int cw = model.getEnvironment().getWorldIndex(); // get current index
         dynPropagators.descending(cw, consumer);
         while (!awake_queue.isEmpty()) {
-            execute(awake_queue.pollFirst());
+            execute(awake_queue.pollFirst(), false);
         }
     }
 
     /**
-     * Execute 'coarse' propagation on a newly added propagator
-     * or one that should be propagated on backtrack
+     * Execute a propagator immediately, without scheduling it.
+     * If the propagator is stateless, that is, it has not been executed ever, it is set to active first.
+     * Then, if the propagator is active, that is not reified or passive, it is fully propagated.
+     * Finally, if the solver is in LCG mode, the SAT solver is propagated.
      *
      * @param propagator a propagator to propagate
      * @throws ContradictionException if propagation fails
+     * @implSpec In the case the propagator is activated by a reification,
+     * then {@link #onPropagatorExecution(Propagator)} is called after propagation.
      */
-    public void execute(Propagator<?> propagator) throws ContradictionException {
+    public void execute(Propagator<?> propagator, boolean activatedByReification) throws ContradictionException {
         if (propagator.isStateLess()) {
             propagator.setActive();
         }
         if (propagator.isActive()) {
+            // first, fully propagate the propagator
             model.getSolver().getMeasures().incPropagationCount();
             propagator.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
+            if (activatedByReification){
+                onPropagatorExecution(propagator);
+            }
+            // then, if required (LCG), propagate the SAT solver
             model.getSolver().getMeasures().incPropagationCount();
             propagateSat();
             while (!var_queue.isEmpty()) {
