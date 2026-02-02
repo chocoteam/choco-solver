@@ -9,10 +9,74 @@ NEXT MILESTONE
 
 ### Major features:
 
+This set of commits delivers a major consolidation of Lazy Clause Generation, 
+significant performance and memory improvements, 
+more robust constraint handling, 
+and a broad cleanup and modernization of the internal APIs and tooling.
+
+#### Performance & Algorithms
+- Significant performance improvements on:
+- Core propagators (X+Y=Z, abs, div, sum, scalar, etc.)
+- CompactTable (CT) and STR2+
+- Memory management and estimation mechanisms
+- Dynamic selection of table algorithms based on memory footprint
+- Optimizations in MiniSat and SAT-related components (clause reduction, propagation, assertions)
+
+#### Lazy Clause Generation (LCG)
+- Major consolidation effort on LCG:
+- Fixes for critical bugs (initialization, reification, lost propagations)
+- New assertions and invariants
+- Improved separation and handling of learnt clauses (failure vs prohibiting-solution)
+- Extended LCG support for constraints such as abs, div, table, element
+- Better interaction with:
+    - Restart strategies
+    - ParallelPortfolio
+    - Explanation and Reason APIs
+
+#### Constraints & Modeling
+- Refactoring or improvement of many constraints:
+- AllDifferent, AllDifferentExcept*
+- Cumulative, DiffN, BinPacking, Element, Table
+- Arithmetic constraints (abs, div, times, min/max)
+- Smarter choice between decomposition and extension
+- Improved expression recognition and handling (XCSP / Flatzinc)
+#### Testing & Robustness
+- Numerous test fixes and stabilizations
+- Addition of new tests, especially for LCG and XCSP
+- Timeout adjustments
+- Cleanup of memory-intensive or unstable tests
+#### XCSP / Flatzinc / Parsing
+- Update of XCSP3 tools (v2.5)
+- Improvements in parsing and expression handling
+- Better support for:
+  - Negative values
+  - Constants
+  - Variable groups and restarts
+- Competition-oriented adjustments for XCSP and Flatzinc
+#### Search & Strategies
+- Enhancements to:
+  - RoundRobin strategies
+  - Dom/Wdeg and ConflictHistorySearch
+  - MetaStrategy framework
+- New parameters and more robust default behaviors
+- Simplification and clarification of search-related APIs
+#### Refactoring & API Evolution
+- Large-scale code cleanup:
+  - Removal of obsolete classes
+  - Simplification of core APIs (IntVar, Decision, Reason)
+- Improved and updated Javadoc
+- Clearer separation of responsibilities between Solver, MiniSat, and learning components
+#### Build, CI & Tooling
+- Updates to Maven configuration, Docker, and Makefiles
+- CI workflow adjustments (tests, snapshots, releases)
+- Preparation of intermediate and beta releases
+
+
+
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:
-See [milestone 5.0.0-beta.2](https://github.com/chocoteam/choco-solver/milestone/41)
+See [milestone 5.0.0-beta.2](https://github.com/chocoteam/choco-solver/milestone/40)
 
 - Performance improvement in PropXPlusYEqZ and PropAbsolute
 - Fix bug in ConflictOrderingSearch (monitor not plugged)
@@ -27,6 +91,7 @@ See [milestone 5.0.0-beta.2](https://github.com/chocoteam/choco-solver/milestone
 - [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
 - [Jean-Guillaume Fages](https://github.com/jgFages) (@jgFages)
 - [Arthur Godet](https://github.com/ArthurGodet) (@ArthurGodet)
+- [Sulian Le Bozec Chiffoleau](https://github.com/SulianLBC) (@SulianLBC)
 
 
 **Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v5.0.0-beta.1...v5.0.0-beta.2
