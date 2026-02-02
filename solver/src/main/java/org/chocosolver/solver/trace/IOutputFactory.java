@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2025, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2026, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -38,7 +38,7 @@ public interface IOutputFactory extends ISelf<Solver> {
      * Default welcome message
      */
     String WELCOME_MESSAGE =
-        "** Choco 5.0.0-beta.1 (2025-02) : Constraint Programming Solver, Copyright (c) 2010-2025";
+        "** Choco 5.0.0 (2026-02) : Constraint Programming Solver, Copyright (c) 2010-2026";
 
     /**
      * Print the version message.
