@@ -116,13 +116,6 @@
                     <url>https://central.sonatype.com</url>
                 </repository>
             </distributionManagement>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-                <property>
-                    <name>performRelease</name>
-                    <value>true</value>
-                </property>
-            </activation>
             <build>
                 <plugins>
                     <!-- We need the GPG Plugin to self-sign the jar files. A valid signature
@@ -366,11 +359,12 @@
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.8.0</version>
+                <version>0.9.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <publishingServerId>central</publishingServerId>
                     <autoPublish>false</autoPublish>
+                    <excludeArtifacts>examples</excludeArtifacts>
                 </configuration>
             </plugin>
             <plugin>

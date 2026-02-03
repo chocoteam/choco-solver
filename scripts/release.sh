@@ -30,7 +30,7 @@ git tag -a v${VERSION} -m "create tag ${VERSION}" || quit "Unable to tag with ${
 git push --tags || quit "Unable to push the tag ${VERSION}"
 
 # Proceed to the deployment
-mvn -P centralDeploy  javadoc:jar source:jar deploy -DskipTests -B -U  ||quit "Unable to deploy to master"
+mvn -P centralDeploy javadoc:jar source:jar deploy -DskipTests central-publishing:publish  ||quit "Unable to deploy to master"
 
 ## Merge back to develop
 git checkout develop || quit "unable to check develop out"
