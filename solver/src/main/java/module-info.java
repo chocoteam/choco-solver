@@ -129,6 +129,7 @@ module org.chocosolver.solver {
     requires org.jgrapht.core;
     requires automaton;
     requires sizeof;
+    requires args4j;
 
     opens org.chocosolver.memory to org.testng, sizeof;
     opens org.chocosolver.solver.constraints.unary to org.chocosolver.parsers, sizeof;
@@ -161,7 +162,7 @@ module org.chocosolver.solver {
     opens org.chocosolver.solver.constraints.nary.alldifferent.algo to sizeof;
 
     // to org.ehcache
-    opens org.chocosolver.solver to sizeof;
+    opens org.chocosolver.solver to sizeof, args4j;
     opens org.chocosolver.solver.variables.impl to sizeof;
     opens org.chocosolver.solver.variables.delta to sizeof;
     opens org.chocosolver.solver.variables.delta.monitor to sizeof;
