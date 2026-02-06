@@ -14,10 +14,7 @@ import org.antlr.v4.runtime.atn.PredictionMode;
 import org.chocosolver.parser.Level;
 import org.chocosolver.parser.RegParser;
 import org.chocosolver.parser.flatzinc.ast.Datas;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.*;
 import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.SearchParams;
@@ -99,7 +96,7 @@ public class Flatzinc extends RegParser {
 
     @Override
     public void createSettings() {
-        defaultSettings = Settings.prod()
+        defaultSettings = SettingsBuilder.prod()
                 .setMinCardinalityForSumDecomposition(256)
                 .setLCG(lcg)
                 .setNbMaxLearntClauses(100_000)

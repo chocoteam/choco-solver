@@ -125,7 +125,7 @@ This new version has necessitated a rather intrusive revision of the way propaga
 
 By default, LCG is not enabled. The following code shows how to enable it:
 ```java
-Model model = new Model(Settings.init().setLCG(true));
+Model model = new Model(SettingsBuilder.init().setLCG(true));
 ```
 
 At this stage, this is a [beta version](https://github.com/orgs/chocoteam/projects/1).

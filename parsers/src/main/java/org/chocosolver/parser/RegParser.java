@@ -14,10 +14,7 @@ import org.chocosolver.parser.handlers.LimitHandler;
 import org.chocosolver.parser.handlers.RestartHandler;
 import org.chocosolver.parser.handlers.ValSelHandler;
 import org.chocosolver.parser.handlers.VarSelHandler;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ParallelPortfolio;
-import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.*;
 import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.SearchParams;
@@ -180,7 +177,7 @@ public abstract class RegParser implements IParser {
     /**
      * Default settings to apply
      */
-    protected Settings defaultSettings;
+    protected SettingsBuilder defaultSettings;
 
     /**
      * The resolution portfolio
@@ -213,10 +210,10 @@ public abstract class RegParser implements IParser {
     }
 
     public void createSettings() {
-        defaultSettings = Settings.prod().setLCG(lcg);
+        defaultSettings = SettingsBuilder.prod().setLCG(lcg);
     }
 
-    public final Settings getSettings() {
+    public final SettingsBuilder getSettings() {
         return defaultSettings;
     }
 

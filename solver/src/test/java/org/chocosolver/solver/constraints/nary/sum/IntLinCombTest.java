@@ -11,7 +11,7 @@ package org.chocosolver.solver.constraints.nary.sum;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Arithmetic;
 import org.chocosolver.solver.constraints.Constraint;
@@ -115,7 +115,7 @@ public class IntLinCombTest {
 
 
     protected Model sum(int[][] domains, int[] coeffs, int b, int op, boolean incr) {
-        Model model = new Model(Settings.init().setEnableIncrementalityOnBoolSum(i -> incr));
+        Model model = new Model(SettingsBuilder.init().setThresholdForIncrementalityOnBoolSum(incr?0:Integer.MAX_VALUE));
         IntVar[] bins = new IntVar[domains.length];
         for (int i = 0; i < domains.length; i++) {
             bins[i] = model.intVar("v_" + i, domains[i][0], domains[i][domains[i].length - 1], true);
@@ -136,7 +136,7 @@ public class IntLinCombTest {
     }
 
     protected Model intlincomb(int[][] domains, int[] coeffs, int b, int op, boolean incr) {
-        Model model = new Model(Settings.init().setEnableIncrementalityOnBoolSum(i -> incr));
+        Model model = new Model(SettingsBuilder.init().setThresholdForIncrementalityOnBoolSum(incr?0:Integer.MAX_VALUE));
         IntVar[] bins = new IntVar[domains.length];
         for (int i = 0; i < domains.length; i++) {
             bins[i] = model.intVar("v_" + i, domains[i][0], domains[i][domains[i].length - 1], true);
@@ -299,7 +299,7 @@ public class IntLinCombTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testS1_coeff_null() {
-        Model model = new Model(Settings.init().setMaxTupleSizeForSubstitution(0));
+        Model model = new Model(SettingsBuilder.init().setMaxTupleSizeForSubstitution(0));
         IntVar[] ivars = model.intVarArray("V", 4, 0, 5, false);
         int[] coeffs = new int[]{1, 0, 0, 2};
         IntVar res = model.intVar("R", 0, 10, false);
@@ -312,7 +312,7 @@ public class IntLinCombTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testS2_coeff_null() {
-        Model model = new Model(Settings.init().setMaxTupleSizeForSubstitution(0));
+        Model model = new Model(SettingsBuilder.init().setMaxTupleSizeForSubstitution(0));
         IntVar[] ivars = model.intVarArray("V", 4, 0, 5, false);
         ivars[2] = ivars[1];
         int[] coeffs = new int[]{1, 1, -1, 2};
@@ -496,7 +496,7 @@ public class IntLinCombTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testD20() {
-        Model model = new Model(Settings.init().setMaxTupleSizeForSubstitution(0));
+        Model model = new Model(SettingsBuilder.init().setMaxTupleSizeForSubstitution(0));
         IntVar[] ivars = model.intVarArray("V", 4, 0, 5, false);
         int[] coeffs = new int[]{1, 2, 2, 1};
         IntVar res = model.intVar("R", 0, 10, false);
@@ -508,12 +508,12 @@ public class IntLinCombTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testExt1() {
-        Model s1 = new Model(Settings.init().setMaxTupleSizeForSubstitution(0));
+        Model s1 = new Model(SettingsBuilder.init().setMaxTupleSizeForSubstitution(0));
         {
             BoolVar[] bs = s1.boolVarArray("b", 5);
             s1.sum(bs, "!=", 3).post();
         }
-        Model s2 = new Model(Settings.init().setMaxTupleSizeForSubstitution(1000));
+        Model s2 = new Model(SettingsBuilder.init().setMaxTupleSizeForSubstitution(1000));
         {
             BoolVar[] bs = s2.boolVarArray("b", 5);
             s2.sum(bs, "!=", 3).post();
@@ -526,12 +526,12 @@ public class IntLinCombTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testExt2() {
-        Model s1 = new Model(Settings.init().setMaxTupleSizeForSubstitution(0));
+        Model s1 = new Model(SettingsBuilder.init().setMaxTupleSizeForSubstitution(0));
         {
             BoolVar[] bs = s1.boolVarArray("b", 5);
             s1.sum(bs, "<=", 3).post();
         }
-        Model s2 = new Model(Settings.init().setMaxTupleSizeForSubstitution(1000));
+        Model s2 = new Model(SettingsBuilder.init().setMaxTupleSizeForSubstitution(1000));
         {
             BoolVar[] bs = s2.boolVarArray("b", 5);
             s2.sum(bs, "<=", 3).post();
@@ -544,13 +544,13 @@ public class IntLinCombTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testExt3() {
-        Model s1 = new Model(Settings.init().setMaxTupleSizeForSubstitution(0));
+        Model s1 = new Model(SettingsBuilder.init().setMaxTupleSizeForSubstitution(0));
         {
             BoolVar[] bs = s1.boolVarArray("b", 3);
             BoolVar r = s1.boolVar("r");
             s1.scalar(bs, new int[]{-1, -1, -1}, "<=", -2).reifyWith(r);
         }
-        Model s2 = new Model(Settings.init().setMaxTupleSizeForSubstitution(1000));
+        Model s2 = new Model(SettingsBuilder.init().setMaxTupleSizeForSubstitution(1000));
         {
             BoolVar[] bs = s2.boolVarArray("b", 3);
             BoolVar r = s2.boolVar("r");
@@ -966,7 +966,7 @@ public class IntLinCombTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "decomp")
     public void testDec1(boolean decomp, int size) {
-        Model m = new Model(Settings.init().setEnableDecompositionOfBooleanSum(decomp));
+        Model m = new Model(SettingsBuilder.init().setEnableDecompositionOfBooleanSum(decomp));
         BoolVar[] row = m.boolVarArray("r", size);
         m.sum(row, "<", 10).post();
         m.getSolver().setSearch(Search.inputOrderLBSearch(row));
@@ -976,7 +976,7 @@ public class IntLinCombTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "decomp")
     public void testDec2(boolean decomp, int size) {
-        Model m = new Model(Settings.init().setEnableDecompositionOfBooleanSum(decomp));
+        Model m = new Model(SettingsBuilder.init().setEnableDecompositionOfBooleanSum(decomp));
         BoolVar[] row = m.boolVarArray("r", size);
         BoolVar b = m.boolVar();
         m.sum(row, "<", 10).reifyWith(b);
@@ -1023,7 +1023,7 @@ public class IntLinCombTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testSmallSumsEQ() {
-        Model model = new Model(Settings.init().setMinCardinalityForSumDecomposition(5));
+        Model model = new Model(SettingsBuilder.init().setMinCardinalityForSumDecomposition(5));
         BoolVar[] bvars = model.boolVarArray("x", 10);
         model.sum(bvars, "=", 5).post();
         model.getSolver().findAllSolutions();
@@ -1032,7 +1032,7 @@ public class IntLinCombTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testSmallSumsGE() {
-        Model model = new Model(Settings.init().setMinCardinalityForSumDecomposition(5));
+        Model model = new Model(SettingsBuilder.init().setMinCardinalityForSumDecomposition(5));
         BoolVar[] bvars = model.boolVarArray("x", 10);
         model.sum(bvars, ">=", 8).post();
         model.getSolver().findAllSolutions();
@@ -1041,7 +1041,7 @@ public class IntLinCombTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testSmallSumsGT() {
-        Model model = new Model(Settings.init().setMinCardinalityForSumDecomposition(5));
+        Model model = new Model(SettingsBuilder.init().setMinCardinalityForSumDecomposition(5));
         BoolVar[] bvars = model.boolVarArray("x", 10);
         model.sum(bvars, ">", 7).post();
         model.getSolver().findAllSolutions();
@@ -1050,7 +1050,7 @@ public class IntLinCombTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testSmallSumsLE() {
-        Model model = new Model(Settings.init().setMinCardinalityForSumDecomposition(5));
+        Model model = new Model(SettingsBuilder.init().setMinCardinalityForSumDecomposition(5));
         BoolVar[] bvars = model.boolVarArray("x", 10);
         model.sum(bvars, "<=", 2).post();
         model.getSolver().findAllSolutions();
@@ -1059,7 +1059,7 @@ public class IntLinCombTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testSmallSumsLT() {
-        Model model = new Model(Settings.init().setMinCardinalityForSumDecomposition(5));
+        Model model = new Model(SettingsBuilder.init().setMinCardinalityForSumDecomposition(5));
         BoolVar[] bvars = model.boolVarArray("x", 10);
         model.sum(bvars, "<", 3).post();
         model.getSolver().findAllSolutions();
@@ -1068,7 +1068,7 @@ public class IntLinCombTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testSmallSumsNE() {
-        Model model = new Model(Settings.init().setMinCardinalityForSumDecomposition(5));
+        Model model = new Model(SettingsBuilder.init().setMinCardinalityForSumDecomposition(5));
         BoolVar[] bvars = model.boolVarArray("x", 10);
         model.sum(bvars, "!=", 5).post();
         model.getSolver().findAllSolutions();

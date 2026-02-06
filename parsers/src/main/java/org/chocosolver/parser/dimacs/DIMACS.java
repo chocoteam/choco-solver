@@ -11,10 +11,7 @@ package org.chocosolver.parser.dimacs;
 
 import org.chocosolver.parser.Level;
 import org.chocosolver.parser.RegParser;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.*;
 import org.chocosolver.solver.search.restart.GeometricalCutoff;
 import org.chocosolver.solver.search.restart.Restarter;
 import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
@@ -51,7 +48,7 @@ public class DIMACS extends RegParser {
 
     @Override
     public void createSettings() {
-        defaultSettings = Settings.prod()
+        defaultSettings = SettingsBuilder.prod()
                 .setEnableSAT(!cp);
     }
 

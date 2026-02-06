@@ -10,7 +10,7 @@
 package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
@@ -223,7 +223,7 @@ public class IntScaleViewTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testCP01() {
-        Model m = new Model(Settings.init().setEnableViews(true));
+        Model m = new Model(SettingsBuilder.init().setEnableViews(true));
         IntVar i = m.intVar("i", 0, 4);
         m.arithm(m.mul(i, -3), "<", -7).post();
 
@@ -235,7 +235,7 @@ public class IntScaleViewTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testNextValue() {
-        Model m = new Model(Settings.init().setEnableViews(true));
+        Model m = new Model(SettingsBuilder.init().setEnableViews(true));
         final IntVar x = m.intVar(new int[]{0, 2, 3}).mul(2).intVar();
         Assert.assertEquals(x.nextValue(Integer.MIN_VALUE), 0);
         Assert.assertEquals(x.nextValue(0), 4);
@@ -245,7 +245,7 @@ public class IntScaleViewTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testPrevValue() {
-        Model m = new Model(Settings.init().setEnableViews(true));
+        Model m = new Model(SettingsBuilder.init().setEnableViews(true));
         final IntVar x = m.intVar(new int[]{0, 2, 3}).mul(2).intVar();
         Assert.assertEquals(x.previousValue(Integer.MAX_VALUE), 6);
         Assert.assertEquals(x.previousValue(6), 4);
@@ -255,7 +255,7 @@ public class IntScaleViewTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testNextValueOut() {
-        Model m = new Model(Settings.init().setEnableViews(true));
+        Model m = new Model(SettingsBuilder.init().setEnableViews(true));
         final IntVar x = m.intVar(new int[]{0, 2, 3}).mul(2).intVar();
         Assert.assertEquals(x.nextValueOut(-2), -1);
         Assert.assertEquals(x.nextValueOut(-1), 1);
@@ -268,7 +268,7 @@ public class IntScaleViewTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testPrevValueOut() {
-        Model m = new Model(Settings.init().setEnableViews(true));
+        Model m = new Model(SettingsBuilder.init().setEnableViews(true));
         final IntVar x = m.intVar(new int[]{0, 2, 3}).mul(2).intVar();
         Assert.assertEquals(x.previousValueOut(8), 7);
         Assert.assertEquals(x.previousValueOut(7), 5);

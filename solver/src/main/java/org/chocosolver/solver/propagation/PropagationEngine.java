@@ -191,7 +191,7 @@ public class PropagationEngine {
                     ") is greater than the maximum allowed priority (" +
                     model.getSettings().getMaxPropagatorPriority() +
                     ").\n" +
-                    "Either increase the maximum allowed priority (`Model model = new Model(Settings.init().setMaxPropagatorPriority(" +
+                    "Either increase the maximum allowed priority (`Model model = new Model(SettingsBuilder.init().setMaxPropagatorPriority(" +
                     (propagator.getPriority().getValue() + 1) +
                     "));`)  " +
                     "or decrease the propagator priority.");

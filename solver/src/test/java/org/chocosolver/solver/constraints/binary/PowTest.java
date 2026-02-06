@@ -9,10 +9,7 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
-import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.*;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
@@ -92,7 +89,7 @@ public class PowTest extends AbstractBinaryTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testJT2() {
-        Model model = new Model("model", Settings.init().setEnableTableSubstitution(false));
+        Model model = new Model("model", SettingsBuilder.init().setEnableTableSubstitution(false));
         IntVar a = model.intVar("a", 2, 6);
         int b = 2;
         IntVar c = model.intVar("c", 5, 30);
@@ -111,7 +108,7 @@ public class PowTest extends AbstractBinaryTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testMod2Var1() {
-        Model model = new Model("model", Settings.init().setEnableTableSubstitution(false));
+        Model model = new Model("model", SettingsBuilder.init().setEnableTableSubstitution(false));
         IntVar x = model.intVar("x", 0, 9);
         IntVar z = model.intVar("z", 0, 9);
         model.pow(x, 2, z).post();
@@ -132,7 +129,7 @@ public class PowTest extends AbstractBinaryTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testMod2VarNegValues2() throws ContradictionException {
-        Model model = new Model("model", Settings.init().setEnableTableSubstitution(false));
+        Model model = new Model("model", SettingsBuilder.init().setEnableTableSubstitution(false));
         IntVar x = model.intVar("x", -5, 5);
         IntVar z = model.intVar("z", -5, 5);
         model.pow(x, 3, z).post();
@@ -152,7 +149,7 @@ public class PowTest extends AbstractBinaryTest {
 
     @Test(groups = "1s", timeOut = 60000, expectedExceptions = SolverException.class)
     public void testMod2VarsZeroPow2() {
-        Model model = new Model("model", Settings.init().setEnableTableSubstitution(false));
+        Model model = new Model("model", SettingsBuilder.init().setEnableTableSubstitution(false));
         IntVar x = model.intVar("x", 0, 9);
         IntVar y = model.intVar("y", 0, 9);
         model.pow(x, 0, y).post();
@@ -168,7 +165,7 @@ public class PowTest extends AbstractBinaryTest {
 
     @Test(groups = "1s", timeOut = 60000, expectedExceptions = SolverException.class)
     public void testMod2VarsNegPow2() {
-        Model model = new Model("model", Settings.init().setEnableTableSubstitution(false));
+        Model model = new Model("model", SettingsBuilder.init().setEnableTableSubstitution(false));
         IntVar x = model.intVar("x", -9, 9);
         IntVar y = model.intVar("y", -9, 9);
         model.pow(x, -2, y).post();
@@ -176,7 +173,7 @@ public class PowTest extends AbstractBinaryTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testMod2VarsBig() {
-        Model model = new Model("model", Settings.init().setEnableTableSubstitution(false));
+        Model model = new Model("model", SettingsBuilder.init().setEnableTableSubstitution(false));
         IntVar x = model.intVar("x", 2, 60);
         IntVar y = model.intVar("y", 0, 999_999);
         model.pow(x, 7, y).post();

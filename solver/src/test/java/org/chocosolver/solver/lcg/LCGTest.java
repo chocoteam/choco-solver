@@ -11,7 +11,7 @@ package org.chocosolver.solver.lcg;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Providers;
-import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
@@ -73,7 +73,7 @@ public class LCGTest {
     @Test(groups = "lcg", dataProvider = "nqueen", timeOut = 60000)
     public void testNQueenOneSolution(boolean bounded, boolean view, int n, int s, long seed) {
         Model model = new Model("LCG Queens sat",
-                Settings.init().setLCG(true));
+                SettingsBuilder.init().setLCG(true));
         IntVar[] vars = model.intVarArray("Q", n, 1, n, bounded);
 
         for (int i = 0; i < n; i++) {
@@ -105,7 +105,7 @@ public class LCGTest {
     @Test(groups = "lcg", dataProvider = "nqueen", timeOut = 60000)
     public void testNQueenAllSolutions(boolean bounded, boolean view, int n, int s, long seed) {
         Model model = new Model("LCG Queens enum",
-                Settings.init().setLCG(true));
+                SettingsBuilder.init().setLCG(true));
         IntVar[] vars = model.intVarArray("Q", n, 1, n, bounded);
 
         for (int i = 0; i < n; i++) {
@@ -134,7 +134,7 @@ public class LCGTest {
     public void testNQueenAllSolutionsLim(boolean bounded, boolean view, int n, int s, long seed) {
         // to ensure that prohibiting-solution clauses are not removed by the clause database reduction
         Model model = new Model("LCG Queens enum",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setNbMaxLearntClauses(100)
         );
         IntVar[] vars = model.intVarArray("Q", n, 1, n, bounded);
@@ -169,7 +169,7 @@ public class LCGTest {
     @Test(groups = "lcg", dataProvider = "nqueen", timeOut = 60000)
     public void testNQueenOptim(boolean bounded, boolean view, int n, int s, long seed) {
         Model model = new Model("LCG Queens opt",
-                Settings.init()
+                SettingsBuilder.init()
                         .setLCG(true)
         );
         IntVar[] vars = model.intVarArray("Q", n, 1, n + 1, bounded); // <= one more column
@@ -224,7 +224,7 @@ public class LCGTest {
     @Test(groups = "lcg", dataProvider = "golomb", timeOut = 60000)
     public void testGolombRuler(boolean bounded, boolean view, int m, int o, String a, long seed) {
         Model model = new Model("LCG Golomb ruler",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         IntVar[] ticks = model.intVarArray("a", m, 0, (m < 31) ? (1 << (m + 1)) - 1 : 9999, bounded);
         model.arithm(ticks[0], "=", 0).post();
@@ -273,7 +273,7 @@ public class LCGTest {
     public void testGolombRuler2(boolean bounded, boolean view, int m, int o, String a, long seed) {
         int[] length = new int[]{0, 0, 1, 3, 6, 11, 17, 25, 34, 44, 55, 72, 85, 106, 127};
         Model model = new Model("LCG Golomb ruler",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         IntVar[] ticks = new IntVar[m];
         ticks[0] = model.intVar("a0", 0);
@@ -341,7 +341,7 @@ public class LCGTest {
     @Test(groups = "lcg", dataProvider = "milp", timeOut = 60000)
     public void testMILP(boolean bounded, boolean view, long seed) {
         Model model = new Model("LCG MILP",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         // Variables
         IntVar[] x = model.intVarArray("x", 8, 0, 100, bounded);
@@ -388,7 +388,7 @@ public class LCGTest {
     @Test(groups = "lcg", dataProvider = "milp", timeOut = 60000)
     public void testMILPBin(boolean bounded, boolean view, long seed) {
         Model model = new Model("LCG MILP bin",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         // Variables
         BoolVar[] x = model.boolVarArray("x", 8);
@@ -451,7 +451,7 @@ public class LCGTest {
     @Test(groups = "lcg", dataProvider = "schurlemma", timeOut = 60000)
     public void testSchurLemma(boolean bounded, boolean clause, int balls, int boxes, int nbsol, long seed) {
         Model model = new Model("LCG Schur Lemma",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         BoolVar[][] M = model.boolVarMatrix("b", balls, boxes); // M_ij is true iff ball i is in box j
 
@@ -505,7 +505,7 @@ public class LCGTest {
     @Test(groups = "lcg", dataProvider = "schurlemma", timeOut = 60000)
     public void testSchurLemmaInt(boolean bounded, boolean clause, int balls, int boxes, int nbsol, long seed) {
         Model model = new Model("LCG Schur Lemma",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         IntVar[][] M = new IntVar[balls][boxes];
         for (int i = 0; i < balls; i++) {
@@ -553,7 +553,7 @@ public class LCGTest {
     @Test(groups = "lcg", timeOut = 60000)
     public void testBoolVars() {
         Model model = new Model("LCG Bin Neq 1",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         IntVar[] bs = model.boolVarArray("b", 3);
         model.arithm(bs[0], "!=", bs[1]).post();
@@ -567,7 +567,7 @@ public class LCGTest {
     @Test(groups = "lcg", timeOut = 60000)
     public void testBoolVars2() {
         Model model = new Model("LCG Bin Neq 2",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         IntVar[] bs = model.boolVarArray("b", 3);
         model.arithm(bs[0], "!=", bs[1]).post();
@@ -581,7 +581,7 @@ public class LCGTest {
     @Test(groups = "lcg", timeOut = 60000)
     public void testBoolVars3() {
         Model model = new Model("LCG MILP",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         BoolVar[] bs = model.boolVarArray("b", 3);
         model.addClausesBoolAndEqVar(bs[0], bs[1], bs[2].not());
@@ -599,7 +599,7 @@ public class LCGTest {
     @Test(groups = "lcg", dataProvider = "seed", timeOut = 60000)
     public void testEq(long seed) {
         Model model = new Model("LCG Reification",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         IntVar[] vs = model.intVarArray("v", 2, 0, 3);
         BoolVar b = model.boolVar("b");
@@ -619,7 +619,7 @@ public class LCGTest {
     @Test(groups = "lcg", timeOut = 60000, dataProvider = "seed")
     public void testReif(long seed) {
         Model model = new Model("LCG BACP",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         int n = 100;
         IntVar cp = model.intVar("cp", 1, n, false);
@@ -651,7 +651,7 @@ public class LCGTest {
     @Test(groups = "lcg", dataProvider = "view")
     public void testIsEq(boolean view, long seed) {
         Model model = new Model("LCG isEq",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         int t = 2;
         IntVar x = model.intVar("x", 1, 4);
@@ -676,7 +676,7 @@ public class LCGTest {
     @Test(groups = "lcg", dataProvider = "view")
     public void testIsGeq(boolean view, long seed) {
         Model model = new Model("LCG isGeq",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         int t = 2;
         IntVar x = model.intVar("x", 0, 4);
@@ -700,7 +700,7 @@ public class LCGTest {
 
     @Test(groups = "lcg", timeOut = 60000)
     public void testReification() {
-        Model model = new Model(Settings.init().setLCG(true));
+        Model model = new Model(SettingsBuilder.init().setLCG(true));
         IntVar[] x = model.intVarArray("x", 6, 0, 1);
         IntVar[] y = model.intVarArray("y", 6, 0, 1);
         BoolVar b = model.boolVar("b");
@@ -737,7 +737,7 @@ public class LCGTest {
             System.out.printf("Testing with range [%d,%d]%n", Short.MIN_VALUE / i, Short.MAX_VALUE / i);
 
             //{a*b + c == 2020, a + b*c == 2021}
-            Model model = new Model(Settings.init().setLCG(true));
+            Model model = new Model(SettingsBuilder.init().setLCG(true));
             IntVar a = model.intVar("a", Short.MIN_VALUE / i, Short.MAX_VALUE / i);
             IntVar b = model.intVar("b", Short.MIN_VALUE / i, Short.MAX_VALUE / i);
             IntVar c = model.intVar("c", Short.MIN_VALUE / i, Short.MAX_VALUE / i);
@@ -763,7 +763,7 @@ public class LCGTest {
     @Test(groups = "lcg", timeOut = 600000, dataProvider = "offsets")
     public void testJG1(int offset) {
         // When the domain is sparse, the lit-based domain was not correctly instantiated
-        Model model = new Model(Settings.init().setLCG(true));
+        Model model = new Model(SettingsBuilder.init().setLCG(true));
         IntVar a = model.intVar("a", offset, 31);
         IntVar b = model.intVar("b", new int[]{offset, 10, 20, 30});
         model.arithm(a, "=", b).post();

@@ -10,7 +10,7 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.SolverException;
@@ -28,7 +28,7 @@ import static org.testng.Assert.*;
 public class InverseChannelingTest {
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
-    public void testNominal(boolean bounded, Settings settings) {
+    public void testNominal(boolean bounded, SettingsBuilder settings) {
         Model model = new Model(settings);
         IntVar[] intVars1 = makeArray(model, 5, 0, 4, bounded);
         IntVar[] intVars2 = makeArray(model, 5, 0, 4, bounded);
@@ -38,7 +38,7 @@ public class InverseChannelingTest {
     }
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
-    public void testNoSolution(boolean bounded, Settings settings) {
+    public void testNoSolution(boolean bounded, SettingsBuilder settings) {
         Model model = new Model(settings);
         IntVar[] intVars1 = new IntVar[] {
                 makeVariable(model, 1, 1, bounded),
@@ -56,7 +56,7 @@ public class InverseChannelingTest {
 
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
-    public void testDomainsFiltering(boolean bounded, Settings settings) {
+    public void testDomainsFiltering(boolean bounded, SettingsBuilder settings) {
         Model model = new Model(settings);
         IntVar[] intVars1 = makeArray(model, 2, 0, 6, bounded);
         IntVar[] intVars2 = makeArray(model, 2, 0, 6, bounded);
@@ -66,7 +66,7 @@ public class InverseChannelingTest {
 
     @Test(groups = "1s", timeOut=60000, expectedExceptions = SolverException.class,
             dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
-    public void testLengthsDiffer(boolean bounded, Settings settings) {
+    public void testLengthsDiffer(boolean bounded, SettingsBuilder settings) {
         Model model = new Model(settings);
         IntVar[] intVars1 = makeArray(model, 3, 0, 4, bounded);
         IntVar[] intVars2 = makeArray(model, 4, 0, 4, bounded);

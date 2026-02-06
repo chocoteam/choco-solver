@@ -534,7 +534,7 @@ public class ModelTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testSwapOnPassivate() {
-        Model model = new Model(Settings.init().setSwapOnPassivate(true));
+        Model model = new Model(SettingsBuilder.init().setSwapOnPassivate(true));
         int n = 11;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
@@ -702,7 +702,7 @@ public class ModelTest {
 
     @Test(groups = "1s", expectedExceptions = SolverException.class)
     public void testMaxPriority1() {
-        Model model = new Model(Settings.init().setMaxPropagatorPriority(4));
+        Model model = new Model(SettingsBuilder.init().setMaxPropagatorPriority(4));
         IntVar[] vars = model.intVarArray("X", 3, 0, 2);
         model.allDifferent(vars).post();
         model.getSolver().findAllSolutions();
@@ -710,7 +710,7 @@ public class ModelTest {
 
     @Test(groups = "1s")
     public void testMaxPriority2() {
-        Model model = new Model(Settings.init().setMaxPropagatorPriority(9));
+        Model model = new Model(SettingsBuilder.init().setMaxPropagatorPriority(9));
         IntVar[] vars = model.intVarArray("X", 3, 0, 2);
         model.allDifferent(vars).post();
         model.getSolver().findAllSolutions();

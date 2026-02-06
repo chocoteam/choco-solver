@@ -673,7 +673,7 @@ public class ViewsTest {
 
     private static Model makeModel(final boolean withViews) {
         Model m = new Model("with" + (withViews ? "" : "out") + " views",
-                Settings.init().setEnableViews(withViews));
+                SettingsBuilder.init().setEnableViews(withViews));
         return m;
     }
 
@@ -830,7 +830,7 @@ public class ViewsTest {
     public void testCP01() {
         for (int a = -5; a < 6; a++) {
             for (int b = 5; b > -6; b--) {
-                Model base = new Model(Settings.init().setEnableViews(false));
+                Model base = new Model(SettingsBuilder.init().setEnableViews(false));
                 {
                     IntVar i = base.intVar("i", -5, 5);
                     IntVar f = base.intView(a, i, b);
@@ -839,7 +839,7 @@ public class ViewsTest {
                     Solver s = base.getSolver();
                     s.findAllSolutions();
                 }
-                Model comp = new Model(Settings.init().setEnableViews(true));
+                Model comp = new Model(SettingsBuilder.init().setEnableViews(true));
                 {
                     IntVar i = comp.intVar("i", -5, 5);
                     IntVar f = comp.intView(a, i, b);
