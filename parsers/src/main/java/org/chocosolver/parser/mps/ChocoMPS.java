@@ -19,7 +19,7 @@ public class ChocoMPS {
         MPS mps = new MPS();
 //        mps.addListener(new BaseXCSPListener(mps)); //todo
         if(mps.setUp(args)) {
-            mps.getSettings().setMinCardinalityForSumDecomposition(mps.split);
+            mps.setMinCardinalityForSumDecomposition(mps.split);
             mps.createSolver();
             mps.buildModel();
             mps.configureSearch();

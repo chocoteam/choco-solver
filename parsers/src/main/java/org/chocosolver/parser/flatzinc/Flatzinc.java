@@ -85,6 +85,11 @@ public class Flatzinc extends RegParser {
 
     public Flatzinc() {
         this(false, false, 1);
+        this.setMinCardinalityForSumDecomposition(256)
+                .setNbMaxLearntClauses(100_000)
+                //.setIntVarLazyLitWithWeakBounds(false)
+                .set("adhocReification", "true")
+                .setWarnUser(false);
     }
 
     public Flatzinc(boolean all, boolean free, int nb_cores) {
@@ -113,13 +118,13 @@ public class Flatzinc extends RegParser {
     @Override
     public void createSolver() {
         if (level.isLoggable(Level.COMPET)) {
-            System.out.printf("%% Choco-solver%s (5.0.0, 260202_14:43)\n", lcg? " with LCG" : "");
+            System.out.printf("%% Choco-solver%s (5.0.0, 260202_14:43)\n", this.isLCG()? " with LCG" : "");
         }
         super.createSolver();
         datas = new Datas[nb_cores];
         String iname = instance == null ? "" : Paths.get(instance).getFileName().toString();
         for (int i = 0; i < nb_cores; i++) {
-            Model threadModel = new Model(iname + "_" + (i + 1), defaultSettings);
+            Model threadModel = new Model(iname + "_" + (i + 1), this);
             threadModel.getSolver().logWithANSI(ansi);
             portfolio.addModel(threadModel);
             datas[i] = new Datas(threadModel, level, oss);

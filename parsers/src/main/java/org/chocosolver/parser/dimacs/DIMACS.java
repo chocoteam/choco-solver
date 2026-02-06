@@ -64,7 +64,7 @@ public class DIMACS extends RegParser {
         String iname = Paths.get(instance).getFileName().toString();
         parsers = new DIMACSParser[nb_cores];
         for (int i = 0; i < nb_cores; i++) {
-            Model threadModel = new Model(iname + "_" + (i + 1), defaultSettings);
+            Model threadModel = new Model(iname + "_" + (i + 1), this);
             threadModel.getSolver().logWithANSI(ansi);
             portfolio.addModel(threadModel);
             parsers[i] = new DIMACSParser();

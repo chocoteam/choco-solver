@@ -408,7 +408,7 @@ public enum FConstraint {
             IntVar c = exps.get(2).intVarValue(model);
             BoolVar r = exps.get(3).boolVarValue(model);
 
-            if ((boolean) model.getSettings().get("adhocReification").orElse(false)) {
+            if (Boolean.getBoolean(model.getSettings().get("adhocReification").orElse("false"))) {
                 if (bs.length == 1) {
                     if (bs[0].isInstantiated() || c.isInstantiated()) {
                         IntVar x;
@@ -665,7 +665,7 @@ public enum FConstraint {
             if ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
                 model.addClausesBoolIsNeqVar((BoolVar) a, (BoolVar) b, r);
             } else {
-                if ((boolean) model.getSettings().get("adhocReification").orElse(false)) {
+                if (Boolean.getBoolean(model.getSettings().get("adhocReification").orElse("false"))) {
                     if (a.isInstantiated() || b.isInstantiated()) {
                         IntVar x;
                         int c;

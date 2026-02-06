@@ -17,7 +17,6 @@ import org.chocosolver.solver.variables.impl.IntVarLazyLit;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -51,8 +50,6 @@ public class Settings {
 
     private final boolean sortPropagatorActivationWRTPriority;
 
-    private final int maxPropagatorPriority;
-
     private final Consumer<Model> defaultSearch;
 
     private final boolean warnUser;
@@ -83,9 +80,7 @@ public class Settings {
 
     private final boolean ibexRestoreRounding;
 
-    private final Function<Model, Solver> initSolver;
-
-    private final HashMap<String, Object> additionalSettings;
+    private final HashMap<String, String> additionalSettings;
 
     private final boolean lcg;
 
@@ -101,7 +96,6 @@ public class Settings {
         this.maxTupleSizeForSubstitution = builder.getMaxTupleSizeForSubstitution();
         this.maxSizeInMBToUseCompactTable = builder.getMaxSizeInMBToUseCompactTable();
         this.sortPropagatorActivationWRTPriority = builder.sortPropagatorActivationWRTPriority();
-        this.maxPropagatorPriority = builder.getMaxPropagatorPriority();
         this.defaultSearch = builder.getDefaultSearch();
         this.warnUser = builder.warnUser();
         this.enableDecompositionOfBooleanSum = builder.enableDecompositionOfBooleanSum();
@@ -117,7 +111,6 @@ public class Settings {
         this.intVarLazyLitWithWeakBounds = builder.intVarLazyLitWithWeakBounds();
         this.ibexContractionRatio = builder.getIbexContractionRatio();
         this.ibexRestoreRounding = builder.getIbexRestoreRounding();
-        this.initSolver = builder.getInitSolver();
         this.lcg = builder.isLCG();
         this.environmentSupplier = builder.getEnvironmentSupplier();
         this.additionalSettings = new HashMap<>(builder.getAdditionalSettings());
@@ -192,13 +185,6 @@ public class Settings {
      */
     public boolean sortPropagatorActivationWRTPriority() {
         return sortPropagatorActivationWRTPriority;
-    }
-
-    /**
-     * @return the maximum priority any propagators can have (default is 7)
-     */
-    public int getMaxPropagatorPriority() {
-        return maxPropagatorPriority;
     }
 
     /**
@@ -286,17 +272,6 @@ public class Settings {
     }
 
     /**
-     * This method is called in {@link Model#Model(String, Settings)} to create the
-     * solver to associate with a model.
-     *
-     * @param model a model to initialize with a solver
-     * @return the new solver
-     */
-    public Solver initSolver(Model model) {
-        return initSolver.apply(model);
-    }
-
-    /**
      * @return <i>0b00<i/> if constraint-oriented propagation engine,
      * <i>0b01<i/> if hybridization between variable and constraint oriented and
      * <i>0b10<i/> if variable-oriented.
@@ -340,12 +315,15 @@ public class Settings {
         return ibexRestoreRounding;
     }
 
-    public Optional<Object> get(String key) {
+    /**
+     * Get the value of an additional setting.
+     * The additional settings are a map of string keys to string values that can be used to store any additional setting that is not explicitly defined in this class.
+     *
+     * @param key the key of the setting
+     * @return an optional containing the value of the setting if it exists, an empty optional otherwise
+     */
+    public Optional<String> get(String key) {
         return Optional.ofNullable(additionalSettings.get(key));
     }
 
-    public Settings set(String key, Object value) {
-        this.additionalSettings.put(key, value);
-        return this;
-    }
 }

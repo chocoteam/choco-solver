@@ -208,7 +208,7 @@ public class Model implements IModel {
         this.objective = null;
         this.hooks = new HashMap<>();
         this.settings = settings;
-        this.solver = settings.initSolver(this);
+        this.solver = new Solver(this);
         // to make sure MiniSat.C_Undef is not null, call it once
         this.hooks.put("C_Undef", MiniSat.C_Undef);
         this.hooks.clear();

@@ -38,7 +38,7 @@ import java.util.Comparator;
  * Created by cprudhom on 01/09/15.
  * Project: choco-parsers.
  */
-public abstract class RegParser implements IParser {
+public abstract class RegParser extends SettingsBuilder implements IParser {
     /**
      * Name of the parser
      */
@@ -168,16 +168,8 @@ public abstract class RegParser implements IParser {
     @Option(name = "--cp-profiler", usage = "Connect to CP-Profiler. Two comma-separated values are expected: the execution id and the port.")
     public String cpProfiler = null;
 
-    @Option(name = "-lcg", usage = "Set Lazy Clause Generation (LCG) on. ")
-    protected boolean lcg = false;
-
     @Option(name = "--disable-shutdown-hook", usage = "Disable the shutdown hook.")
     protected boolean disableShutdownHook = false;
-
-    /**
-     * Default settings to apply
-     */
-    protected SettingsBuilder defaultSettings;
 
     /**
      * The resolution portfolio
