@@ -31,10 +31,6 @@ public class RegParserTest {
         parser = new RegParser("test") {
 
             @Override
-            public void createSettings() {
-            }
-
-            @Override
             public void createSolver() {
 
             }

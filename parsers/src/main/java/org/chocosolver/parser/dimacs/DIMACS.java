@@ -47,12 +47,6 @@ public class DIMACS extends RegParser {
     }
 
     @Override
-    public void createSettings() {
-        defaultSettings = SettingsBuilder.prod()
-                .setEnableSAT(!cp);
-    }
-
-    @Override
     public Thread actionOnKill() {
         return new Thread(() -> {
             if (userinterruption) {

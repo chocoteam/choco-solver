@@ -209,14 +209,6 @@ public abstract class RegParser implements IParser {
         this.parser_cmd = parser_cmd;
     }
 
-    public void createSettings() {
-        defaultSettings = SettingsBuilder.prod().setLCG(lcg);
-    }
-
-    public final SettingsBuilder getSettings() {
-        return defaultSettings;
-    }
-
     /**
      * Create the solver
      */
@@ -260,7 +252,6 @@ public abstract class RegParser implements IParser {
         if (valsel == null) {
             valsel = new SearchParams.ValSelConf(valH, best, bestRate, last);
         }
-        createSettings();
         if (!disableShutdownHook) {
             Runtime.getRuntime().addShutdownHook(statOnKill);
         }

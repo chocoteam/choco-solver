@@ -95,18 +95,6 @@ public class Flatzinc extends RegParser {
     }
 
     @Override
-    public void createSettings() {
-        defaultSettings = SettingsBuilder.prod()
-                .setMinCardinalityForSumDecomposition(256)
-                .setLCG(lcg)
-                .setNbMaxLearntClauses(100_000)
-                //.setIntVarLazyLitWithWeakBounds(false)
-                .set("adhocReification", true)
-                .setWarnUser(false)
-        ;
-    }
-
-    @Override
     public Thread actionOnKill() {
         return new Thread(() -> {
             if (userinterruption) {
