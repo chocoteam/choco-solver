@@ -17,7 +17,6 @@ import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.tools.ArrayUtils;
-import org.chocosolver.util.tools.VariableUtils;
 
 /**
  * Interface to make variables (BoolVar, IntVar, RealVar, SetVar, and GraphVar)
@@ -283,7 +282,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * (any value removals in the middle of the domain will be ignored).
      */
     default IntVar intVar(String name, int lb, int ub) {
-        boolean bounded = ub - lb + 1 >= ref().getSettings().getMaxDomSizeForEnumerated();
+        boolean bounded = ub - lb + 1 >= ref().getSettings().getEnumeratedDomainSizeThreshold();
         return intVar(name, lb, ub, bounded);
     }
 

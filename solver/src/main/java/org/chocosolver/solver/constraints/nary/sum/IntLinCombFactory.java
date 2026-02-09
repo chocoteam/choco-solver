@@ -269,7 +269,7 @@ public class IntLinCombFactory {
                 //TODO: deal with clauses and reification
                 Model model = VARS[0].getModel();
                 if (nbools == VARS.length) {
-                    if (tmpV.length > model.getSettings().thresholdForIncrementalityOnBoolSum()) {
+                    if (tmpV.length > model.getSettings().getIncrementalityOnBoolSumThreshold()) {
                         return new SumConstraint(new PropSumFullBoolIncr(model.toBoolVar(tmpV), b, OPERATOR, RESULT));
                     } else {
                         return new SumConstraint(new PropSumFullBool(model.toBoolVar(tmpV), b, OPERATOR, RESULT));
@@ -277,7 +277,7 @@ public class IntLinCombFactory {
                 }
                 if (nbools == VARS.length - 1 && !tmpV[tmpV.length - 1].isBool() && COEFFS[VARS.length - 1] == -1) {
                     // the large domain variable is on the last idx
-                    if (tmpV.length > model.getSettings().thresholdForIncrementalityOnBoolSum()) {
+                    if (tmpV.length > model.getSettings().getIncrementalityOnBoolSumThreshold()) {
                         return new SumConstraint(new PropSumBoolIncr(model.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
                                 b, OPERATOR, tmpV[tmpV.length - 1], RESULT));
 

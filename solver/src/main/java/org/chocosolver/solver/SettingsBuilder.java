@@ -60,11 +60,11 @@ public class SettingsBuilder {
             usage = "if true, views are enabled. Creates new variables with channeling constraints otherwise (default is true).")
     private boolean enableViews = true;
 
-    public static final String MAX_DOM_SIZE_FOR_ENUMERATED = "maxDomSizeForEnumerated";
-    @Option(name = "--maxDomSizeForEnumerated",
-            aliases = {"--model.maxDomSizeForEnumerated", "-mdsfe"},
+    public static final String ENUMERATED_DOMAIN_SIZE_THRESHOLD = "enumeratedDomainSizeThreshold";
+    @Option(name = "--enumeratedDomainSizeThreshold",
+            aliases = {"--model.enumeratedDomainSizeThreshold", "-edst"},
             usage = "maximum domain size threshold to force integer variable to be enumerated (default is 65536).")
-    private int maxDomSizeForEnumerated = 1 << 16;
+    private int enumeratedDomainSizeThreshold = 1 << 16;
 
     public static final String MIN_CARD_FOR_SUM_DECOMPOSITION = "minCardForSumDecomposition";
     @Option(name = "--minCardForSumDecomposition",
@@ -92,7 +92,7 @@ public class SettingsBuilder {
             usage = "maximum estimated size, in MB, of the table to use compact table representation (default is 1024).")
     private long maxSizeInMBToUseCompactTable = 1024L;
 
-    public static final String SORT_PROPAGATOR_ACTIVATION_WRTPRIORITY = "sortPropagatorActivationWRTPriority";
+    public static final String SORT_PROPAGATOR_ACTIVATION_WRT_PRIORITY = "sortPropagatorActivationWRTPriority";
     @Option(name = "--sortPropagatorActivationWRTPriority",
             aliases = {"--prop.sortPropagatorActivationWRTPriority", "-pawrp"},
             usage = "if true, propagators are sorted wrt their priority on initial activation. " +
@@ -115,11 +115,11 @@ public class SettingsBuilder {
                     "if false, a single constraint should be used instead (default is false).")
     private boolean enableDecompositionOfBooleanSum = false;
 
-    public static final String THRESHOLD_FOR_INCREMENTALITY_ON_BOOL_SUM = "thresholdForIncrementalityOnBoolSum";
-    @Option(name = "--thresholdForIncrementalityOnBoolSum",
-            aliases = {"--model.thresholdForIncrementalityOnBoolSum", "-tfibss"},
+    public static final String INCREMENTALITY_ON_BOOL_SUM_THRESHOLD = "incrementalityOnBoolSumThreshold";
+    @Option(name = "--incrementalityOnBoolSumThreshold",
+            aliases = {"--model.incrementalityOnBoolSumThreshold", "-icbst"},
             usage = "the threshold on the number of variables declared in a boolean sum constraint to choose incremental sum (default is 10).")
-    private int thresholdForIncrementalityOnBoolSum = 10;
+    private int incrementalityOnBoolSumThreshold = 10;
 
     public static final String ENABLE_SAT = "enableSAT";
     @Option(name = "--enableSAT",
@@ -163,13 +163,13 @@ public class SettingsBuilder {
             depends = "checkDeclaredConstraints")
     private boolean printAllUndeclaredConstraints = false;
 
-    public static final String HYBRID_ENGINE = "hybridEngine";
-    @Option(name = "--hybridEngine",
-            aliases = {"--prop.hybridEngine", "-he"},
+    public static final String PROPAGATION_ENGINE_TYPE = "propagationEngineType";
+    @Option(name = "--propagationEngineType",
+            aliases = {"--prop.propagationEngineType", "-pet"},
             usage = "when set to '0b00', this works as a constraint-oriented propagation engine; " +
-                    "when set to '0b01', this workds as an hybridization between variable and constraint oriented propagation engine; " +
-                    "when set to '0b10', this workds as a variable- oriented propagation engine (default is 0b00).")
-    private byte hybridEngine = 0b00;
+                    "when set to '0b01', this works as an hybridization between variable and constraint oriented propagation engine; " +
+                    "when set to '0b10', this works as a variable-oriented propagation engine (default is 0b00).")
+    private byte propagationEngineType = 0b00;
 
     public static final String NB_MAX_LEARNT_CLAUSES = "nbMaxLearntClauses";
     @Option(name = "--nbMaxLearntClauses",
@@ -305,8 +305,8 @@ public class SettingsBuilder {
                 case ENABLE_VIEWS:
                     this.setEnableViews(Boolean.parseBoolean(value));
                     break;
-                case MAX_DOM_SIZE_FOR_ENUMERATED:
-                    this.setMaxDomSizeForEnumerated(Integer.parseInt(value));
+                case ENUMERATED_DOMAIN_SIZE_THRESHOLD:
+                    this.setEnumeratedDomainSizeThreshold(Integer.parseInt(value));
                     break;
                 case MIN_CARD_FOR_SUM_DECOMPOSITION:
                     this.setMinCardinalityForSumDecomposition(Integer.parseInt(value));
@@ -320,7 +320,7 @@ public class SettingsBuilder {
                 case MAX_SIZE_IN_MB_TO_USE_COMPACT_TABLE:
                     this.setMaxSizeInMBToUseCompactTable(Integer.parseInt(value));
                     break;
-                case SORT_PROPAGATOR_ACTIVATION_WRTPRIORITY:
+                case SORT_PROPAGATOR_ACTIVATION_WRT_PRIORITY:
                     this.setSortPropagatorActivationWRTPriority(Boolean.parseBoolean(value));
                     break;
                 case WARN_USER:
@@ -329,8 +329,8 @@ public class SettingsBuilder {
                 case ENABLE_DECOMPOSITION_OF_BOOLEAN_SUM:
                     this.setEnableDecompositionOfBooleanSum(Boolean.parseBoolean(value));
                     break;
-                case THRESHOLD_FOR_INCREMENTALITY_ON_BOOL_SUM:
-                    this.setThresholdForIncrementalityOnBoolSum(Integer.parseInt(value));
+                case INCREMENTALITY_ON_BOOL_SUM_THRESHOLD:
+                    this.setIncrementalityOnBoolSumThreshold(Integer.parseInt(value));
                     break;
                 case ENABLE_SAT:
                     this.setEnableSAT(Boolean.parseBoolean(value));
@@ -350,8 +350,8 @@ public class SettingsBuilder {
                 case PRINT_ALL_UNDECLARED_CONSTRAINTS:
                     this.setPrintAllUndeclaredConstraints(Boolean.parseBoolean(value));
                     break;
-                case HYBRID_ENGINE:
-                    this.setHybridizationOfPropagationEngine(Byte.parseByte(value));
+                case PROPAGATION_ENGINE_TYPE:
+                    this.getPropagationEnginType(Byte.parseByte(value));
                     break;
                 case NB_MAX_LEARNT_CLAUSES:
                     this.setNbMaxLearntClauses(Integer.parseInt(value));
@@ -494,19 +494,19 @@ public class SettingsBuilder {
     /**
      * @return maximum domain size threshold to force integer variable to be enumerated
      */
-    public int getMaxDomSizeForEnumerated() {
-        return maxDomSizeForEnumerated;
+    public int getEnumeratedDomainSizeThreshold() {
+        return enumeratedDomainSizeThreshold;
     }
 
     /**
      * Define the minimum number of cardinality threshold to a sum/scalar constraint to be decomposed in intermediate
      * sub-sums.
      *
-     * @param maxDomSizeForEnumerated cardinality threshold
+     * @param enumeratedDomainSizeThreshold cardinality threshold
      * @return the current instance
      */
-    public SettingsBuilder setMaxDomSizeForEnumerated(int maxDomSizeForEnumerated) {
-        this.maxDomSizeForEnumerated = maxDomSizeForEnumerated;
+    public SettingsBuilder setEnumeratedDomainSizeThreshold(int enumeratedDomainSizeThreshold) {
+        this.enumeratedDomainSizeThreshold = enumeratedDomainSizeThreshold;
         return this;
     }
 
@@ -663,18 +663,18 @@ public class SettingsBuilder {
     /**
      * @return the threshold on the number of variables declared in a boolean sum constraint to choose incremental sum (default is 10).
      */
-    public int thresholdForIncrementalityOnBoolSum() {
-        return this.thresholdForIncrementalityOnBoolSum;
+    public int getIncrementalityOnBoolSumThreshold() {
+        return this.incrementalityOnBoolSumThreshold;
     }
 
     /**
      * Define the threshold on the number of variables declared in a boolean sum constraint to choose incremental sum (default is 10).
      *
-     * @param thresholdForIncrementalityOnBoolSum threshold on the number of variables declared in a boolean sum constraint to choose incremental sum
+     * @param incrementalityOnBoolSumThreshold threshold on the number of variables declared in a boolean sum constraint to choose incremental sum
      * @return the current instance
      */
-    public SettingsBuilder setThresholdForIncrementalityOnBoolSum(int thresholdForIncrementalityOnBoolSum) {
-        this.thresholdForIncrementalityOnBoolSum = thresholdForIncrementalityOnBoolSum;
+    public SettingsBuilder setIncrementalityOnBoolSumThreshold(int incrementalityOnBoolSumThreshold) {
+        this.incrementalityOnBoolSumThreshold = incrementalityOnBoolSumThreshold;
         return this;
     }
 
@@ -797,8 +797,8 @@ public class SettingsBuilder {
      * <i>0b01<i/> if hybridization between variable and constraint oriented and
      * <i>0b10<i/> if variable-oriented.
      */
-    public byte enableHybridizationOfPropagationEngine() {
-        return hybridEngine;
+    public byte setPropagationEngineType() {
+        return propagationEngineType;
     }
 
     /**
@@ -810,8 +810,8 @@ public class SettingsBuilder {
      *               when set to '0b10', this workds as a variable- oriented propagation engine.
      * @return the current instance
      */
-    public SettingsBuilder setHybridizationOfPropagationEngine(byte hybrid) {
-        this.hybridEngine = hybrid;
+    public SettingsBuilder getPropagationEnginType(byte hybrid) {
+        this.propagationEngineType = hybrid;
         return this;
     }
 
@@ -858,7 +858,7 @@ public class SettingsBuilder {
      * @return <tt>true</tt> if the {@link IntVarLazyLit} propagator uses weak bounds.
      * @see #setIntVarLazyLitWithWeakBounds(boolean)
      */
-    public boolean intVarLazyLitWithWeakBounds() {
+    public boolean enableIntVarLazyLitWithWeakBounds() {
         return intVarLazyLitWithWeakBounds;
     }
 

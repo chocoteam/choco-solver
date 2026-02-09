@@ -115,7 +115,7 @@ public class IntLinCombTest {
 
 
     protected Model sum(int[][] domains, int[] coeffs, int b, int op, boolean incr) {
-        Model model = new Model(SettingsBuilder.init().setThresholdForIncrementalityOnBoolSum(incr ? 0 : Integer.MAX_VALUE));
+        Model model = new Model(SettingsBuilder.init().setIncrementalityOnBoolSumThreshold(incr ? 0 : Integer.MAX_VALUE));
         IntVar[] bins = new IntVar[domains.length];
         for (int i = 0; i < domains.length; i++) {
             bins[i] = model.intVar("v_" + i, domains[i][0], domains[i][domains[i].length - 1], true);
@@ -136,7 +136,7 @@ public class IntLinCombTest {
     }
 
     protected Model intlincomb(int[][] domains, int[] coeffs, int b, int op, boolean incr) {
-        Model model = new Model(SettingsBuilder.init().setThresholdForIncrementalityOnBoolSum(incr ? 0 : Integer.MAX_VALUE));
+        Model model = new Model(SettingsBuilder.init().setIncrementalityOnBoolSumThreshold(incr ? 0 : Integer.MAX_VALUE));
         IntVar[] bins = new IntVar[domains.length];
         for (int i = 0; i < domains.length; i++) {
             bins[i] = model.intVar("v_" + i, domains[i][0], domains[i][domains[i].length - 1], true);

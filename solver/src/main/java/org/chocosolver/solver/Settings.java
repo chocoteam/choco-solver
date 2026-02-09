@@ -39,7 +39,7 @@ public class Settings {
 
     private final boolean enableViews;
 
-    private final int maxDomSizeForEnumerated;
+    private final int enumeratedDomainSizeThreshold;
 
     private final int minCardForSumDecomposition;
 
@@ -57,7 +57,7 @@ public class Settings {
 
     private final boolean enableDecompositionOfBooleanSum;
 
-    private final int thresholdForIncrementalityOnBoolSum;
+    private final int incrementalityOnBoolSumThreshold;
 
     private final boolean enableSAT;
 
@@ -71,7 +71,7 @@ public class Settings {
 
     private final boolean printAllUndeclaredConstraints;
 
-    private final byte hybridEngine;
+    private final byte propagationEngineType;
 
     private final int nbMaxLearnt;
 
@@ -91,7 +91,7 @@ public class Settings {
         this.modelChecker = builder.getModelChecker();
         this.cloneVariableArrayInPropagator = builder.cloneVariableArrayInPropagator();
         this.enableViews = builder.enableViews();
-        this.maxDomSizeForEnumerated = builder.getMaxDomSizeForEnumerated();
+        this.enumeratedDomainSizeThreshold = builder.getEnumeratedDomainSizeThreshold();
         this.minCardForSumDecomposition = builder.getMinCardForSumDecomposition();
         this.enableTableSubstitution = builder.enableTableSubstitution();
         this.maxTupleSizeForSubstitution = builder.getMaxTupleSizeForSubstitution();
@@ -100,16 +100,16 @@ public class Settings {
         this.defaultSearch = builder.getDefaultSearch();
         this.warnUser = builder.warnUser();
         this.enableDecompositionOfBooleanSum = builder.enableDecompositionOfBooleanSum();
-        this.thresholdForIncrementalityOnBoolSum = builder.thresholdForIncrementalityOnBoolSum();
+        this.incrementalityOnBoolSumThreshold = builder.getIncrementalityOnBoolSumThreshold();
         this.enableSAT = builder.enableSAT();
         this.swapOnPassivate = builder.swapOnPassivate();
         this.checkDeclaredConstraints = builder.checkDeclaredConstraints();
         this.checkDeclaredViews = builder.checkDeclaredViews();
         this.checkDeclaredMonitors = builder.checkDeclaredMonitors();
         this.printAllUndeclaredConstraints = builder.printAllUndeclaredConstraints();
-        this.hybridEngine = builder.enableHybridizationOfPropagationEngine();
+        this.propagationEngineType = builder.setPropagationEngineType();
         this.nbMaxLearnt = builder.getNbMaxLearntClauses();
-        this.intVarLazyLitWithWeakBounds = builder.intVarLazyLitWithWeakBounds();
+        this.intVarLazyLitWithWeakBounds = builder.enableIntVarLazyLitWithWeakBounds();
         this.ibexContractionRatio = builder.getIbexContractionRatio();
         this.ibexRestoreRounding = builder.getIbexRestoreRounding();
         this.lcg = builder.isLCG();
@@ -149,8 +149,8 @@ public class Settings {
     /**
      * @return maximum domain size threshold to force integer variable to be enumerated
      */
-    public int getMaxDomSizeForEnumerated() {
-        return maxDomSizeForEnumerated;
+    public int getEnumeratedDomainSizeThreshold() {
+        return enumeratedDomainSizeThreshold;
     }
 
     /**
@@ -219,8 +219,8 @@ public class Settings {
      * (i.e. to use a dedicated propagator that maintains the current sum value and incrementally updates it when a variable is instantiated)
      * instead of using a non-incremental propagator that recomputes the sum from scratch at each propagation.
      */
-    public int thresholdForIncrementalityOnBoolSum() {
-        return thresholdForIncrementalityOnBoolSum;
+    public int getIncrementalityOnBoolSumThreshold() {
+        return incrementalityOnBoolSumThreshold;
     }
 
     /**
@@ -277,8 +277,8 @@ public class Settings {
      * <i>0b01<i/> if hybridization between variable and constraint oriented and
      * <i>0b10<i/> if variable-oriented.
      */
-    public byte enableHybridizationOfPropagationEngine() {
-        return hybridEngine;
+    public byte getPropagationEnginType() {
+        return propagationEngineType;
     }
 
     /**
@@ -298,7 +298,7 @@ public class Settings {
     /**
      * @return <tt>true</tt> if the {@link IntVarLazyLit} propagator uses weak bounds.
      */
-    public boolean intVarLazyLitWithWeakBounds() {
+    public boolean enableIntVarLazyLitWithWeakBounds() {
         return intVarLazyLitWithWeakBounds;
     }
 

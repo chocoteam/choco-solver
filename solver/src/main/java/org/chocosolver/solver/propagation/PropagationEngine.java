@@ -129,7 +129,7 @@ public class PropagationEngine {
         this.propagators = new ArrayList<>();
         //0b00: cstr-ori
         //0b10: var-ori
-        this.hybrid = model.getSettings().enableHybridizationOfPropagationEngine();
+        this.hybrid = model.getSettings().getPropagationEnginType();
         this.sat = sat;
     }
 

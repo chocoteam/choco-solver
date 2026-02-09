@@ -70,7 +70,7 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar, Lit
             throw new UnsupportedOperationException("IntVarLazyLit can only wrap bounded integer variables");
         }
         this.sat = getModel().getSolver().getSat();
-        if (getModel().getSettings().intVarLazyLitWithWeakBounds()) {
+        if (getModel().getSettings().enableIntVarLazyLitWithWeakBounds()) {
             bnd = new WeakBound(getModel());
         } else {
             bnd = new StrongBound(getModel(), min0, max0);

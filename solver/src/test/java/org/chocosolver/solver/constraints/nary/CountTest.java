@@ -151,7 +151,7 @@ public class CountTest {
             int sizeDom = 4;
             int sizeOccurence = 4;
 
-            Model model = new Model(SettingsBuilder.init().setHybridizationOfPropagationEngine((byte)0b00));
+            Model model = new Model(SettingsBuilder.init().getPropagationEnginType((byte)0b00));
             IntVar[] vars;
             if (enumvar) {
                 vars = model.intVarArray("e", nbVar, 0, sizeDom, false);
