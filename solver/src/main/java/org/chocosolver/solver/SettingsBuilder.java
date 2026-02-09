@@ -737,7 +737,7 @@ public class SettingsBuilder {
     }
 
     /**
-     * Check if a view already semantically exists before creating it.
+     * Check if a view semantically equivalent exists before creating it.
      *
      * @param checkDeclaredViews {@code true} to check views before creation
      * @return the current instance
@@ -747,11 +747,20 @@ public class SettingsBuilder {
         return this;
     }
 
+    /**
+     * Check if a monitor semantically equivalent exists before creating it.
+     *
+     * @param check checkDeclaredMonitors {@code true} to check monitors before creation
+     * @return the current instance
+     */
     public SettingsBuilder setCheckDeclaredMonitors(boolean check) {
         this.checkDeclaredMonitors = check;
         return this;
     }
 
+    /**
+     * @return <i>true</i> (default value) to check prior to creation if a monitor semantically equivalent exists.
+     */
     public boolean checkDeclaredMonitors() {
         return this.checkDeclaredMonitors;
     }
