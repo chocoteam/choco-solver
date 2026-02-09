@@ -42,8 +42,10 @@ import java.util.function.Supplier;
  */
 public class SettingsBuilder {
 
+    public static final String MODEL_CHECKER = "modelChecker";
     private Predicate<Solver> modelChecker = s -> !ESat.FALSE.equals(s.isSatisfied());
 
+    public static final String CLONE_VARIABLE_ARRAY_IN_PROPAGATOR = "cloneVariableArrayInPropagator";
     @Option(name = "--cloneVariableArrayInPropagator",
             aliases = {"--prop.cloneVarArray", "-cvap"},
             usage = "if true, a clone of the input variable array is made in any propagator constructors (default is true). " +
@@ -51,26 +53,31 @@ public class SettingsBuilder {
                     "Setting this to false may limit the memory consumption during modelling but may cause wrong behavior in some cases.")
     private boolean cloneVariableArrayInPropagator = true;
 
+    public static final String ENABLE_VIEWS = "enableViews";
     @Option(name = "--enableViews",
             aliases = {"--model.enableViews", "-ev"},
             usage = "if true, views are enabled. Creates new variables with channeling constraints otherwise (default is true).")
     private boolean enableViews = true;
 
+    public static final String MAX_DOM_SIZE_FOR_ENUMERATED = "maxDomSizeForEnumerated";
     @Option(name = "--maxDomSizeForEnumerated",
             aliases = {"--model.maxDomSizeForEnumerated", "-mdsfe"},
             usage = "maximum domain size threshold to force integer variable to be enumerated (default is 65536).")
     private int maxDomSizeForEnumerated = 1 << 16;
 
+    public static final String MIN_CARD_FOR_SUM_DECOMPOSITION = "minCardForSumDecomposition";
     @Option(name = "--minCardForSumDecomposition",
             aliases = {"--model.minCardForSumDecomposition", "-mcfssd"},
             usage = "minimum cardinality threshold to a sum constraint to be decomposed (default is 50).")
     private int minCardForSumDecomposition = 50;
 
+    public static final String ENABLE_TABLE_SUBSTITUTION = "enableTableSubstitution";
     @Option(name = "--enableTableSubstitution",
             aliases = {"--model.enableTableSubstitution", "-ets"},
             usage = "if true, some intension constraints can be replaced by extension constraints (default is true).")
     private boolean enableTableSubstitution = true;
 
+    public static final String MAX_TUPLE_SIZE_FOR_SUBSTITUTION = "maxTupleSizeForSubstitution";
     @Option(name = "--maxTupleSizeForSubstitution",
             aliases = {"--model.maxTupleSizeForSubstitution", "-mtss"},
             usage = "maximum domain size threshold to replace intension constraints by extension constraints (default is 10000). " +
@@ -78,47 +85,56 @@ public class SettingsBuilder {
             depends = "model.enableTableSubstitution")
     private int maxTupleSizeForSubstitution = 10_000;
 
+    public static final String MAX_SIZE_IN_MB_TO_USE_COMPACT_TABLE = "maxSizeInMBToUseCompactTable";
     @Option(name = "--maxSizeInMBToUseCompactTable",
             aliases = {"--model.maxSizeInMBToUseCompactTable", "-msmbuct"},
             usage = "maximum estimated size, in MB, of the table to use compact table representation (default is 1024).")
     private long maxSizeInMBToUseCompactTable = 1024L;
 
+    public static final String SORT_PROPAGATOR_ACTIVATION_WRTPRIORITY = "sortPropagatorActivationWRTPriority";
     @Option(name = "--sortPropagatorActivationWRTPriority",
             aliases = {"--prop.sortPropagatorActivationWRTPriority", "-pawrp"},
             usage = "if true, propagators are sorted wrt their priority on initial activation. " +
                     "Otherwise, they are activated in the order they have been declared in the model (default is true).")
     private boolean sortPropagatorActivationWRTPriority = true;
 
+    public static final String DEFAULT_SEARCH = "defaultSearch";
     private Consumer<Model> defaultSearch = m -> BlackBoxConfigurator.init().make(m);
 
+    public static final String WARN_USER = "warnUser";
     @Option(name = "--warnUser",
             aliases = {"--model.warnUser", "-wu"},
             usage = "if true, warnings detected during modeling/solving are output (default is false).")
     private boolean warnUser = false;
 
+    public static final String ENABLE_DECOMPOSITION_OF_BOOLEAN_SUM = "enableDecompositionOfBooleanSum";
     @Option(name = "--enableDecompositionOfBooleanSum",
             aliases = {"--model.enableDecompositionOfBooleanSum", "-edobs"},
             usage = "if true, boolean sum should be decomposed into an equality constraint and an arithmetic constraint, " +
                     "if false, a single constraint should be used instead (default is false).")
     private boolean enableDecompositionOfBooleanSum = false;
 
+    public static final String THRESHOLD_FOR_INCREMENTALITY_ON_BOOL_SUM = "thresholdForIncrementalityOnBoolSum";
     @Option(name = "--thresholdForIncrementalityOnBoolSum",
             aliases = {"--model.thresholdForIncrementalityOnBoolSum", "-tfibss"},
             usage = "the threshold on the number of variables declared in a boolean sum constraint to choose incremental sum (default is 10).")
     private int thresholdForIncrementalityOnBoolSum = 10;
 
+    public static final String ENABLE_SAT = "enableSAT";
     @Option(name = "--enableSAT",
             aliases = {"--model.enableSAT", "-esat"},
             usage = "when true, an underlying SAT solver is used to manage clauses declared through ISatFactory, " +
                     "when false, clauses are managed with CSP constraints only (default is false).")
     private boolean enableSAT = false;
 
+    public static final String SWAP_ON_PASSIVATE = "swapOnPassivate";
     @Option(name = "--swapOnPassivate",
             aliases = {"--prop.swapOnPassivate", "-sop"},
             usage = "when true, on propagator passivation, the propagator is swapped from active to passive in its variables' propagators list. " +
                     "when false, on propagator passivation, only the propagator's state is set to PASSIVE (default is true).")
     private boolean swapOnPassivate = true;
 
+    public static final String CHECK_DECLARED_CONSTRAINTS = "checkDeclaredConstraints";
     @Option(name = "--checkDeclaredConstraints",
             aliases = {"--model.checkDeclaredConstraints", "-cdc"},
             usage = "when true, check if all declared constraints are not free anymore, " +
@@ -126,16 +142,19 @@ public class SettingsBuilder {
                     "when false, skip the control (default is true).")
     private boolean checkDeclaredConstraints = true;
 
+    public static final String CHECK_DECLARED_VIEWS = "checkDeclaredViews";
     @Option(name = "--checkDeclaredViews",
             aliases = {"--model.checkDeclaredViews", "-cdv"},
             usage = "when true, check if a view already semantically exists before creating it (default is true).")
     private boolean checkDeclaredViews = true;
 
+    public static final String CHECK_DECLARED_MONITORS = "checkDeclaredMonitors";
     @Option(name = "--checkDeclaredMonitors",
             aliases = {"--model.checkDeclaredMonitors", "-cdm"},
             usage = "when true, check if a monitor already semantically exists before creating it (default is true).")
     private boolean checkDeclaredMonitors = true;
 
+    public static final String PRINT_ALL_UNDECLARED_CONSTRAINTS = "printAllUndeclaredConstraints";
     @Option(name = "--printAllUndeclaredConstraints",
             aliases = {"--model.printAllUndeclaredConstraints", "-paudc"},
             usage = "when true, list all undeclared constraint, when false (default value) otherwise. " +
@@ -143,6 +162,7 @@ public class SettingsBuilder {
             depends = "checkDeclaredConstraints")
     private boolean printAllUndeclaredConstraints = false;
 
+    public static final String HYBRID_ENGINE = "hybridEngine";
     @Option(name = "--hybridEngine",
             aliases = {"--prop.hybridEngine", "-he"},
             usage = "when set to '0b00', this works as a constraint-oriented propagation engine; " +
@@ -150,11 +170,13 @@ public class SettingsBuilder {
                     "when set to '0b10', this workds as a variable- oriented propagation engine (default is 0b00).")
     private byte hybridEngine = 0b00;
 
+    public static final String NB_MAX_LEARNT_CLAUSES = "nbMaxLearntClauses";
     @Option(name = "--nbMaxLearntClauses",
             aliases = {"--sat.nbMaxLearntClauses", "-nblc"},
             usage = "maximum number of learnt clauses to store. When reached, a reduction is applied (default is 100000).")
     private int nbMaxLearnt = 100_000;
 
+    public static final String INT_VAR_LAZY_LIT_WITH_WEAK_BOUNDS = "intVarLazyLitWithWeakBounds";
     @Option(name = "--intVarLazyLitWithWeakBounds",
             aliases = {"--sat.intVarLazyLitWithWeakBounds", "-ivllwwb"},
             usage = "when true, the IntVarLazyLit propagator uses weak bounds: when a bound is modified, the channeling is done only with the previous value. " +
@@ -163,6 +185,7 @@ public class SettingsBuilder {
                     "It provides stronger reasons, which are slower to compute but more informative (default is false).")
     private boolean intVarLazyLitWithWeakBounds = false;
 
+    public static final String IBEX_CONTRACTION_RATIO = "ibexContractionRatio";
     @Option(name = "--ibexContractionRatio",
             aliases = {"--ibex.contractionRatio", "-icr"},
             usage = "the ratio that real domains must be contracted by ibex to compute the constraint. " +
@@ -171,6 +194,7 @@ public class SettingsBuilder {
                     "A too small ratio can degrade the ibex performance (default 0.01.")
     private double ibexContractionRatio = Ibex.RATIO;
 
+    public static final String IBEX_RESTORE_ROUNDING = "ibexRestoreRounding";
     @Option(name = "--ibexRestoreRounding",
             aliases = {"--ibex.restoreRounding", "-irr"},
             usage = "when true, defines that the rounding mode of the current thread is restored after each call to ibex. " +
@@ -178,12 +202,14 @@ public class SettingsBuilder {
                     "However, it can degrade the performance of ibex. (default is true.")
     private boolean ibexRestoreRounding = Ibex.PRESERVE_ROUNDING;
 
+    public static final String LCG = "lcg";
     @Option(name = "-lcg",
             aliases = {"--model.lcg", "--lazyClauseGeneration"},
             usage = "when true, set the solver to be in Lazy Clause Generation mode (in opposition to the full CP mode). " +
                     "This is a shortcut for setting enableSAT to true and relying on the SAT solver to handle clauses management (default is false).")
     private boolean lcg = false;
 
+    public static final String ENVIRONMENT_SUPPLIER = "environmentSupplier";
     private Supplier<IEnvironment> environmentSupplier = () -> new EnvironmentBuilder().fromFlat().build();
 
     @SuppressWarnings("FieldMayBeFinal") // mutable on purpose, to allow setting values through command line arguments
@@ -267,78 +293,78 @@ public class SettingsBuilder {
             String key = k.toString();
             String value = v.toString();
             switch (key) {
-                case "modelChecker":
-                case "environmentSupplier":
-                case "defaultSearch":
+                case MODEL_CHECKER:
+                case ENVIRONMENT_SUPPLIER:
+                case DEFAULT_SEARCH:
                     // not supported
                     break;
-                case "cloneVariableArrayInPropagator":
+                case CLONE_VARIABLE_ARRAY_IN_PROPAGATOR:
                     this.setCloneVariableArrayInPropagator(Boolean.parseBoolean(value));
                     break;
-                case "enableViews":
+                case ENABLE_VIEWS:
                     this.setEnableViews(Boolean.parseBoolean(value));
                     break;
-                case "maxDomSizeForEnumerated":
+                case MAX_DOM_SIZE_FOR_ENUMERATED:
                     this.setMaxDomSizeForEnumerated(Integer.parseInt(value));
                     break;
-                case "minCardForSumDecomposition":
+                case MIN_CARD_FOR_SUM_DECOMPOSITION:
                     this.setMinCardinalityForSumDecomposition(Integer.parseInt(value));
                     break;
-                case "enableTableSubstitution":
+                case ENABLE_TABLE_SUBSTITUTION:
                     this.setEnableTableSubstitution(Boolean.parseBoolean(value));
                     break;
-                case "maxTupleSizeForSubstitution":
+                case MAX_TUPLE_SIZE_FOR_SUBSTITUTION:
                     this.setMaxTupleSizeForSubstitution(Integer.parseInt(value));
                     break;
-                case "maxSizeInMBToUseCompactTable":
+                case MAX_SIZE_IN_MB_TO_USE_COMPACT_TABLE:
                     this.setMaxSizeInMBToUseCompactTable(Integer.parseInt(value));
                     break;
-                case "sortPropagatorActivationWRTPriority":
+                case SORT_PROPAGATOR_ACTIVATION_WRTPRIORITY:
                     this.setSortPropagatorActivationWRTPriority(Boolean.parseBoolean(value));
                     break;
-                case "warnUser":
+                case WARN_USER:
                     this.setWarnUser(Boolean.parseBoolean(value));
                     break;
-                case "enableDecompositionOfBooleanSum":
+                case ENABLE_DECOMPOSITION_OF_BOOLEAN_SUM:
                     this.setEnableDecompositionOfBooleanSum(Boolean.parseBoolean(value));
                     break;
-                case "thresholdForIncrementalityOnBoolSum":
+                case THRESHOLD_FOR_INCREMENTALITY_ON_BOOL_SUM:
                     this.setThresholdForIncrementalityOnBoolSum(Integer.parseInt(value));
                     break;
-                case "enableSAT":
+                case ENABLE_SAT:
                     this.setEnableSAT(Boolean.parseBoolean(value));
                     break;
-                case "swapOnPassivate":
+                case SWAP_ON_PASSIVATE:
                     this.setSwapOnPassivate(Boolean.parseBoolean(value));
                     break;
-                case "checkDeclaredConstraints":
+                case CHECK_DECLARED_CONSTRAINTS:
                     this.setCheckDeclaredConstraints(Boolean.parseBoolean(value));
                     break;
-                case "checkDeclaredViews":
+                case CHECK_DECLARED_VIEWS:
                     this.setCheckDeclaredViews(Boolean.parseBoolean(value));
                     break;
-                case "checkDeclaredMonitors":
+                case CHECK_DECLARED_MONITORS:
                     this.setCheckDeclaredMonitors(Boolean.parseBoolean(value));
                     break;
-                case "printAllUndeclaredConstraints":
+                case PRINT_ALL_UNDECLARED_CONSTRAINTS:
                     this.setPrintAllUndeclaredConstraints(Boolean.parseBoolean(value));
                     break;
-                case "hybridEngine":
+                case HYBRID_ENGINE:
                     this.setHybridizationOfPropagationEngine(Byte.parseByte(value));
                     break;
-                case "nbMaxLearntClauses":
+                case NB_MAX_LEARNT_CLAUSES:
                     this.setNbMaxLearntClauses(Integer.parseInt(value));
                     break;
-                case "intVarLazyLitWithWeakBounds":
+                case INT_VAR_LAZY_LIT_WITH_WEAK_BOUNDS:
                     this.setIntVarLazyLitWithWeakBounds(Boolean.parseBoolean(value));
                     break;
-                case "ibexContractionRatio":
+                case IBEX_CONTRACTION_RATIO:
                     this.ibexContractionRatio = Double.parseDouble(value);
                     break;
-                case "ibexRestoreRounding":
+                case IBEX_RESTORE_ROUNDING:
                     this.ibexRestoreRounding = Boolean.parseBoolean(value);
                     break;
-                case "lcg":
+                case LCG:
                     this.setLCG(Boolean.parseBoolean(value));
                     break;
                 default:
