@@ -15,6 +15,7 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.impl.IntVarLazyLit;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -80,7 +81,7 @@ public class Settings {
 
     private final boolean ibexRestoreRounding;
 
-    private final HashMap<String, String> additionalSettings;
+    private final Map<String, String> additionalSettings;
 
     private final boolean lcg;
 

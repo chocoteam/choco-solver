@@ -22,6 +22,7 @@ import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.MapOptionHandler;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Consumer;
@@ -218,7 +219,7 @@ public class SettingsBuilder {
             usage = "additional settings that can be set through command line arguments, with the syntax -Dkey=value. " +
                     "These settings are stored in the additionalSettings map and can be retrieved with the get method. " +
                     "This allows to set custom settings that are not defined in this class, but that can be used in the code with the get method.")
-    private HashMap<String, String> additionalSettings = new HashMap<>();
+    private Map<String, String> additionalSettings = new HashMap<>();
 
     /**
      * Create a new instance of `Settings` which can then be adapted to requirements.
@@ -957,7 +958,7 @@ public class SettingsBuilder {
     /**
      * @return a map of additional settings that can be used to store any custom setting not already defined in this class.
      */
-    public HashMap<String, String> getAdditionalSettings() {
+    public Map<String, String> getAdditionalSettings() {
         return this.additionalSettings;
     }
 }
