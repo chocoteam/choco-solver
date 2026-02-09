@@ -107,10 +107,10 @@ public class AbstractVariableTest {
         v1.addMonitor(m1);
         v1.addMonitor(m2);
         v1.notifyMonitors(IntEventType.VOID);
-        if(!check) {
+        if (!check) {
             // Redundancy checker disabled, we expect all monitors to be updated.
             Assert.assertEquals(score.get(), 5);
-        }else {
+        } else {
             // Redundancy checker enabled, we expect only 1 m1 and the m2.
             Assert.assertEquals(score.get(), 4);
         }
