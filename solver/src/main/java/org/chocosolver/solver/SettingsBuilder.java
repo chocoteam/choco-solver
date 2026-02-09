@@ -452,7 +452,6 @@ public class SettingsBuilder {
         return enableViews;
     }
 
-
     /**
      * Set to 'true' to allow the creation of views in the {@link Model}.
      * Creates new variables with channeling constraints otherwise.
@@ -491,7 +490,6 @@ public class SettingsBuilder {
         return minCardForSumDecomposition;
     }
 
-
     /**
      * Define the default minimum number of cardinality threshold to a sum/scalar constraint to be
      * decomposed into intermediate sub-sums.
@@ -504,14 +502,12 @@ public class SettingsBuilder {
         return this;
     }
 
-
     /**
      * @return <tt>true</tt> if some intension constraints can be replaced by extension constraints
      */
     public boolean enableTableSubstitution() {
         return enableTableSubstitution;
     }
-
 
     /**
      * Define whether some intension constraints are replaced by extension constraints
@@ -523,7 +519,6 @@ public class SettingsBuilder {
         this.enableTableSubstitution = enableTableSubstitution;
         return this;
     }
-
 
     /**
      * @return maximum domain size threshold to replace intension constraints by extension constraints
@@ -569,7 +564,6 @@ public class SettingsBuilder {
         return sortPropagatorActivationWRTPriority;
     }
 
-
     /**
      * Set whether propagators are sorted wrt their priority in {@link org.chocosolver.solver.propagation.PropagationEngine} when
      * dealing with propagator activation.
@@ -609,7 +603,6 @@ public class SettingsBuilder {
         return warnUser;
     }
 
-
     /**
      * To be informed of warnings detected during modeling/solving
      *
@@ -621,7 +614,6 @@ public class SettingsBuilder {
         return this;
     }
 
-
     /**
      * @return {@code true} if boolean sum should be decomposed into an equality constraint and an arithmetic constraint,
      * {@code false}if a single constraint should be used instead.
@@ -629,7 +621,6 @@ public class SettingsBuilder {
     public boolean enableDecompositionOfBooleanSum() {
         return enableDecompositionOfBooleanSum;
     }
-
 
     /**
      * Define if boolean sums should be decomposed into an equality constraint + arithmetic constraint
@@ -642,14 +633,12 @@ public class SettingsBuilder {
         return this;
     }
 
-
     /**
      * @return the threshold on the number of variables declared in a boolean sum constraint to choose incremental sum (default is 10).
      */
     public int thresholdForIncrementalityOnBoolSum() {
         return this.thresholdForIncrementalityOnBoolSum;
     }
-
 
     /**
      * Define the threshold on the number of variables declared in a boolean sum constraint to choose incremental sum (default is 10).
@@ -670,7 +659,6 @@ public class SettingsBuilder {
         return enableSAT;
     }
 
-
     /**
      * Indicate if clauses are managed by a unique SAT solver.
      *
@@ -689,7 +677,6 @@ public class SettingsBuilder {
     public boolean swapOnPassivate() {
         return swapOnPassivate;
     }
-
 
     /**
      * Define if passivation of propagator swap it in variables' list
@@ -711,7 +698,6 @@ public class SettingsBuilder {
         return checkDeclaredConstraints;
     }
 
-
     /**
      * Indicate if the declared constraints are either posted or reified.
      *
@@ -731,7 +717,6 @@ public class SettingsBuilder {
         return printAllUndeclaredConstraints;
     }
 
-
     /**
      * Indicate if all undeclared constraints are listed on console when {@link #checkDeclaredConstraints()} is on.
      *
@@ -750,7 +735,6 @@ public class SettingsBuilder {
     public boolean checkDeclaredViews() {
         return checkDeclaredViews;
     }
-
 
     /**
      * Check if a view already semantically exists before creating it.
@@ -781,7 +765,6 @@ public class SettingsBuilder {
         return hybridEngine;
     }
 
-
     /**
      * Define behavior of the propagation engine.
      *
@@ -795,7 +778,6 @@ public class SettingsBuilder {
         this.hybridEngine = hybrid;
         return this;
     }
-
 
     /**
      * Set the solver to be in Lazy Clause Generation mode (in opposition to the full CP mode).
@@ -860,7 +842,6 @@ public class SettingsBuilder {
         this.intVarLazyLitWithWeakBounds = intVarLazyLitWithWeakBounds;
         return this;
     }
-
 
     /**
      * @return the ratio that a domains must be contracted by ibex to compute the constraint.
