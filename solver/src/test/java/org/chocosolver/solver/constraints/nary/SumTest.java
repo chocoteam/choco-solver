@@ -10,7 +10,7 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ternary.PropXplusYeqZ;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -656,7 +656,7 @@ public class SumTest {
     public void testBigCoeffs1() throws ContradictionException {
         for (int i = 0; i < 70; i++) {
             int rhs = 0;
-            Model cp = new Model(Settings.init().setMinCardinalityForSumDecomposition(1001));
+            Model cp = new Model(SettingsBuilder.init().setMinCardinalityForSumDecomposition(1001));
             IntVar[] xs = cp.intVarArray(1000, IntVar.MIN_INT_BOUND, IntVar.MAX_INT_BOUND);
 
             cp.post(cp.sum(xs, ">=", rhs));
@@ -669,7 +669,7 @@ public class SumTest {
     public void testBigCoeffs2() throws ContradictionException {
         for (int i = 0; i < 70; i++) {
             int rhs = 0;
-            Model cp = new Model(Settings.init().setMinCardinalityForSumDecomposition(1001));
+            Model cp = new Model(SettingsBuilder.init().setMinCardinalityForSumDecomposition(1001));
             IntVar[] xs = cp.intVarArray(1000, IntVar.MIN_INT_BOUND, IntVar.MAX_INT_BOUND);
 
             cp.post(cp.sum(xs, "=", rhs));
@@ -682,7 +682,7 @@ public class SumTest {
     public void testBigCoeffs3() throws ContradictionException {
         for (int i = 0; i < 70; i++) {
             int rhs = 0;
-            Model cp = new Model(Settings.init().setMinCardinalityForSumDecomposition(1001));
+            Model cp = new Model(SettingsBuilder.init().setMinCardinalityForSumDecomposition(1001));
             IntVar[] xs = cp.intVarArray(1000, IntVar.MIN_INT_BOUND, IntVar.MAX_INT_BOUND);
 
             cp.post(cp.sum(xs, "!=", rhs));

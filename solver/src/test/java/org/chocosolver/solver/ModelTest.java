@@ -28,6 +28,7 @@ import org.testng.annotations.Test;
 import java.text.MessageFormat;
 import java.util.BitSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Random;
 import java.util.stream.Stream;
 
@@ -534,7 +535,7 @@ public class ModelTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testSwapOnPassivate() {
-        Model model = new Model(Settings.init().setSwapOnPassivate(true));
+        Model model = new Model(SettingsBuilder.init().setSwapOnPassivate(true));
         int n = 11;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
@@ -700,22 +701,6 @@ public class ModelTest {
         model.unpost(thenCst);
     }
 
-    @Test(groups = "1s", expectedExceptions = SolverException.class)
-    public void testMaxPriority1() {
-        Model model = new Model(Settings.init().setMaxPropagatorPriority(4));
-        IntVar[] vars = model.intVarArray("X", 3, 0, 2);
-        model.allDifferent(vars).post();
-        model.getSolver().findAllSolutions();
-    }
-
-    @Test(groups = "1s")
-    public void testMaxPriority2() {
-        Model model = new Model(Settings.init().setMaxPropagatorPriority(9));
-        IntVar[] vars = model.intVarArray("X", 3, 0, 2);
-        model.allDifferent(vars).post();
-        model.getSolver().findAllSolutions();
-    }
-
     @Test(groups = "1s", timeOut = 60000)
     public void testSampling1() {
         Model m = ProblemMaker.makeNQueenWithOneAlldifferent(9);
@@ -791,4 +776,24 @@ public class ModelTest {
         m.getSolver().solve();
     }
 
+    @Test(groups = "1s")
+    public void testSettingsBuilderPriority1() throws ContradictionException {
+        SettingsBuilder sb = SettingsBuilder.init();
+        Assert.assertEquals(sb.getNbMaxLearntClauses(), 100000);
+        sb.setNbMaxLearntClauses(10);
+        Assert.assertEquals(sb.getNbMaxLearntClauses(), 10);
+        Properties prop = new Properties();
+        prop.setProperty("nbMaxLearntClauses", "20");
+        prop.setProperty("unknown", "42");
+        sb.fromProperties(prop);
+        Assert.assertEquals(sb.getNbMaxLearntClauses(), 20);
+        sb.fromArgs(new String[]{"--nbMaxLearntClauses", "30", "-P", "not_known=-42"});
+        Assert.assertEquals(sb.getNbMaxLearntClauses(), 30);
+        Model m = new Model(sb.build());
+        Assert.assertEquals(m.getSettings().getNbMaxLearntClauses(), 30);
+        Assert.assertTrue(m.getSettings().get("unknown").isPresent());
+        Assert.assertEquals(m.getSettings().get("unknown").get(), "42");
+        Assert.assertTrue(m.getSettings().get("not_known").isPresent());
+        Assert.assertEquals(m.getSettings().get("not_known").get(), "-42");
+    }
 }

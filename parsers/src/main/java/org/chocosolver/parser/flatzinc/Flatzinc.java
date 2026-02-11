@@ -14,10 +14,7 @@ import org.antlr.v4.runtime.atn.PredictionMode;
 import org.chocosolver.parser.Level;
 import org.chocosolver.parser.RegParser;
 import org.chocosolver.parser.flatzinc.ast.Datas;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.*;
 import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.SearchParams;
@@ -88,6 +85,11 @@ public class Flatzinc extends RegParser {
 
     public Flatzinc() {
         this(false, false, 1);
+        this.setMinCardinalityForSumDecomposition(256)
+                .setNbMaxLearntClauses(100_000)
+                //.setIntVarLazyLitWithWeakBounds(false)
+                .set("adhocReification", "true")
+                .setWarnUser(false);
     }
 
     public Flatzinc(boolean all, boolean free, int nb_cores) {
@@ -95,18 +97,6 @@ public class Flatzinc extends RegParser {
         this.all = all;
         this.free = free;
         this.nb_cores = nb_cores;
-    }
-
-    @Override
-    public void createSettings() {
-        defaultSettings = Settings.prod()
-                .setMinCardinalityForSumDecomposition(256)
-                .setLCG(lcg)
-                .setNbMaxLearntClauses(100_000)
-                //.setIntVarLazyLitWithWeakBounds(false)
-                .set("adhocReification", true)
-                .setWarnUser(false)
-        ;
     }
 
     @Override
@@ -128,13 +118,13 @@ public class Flatzinc extends RegParser {
     @Override
     public void createSolver() {
         if (level.isLoggable(Level.COMPET)) {
-            System.out.printf("%% Choco-solver%s (5.0.0, 260202_14:43)\n", lcg? " with LCG" : "");
+            System.out.printf("%% Choco-solver%s (5.0.0, 260202_14:43)\n", this.isLCG()? " with LCG" : "");
         }
         super.createSolver();
         datas = new Datas[nb_cores];
         String iname = instance == null ? "" : Paths.get(instance).getFileName().toString();
         for (int i = 0; i < nb_cores; i++) {
-            Model threadModel = new Model(iname + "_" + (i + 1), defaultSettings);
+            Model threadModel = new Model(iname + "_" + (i + 1), this);
             threadModel.getSolver().logWithANSI(ansi);
             portfolio.addModel(threadModel);
             datas[i] = new Datas(threadModel, level, oss);

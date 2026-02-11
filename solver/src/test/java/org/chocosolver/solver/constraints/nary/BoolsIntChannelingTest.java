@@ -9,8 +9,8 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -25,7 +25,7 @@ public class BoolsIntChannelingTest {
 
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
-    public void testNominal(boolean bounded, Settings viewPolicy) {
+    public void testNominal(boolean bounded, SettingsBuilder viewPolicy) {
         Model model = new Model(viewPolicy);
         BoolVar[] boolVars = model.boolVarArray(5);
         IntVar intVar = makeVariable(model, 0, 4, bounded);
@@ -35,7 +35,7 @@ public class BoolsIntChannelingTest {
     }
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
-    public void testTwoTrue(boolean bounded, Settings viewPolicy) {
+    public void testTwoTrue(boolean bounded, SettingsBuilder viewPolicy) {
         Model model = new Model(viewPolicy);
         BoolVar[] boolVars = new BoolVar[] {
                 model.boolVar(true),
@@ -50,7 +50,7 @@ public class BoolsIntChannelingTest {
     }
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
-    public void testAllFalse(boolean bounded, Settings viewPolicy) {
+    public void testAllFalse(boolean bounded, SettingsBuilder viewPolicy) {
         Model model = new Model(viewPolicy);
         BoolVar[] boolVars = new BoolVar[5];
         for (int i = 0; i < boolVars.length; i++) {
@@ -63,7 +63,7 @@ public class BoolsIntChannelingTest {
     }
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
-    public void testInstantiatedIndex(boolean bounded, Settings viewPolicy) {
+    public void testInstantiatedIndex(boolean bounded, SettingsBuilder viewPolicy) {
         Model model = new Model(viewPolicy);
         BoolVar[] boolVars = model.boolVarArray(5);
         IntVar variable = makeVariable(model, 2, 2, bounded);
@@ -74,7 +74,7 @@ public class BoolsIntChannelingTest {
     }
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
-    public void testOutOfBoundsOK(boolean bounded, Settings viewPolicy) {
+    public void testOutOfBoundsOK(boolean bounded, SettingsBuilder viewPolicy) {
         Model model = new Model(viewPolicy);
         BoolVar[] boolVars = model.boolVarArray(3);
         IntVar intVar = makeVariable(model, 0, 3, bounded);
@@ -83,7 +83,7 @@ public class BoolsIntChannelingTest {
     }
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
-    public void testOutOfBoundsKO(boolean bounded, Settings viewPolicy) {
+    public void testOutOfBoundsKO(boolean bounded, SettingsBuilder viewPolicy) {
         Model model = new Model(viewPolicy);
         BoolVar[] boolVars = new BoolVar[] {
                 model.boolVar(false),
@@ -97,7 +97,7 @@ public class BoolsIntChannelingTest {
     }
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
-    public void testDifferentDomains(boolean bounded, Settings viewPolicy) {
+    public void testDifferentDomains(boolean bounded, SettingsBuilder viewPolicy) {
         Model model = new Model(viewPolicy);
         BoolVar[] boolVars = model.boolVarArray(5);
         IntVar var = makeVariable(model, 5, 10, bounded);
@@ -108,7 +108,7 @@ public class BoolsIntChannelingTest {
     }
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
-    public void testEmptyArray(boolean bounded, Settings viewPolicy) {
+    public void testEmptyArray(boolean bounded, SettingsBuilder viewPolicy) {
         Model model = new Model(viewPolicy);
         BoolVar[] boolVars = model.boolVarArray(0);
         IntVar intVar = makeVariable(model, 0, 100, bounded);

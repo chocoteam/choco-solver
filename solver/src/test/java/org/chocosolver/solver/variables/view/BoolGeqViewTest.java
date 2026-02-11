@@ -11,7 +11,7 @@ package org.chocosolver.solver.variables.view;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
@@ -455,7 +455,7 @@ public class BoolGeqViewTest {
     @Test(groups = "1s")
     public void testToTable() throws ContradictionException {
         for (int i = 0; i < 100; i++) {
-            Model mod = new Model(Settings.init().setEnableViews(false));
+            Model mod = new Model(SettingsBuilder.init().setEnableViews(false));
             IntVar res = mod.intVar("r", 0, 1004);
             IntVar[] xs = mod.intVarArray(5, new int[]{2, 3, 4, 5});
             BoolVar[] vs = new BoolVar[5];

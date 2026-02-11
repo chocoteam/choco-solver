@@ -15,6 +15,7 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.Variable;
@@ -116,7 +117,7 @@ public class PropagationEngine {
      */
     public PropagationEngine(Model model, MiniSat sat) {
         this.model = model;
-        int nbQueues = model.getSettings().getMaxPropagatorPriority() + 1;
+        int nbQueues = PropagatorPriority.VERY_SLOW.getValue() + 1;
         //noinspection unchecked
         this.pro_queue = new CircularQueue[nbQueues];
         for (int i = 0; i < nbQueues; i++) {
@@ -128,7 +129,7 @@ public class PropagationEngine {
         this.propagators = new ArrayList<>();
         //0b00: cstr-ori
         //0b10: var-ori
-        this.hybrid = model.getSettings().enableHybridizationOfPropagationEngine();
+        this.hybrid = model.getSettings().getPropagationEnginType();
         this.sat = sat;
     }
 
@@ -185,16 +186,16 @@ public class PropagationEngine {
         Propagator<?> propagator = propagators.get(i);
         if (propagator.getPriority().getValue() >= pro_queue.length) {
             throw new SolverException(
-                    propagator+
-                    "\nThis propagator declares a priority (" +
-                    propagator.getPriority() + ") whose value (" + propagator.getPriority().getValue() +
-                    ") is greater than the maximum allowed priority (" +
-                    model.getSettings().getMaxPropagatorPriority() +
-                    ").\n" +
-                    "Either increase the maximum allowed priority (`Model model = new Model(Settings.init().setMaxPropagatorPriority(" +
-                    (propagator.getPriority().getValue() + 1) +
-                    "));`)  " +
-                    "or decrease the propagator priority.");
+                    propagator +
+                            "\nThis propagator declares a priority (" +
+                            propagator.getPriority() + ") whose value (" + propagator.getPriority().getValue() +
+                            ") is greater than the maximum allowed priority (" +
+                            PropagatorPriority.VERY_SLOW.getValue() +
+                            ").\n" +
+                            "Either increase the maximum allowed priority (`Model model = new Model(SettingsBuilder.init().setMaxPropagatorPriority(" +
+                            (propagator.getPriority().getValue() + 1) +
+                            "));`)  " +
+                            "or decrease the propagator priority.");
         }
         propagator.setPosition(i);
         return propagator;
@@ -294,7 +295,7 @@ public class PropagationEngine {
             // first, fully propagate the propagator
             model.getSolver().getMeasures().incPropagationCount();
             propagator.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
-            if (activatedByReification){
+            if (activatedByReification) {
                 onPropagatorExecution(propagator);
             }
             // then, if required (LCG), propagate the SAT solver

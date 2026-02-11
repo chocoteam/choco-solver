@@ -54,6 +54,7 @@ public class XCSP extends RegParser {
 
     public XCSP() {
         super("ChocoXCSP");
+        this.setWarnUser(false);
     }
 
     @Override
@@ -70,14 +71,14 @@ public class XCSP extends RegParser {
 
     @Override
     public void createSolver() {
-        super.createSolver();
         if (level.isLoggable(Level.COMPET)) {
-            System.out.printf("c Choco-solver%s (5.0.0, 260202_14:43)\n", lcg? " with LCG" : "");
+            System.out.printf("c Choco-solver%s (5.0.0, 260202_14:43)\n", this.isLCG() ? " with LCG" : "");
         }
+        super.createSolver();
         String iname = Paths.get(instance).getFileName().toString();
         parsers = new XCSPParser[nb_cores];
         for (int i = 0; i < nb_cores; i++) {
-            Model threadModel = new Model(iname + "_" + (i + 1), defaultSettings);
+            Model threadModel = new Model(iname + "_" + (i + 1), this);
             threadModel.getSolver().logWithANSI(ansi);
             portfolio.addModel(threadModel);
             parsers[i] = new XCSPParser();
@@ -141,8 +142,8 @@ public class XCSP extends RegParser {
         bb.setIntVarStrategy(Search::roundRobinSearch)
                 .setRestartPolicy(s -> new Restarter(new InnerOuterCutoff(50, 1.01, 1.01),
                         c -> s.getFailCount() >= c, 50_000, true))
-                .setNogoodOnRestart(!lcg)
-                .setRestartOnSolution(lcg)
+                .setNogoodOnRestart(!this.isLCG())
+                .setRestartOnSolution(this.isLCG())
                 .setRefinedPartialAssignmentGeneration(false)
                 .setExcludeObjective(true)
                 .setExcludeViews(false);

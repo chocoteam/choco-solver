@@ -22,7 +22,6 @@ public class ChocoFZN {
     public static void main(String[] args) throws Exception {
         Flatzinc fzn = new Flatzinc();
         if(fzn.setUp(args)) {
-            fzn.createSettings();
             fzn.createSolver();
             fzn.buildModel();
             fzn.configureSearch();

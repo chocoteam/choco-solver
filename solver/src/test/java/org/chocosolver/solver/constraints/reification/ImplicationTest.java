@@ -10,7 +10,7 @@
 package org.chocosolver.solver.constraints.reification;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.strategy.Search;
@@ -59,7 +59,7 @@ public class ImplicationTest {
 
 
     private Model implied(boolean dec, int seed) {
-        Model model = new Model(Settings.init().setWarnUser(false));
+        Model model = new Model(SettingsBuilder.init().setWarnUser(false));
         IntVar x = model.intVar("X", 0, 4);
         IntVar y = model.intVar("Y", 0, 4);
         BoolVar r = model.boolVar("r");

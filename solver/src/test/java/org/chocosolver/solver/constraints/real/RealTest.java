@@ -10,6 +10,7 @@
 package org.chocosolver.solver.constraints.real;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -1248,8 +1249,7 @@ public class RealTest {
         Assert.assertEquals(x1.getUB(), 0.5, precision);
 
         // Default ibex contraction ratio (0.001) computes constraint
-        Model model2 = new Model();
-        model2.getSettings().setIbexContractionRatio(0.001);
+        Model model2 = new Model(SettingsBuilder.init().setIbexContractionRatio(0.001));
         RealVar x2 = model2.realVar(0.5);
         RealVar y2 = model2.realVar(0.0, 100.0, precision);
         y2.ge(x2).ibex(precision).post();

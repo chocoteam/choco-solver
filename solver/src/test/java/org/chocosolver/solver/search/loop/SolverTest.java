@@ -10,7 +10,7 @@
 package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -332,7 +332,7 @@ public class SolverTest {
 
     @Test(groups = "1s")
     public void testMessage() {
-        Model choco = new Model(Settings.init().setWarnUser(true));
+        Model choco = new Model(SettingsBuilder.init().setWarnUser(true));
         Constraint expr = choco.arithm(choco.intVar(1, 2), "<", 2);
         expr.getOpposite().post();
         ByteArrayOutputStream errContent = new ByteArrayOutputStream();

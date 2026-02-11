@@ -12,8 +12,8 @@ package org.chocosolver.parser.flatzinc.parser;
 import org.chocosolver.parser.Level;
 import org.chocosolver.parser.flatzinc.Flatzinc4Parser;
 import org.chocosolver.parser.flatzinc.ast.Datas;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -36,7 +36,7 @@ public class T_var_decl extends GrammarTest {
 
     @BeforeMethod(alwaysRun = true)
     public void before() {
-        mSolver = new Model(Settings.init().setEnableViews(true));
+        mSolver = new Model(SettingsBuilder.init().setEnableViews(true));
         datas = new Datas();
     }
 

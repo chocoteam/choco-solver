@@ -200,7 +200,7 @@ public class CumulativeTest {
 
     @Test(groups = "1s", dataProvider = "trueOrFalse", dataProviderClass = Providers.class)
     public void testGCCAT(boolean lcg) {
-        Model model = new Model(Settings.dev().setLCG(lcg));
+        Model model = new Model(SettingsBuilder.dev().setLCG(lcg));
         int[][] s = new int[][]{{1, 5}, {2, 7}, {3, 6}, {1, 8}};
         int[][] d = new int[][]{{4, 4}, {6, 6}, {3, 6}, {2, 3}};
         int[][] e = new int[][]{{1, 9}, {1, 9}, {1, 9}, {1, 9}};

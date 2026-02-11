@@ -10,7 +10,7 @@
 package org.chocosolver.solver.constraints;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
@@ -363,7 +363,7 @@ public class ConstraintTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testAmIMeYet() {
-        Model model = new Model("model", Settings.init()
+        Model model = new Model("model", SettingsBuilder.init()
                 .setCheckDeclaredConstraints(true)
                 .setPrintAllUndeclaredConstraints(true));
 
@@ -382,7 +382,7 @@ public class ConstraintTest {
 
     @Test(groups = "10s", timeOut = 60000)
     public void testJitee2() {
-        Model model = new Model("model", Settings.init()
+        Model model = new Model("model", SettingsBuilder.init()
                 .setCheckDeclaredConstraints(true)
                 .setPrintAllUndeclaredConstraints(true));
         IntVar a = model.intVar("a", 0, 1000, false);
@@ -547,7 +547,7 @@ public class ConstraintTest {
     public void testNoWarning1() {
         ByteArrayOutputStream warnContent = new ByteArrayOutputStream();
 
-        Model model = new Model(Settings.dev());
+        Model model = new Model(SettingsBuilder.dev());
 
         IntVar start = model.intVar("S", 1, 10, true);
         IntVar end = model.intVar("E", 5, 14, true);
@@ -571,7 +571,7 @@ public class ConstraintTest {
     public void testNoWarning2() {
         ByteArrayOutputStream warnContent = new ByteArrayOutputStream();
 
-        Model model = new Model(Settings.dev());
+        Model model = new Model(SettingsBuilder.dev());
 
         IntVar start = model.intVar("S", 1, 10, true);
         IntVar bound = model.intVar("B", 10, 15, true);

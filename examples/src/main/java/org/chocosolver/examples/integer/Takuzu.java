@@ -10,8 +10,8 @@
 package org.chocosolver.examples.integer;
 
 import org.chocosolver.examples.AbstractProblem;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.variables.BoolVar;
@@ -48,7 +48,7 @@ public class Takuzu extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        model = new Model(Settings.init().setEnableTableSubstitution(false));
+        model = new Model(SettingsBuilder.init().setEnableTableSubstitution(false));
         int n = data.grid.length;
         int m = data.grid[0].length;
         cells = new BoolVar[n][m];
