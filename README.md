@@ -85,6 +85,7 @@ Supporting Choco with financial aid favors long-term support and development.
 Our expenses are varied: fees (GitHub organization, Domain name, etc), funding PhD students or internships, conferences, hardware renewal, ...
 
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2GHMNLTP4MCL8)
+[![libs.tech recommends](https://libs.tech/project/2708082/badge.svg)](https://libs.tech/project/2708082/choco-solver)
 
 
 <a name="dow"></a>
