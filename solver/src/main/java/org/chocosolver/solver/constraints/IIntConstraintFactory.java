@@ -569,7 +569,11 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             return arithm(result, "=", base);
         }
         if (ref().getSolver().isLCG()) {
-            throw new SolverException("Power constraint is not supported in LCG mode");
+            if (TuplesFactory.canBeTupled(result, base)) {
+                return table(new IntVar[]{result, base}, TuplesFactory.square(result, base));
+            } else {
+                throw new SolverException("Power constraint is not supported in LCG mode");
+            }
         }
         if ((exponent % 2) == 0) {
             return new Constraint(ConstraintsName.POWER, new PropPowEven(result, base, exponent));
