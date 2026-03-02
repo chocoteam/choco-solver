@@ -410,8 +410,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 
         if (Z.isInstantiated()) {
             return mod(X, y, Z.getValue());
-        } else if (TuplesFactory.canBeTupled(X, Z)) {
-            return table(X, Z, TuplesFactory.modulo(X, y, Z));
+        } else if (TuplesFactory.canBeTupledWithResult(Z, X)) {
+            return table(Z, X, TuplesFactory.modulo(Z, X, y));
         } else {
             if (ref().getSolver().isLCG()) {
                 int xl = abs(X.getLB());
@@ -569,7 +569,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             return arithm(result, "=", base);
         }
         if (ref().getSolver().isLCG()) {
-            if (TuplesFactory.canBeTupled(result, base)) {
+            if (TuplesFactory.canBeTupledWithResult(result, base)) {
                 return table(new IntVar[]{result, base}, TuplesFactory.square(result, base));
             } else {
                 throw new SolverException("Power constraint is not supported in LCG mode");
@@ -788,8 +788,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 
         if (Y.isInstantiated()) {
             return mod(X, Y.getValue(), Z);
-        } else if (TuplesFactory.canBeTupled(X, Y, Z)) {
-            return table(new IntVar[]{X, Y, Z}, TuplesFactory.modulo(X, Y, Z));
+        } else if (TuplesFactory.canBeTupledWithResult(Z, X, Y)) {
+            return table(new IntVar[]{Z, X, Y}, TuplesFactory.modulo(Z, X, Y));
         } else {
             if (ref().getSolver().isLCG()) {
                 int xl = abs(X.getLB());
@@ -821,8 +821,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             return times(X, Y.getValue(), Z);
         } else if (X.isInstantiated()) {
             return times(Y, X.getValue(), Z);
-        } else if (TuplesFactory.canBeTupled(X, Y, Z)) {
-            return table(new IntVar[]{X, Y, Z}, TuplesFactory.times(X, Y, Z));
+        } else if (TuplesFactory.canBeTupledWithResult(Z, X, Y)) {
+            return table(new IntVar[]{Z, X, Y}, TuplesFactory.times(Z, X, Y));
         } else {
             long a = X.getLB(), b = X.getUB(), c = Y.getLB(), d = Y.getUB();
             long min = Math.min(Math.min(a * c, a * d), Math.min(b * c, b * d));
