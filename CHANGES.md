@@ -9,13 +9,17 @@ NEXT MILESTONE
 
 ### Major features:
 
+#### Constraints & LCG
+- Add table reformulation for pow constraint when LCG is on
+
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:
 See [milestone 5.0.1](https://github.com/chocoteam/choco-solver/milestone/41)
 
 #### Contributors to this release:
-
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
+- [Jean-Guillaume Fages](https://github.com/jgFages) (@jgFages)
 
 **Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v5.0.0...v5.0.1
 
