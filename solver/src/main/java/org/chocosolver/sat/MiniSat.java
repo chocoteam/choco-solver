@@ -17,6 +17,7 @@ import gnu.trove.stack.array.TIntArrayStack;
 import org.chocosolver.solver.variables.impl.LitVar;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
 
@@ -41,6 +42,48 @@ import java.util.Comparator;
  */
 @SuppressWarnings("FieldCanBeLocal")
 public class MiniSat implements SatFactory {
+
+    private final class MinimaList<E> {
+        E[] content = (E[]) new Object[16];
+        int size = 0;
+
+        public void ensureCapacity(int newSize) {
+            while (newSize >= this.content.length) {
+                this.content = Arrays.copyOf(this.content, (int) (this.content.length * 1.5));
+            }
+        }
+
+        public void add(E e) {
+            ensureCapacity(size + 1);
+            this.content[size++] = e;
+        }
+
+        public E get(int i) {
+            return this.content[i];
+        }
+
+        public void set(int i, E e){
+            this.content[i] = e;
+        }
+
+        public void remove(int i) {
+            final int newSize;
+            if ((newSize = size - 1) > i)
+                System.arraycopy(this.content, i + 1, this.content, i, newSize - i);
+            this.content[size = newSize] = null;
+        }
+
+        public int size(){
+            return this.size;
+        }
+
+        public void resize(int j) {
+            if (size >= 32 && size >= j * 2) {
+                this.content = Arrays.copyOf(this.content, Math.max(16, j+1));
+            }
+            this.size = j;
+        }
+    }
 
     static final int DEBUG = 0;
     // Value of an undefined variable
@@ -70,7 +113,7 @@ public class MiniSat implements SatFactory {
     final ArrayList<Clause> learnts = new ArrayList<>();
     // 'watches_[lit]' is a list of constraints watching 'lit'(will go
     // there if literal becomes true).
-    private final TIntObjectHashMap<ArrayList<Watcher>> watches_ = new TIntObjectHashMap<>();
+    private final TIntObjectHashMap<MinimaList<Watcher>> watches_ = new TIntObjectHashMap<>();
     // The current assignments.
     final TIntArrayList assignment_ = new TIntArrayList();
     // Assignment stack; stores all assignments made in the order they
@@ -489,14 +532,14 @@ public class MiniSat implements SatFactory {
     // Attach a clause to watcher lists.
     void attachClause(Clause cr) {
         assert cr.size() > 1;
-        ArrayList<Watcher> l0 = watches_.get(neg(cr._g(0)));
+        MinimaList<Watcher> l0 = watches_.get(neg(cr._g(0)));
         if (l0 == null) {
-            l0 = new ArrayList<>();
+            l0 = new MinimaList<>();
             watches_.put(neg(cr._g(0)), l0);
         }
-        ArrayList<Watcher> l1 = watches_.get(neg(cr._g(1)));
+        MinimaList<Watcher> l1 = watches_.get(neg(cr._g(1)));
         if (l1 == null) {
-            l1 = new ArrayList<>();
+            l1 = new MinimaList<>();
             watches_.put(neg(cr._g(1)), l1);
         }
         l0.add(new Watcher(cr, cr._g(1)));
@@ -506,7 +549,7 @@ public class MiniSat implements SatFactory {
     }
 
     void detachClause(Clause cr) {
-        ArrayList<Watcher> ws = watches_.get(neg(cr._g(0)));
+        MinimaList<Watcher> ws = watches_.get(neg(cr._g(0)));
         int i = ws.size() - 1;
         while (i >= 0 && ws.get(i).clause != cr) {
             i--;
@@ -537,7 +580,7 @@ public class MiniSat implements SatFactory {
 
     private void propagateLit(int p) {
         // 'p' is enqueued fact to propagate.
-        ArrayList<Watcher> ws = watches_.get(p);
+        MinimaList<Watcher> ws = watches_.get(p);
 
         int i = 0;
         int j = 0;
@@ -594,7 +637,8 @@ public class MiniSat implements SatFactory {
 //            for (int k = ws.size() - 1; k >= j; k--) {
 //                ws.remove(j);
 //            }
-            ws.subList(j, ws.size()).clear();
+//            ws.subList(j, ws.size()).clear();
+            ws.resize(j);
         }
     }
 
@@ -604,9 +648,9 @@ public class MiniSat implements SatFactory {
             if (valueLit(cr._g(k)) != lFalse) {
                 cr._s(1, cr._g(k));
                 cr._s(k, false_lit);
-                ArrayList<Watcher> lw = watches_.get(neg(cr._g(1)));
+                MinimaList<Watcher> lw = watches_.get(neg(cr._g(1)));
                 if (lw == null) {
-                    lw = new ArrayList<>();
+                    lw = new MinimaList<>();
                     watches_.put(neg(cr._g(1)), lw);
                 }
                 lw.add(w);
