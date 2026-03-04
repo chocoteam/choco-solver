@@ -10,6 +10,7 @@
 package org.chocosolver.solver.search.loop.learn;
 
 import gnu.trove.list.array.TIntArrayList;
+import org.chocosolver.sat.ArrayClause;
 import org.chocosolver.sat.Clause;
 import org.chocosolver.sat.MiniSat;
 import org.chocosolver.solver.Cause;
@@ -133,7 +134,7 @@ public class LazyClauseGeneration implements Learn {
             extractFromVariables();
             //extractFromDecisions();
 
-            mSat.confl = new Clause(learnt_clause, false /*?*/);
+            mSat.confl = new ArrayClause(learnt_clause, false /*?*/);
             int backtrack_level = analyze(mSolver.getContradictionException().set(Cause.Sat, null, null), ON_SOLUTION);
             onSolution = true; // to indicate that we are learning on a solution, for #forget()
             int upto = mSolver.getEnvironment().getWorldIndex() - backtrack_level;
