@@ -24,17 +24,17 @@ public abstract class Reason implements ICause {
      * An undefined reason.
      * This reason is static and should not be modified.
      */
-    static final Clause UNDEF = new Clause(new int[]{0});
+    static final Clause UNDEF = new ArrayClause(new int[]{0});
     /**
      * A thread-local clause to explain a modification with one literal.
      * This clause is static and can be reused in the same thread.
      */
-    private final static ThreadLocal<Clause> short_expl_2 = ThreadLocal.withInitial(() -> new Clause(new int[]{0, 0}));
+    private final static ThreadLocal<Clause> short_expl_2 = ThreadLocal.withInitial(() -> new ArrayClause(new int[]{0, 0}));
     /**
      * A thread-local clause to explain a propagation with two literals.
      * This clause is static and can be reused in the same thread.
      */
-    private final static ThreadLocal<Clause> short_expl_3 = ThreadLocal.withInitial(() -> new Clause(new int[]{0, 0, 0}));
+    private final static ThreadLocal<Clause> short_expl_3 = ThreadLocal.withInitial(() -> new ArrayClause(new int[]{0, 0, 0}));
     /**
      * The type of reason among {0, 2, 3}.
      * 2: a reason with one literal (and the asserting literal)
@@ -42,6 +42,10 @@ public abstract class Reason implements ICause {
      * 0: a reason with more than two literals (and the asserting literal)
      */
     final int type;
+
+    Reason(){
+        this.type = 0;
+    }
 
     /**
      * Create a reason with a type.
@@ -109,7 +113,7 @@ public abstract class Reason implements ICause {
             return r(ps[0], ps[1]);
         } else if (ps.length > 2) {
             assert ps[0] == 0 : "The first literal should be left empty for the asserting literal";
-            return new Clause(ps);
+            return new ArrayClause(ps);
         } else {
             return Reason.UNDEF;
         }

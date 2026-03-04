@@ -101,7 +101,7 @@ public class MiniSat implements SatFactory {
     static final VarData VD_Undef = new VarData(R_Undef, -1, -1);
     public Clause confl = C_Undef;
 
-    public static final Clause C_Fail = new Clause(new int[]{0, 0});
+    public static final Clause C_Fail = new ArrayClause(new int[]{0, 0});
     static final ChannelInfo CI_Null = new ChannelInfo(null, 0, 0, 0);
 
     // If false, the constraints are already unsatisfiable. No part of
@@ -251,7 +251,7 @@ public class MiniSat implements SatFactory {
                 propagate();
                 return (ok_ = (confl == C_Undef));
             default:
-                Clause cr = new Clause(ps);
+                Clause cr = new ArrayClause(ps);
                 clauses.add(cr);
                 attachClause(cr);
                 break;
@@ -314,7 +314,7 @@ public class MiniSat implements SatFactory {
         if (learnt_clause.size() == 1) {
             uncheckedEnqueue(learnt_clause.get(0));
         } else {
-            Clause cr = new Clause(learnt_clause, true);
+            Clause cr = new ArrayClause(learnt_clause, true);
             learnts.add(cr);
             if (unforgettable) { // in the case of a solution, for instance.
                 if (learnts.size() > 1) {
@@ -923,13 +923,13 @@ public class MiniSat implements SatFactory {
         double extra_lim = cla_inc / learnts.size();    // Remove any clause below this activity
 
         learnts.subList(learnt_first_removable, learnts.size())  // only removable clauses
-                .sort(Comparator.comparingDouble(c -> c.activity));
+                .sort(Comparator.comparingDouble(Clause::getActivity));
         // Don't delete binary or locked clauses or unforgettable clauses.
         // From the rest, delete clauses from the first half
         // and clauses with activity smaller than 'extra_lim':
         for (i = j = learnt_first_removable; i < learnts.size(); i++) {
             Clause c = learnts.get(i);
-            if (c.size() > 2 && !locked(c) && (i < learnts.size() / 2 || c.activity < extra_lim))
+            if (c.size() > 2 && !locked(c) && (i < learnts.size() / 2 || c.getActivity() < extra_lim))
                 removeClause(learnts.get(i));
             else
                 learnts.set(j++, learnts.get(i));
@@ -977,10 +977,11 @@ public class MiniSat implements SatFactory {
 
 
     void claBumpActivity(Clause c) {
-        if ((c.activity += cla_inc) > 1e20d) {
+        c.setActivity(c.getActivity() + cla_inc);
+        if (c.getActivity() > 1e20d) {
             // Rescale, only clauses that can be removed with reduceDB
             for (int i = learnt_first_removable; i < learnts.size(); i++) {
-                learnts.get(i).activity *= 1e-20d;
+                learnts.get(i).setActivity(learnts.get(i).getActivity() * 1e-20d);
             }
             cla_inc *= 1e-20d;
         }
