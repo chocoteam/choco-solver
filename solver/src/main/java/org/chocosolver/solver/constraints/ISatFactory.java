@@ -659,10 +659,9 @@ public interface ISatFactory extends ISelf<Model> {
         assert (ref().getSolver().isLCG() || ref().getSettings().enableSAT());
         Tuples t = new Tuples(true);
         for (int i = 0; i < TABLE.length; i++) {
-//        for(int i : INDEX){
-            t.add(i, TABLE[i]);
+            t.add(i + OFFSET, TABLE[i]);
         }
-        addTable(new IntVar[]{ref().intView(1, INDEX, -OFFSET), VALUE}, t);
+        addTable(new IntVar[]{INDEX, VALUE}, t);
         return true;
     }
 
