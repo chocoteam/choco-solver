@@ -366,12 +366,12 @@ public class TuplesFactory {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Generate valid tuples for euclidean division constraint: DIVIDEND / DIVISOR = RESULT, rounding towards 0
+     * Generate valid tuples for euclidean division constraint: dividend / divisor = result, rounding towards 0
      *
      * @return a Tuples object, reserved for a table constraint
      */
-    public static Tuples eucl_div(IntVar DIVIDEND, IntVar DIVISOR, IntVar RESULT) {
-        return generateTuples(values -> values[0] / values[1] == values[2], true, DIVIDEND, DIVISOR, RESULT);
+    public static Tuples eucl_div(IntVar result, IntVar dividend, IntVar divisor) {
+        return generateTuplesWithResult(result, TupleValidator.TRUE, values -> values[0] / values[1], dividend, divisor);
     }
 
     /**

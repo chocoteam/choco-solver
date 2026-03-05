@@ -702,6 +702,14 @@ public class ModelAnalyser {
             this.varsTypeStats = varsTypeStats;
             this.cstrsTypeStats = cstrsTypeStats;
         }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder("ModelAnalysis");
+            sb.append("\nvarsTypeStats: ").append(Arrays.toString(varsTypeStats));
+            sb.append("\ncstrsTypeStats: ").append(Arrays.toString(cstrsTypeStats));
+            return sb.toString();
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
