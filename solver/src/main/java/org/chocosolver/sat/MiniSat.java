@@ -339,6 +339,34 @@ public class MiniSat implements SatFactory {
         }
     }
 
+    /**
+     * Compute the literals blocks distance of the current clause
+     *
+     * @param cr a clause
+     */
+    private void computeLBD(Clause cr) {
+        if (cr.size() == 1) {
+            cr.setLBD(1);
+        } else if (cr.size() == 2) {
+            cr.setLBD(level(var(cr._g(0))) == level(var(cr._g(1))) ? 1 : 2);
+        } else {
+            int maxLvl = level(var(cr._g(0))) + 1;
+            if (levels.length <= maxLvl) {
+                levels = new long[(int) (maxLvl * 1.2)];
+            }
+            analysisRound++;
+            assert analysisRound > 0;
+            int lbd = 0;
+            for (int i = 0; i < cr.size(); i++) {
+                if (levels[level(var(cr._g(i)))] != analysisRound) {
+                    lbd++;
+                    levels[level(var(cr._g(i)))] = analysisRound;
+                }
+            }
+            cr.setLBD(Math.min(lbd, cr.getLBD()));
+        }
+    }
+
 
     // Backtrack to the previous level.
     public void cancel() {
@@ -483,6 +511,9 @@ public class MiniSat implements SatFactory {
             vd.set(from, trailMarker(), trail_.size());
         } else {
             vardata.set(v, new VarData(from, trailMarker(), trail_.size()));
+        }
+        if (from.learnt()) {
+            computeLBD(from);
         }
         trail_.add(l);
         cinfo.get(v).channel(sgn(l));
