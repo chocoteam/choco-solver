@@ -207,8 +207,6 @@ public class LazyClauseGeneration implements Learn {
         learnt_clause.resetQuick();
         if (mSat.confl != MiniSat.C_Undef) {
             Clause cl = mSat.confl;
-            level = mSat.findConflictLevel();
-            mSat.cancelUntil(level);
             level = mSat.analyze(cl, learnt_clause);
             if (VERBOSE)
                 System.out.printf("%s learn %s\n",
@@ -242,7 +240,8 @@ public class LazyClauseGeneration implements Learn {
         public SortableIntArrayList(final boolean sort) {
             super();
             if (sort) {
-                comparator = Comparator.comparingInt(a -> mSat.pos(MiniSat.var(a)));
+                comparator = Comparator.comparingInt(a -> mSat.level(MiniSat.var(a)));
+                comparator = comparator.thenComparingInt(i -> i);
             }
         }
 
