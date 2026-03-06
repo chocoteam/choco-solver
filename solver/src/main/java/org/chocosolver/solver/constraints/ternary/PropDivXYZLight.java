@@ -19,6 +19,7 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.MathUtils;
 
 /**
  * Z = ceil(X/Y)
@@ -95,31 +96,30 @@ public class PropDivXYZLight extends Propagator<IntVar> {
             int z_max = Z.getUB();
 
             // z >= ceil(x.min / y.max)
-            hasChanged = Z.updateLowerBound((x_min + y_max - 1) / y_max, this,
+            hasChanged = Z.updateLowerBound(MathUtils.safeAdd(x_min, y_max - 1) / y_max, this,
                     lcg() ? Reason.r(X.getMinLit(), Y.getMaxLit()) : Reason.undef());
             // z <= ceil(x.max / y.min)
-            hasChanged |= Z.updateUpperBound((x_max + y_min - 1) / y_min, this,
+            hasChanged |= Z.updateUpperBound(MathUtils.safeAdd(x_max, y_min - 1) / y_min, this,
                     lcg() ? Reason.r(X.getMaxLit(), Y.getMinLit()) : Reason.undef());
 
             // x >= y.min * (z.min - 1) + 1
-            hasChanged |= X.updateLowerBound(y_min * (z_min - 1) + 1, this,
+            hasChanged |= X.updateLowerBound(MathUtils.safeMultiply(y_min, (z_min - 1)) + 1, this,
                     lcg() ? Reason.r(Y.getMinLit(), Z.getMinLit()) : Reason.undef());
             // x <= y.max * z.max
-            hasChanged |= X.updateUpperBound(y_max * z_max, this,
+            hasChanged |= X.updateUpperBound(MathUtils.safeMultiply(y_max, z_max), this,
                     lcg() ? Reason.r(Y.getMaxLit(), Z.getMaxLit()) : Reason.undef());
 
             // y >= ceil(x.min / z.max)
             if (z_max >= 1) {
-                hasChanged |= Y.updateLowerBound((x_min + z_max - 1) / z_max, this,
+                hasChanged |= Y.updateLowerBound(MathUtils.safeAdd(x_min, z_max - 1) / z_max, this,
                         lcg() ? Reason.r(X.getMinLit(), Z.getMaxLit()) : Reason.undef());
             }
 
             // y <= ceil(x.max / z.min-1) - 1
             if (z_min >= 2) {
-                hasChanged |= Y.updateUpperBound((x_max + z_min - 2) / (z_min - 1) - 1, this,
+                hasChanged |= Y.updateUpperBound(MathUtils.safeAdd(x_max, z_min - 2) / (z_min - 1) - 1, this,
                         lcg() ? Reason.r(X.getMaxLit(), Z.getMinLit()) : Reason.undef());
             }
-
         } while (hasChanged);
     }
 
