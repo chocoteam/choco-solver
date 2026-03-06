@@ -272,6 +272,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         if (mModel.getSettings().isLCG()) {
             mSat = new MiniSat(true);
             setLearner(new LazyClauseGeneration(this, mSat));
+            Reason.makeManager(getEnvironment());
         } else {
             mSat = null;
         }
