@@ -97,6 +97,8 @@ public class MiniSat implements SatFactory {
     public static final int lUndef = 0b11;
     // undefined clause
     protected static ThreadLocal<Integer> clauseCounter = ThreadLocal.withInitial(() -> 0);
+    private final Comparator<Clause> comp = Comparator.<Clause>comparingInt(c -> -c.getLBD())
+            .thenComparingDouble(Clause::getActivity);
     public static final Clause C_Undef = Clause.undef();
     static final Clause R_Undef = Reason.undef();
     static final VarData VD_Undef = new VarData(R_Undef, -1, -1);
@@ -1087,16 +1089,19 @@ public class MiniSat implements SatFactory {
         double extra_lim = cla_inc / learnts.size();    // Remove any clause below this activity
 
         learnts.subList(learnt_first_removable, learnts.size())  // only removable clauses
-                .sort(Comparator.comparingDouble(Clause::getActivity));
+                .sort(comp);
         // Don't delete binary or locked clauses or unforgettable clauses.
         // From the rest, delete clauses from the first half
         // and clauses with activity smaller than 'extra_lim':
+        int deleted = (learnts.size() - learnt_first_removable) / 2;
         for (i = j = learnt_first_removable; i < learnts.size(); i++) {
             Clause c = learnts.get(i);
-            if (c.size() > 2 && !locked(c) && (i < learnts.size() / 2 || c.getActivity() < extra_lim))
+            if (c.size() > 2 && !locked(c) && deleted >= 0) { //&& (c.activity < extra_lim)) {
                 removeClause(learnts.get(i));
-            else
+                deleted--;
+            } else {
                 learnts.set(j++, learnts.get(i));
+            }
         }
         int n = learnts.size();
         learnts.subList(j, n).clear();

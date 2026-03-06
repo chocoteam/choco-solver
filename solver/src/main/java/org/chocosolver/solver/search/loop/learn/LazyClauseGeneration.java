@@ -14,6 +14,7 @@ import org.chocosolver.sat.ArrayClause;
 import org.chocosolver.sat.Clause;
 import org.chocosolver.sat.MiniSat;
 import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
@@ -41,7 +42,7 @@ import java.util.Comparator;
 public class LazyClauseGeneration implements Learn {
     public static boolean VERBOSE = false;
     public static boolean SORT_LITS_ON_SOLUTION = false;
-    public static boolean SORT_LITS_ON_FAILURE = false;
+    private final boolean SORT_LITS_ON_FAILURE = Settings.PARAM_SORT_LITS_ON_FAILURE;
 
     private static final String ON_FAILURE = "On SAT failure,";
     private static final String ON_SOLUTION = "On solution,";
@@ -69,6 +70,8 @@ public class LazyClauseGeneration implements Learn {
      * Indicates whether the current clause comes from on a solution (or on a failure).
      */
     private boolean onSolution = false;
+    private long nextReductionCall = Settings.PARAM_REDUCE_SAT_LEARNTS_CLAUSE_BASE;
+    private int reductions = 0;
     /**
      * A temporary storage for learnt clauses.
      */
@@ -111,8 +114,10 @@ public class LazyClauseGeneration implements Learn {
         } else {
             nbRestarts = mSolver.getRestartCount();
         }
-        if (mSat.nLearnts() >= max_learnts) {
+        if(mSat.nLearnts() >= max_learnts || mSolver.getFailCount() > nextReductionCall){
             mSat.doReduceDB();
+            nextReductionCall += Settings.PARAM_REDUCE_SAT_LEARNTS_CLAUSE_BASE +
+                    (long) Settings.PARAM_REDUCE_SAT_LEARNTS_CLAUSE_FACTOR * (++reductions);
         }
     }
 
@@ -232,10 +237,6 @@ public class LazyClauseGeneration implements Learn {
 
     private class SortableIntArrayList extends TIntArrayList {
         Comparator<Integer> comparator;
-
-        public SortableIntArrayList() {
-            this(false);
-        }
 
         public SortableIntArrayList(final boolean sort) {
             super();
