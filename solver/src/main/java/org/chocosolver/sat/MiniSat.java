@@ -97,7 +97,7 @@ public class MiniSat implements SatFactory {
     // undefined clause
     protected static ThreadLocal<Integer> clauseCounter = ThreadLocal.withInitial(() -> 0);
     public static final Clause C_Undef = Clause.undef();
-    static final Reason R_Undef = Reason.undef();
+    static final Clause R_Undef = Reason.undef();
     static final VarData VD_Undef = new VarData(R_Undef, -1, -1);
     public Clause confl = C_Undef;
 
@@ -328,7 +328,7 @@ public class MiniSat implements SatFactory {
             }
             attachClause(cr);
             claBumpActivity(cr);
-            uncheckedEnqueue(learnt_clause.get(0), Reason.r(cr));
+            uncheckedEnqueue(learnt_clause.get(0), cr);
         }
         claDecayActivity();
 
@@ -461,7 +461,7 @@ public class MiniSat implements SatFactory {
     }
 
     // Enqueue a literal. Assumes value of literal is undefined.
-    public void uncheckedEnqueue(int l, Reason from) {
+    public void uncheckedEnqueue(int l, Clause from) {
         assert valueLit(l) == lUndef : "l: " + printLit(l) + " from: " + from;
         assert isAssertingClause(this, from.getConflict()) : "the reason " + showReason(from) + " is not valid because it is not unit";
         int v = var(l);
@@ -1090,30 +1090,7 @@ public class MiniSat implements SatFactory {
         if (r == null || r == MiniSat.R_Undef) {
             return "no reason";
         }
-        StringBuilder st = new StringBuilder();
-        switch (r.type) {
-            case 0:
-                st.append("clause (");
-                Clause cl = (Clause) r;
-                for (int i = 1; i < cl.size(); i++) {
-                    if (i > 1) st.append(" ∨ ");
-                    st.append(printLit(cl._g(i)));
-                }
-                st.append(")");
-                //st.append(" -> ").append(printLit(r.cl._g(0)));
-                break;
-            //case 1:
-            //    ss << "absorbed binary clause?";
-            //    break;
-            case 2:
-                st.append("single literal ").append(printLit(((Reason.Reason1) r).d1));
-                break;
-            case 3:
-                st.append("two literals ").append(printLit(((Reason.Reason2) r).d1))
-                        .append(" ∨ ").append(printLit(((Reason.Reason2) r).d2));
-                break;
-        }
-        return st.toString();
+        return String.valueOf(r);
     }
 
     /**
