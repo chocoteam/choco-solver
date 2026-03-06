@@ -358,14 +358,14 @@ public class PropDivXYZ extends Propagator<IntVar> {
     protected boolean sameSign(IntVar a, IntVar b, Reason r) throws ContradictionException {
         boolean res = false;
         if (b.getLB() >= 0) {
-            res = a.updateLowerBound(0, this,
+            int minValue = b.getLB() > 0 ? 1 : 0;
+            res = a.updateLowerBound(minValue, this,
                     lcg() ? Reason.gather(r, b.getMinLit()) : Reason.undef());
-        }
-        if (b.getUB() <= 0) {
-            res |= a.updateUpperBound(0, this,
+        } else if (b.getUB() <= 0) {
+            int maxValue = b.getUB() < 0 ? -1 : 0;
+            res |= a.updateUpperBound(maxValue, this,
                     lcg() ? Reason.gather(r, b.getMaxLit()) : Reason.undef());
-        }
-        if (!b.contains(0)) {
+        } else if (!b.contains(0)) {
             res |= a.removeValue(0, this,
                     lcg() ? Reason.gather(r, b.getLit(0, LR_EQ)) : Reason.undef());
         }
