@@ -89,6 +89,8 @@ public class Settings {
 
     private final boolean lcg;
 
+    private final int reasonManager;
+
     private final boolean sortLitsOnSolution;
 
     private final int satCCMinMode;
@@ -123,6 +125,7 @@ public class Settings {
         this.ibexContractionRatio = builder.getIbexContractionRatio();
         this.ibexRestoreRounding = builder.getIbexRestoreRounding();
         this.lcg = builder.isLCG();
+        this.reasonManager = builder.getReasonManager();
         this.sortLitsOnSolution = builder.sortLitsOnSolution();
         this.satCCMinMode = builder.getSatCCMinMode();
         this.environmentSupplier = builder.getEnvironmentSupplier();
@@ -298,6 +301,18 @@ public class Settings {
      */
     public boolean isLCG() {
         return this.lcg;
+    }
+
+    /**
+     * Get the reason manager to use in the SAT solver.
+     * A manager is responsible for storing the reasons of filtering events, ease recycling of reasons and should reduce the GC frequency.
+     * When set to 0, no reason manager is used.
+     * When set to 1, a simple reason array-based manager is used.
+     * When set to 2, an advanced chunk-based manager is used (default is 3).
+     * @return the reason manager to use in the SAT solver.
+     */
+    public int getReasonManager() {
+        return reasonManager;
     }
 
     /**

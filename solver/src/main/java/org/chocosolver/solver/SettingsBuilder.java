@@ -226,6 +226,15 @@ public class SettingsBuilder {
                     "This is a shortcut for setting enableSAT to true and relying on the SAT solver to handle clauses management (default is false).")
     private boolean lcg = false;
 
+    public static final String REASON_MANAGER = "reasonManager";
+    @Option(name = "--reasonManager",
+            aliases = {"--sat.reasonManager", "-rm"},
+            usage = "set the reason manager to use in the SAT solver. " +
+                    "When set to 0, no reason manager is used. " +
+                    "When set to 1, a simple reason array-based manager is used. " +
+                    "When set to 2, an advanced chunk-based manager is used (default is 3). ")
+    public int reasonManager = 3;
+
     public static final String SORT_LITS_ON_SOLUTION = "sortLitsOnSolution";
     @Option(name = "--sortLitsOnSolution",
             aliases = {"--model.lcg.sortlits", "-slos"},
@@ -876,6 +885,32 @@ public class SettingsBuilder {
      */
     public boolean isLCG() {
         return this.lcg;
+    }
+
+    /**
+     * Set the reason manager to use in the SAT solver.
+     * A manager is responsible for storing the reasons of filtering events, ease recycling of reasons and should reduce the GC frequency.
+     * When set to 0, no reason manager is used.
+     * When set to 1, a simple reason array-based manager is used.
+     * When set to 2, an advanced chunk-based manager is used (default is 3).
+     * @param reasonManager the reason manager to use in the SAT solver.
+     * @return the current instance
+     */
+    public SettingsBuilder setReasonManager(int reasonManager) {
+        this.reasonManager = reasonManager;
+        return this;
+    }
+
+    /**
+     * Get the reason manager to use in the SAT solver.
+     * A manager is responsible for storing the reasons of filtering events, ease recycling of reasons and should reduce the GC frequency.
+     * When set to 0, no reason manager is used.
+     * When set to 1, a simple reason array-based manager is used.
+     * When set to 2, an advanced chunk-based manager is used (default is 3).
+     * @return the reason manager to use in the SAT solver.
+     */
+    public int getReasonManager() {
+        return reasonManager;
     }
 
     /**

@@ -26,10 +26,6 @@ import java.util.Arrays;
  */
 public abstract class Reason {
 
-    // 0 : no manager, high GC, low RAM
-    // 1 : reason manager, low GC, high RAM
-    // 2 : reason manager with chunks, (should be) low GC, low RAM
-    private final static int VERSION = Integer.getInteger("reaMan", 3);
     private static final int CHUNK_SHIFT = 16;
     public static IManager manager = null;
     /**
@@ -50,18 +46,20 @@ public abstract class Reason {
 
     /**
      * TODO: not really a good idea to build this in that way...
+     * 0 : no manager, high GC, low RAM
+     * 1 : reason manager, low GC, high RAM
+     * 2 : reason manager with chunks, (should be) low GC, low RAM
      *
      * @param environment
      */
-    public static void makeManager(IEnvironment environment) {
-        System.out.println("%% VERSION="+ VERSION);
-        switch (VERSION) {
+    public static void makeManager(IEnvironment environment, int version) {
+        switch (version) {
             case 1:
                 Reason.manager = new ReasonManager(environment);
                 break;
             case 2:
             case 3:
-                Reason.manager = new ReasonManagerChunk(environment, VERSION == 2);
+                Reason.manager = new ReasonManagerChunk(environment, version == 2);
                 break;
             default:
                 Reason.manager = new NoManager();
