@@ -53,8 +53,8 @@ public class SatDecorator extends MiniSat {
 
     private final TIntArrayList touched_variables_;
 
-    public SatDecorator(Model model) {
-        super(false);
+    public SatDecorator(Model model, int ccmin_mode) {
+        super(false, ccmin_mode);
         sat_trail_ = model.getEnvironment().makeInt();
         early_deductions_ = new TIntArrayList();
         touched_variables_ = new TIntArrayList();
@@ -162,8 +162,8 @@ public class SatDecorator extends MiniSat {
                 return ESat.FALSE;
             case lTrue:
                 return ESat.TRUE;
-            default:
             case lUndef:
+            default:
                 return ESat.UNDEFINED;
         }
     }
