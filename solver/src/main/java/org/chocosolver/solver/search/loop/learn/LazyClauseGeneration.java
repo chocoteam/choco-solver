@@ -14,7 +14,6 @@ import org.chocosolver.sat.ArrayClause;
 import org.chocosolver.sat.Clause;
 import org.chocosolver.sat.MiniSat;
 import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
@@ -42,7 +41,6 @@ import java.util.Comparator;
 public class LazyClauseGeneration implements Learn {
     public static boolean VERBOSE = false;
     public static boolean SORT_LITS_ON_SOLUTION = false;
-    private final boolean SORT_LITS_ON_FAILURE = Settings.PARAM_SORT_LITS_ON_FAILURE;
 
     private static final String ON_FAILURE = "On SAT failure,";
     private static final String ON_SOLUTION = "On solution,";
@@ -69,18 +67,25 @@ public class LazyClauseGeneration implements Learn {
     /**
      * Indicates whether the current clause comes from on a solution (or on a failure).
      */
-    private boolean onSolution = false;
-    private long nextReductionCall = Settings.PARAM_REDUCE_SAT_LEARNTS_CLAUSE_BASE;
+    private boolean onSolution;
+    private final boolean isSortLitsOnSolution;
+    private long nextReductionCall;
+    private final long reduceBase;
+    private final long reduceFactor;
     private int reductions = 0;
     /**
      * A temporary storage for learnt clauses.
      */
-    private final SortableIntArrayList learnt_clause = new SortableIntArrayList(SORT_LITS_ON_SOLUTION || SORT_LITS_ON_FAILURE);
+    private final SortableIntArrayList learnt_clause = new SortableIntArrayList(SORT_LITS_ON_SOLUTION);
 
     public LazyClauseGeneration(Solver solver, MiniSat sat) {
         this.mSolver = solver;
         this.mSat = sat;
+        this.isSortLitsOnSolution = mSolver.getModel().getSettings().sortLitsOnSolution();
         this.max_learnts = mSolver.getModel().getSettings().getNbMaxLearntClauses();
+        this.reduceBase = solver.getModel().getSettings().getReduceLearntClausesBase();
+        this.reduceFactor = solver.getModel().getSettings().getReduceLearntClausesFactor();
+        this.nextReductionCall = reduceBase;
     }
 
     @Override
@@ -106,7 +111,7 @@ public class LazyClauseGeneration implements Learn {
             mSolver.cancelTrail();
             mSolver.getDecisionPath().synchronize(true, learnt_clause.size() > 1);
             if (!learnt_clause.isEmpty()) {
-                if (onSolution ? SORT_LITS_ON_SOLUTION : SORT_LITS_ON_FAILURE) {
+                if (onSolution && isSortLitsOnSolution) {
                     learnt_clause.quicksort(1, learnt_clause.size() - 1);
                 }
                 mSat.addLearnt(learnt_clause, onSolution);
@@ -114,10 +119,9 @@ public class LazyClauseGeneration implements Learn {
         } else {
             nbRestarts = mSolver.getRestartCount();
         }
-        if(mSat.nLearnts() >= max_learnts || mSolver.getFailCount() > nextReductionCall){
+        if (mSat.nLearnts() >= max_learnts || mSolver.getFailCount() > nextReductionCall) {
             mSat.doReduceDB();
-            nextReductionCall += Settings.PARAM_REDUCE_SAT_LEARNTS_CLAUSE_BASE +
-                    (long) Settings.PARAM_REDUCE_SAT_LEARNTS_CLAUSE_FACTOR * (++reductions);
+            nextReductionCall += reduceBase + reduceFactor * (++reductions);
         }
     }
 

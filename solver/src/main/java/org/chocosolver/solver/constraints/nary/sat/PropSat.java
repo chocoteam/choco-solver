@@ -62,7 +62,7 @@ public class PropSat extends Propagator<Variable> {
                 PropagatorPriority.VERY_SLOW, true, false);
         // erase model.ONE from the variable scope
         this.vars = new Variable[0];
-        sat_ = new SatDecorator(model);
+        sat_ = new SatDecorator(model, model.getSettings().getSatCCMinMode());
         add_var = new ArrayList<>(16);
     }
 

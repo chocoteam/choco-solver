@@ -15,7 +15,6 @@ import org.chocosolver.solver.constraints.ISatFactory;
 import org.chocosolver.solver.constraints.real.Ibex;
 import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
 import org.chocosolver.solver.search.strategy.Search;
-import org.chocosolver.solver.variables.impl.IntVarLazyLit;
 import org.chocosolver.util.ESat;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -41,6 +40,7 @@ import java.util.function.Supplier;
  * @author Charles Prud'homme
  * @since 06/02/2026.
  */
+@SuppressWarnings("UnusedReturnValue")
 public class SettingsBuilder {
 
     public static final String MODEL_CHECKER = "modelChecker";
@@ -177,6 +177,22 @@ public class SettingsBuilder {
             usage = "maximum number of learnt clauses to store. When reached, a reduction is applied (default is 100000).")
     private int nbMaxLearnt = 100_000;
 
+    public static final String REDUCE_LEARNT_CLAUSES_BASE = "reduceLearntClausesBase";
+    @Option(name = "--reduceLearntClausesBase",
+            aliases = {"--sat.reduceLearntClausesBase", "-rlcb"},
+            usage = "base number of learnt clauses to trigger a reduction. " +
+                    "When the number of learnt clauses reaches reduceLearntClausesBase + reduceLearntClausesFactor * nbReductions, " +
+                    "a reduction is applied (default is 1000).")
+    private int reduceLearntClausesBase = 1_000;
+
+    public static final String REDUCE_LEARNT_CLAUSES_FACTOR = "reduceLearntClausesFactor";
+    @Option(name = "--reduceLearntClausesFactor",
+            aliases = {"--sat.reduceLearntClausesFactor", "-rlcf"},
+            usage = "factor to apply to the number of learnt clauses to trigger a reduction. " +
+                    "When the number of learnt clauses reaches reduceLearntClausesBase + reduceLearntClausesFactor * nbReductions, " +
+                    "a reduction is applied (default is 100).")
+    private int reduceLearntClausesFactor = 100;
+
     public static final String INT_VAR_LAZY_LIT_WITH_WEAK_BOUNDS = "intVarLazyLitWithWeakBounds";
     @Option(name = "--intVarLazyLitWithWeakBounds",
             aliases = {"--sat.intVarLazyLitWithWeakBounds", "-ivllwwb"},
@@ -209,6 +225,22 @@ public class SettingsBuilder {
             usage = "when true, set the solver to be in Lazy Clause Generation mode (in opposition to the full CP mode). " +
                     "This is a shortcut for setting enableSAT to true and relying on the SAT solver to handle clauses management (default is false).")
     private boolean lcg = false;
+
+    public static final String SORT_LITS_ON_SOLUTION = "sortLitsOnSolution";
+    @Option(name = "--sortLitsOnSolution",
+            aliases = {"--model.lcg.sortlits", "-slos"},
+            usage = "when true, the literals of the clause generated on a solution are sorted according to their level in the search tree, from the deepest to the shallowest (default is true). " +
+                    "This can improve the performance of the SAT solver when dealing with many solutions.")
+    private boolean sortLitsOnSolution = true;
+
+    public static final String SAT_CC_MIN_MODE = "satCCMinMode";
+    @Option(name = "-ccmin",
+            aliases = {"--sat.ccmin", "--sat.conflictClauseMinimization"},
+            usage = "set the conflict clause minimization mode to apply during conflict analysis in the SAT solver. " +
+                    "When set to 0, no minimization is applied. " +
+                    "When set to 1, local minimization is applied." +
+                    "When set to 2, recursive minimization is applied (default is 0).")
+    private int satCCMinMode = 0;
 
     public static final String ENVIRONMENT_SUPPLIER = "environmentSupplier";
     private Supplier<IEnvironment> environmentSupplier = () -> new EnvironmentBuilder().fromFlat().build();
@@ -356,6 +388,12 @@ public class SettingsBuilder {
                 case NB_MAX_LEARNT_CLAUSES:
                     this.setNbMaxLearntClauses(Integer.parseInt(value));
                     break;
+                case REDUCE_LEARNT_CLAUSES_BASE:
+                    this.setReduceLearntClausesBase(Integer.parseInt(value));
+                    break;
+                case REDUCE_LEARNT_CLAUSES_FACTOR:
+                    this.setReduceLearntClausesFactor(Integer.parseInt(value));
+                    break;
                 case INT_VAR_LAZY_LIT_WITH_WEAK_BOUNDS:
                     this.setIntVarLazyLitWithWeakBounds(Boolean.parseBoolean(value));
                     break;
@@ -367,6 +405,12 @@ public class SettingsBuilder {
                     break;
                 case LCG:
                     this.setLCG(Boolean.parseBoolean(value));
+                    break;
+                    case SORT_LITS_ON_SOLUTION:
+                    this.setSortLitsOnSolution(Boolean.parseBoolean(value));
+                    break;
+                case SAT_CC_MIN_MODE:
+                    this.setSatCCMinMode(Integer.parseInt(value));
                     break;
                 default:
                     this.set(key, value);
@@ -835,6 +879,52 @@ public class SettingsBuilder {
     }
 
     /**
+     * Set whether the literals of the clause generated on a solution are sorted according to their level
+     * in the search tree, from the deepest to the shallowest.
+     *
+     * @param sortLitsOnSolution true to sort the literals of the clause generated on a solution
+     *                           according to their level in the search tree, from the deepest to the shallowest,
+     *                           false otherwise (default is true).
+     * @return the current instance
+     */
+    public SettingsBuilder setSortLitsOnSolution(boolean sortLitsOnSolution) {
+        this.sortLitsOnSolution = sortLitsOnSolution;
+        return this;
+    }
+
+    /**
+     * @return true if the literals of the clause generated on a solution are sorted according to their level
+     * in the search tree, from the deepest to the shallowest, false otherwise (default is true).
+     */
+    public boolean sortLitsOnSolution() {
+        return this.sortLitsOnSolution;
+    }
+
+    /**
+     * Set the conflict clause minimization mode to apply during conflict analysis in the SAT solver.
+     * When set to 0, no minimization is applied.
+     * When set to 1, local minimization is applied.
+     * When set to 2, recursive minimization is applied (default is 0).
+     *
+     * @param satCCMinMode the conflict clause minimization mode to apply during conflict analysis in the SAT solver.
+     * @return the current instance
+     */
+    public SettingsBuilder setSatCCMinMode(int satCCMinMode) {
+        this.satCCMinMode = satCCMinMode;
+        return this;
+    }
+
+    /**
+     * @return the conflict clause minimization mode to apply during conflict analysis in the SAT solver.
+     * When set to 0, no minimization is applied.
+     * When set to 1, local minimization is applied.
+     * When set to 2, recursive minimization is applied (default is 0).
+     */
+    public int getSatCCMinMode() {
+        return this.satCCMinMode;
+    }
+
+    /**
      * @return maximum number of learnt clauses to store. When reached, a reduction is applied.
      * @see #setNbMaxLearntClauses(int)
      */
@@ -855,7 +945,43 @@ public class SettingsBuilder {
     }
 
     /**
-     * @return <tt>true</tt> if the {@link IntVarLazyLit} propagator uses weak bounds.
+     * Set the parameters to trigger a reduction of the store when the number of learnt clauses reaches reduceLearntClausesBase + reduceLearntClausesFactor * nbReductions.
+     *
+     * @param reduceLearntClausesBase base number of learnt clauses to trigger a reduction (default is 1000).
+     * @return the current instance
+     */
+    public SettingsBuilder setReduceLearntClausesBase(int reduceLearntClausesBase) {
+        this.reduceLearntClausesBase = reduceLearntClausesBase;
+        return this;
+    }
+
+    /**
+     * @return the base number of learnt clauses to trigger a reduction (default is 1000).
+     */
+    public int getReduceLearntClausesBase() {
+        return reduceLearntClausesBase;
+    }
+
+    /**
+     * Set the parameters to trigger a reduction of the store when the number of learnt clauses reaches reduceLearntClausesBase + reduceLearntClausesFactor * nbReductions.
+     *
+     * @param reduceLearntClausesFactor factor to apply to the number of learnt clauses to trigger a reduction (default is 100).
+     * @return the current instance
+     */
+    public SettingsBuilder setReduceLearntClausesFactor(int reduceLearntClausesFactor) {
+        this.reduceLearntClausesFactor = reduceLearntClausesFactor;
+        return this;
+    }
+
+    /**
+     * @return the factor to apply to the number of learnt clauses to trigger a reduction (default is 100).
+     */
+    public int getReduceLearntClausesFactor() {
+        return reduceLearntClausesFactor;
+    }
+
+    /**
+     * @return <tt>true</tt> if the {@link org.chocosolver.solver.variables.impl.IntVarLazyLit} propagator uses weak bounds.
      * @see #setIntVarLazyLitWithWeakBounds(boolean)
      */
     public boolean enableIntVarLazyLitWithWeakBounds() {

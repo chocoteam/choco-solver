@@ -59,7 +59,7 @@ public final class MiniSatSolver extends MiniSat implements Dimacs {
      * Create a new instance of MiniSat solver.
      */
     public MiniSatSolver() {
-        super(false);
+        super(false, 0);
         rand = new Random(random_seed);
     }
 

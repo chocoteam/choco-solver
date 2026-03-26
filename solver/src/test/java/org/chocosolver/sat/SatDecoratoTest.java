@@ -29,7 +29,7 @@ public class SatDecoratoTest {
     @BeforeMethod(alwaysRun = true)
     public void setUp() throws Exception {
         model = new Model();
-        sat = new SatDecorator(model);
+        sat = new SatDecorator(model, 0);
         a = sat.newVariable();
         b = sat.newVariable();
         c = sat.newVariable();

@@ -14,12 +14,10 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.variables.impl.LitVar;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Comparator;
 
 /**
@@ -44,7 +42,7 @@ import java.util.Comparator;
 @SuppressWarnings("FieldCanBeLocal")
 public class MiniSat implements SatFactory {
 
-    private final class MinimaList<E> {
+    private static final class MinimaList<E> {
         E[] content = (E[]) new Object[16];
         int size = 0;
 
@@ -129,7 +127,7 @@ public class MiniSat implements SatFactory {
     // Number of variables
     int num_vars_;
     int rootlvl = 0;
-    private final int ccmin_mode = Settings.PARAM_CLAUSE_MINIMISATION; // Controls conflict clause minimization (0=none, 1=local, 2=recursive)
+    private final int ccmin_mode; // Controls conflict clause minimization (0=none, 1=local, 2=recursive)
     private double cla_inc = 1;
     private final double clause_decay = 0.999;
     int learnt_first_removable = 0; // index of first removable learnt clause (related to #reduceDB only).
@@ -150,8 +148,8 @@ public class MiniSat implements SatFactory {
     private final TIntArrayList analyze_stack = new TIntArrayList();
     private final TIntArrayList temporary_add_vector_ = new TIntArrayList();
     public final TIntStack temporary_variables = new TIntArrayStack();
-    private long[] levels = new long[ccmin_mode == 2 ? 1 << 8 : 0];
-    private int[] minRank = new int[ccmin_mode == 2 ? 1 << 8 : 0];
+    private long[] levels;
+    private int[] minRank;
     private long analysisRound;
     private long notKeep;
     private long keep;
@@ -159,7 +157,10 @@ public class MiniSat implements SatFactory {
     /**
      * Create a new instance of MiniSat solver.
      */
-    public MiniSat(boolean addTautology) {
+    public MiniSat(boolean addTautology, int ccmin_mode) {
+        this.ccmin_mode = ccmin_mode;
+        this.levels = new long[ccmin_mode == 2 ? 1 << 8 : 0];
+        this.minRank = new int[ccmin_mode == 2 ? 1 << 8 : 0];
         this.ok_ = true;
         this.qhead_ = 0;
         num_vars_ = 0;

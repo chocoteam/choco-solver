@@ -75,6 +75,10 @@ public class Settings {
 
     private final int nbMaxLearnt;
 
+    private final int reduceLearntClausesBase;
+
+    private final int reduceLearntClausesFactor;
+
     private final boolean intVarLazyLitWithWeakBounds;
 
     private final double ibexContractionRatio;
@@ -84,6 +88,10 @@ public class Settings {
     private final Map<String, String> additionalSettings;
 
     private final boolean lcg;
+
+    private final boolean sortLitsOnSolution;
+
+    private final int satCCMinMode;
 
     private final Supplier<IEnvironment> environmentSupplier;
 
@@ -109,10 +117,14 @@ public class Settings {
         this.printAllUndeclaredConstraints = builder.printAllUndeclaredConstraints();
         this.propagationEngineType = builder.setPropagationEngineType();
         this.nbMaxLearnt = builder.getNbMaxLearntClauses();
+        this.reduceLearntClausesBase = builder.getReduceLearntClausesBase();
+        this.reduceLearntClausesFactor = builder.getReduceLearntClausesFactor();
         this.intVarLazyLitWithWeakBounds = builder.enableIntVarLazyLitWithWeakBounds();
         this.ibexContractionRatio = builder.getIbexContractionRatio();
         this.ibexRestoreRounding = builder.getIbexRestoreRounding();
         this.lcg = builder.isLCG();
+        this.sortLitsOnSolution = builder.sortLitsOnSolution();
+        this.satCCMinMode = builder.getSatCCMinMode();
         this.environmentSupplier = builder.getEnvironmentSupplier();
         this.additionalSettings = new HashMap<>(builder.getAdditionalSettings());
     }
@@ -289,10 +301,42 @@ public class Settings {
     }
 
     /**
+     * @return true if the literals of the clause generated on a solution are sorted according to their level
+     * in the search tree, from the deepest to the shallowest, false otherwise (default is true).
+     */
+    public boolean sortLitsOnSolution() {
+        return this.sortLitsOnSolution;
+    }
+
+    /**
+     * @return the conflict clause minimization mode to apply during conflict analysis in the SAT solver.
+     * When set to 0, no minimization is applied.
+     * When set to 1, local minimization is applied.
+     * When set to 2, recursive minimization is applied (default is 0).
+     */
+    public int getSatCCMinMode() {
+        return this.satCCMinMode;
+    }
+
+    /**
      * @return maximum number of learnt clauses to store. When reached, a reduction is applied.
      */
     public int getNbMaxLearntClauses() {
         return nbMaxLearnt;
+    }
+
+    /**
+     * @return the base number of learnt clauses to trigger a reduction (default is 1000).
+     */
+    public int getReduceLearntClausesBase() {
+        return reduceLearntClausesBase;
+    }
+
+    /**
+     * @return the factor to apply to the number of learnt clauses to trigger a reduction (default is 100).
+     */
+    public int getReduceLearntClausesFactor() {
+        return reduceLearntClausesFactor;
     }
 
     /**

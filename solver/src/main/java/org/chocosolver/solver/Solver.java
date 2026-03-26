@@ -48,11 +48,9 @@ import org.chocosolver.solver.search.strategy.strategy.StrategiesSequencer;
 import org.chocosolver.solver.search.strategy.strategy.WarmStart;
 import org.chocosolver.solver.trace.IOutputFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
-import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.logger.ANSILogger;
 import org.chocosolver.util.logger.Logger;
 
@@ -270,7 +268,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         L = new LearnNothing();
         restarter = AbstractRestart.NO_RESTART;
         if (mModel.getSettings().isLCG()) {
-            mSat = new MiniSat(true);
+            mSat = new MiniSat(true, aModel.getSettings().getSatCCMinMode());
             setLearner(new LazyClauseGeneration(this, mSat));
             Reason.makeManager(getEnvironment());
         } else {
@@ -1320,7 +1318,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     public void clearRestarter() {
         if (restarter != AbstractRestart.NO_RESTART) {
             restarter.setNext(this.restarter);
-            this.restarter = restarter;
         }
         this.restarter = AbstractRestart.NO_RESTART;
     }
