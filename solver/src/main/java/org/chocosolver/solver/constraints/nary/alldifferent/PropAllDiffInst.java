@@ -130,7 +130,7 @@ public class PropAllDiffInst extends Propagator<IntVar> {
     }
 
     private Reason explain(int i, int j) {
-        return Reason.r(vars[i].getValLit(), j > -1 ? vars[j].getValLit() : 0);
+        return this.r(vars[i].getValLit(), j > -1 ? vars[j].getValLit() : 0);
     }
 
 

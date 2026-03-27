@@ -40,7 +40,6 @@ import java.util.Comparator;
  */
 public class LazyClauseGeneration implements Learn {
     public static boolean VERBOSE = false;
-    public static boolean SORT_LITS_ON_SOLUTION = false;
 
     private static final String ON_FAILURE = "On SAT failure,";
     private static final String ON_SOLUTION = "On solution,";
@@ -76,12 +75,13 @@ public class LazyClauseGeneration implements Learn {
     /**
      * A temporary storage for learnt clauses.
      */
-    private final SortableIntArrayList learnt_clause = new SortableIntArrayList(SORT_LITS_ON_SOLUTION);
+    private final SortableIntArrayList learnt_clause;
 
     public LazyClauseGeneration(Solver solver, MiniSat sat) {
         this.mSolver = solver;
         this.mSat = sat;
         this.isSortLitsOnSolution = mSolver.getModel().getSettings().sortLitsOnSolution();
+        this.learnt_clause = new SortableIntArrayList(isSortLitsOnSolution);
         this.max_learnts = mSolver.getModel().getSettings().getNbMaxLearntClauses();
         this.reduceBase = solver.getModel().getSettings().getReduceLearntClausesBase();
         this.reduceFactor = solver.getModel().getSettings().getReduceLearntClausesFactor();

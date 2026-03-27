@@ -56,11 +56,11 @@ public class PropXgeCHalfReif extends Propagator<IntVar> {
             setPassive();
         } else if (b.isInstantiatedTo(1)) {
             // b is not false, so x >= c
-            x.updateLowerBound(c, this, lcg() ? Reason.r(b.getValLit()) : Reason.undef());
+            x.updateLowerBound(c, this, lcg() ? this.r(b.getValLit()) : Reason.undef());
             setPassive();
         } else if (x.getUB() < c) {
             // b must be false
-            b.setToFalse(this, lcg() ? Reason.r(x.getMaxLit()) : Reason.undef());
+            b.setToFalse(this, lcg() ? this.r(x.getMaxLit()) : Reason.undef());
             setPassive();
         }
     }

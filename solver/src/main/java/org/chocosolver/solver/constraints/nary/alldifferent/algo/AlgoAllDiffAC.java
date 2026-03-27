@@ -191,7 +191,7 @@ public class AlgoAllDiffAC implements IAlldifferentAlgorithm {
                     ps[m++] = MiniSat.neg(vars[l].getLit(set.max(), LR_LE));
                 }
                 assert m == ps.length;
-                reason = Reason.r(ps);
+                reason = aCause.r(ps);
 
             }
             aCause.fails(reason);
@@ -283,7 +283,7 @@ public class AlgoAllDiffAC implements IAlldifferentAlgorithm {
                         int vidx = digraph.getSuccessorsOf(j).min();
                         if (vars[vidx].isInstantiated()) {
                             assert vars[vidx].isInstantiatedTo(k);
-                            reason = Reason.r(vars[vidx].getValLit());
+                            reason = aCause.r(vars[vidx].getValLit());
                         } else {
                             // todo: While the component variable has not yet been determined,
                             //  but will be shortly, the chronology of events has not been respected.
@@ -302,7 +302,7 @@ public class AlgoAllDiffAC implements IAlldifferentAlgorithm {
                             }
                         }
                         assert m == ps.length;
-                        reason = Reason.r(ps);
+                        reason = aCause.r(ps);
                     }
                 }
                 if (v.removeValue(k, aCause, reason)) {

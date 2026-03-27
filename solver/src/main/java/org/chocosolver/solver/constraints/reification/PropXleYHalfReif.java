@@ -61,16 +61,16 @@ public class PropXleYHalfReif extends Propagator<IntVar> {
         if (x_min > y_max) {
             // b must be false
             b.setToFalse(this,
-                    lcg() ? Reason.r(x.getMinLit(), y.getMaxLit()) : Reason.undef());
+                    lcg() ? this.r(x.getMinLit(), y.getMaxLit()) : Reason.undef());
             setPassive();
             return;
         }
         if (b.isInstantiatedTo(1)) {
             // b is not false, so x >= y
             x.updateUpperBound(y_max, this,
-                    lcg() ? Reason.r(y.getMaxLit(), b.getValLit()) : Reason.undef());
+                    lcg() ? this.r(y.getMaxLit(), b.getValLit()) : Reason.undef());
             y.updateLowerBound(x_min, this,
-                    lcg() ? Reason.r(x.getMinLit(), b.getValLit()) : Reason.undef());
+                    lcg() ? this.r(x.getMinLit(), b.getValLit()) : Reason.undef());
             if (x.getUB() <= y.getLB()) {
                 setPassive();
             }

@@ -9,15 +9,12 @@
  */
 package org.chocosolver.solver.constraints.nary.cumulative;
 
-import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.memory.IStateBitSet;
-import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.BitSet;
 
 import static org.chocosolver.solver.constraints.nary.cumulative.SchedulingUtils.mustBePerformed;
 
@@ -30,9 +27,9 @@ import static org.chocosolver.solver.constraints.nary.cumulative.SchedulingUtils
 public class Profile {
     private final int[] timePoints;
     private final int[] heights;
-    private final TIntArrayList[] indexesTask;
+    private final BitSet[] indexesTask;
     private final EventPointSeries eventPointSeries;
-    private final TIntArrayList list;
+    private final BitSet list;
     private int idx;
     private int[] time;
     private int min;
@@ -47,12 +44,12 @@ public class Profile {
         idx = 0;
         timePoints = new int[2 * (nbTasks + 1)];
         heights = new int[2 * (nbTasks + 1)];
-        indexesTask = new TIntArrayList[2 * (nbTasks + 1)];
+        indexesTask = new BitSet[2 * (nbTasks + 1)];
         for (int i = 0; i < indexesTask.length; ++i) {
-            indexesTask[i] = new TIntArrayList();
+            indexesTask[i] = new BitSet();
         }
         eventPointSeries = new EventPointSeries(nbTasks);
-        list = new TIntArrayList(nbTasks);
+        list = new BitSet(nbTasks);
         time = new int[31];
     }
 
@@ -102,22 +99,13 @@ public class Profile {
         return heights[j];
     }
 
-    /**
-     * Returns the indexes of the tasks whose compulsory part contributes to the rectangle at index j.
-     *
-     * @param j the index of the rectangle
-     * @return the indexes of the tasks whose compulsory part contributes to the rectangle at index j
-     */
-    public TIntArrayList getIndexesTaskRectangle(final int j) {
-        return indexesTask[j];
-    }
 
     /**
      * Builds the profile for the tasks and their corresponding heights variables.
      *
      * @param tasks        the tasks
      * @param tasksHeights the heights variables of the tasks
-     * @param activeTasks the indexes of tasks to consider
+     * @param activeTasks  the indexes of tasks to consider
      */
     public void buildProfile(final Task[] tasks, final IntVar[] tasksHeights, final IStateBitSet activeTasks) {
         clear();
@@ -130,7 +118,8 @@ public class Profile {
             min = Math.min(min, tasks[i].getEst());
             max = Math.max(max, tasks[i].getLct());
         }
-        if (max - min < activeTasks.cardinality() * activeTasks.cardinality()) {
+        if (!tasks[0].getStart().getModel().getSolver().isLCG()
+                && max - min < activeTasks.cardinality() * activeTasks.cardinality()) {
             buildProfileNaive(tasks, tasksHeights, activeTasks);
         } else {
             buildProfileSweep(tasks, tasksHeights, activeTasks);
@@ -145,7 +134,7 @@ public class Profile {
      *
      * @param tasks        the tasks
      * @param tasksHeights the heights variables of the tasks
-     * @param activeTasks the indexes of tasks to consider
+     * @param activeTasks  the indexes of tasks to consider
      */
     private void buildProfileSweep(final Task[] tasks, final IntVar[] tasksHeights, final IStateBitSet activeTasks) {
         eventPointSeries.generateEvents(tasks, tasksHeights, activeTasks);
@@ -159,12 +148,12 @@ public class Profile {
                     Event event = eventPointSeries.removeFirstEvent();
                     if (event.getType() == Event.SCP) {
                         if (lcg) {
-                            list.add(event.getIndexTask());
+                            list.set(event.getIndexTask());
                         }
                         h += tasksHeights[event.getIndexTask()].getLB();
                     } else {
                         if (lcg) {
-                            list.remove(event.getIndexTask());
+                            list.clear(event.getIndexTask());
                         }
                         h -= tasksHeights[event.getIndexTask()].getLB();
                     }
@@ -173,7 +162,7 @@ public class Profile {
                     heights[idx] = h;
                     if (lcg) {
                         indexesTask[idx].clear();
-                        indexesTask[idx].addAll(list);
+                        if (!list.isEmpty()) indexesTask[idx].or(list);
                     }
                     idx++;
                 }
@@ -188,7 +177,7 @@ public class Profile {
      *
      * @param tasks        the tasks
      * @param tasksHeights the heights variables of the tasks
-     * @param activeTasks the indexes of tasks to consider
+     * @param activeTasks  the indexes of tasks to consider
      */
     private void buildProfileNaive(final Task[] tasks, final IntVar[] tasksHeights, final IStateBitSet activeTasks) {
         min = Integer.MAX_VALUE / 2;
@@ -207,9 +196,6 @@ public class Profile {
             }
             fillTime(tasks, tasksHeights, activeTasks);
             fillRectangles();
-            if (tasksHeights[0].getModel().getSolver().isLCG()) {
-                fillLists(tasks, tasksHeights, activeTasks);
-            }
         }
     }
 
@@ -217,9 +203,9 @@ public class Profile {
      * Fills the time array, representing the resource consumption at a given time point, from the compulsory part of
      * tasks that must be performed.
      *
-     * @param tasks the tasks
+     * @param tasks        the tasks
      * @param tasksHeights the heights variables
-     * @param activeTasks the indexes of tasks to consider
+     * @param activeTasks  the indexes of tasks to consider
      */
     private void fillTime(final Task[] tasks, final IntVar[] tasksHeights, final IStateBitSet activeTasks) {
         // Fill mandatory parts
@@ -237,27 +223,14 @@ public class Profile {
     }
 
     /**
-     * Fills the indexesTask lists of tasks' indexes contributing to the rectangles of the profile.
+     * Fills the indexesTask lists of tasks' indexes contributing to the rectangle k of the profile.
      *
-     * @param tasks the tasks
-     * @param tasksHeights the heights variables
-     * @param activeTasks the indexes of tasks to consider
+     * @return the list of indexes of tasks contributing to the rectangle k
      */
-    private void fillLists(final Task[] tasks, final IntVar[] tasksHeights, final IStateBitSet activeTasks) {
-        for (int k = 1; k < size(); ++k) {
-            final TIntArrayList listIndexes = indexesTask[k];
-            listIndexes.clear();
-            for (int i = activeTasks.nextSetBit(0); i != -1; i = activeTasks.nextSetBit(i + 1)) {
-                if (tasks[i].hasCompulsoryPart()
-                        && mustBePerformed(tasks[i], tasksHeights[i])
-                        && tasks[i].getLst() < getEndRectangle(k)
-                        && getStartRectangle(k) < tasks[i].getEct()) {
-                    listIndexes.add(i);
-                }
-            }
-        }
+    public BitSet fillList(int k) {
+        return indexesTask[k];
     }
-    
+
     /**
      * Fills the rectangles data structures from the time array. Should be called after the
      * {@link #fillTime(Task[], IntVar[], IStateBitSet)} function.

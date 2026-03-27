@@ -55,12 +55,12 @@ public class PropXinSHalfReif extends Propagator<IntVar> {
             return;
         }
         if (var.getLB() > set.max()) {
-            b.setToFalse(this, lcg() ? Reason.r(var.getMinLit()) : Reason.undef());
+            b.setToFalse(this, lcg() ? this.r(var.getMinLit()) : Reason.undef());
             setPassive();
             return;
         }else
         if (var.getUB() < set.min()) {
-            b.setToFalse(this, lcg() ? Reason.r(var.getMaxLit()) : Reason.undef());
+            b.setToFalse(this, lcg() ? this.r(var.getMaxLit()) : Reason.undef());
             setPassive();
             return;
         }else
@@ -75,7 +75,7 @@ public class PropXinSHalfReif extends Propagator<IntVar> {
             for (int i = var.getLB(); i <= vub; i = var.nextValue(i)) {
                 if (!set.contains(i)) {
                     var.removeValue(i, this, lcg() ?
-                            Reason.r(b.getValLit()) : Reason.undef());
+                            this.r(b.getValLit()) : Reason.undef());
                 }
             }
             setPassive();
@@ -89,7 +89,7 @@ public class PropXinSHalfReif extends Propagator<IntVar> {
             for (int i : set) {
                 ps[m++] = var.getLit(i, IntVar.LR_EQ);
             }
-            return Reason.r(ps);
+            return this.r(ps);
         }
         return Reason.undef();
     }

@@ -11,6 +11,7 @@ package org.chocosolver.solver.constraints.nary.cumulative;
 
 import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.OptionalTask;
@@ -100,9 +101,9 @@ public class SchedulingUtils {
      * @return true iff updating the est has filtered a variable
      * @throws ContradictionException an exception if a domain has been emptied
      */
-    public static boolean filterEst(Task task, IntVar height, int est, ICause cause, Reason reason) throws ContradictionException {
+    public static boolean filterEst(Task task, IntVar height, int est, Propagator<?> cause, Reason reason) throws ContradictionException {
         if (height != null && height.getLB() == 0 && task.mustBePerformed() && est > task.getLst()) {
-            return height.updateUpperBound(0, cause, Reason.gather(reason, task.getStart().getMaxLit()));
+            return height.updateUpperBound(0, cause, cause.gather(reason, task.getStart().getMaxLit()));
         } else if (height == null || height.getLB() > 0 || task instanceof OptionalTask) {
             return task.updateEst(est, cause, reason);
         } else {
@@ -143,9 +144,9 @@ public class SchedulingUtils {
      * @return true iff updating the lst has filtered a variable
      * @throws ContradictionException an exception if a domain has been emptied
      */
-    public static boolean filterLst(Task task, IntVar height, int lst, ICause cause, Reason reason) throws ContradictionException {
+    public static boolean filterLst(Task task, IntVar height, int lst, Propagator<?> cause, Reason reason) throws ContradictionException {
         if (height != null && height.getLB() == 0 && task.mustBePerformed() && lst < task.getEst()) {
-            return height.updateUpperBound(0, cause, Reason.gather(reason, task.getStart().getMinLit()));
+            return height.updateUpperBound(0, cause, cause.gather(reason, task.getStart().getMinLit()));
         } else if (height == null || height.getLB() > 0 || task instanceof OptionalTask) {
             return task.updateLst(lst, cause, reason);
         } else {
@@ -186,9 +187,9 @@ public class SchedulingUtils {
      * @return true iff updating the ect has filtered a variable
      * @throws ContradictionException an exception if a domain has been emptied
      */
-    public static boolean filterEct(Task task, IntVar height, int ect, ICause cause, Reason reason) throws ContradictionException {
+    public static boolean filterEct(Task task, IntVar height, int ect, Propagator<?> cause, Reason reason) throws ContradictionException {
         if (height != null && height.getLB() == 0 && task.mustBePerformed() && ect > task.getLct()) {
-            return height.updateUpperBound(0, cause, Reason.gather(reason, task.getEnd().getMaxLit()));
+            return height.updateUpperBound(0, cause, cause.gather(reason, task.getEnd().getMaxLit()));
         } else if (height == null || height.getLB() > 0 || task instanceof OptionalTask) {
             return task.updateEct(ect, cause, reason);
         } else {
@@ -229,9 +230,9 @@ public class SchedulingUtils {
      * @return true iff updating the lct has filtered a variable
      * @throws ContradictionException an exception if a domain has been emptied
      */
-    public static boolean filterLct(Task task, IntVar height, int lct, ICause cause, Reason reason) throws ContradictionException {
+    public static boolean filterLct(Task task, IntVar height, int lct, Propagator<?> cause, Reason reason) throws ContradictionException {
         if (height != null && height.getLB() == 0 && task.mustBePerformed() && lct < task.getEct()) {
-            return height.updateUpperBound(0, cause, Reason.gather(reason, task.getEnd().getMinLit()));
+            return height.updateUpperBound(0, cause, cause.gather(reason, task.getEnd().getMinLit()));
         } else if (height == null || height.getLB() > 0 || task instanceof OptionalTask) {
             return task.updateLct(lct, cause, reason);
         } else {

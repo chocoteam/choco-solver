@@ -108,7 +108,7 @@ public class PropInverseChannelBC extends Propagator<IntVar> {
         for (int v = min; v <= max; v = X[var].nextValue(v)) {
             if (!Y[v - minX].contains(var + minY)) {
                 X[var].removeValue(v, this,
-                        lcg() ? Reason.r(Y[v - minX].getLit(var + minY, IntVar.LR_EQ)) : Reason.undef());
+                        lcg() ? this.r(Y[v - minX].getLit(var + minY, IntVar.LR_EQ)) : Reason.undef());
                 toCompute.set(v - minX);
             } else {
                 break;
@@ -117,7 +117,7 @@ public class PropInverseChannelBC extends Propagator<IntVar> {
         for (int v = max; v >= min; v = X[var].previousValue(v)) {
             if (!Y[v - minX].contains(var + minY)) {
                 X[var].removeValue(v, this,
-                        lcg() ? Reason.r(Y[v - minX].getLit(var + minY, IntVar.LR_EQ)) : Reason.undef());
+                        lcg() ? this.r(Y[v - minX].getLit(var + minY, IntVar.LR_EQ)) : Reason.undef());
                 toCompute.set(v - minX);
             } else {
                 break;
@@ -132,7 +132,7 @@ public class PropInverseChannelBC extends Propagator<IntVar> {
         for (int v = min; v <= max; v = Y[var].nextValue(v)) {
             if (!X[v - minY].contains(var + minX)) {
                 Y[var].removeValue(v, this,
-                        lcg() ? Reason.r(X[v - minY].getLit(var + minX, IntVar.LR_EQ)) : Reason.undef());
+                        lcg() ? this.r(X[v - minY].getLit(var + minX, IntVar.LR_EQ)) : Reason.undef());
                 toCompute.set(v - minY);
             } else {
                 break;
@@ -141,7 +141,7 @@ public class PropInverseChannelBC extends Propagator<IntVar> {
         for (int v = max; v >= min; v = Y[var].previousValue(v)) {
             if (!X[v - minY].contains(var + minX)) {
                 Y[var].removeValue(v, this,
-                        lcg() ? Reason.r(X[v - minY].getLit(var + minX, IntVar.LR_EQ)) : Reason.undef());
+                        lcg() ? this.r(X[v - minY].getLit(var + minX, IntVar.LR_EQ)) : Reason.undef());
                 toCompute.set(v - minY);
             } else {
                 break;

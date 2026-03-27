@@ -178,18 +178,18 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar, Lit
     }
 
     void channelMin(int v, int p) {
-        Reason r = Reason.r(MiniSat.neg(p));
+        Reason r = this.getModel().getSolver().getReasonManager().r(MiniSat.neg(p));
         int prev = previousValue(v);
         bnd.channelMin(prev, sat, r);
     }
 
     void channelMax(int v, int p) {
-        Reason r = Reason.r(MiniSat.neg(p));
+        Reason r = this.getModel().getSolver().getReasonManager().r(MiniSat.neg(p));
         bnd.channelMax(v, sat, r);
     }
 
     void updateFixed() {
-        Reason r = Reason.r(getMinLit(), getMaxLit());
+        Reason r = this.getModel().getSolver().getReasonManager().r(getMinLit(), getMaxLit());
         sat.cEnqueue(valLit, r);
     }
 
@@ -197,9 +197,11 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar, Lit
     public boolean removeValue(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         if (value == getLB()) {
-            return updateLowerBound(value + 1, cause, Reason.gather(reason, getMinLit()));
+            return updateLowerBound(value + 1, cause,
+                    this.getModel().getSolver().getReasonManager().gather(reason, getMinLit()));
         } else if (value == getUB()) {
-            return updateUpperBound(value - 1, cause, Reason.gather(reason, getMaxLit()));
+            return updateUpperBound(value - 1, cause,
+                    this.getModel().getSolver().getReasonManager().gather(reason, getMaxLit()));
         }
         return false;
     }

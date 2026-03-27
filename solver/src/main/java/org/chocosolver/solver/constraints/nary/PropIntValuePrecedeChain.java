@@ -161,7 +161,7 @@ public class PropIntValuePrecedeChain extends Propagator<IntVar> {
             for (int i = 0; i < to; i++) {
                 lits[m++] = vars[i].getLit(s, IntVar.LR_EQ);
             }
-            r = Reason.r(lits);
+            r = this.r(lits);
         }
         return r;
     }
@@ -177,7 +177,7 @@ public class PropIntValuePrecedeChain extends Propagator<IntVar> {
             for (int i = a + 1; i < g; i++) {
                 lits[m++] = vars[i].getLit(s, IntVar.LR_EQ);
             }
-            r = Reason.r(lits);
+            r = this.r(lits);
         }
         return r;
     }
@@ -195,7 +195,7 @@ public class PropIntValuePrecedeChain extends Propagator<IntVar> {
                     lits[m++] = vars[i].getLit(s, IntVar.LR_EQ);
                 }
             }
-            r = Reason.r(lits);
+            r = this.r(lits);
         }
         return r;
     }

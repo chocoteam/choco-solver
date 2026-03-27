@@ -72,7 +72,7 @@ public class PropImplied extends Propagator<Variable> {
         } else {
             ESat sat = trueCons.isSatisfied();
             if (sat == ESat.FALSE) {
-                bVar.setToFalse(this, lcg() ? Propagator.reason(bVar, vars) : Reason.undef());
+                bVar.setToFalse(this, lcg() ? this.reason(bVar, vars) : Reason.undef());
                 setPassive();
             }
         }

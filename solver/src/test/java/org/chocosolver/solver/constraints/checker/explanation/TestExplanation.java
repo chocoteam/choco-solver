@@ -49,6 +49,7 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
 import org.chocosolver.util.tools.VariableUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import java.lang.annotation.Annotation;
@@ -291,6 +292,25 @@ public class TestExplanation {
     @Test(groups = "lcg", timeOut = 60000, dataProvider = "propagators")
     public void testPropagator(Class<? extends Propagator<IntVar>> prop, Class<?>[] parameterTypes, Object[] info,
                                long seed) {
+        boolean isExplained = false;
+        Annotation[] annotations = prop.getAnnotations();
+        for (Annotation annotation : annotations) {
+            if (Objects.equals(annotation.annotationType(), Explained.class)) {
+                isExplained = true;
+            }
+        }
+        Assert.assertTrue(isExplained);
+        mainLooop((l, s) -> buildModel(prop, parameterTypes, info, l, s), seed, Scalar::create);
+    }
+
+    @Test(groups = "lcg", dataProvider = "seed")
+    @Ignore(value="for debugging")
+    public void testSinglePropagator(long seed) {
+
+        Class<? extends Propagator<IntVar>> prop = PropDivXYZ.class;
+        Class<?>[] parameterTypes = new Class[]{IntVar.class, IntVar.class, IntVar.class};
+        Object[] info = new Object[]{null};
+
         boolean isExplained = false;
         Annotation[] annotations = prop.getAnnotations();
         for (Annotation annotation : annotations) {

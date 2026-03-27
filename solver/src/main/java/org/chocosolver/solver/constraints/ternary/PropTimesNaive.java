@@ -118,7 +118,7 @@ public class PropTimesNaive extends Propagator<IntVar> {
             ps[2] = vars[i].getMaxLit();
             ps[3] = vars[j].getMinLit();
             ps[4] = vars[j].getMaxLit();
-            return Reason.r(ps);
+            return this.r(ps);
         }
         return Reason.undef();
     }

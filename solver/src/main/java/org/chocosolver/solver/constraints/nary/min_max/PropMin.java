@@ -53,14 +53,14 @@ public class PropMin extends Propagator<IntVar> {
             // update min
             for (int i = 0; i < n; i++) {
                 filter |= vars[i].updateLowerBound(min, this,
-                        lcg() ? Reason.r(vars[n].getMinLit()) : Reason.undef());
+                        lcg() ? this.r(vars[n].getMinLit()) : Reason.undef());
                 lb = Math.min(lb, vars[i].getLB());
                 ub = Math.min(ub, vars[i].getUB());
             }
             filter |= vars[n].updateLowerBound(lb, this,
-                    lcg() ? Propagator.lbounds(vars[n], vars) : Reason.undef());
+                    lcg() ? this.lbounds(vars[n], vars) : Reason.undef());
             filter |= vars[n].updateUpperBound(ub, this,
-                    lcg() ? Propagator.ubounds(vars[n], vars) : Reason.undef());
+                    lcg() ? this.ubounds(vars[n], vars) : Reason.undef());
             ub = Math.min(ub, vars[n].getUB()); // to deal with holes in vars[n] or its instantiation
             // back-propagation
             int c = 0, idx = -1;
@@ -79,7 +79,7 @@ public class PropMin extends Propagator<IntVar> {
                         ps[m] = vars[i].getMinLit();
                     }
                     ps[idx + 1] = vars[n].getMaxLit();
-                    r = Reason.r(ps);
+                    r = this.r(ps);
                 }
                 filter |= vars[idx].updateUpperBound(vars[n].getUB(), this, r);
                 if (vars[n].isInstantiated() && vars[idx].isInstantiatedTo(vars[n].getValue())) {
