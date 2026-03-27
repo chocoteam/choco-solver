@@ -266,7 +266,7 @@ public class PropDiffN extends Propagator<IntVar> {
             ps[m++] = vars[o2 + n].getMinLit();
             ps[m++] = vars[o2 + n].getMaxLit();
             ps[m] = vars[o2 + 2 * n + n].getMinLit();
-            return Reason.r(ps);
+            return this.r(ps);
         }
         return Reason.undef();
     }

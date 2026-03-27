@@ -227,7 +227,7 @@ public class AlgoAllDiffBC {
                     }
                 }
             }
-            return Reason.r(ps);
+            return aCause.r(ps);
         } else {
             return Reason.undef();
         }
@@ -302,7 +302,7 @@ public class AlgoAllDiffBC {
                     }
                 }
             }
-            return Reason.r(ps);
+            return aCause.r(ps);
         } else {
             return Reason.undef();
         }

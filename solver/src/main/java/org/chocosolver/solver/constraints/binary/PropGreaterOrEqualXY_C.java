@@ -50,9 +50,9 @@ public final class PropGreaterOrEqualXY_C extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         x.updateLowerBound(MathUtils.safeSubstract(this.cste, y.getUB()), this,
-                lcg() ? Reason.r(y.getMaxLit()) : Reason.undef());
+                lcg() ? this.r(y.getMaxLit()) : Reason.undef());
         y.updateLowerBound(MathUtils.safeSubstract(this.cste, x.getUB()), this,
-                lcg() ? Reason.r(x.getMaxLit()) : Reason.undef());
+                lcg() ? this.r(x.getMaxLit()) : Reason.undef());
         if (x.getLB() + y.getLB() >= this.cste) {
             this.setPassive();
         }
@@ -62,10 +62,10 @@ public final class PropGreaterOrEqualXY_C extends Propagator<IntVar> {
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         if (idxVarInProp == 0) {
             y.updateLowerBound(this.cste - x.getUB(), this,
-                    lcg() ? Reason.r(x.getMaxLit()) : Reason.undef());
+                    lcg() ? this.r(x.getMaxLit()) : Reason.undef());
         } else {
             x.updateLowerBound(this.cste - y.getUB(), this,
-                    lcg() ? Reason.r(y.getMaxLit()) : Reason.undef());
+                    lcg() ? this.r(y.getMaxLit()) : Reason.undef());
         }
         if (x.getLB() + y.getLB() >= this.cste) {
             this.setPassive();

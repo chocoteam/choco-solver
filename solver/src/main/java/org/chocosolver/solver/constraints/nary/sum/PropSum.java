@@ -393,7 +393,7 @@ public class PropSum extends Propagator<IntVar> {
                 ps[m++] = vars[j].getMinLit();
             }
             if (i > -1) ps[i + 1] = ps[0] = 0;
-            return Reason.r(ps);
+            return this.r(ps);
         } else return Reason.undef();
     }
 
@@ -408,7 +408,7 @@ public class PropSum extends Propagator<IntVar> {
                 ps[m++] = vars[j].getMaxLit();
             }
             if (i > -1) ps[i + 1] = ps[0] = 0;
-            return Reason.r(ps);
+            return this.r(ps);
         } else return Reason.undef();
     }
 

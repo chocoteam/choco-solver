@@ -232,8 +232,8 @@ public class SettingsBuilder {
             usage = "set the reason manager to use in the SAT solver. " +
                     "When set to 0, no reason manager is used. " +
                     "When set to 1, a simple reason array-based manager is used. " +
-                    "When set to 2, an advanced chunk-based manager is used (default is 3). ")
-    public int reasonManager = 3;
+                    "When set to 2, an advanced chunk-based manager is used (default is 2). ")
+    public int reasonManager = 2;
 
     public static final String SORT_LITS_ON_SOLUTION = "sortLitsOnSolution";
     @Option(name = "--sortLitsOnSolution",
@@ -415,7 +415,10 @@ public class SettingsBuilder {
                 case LCG:
                     this.setLCG(Boolean.parseBoolean(value));
                     break;
-                    case SORT_LITS_ON_SOLUTION:
+                case REASON_MANAGER:
+                    this.setReasonManager(Integer.parseInt(value));
+                    break;
+                case SORT_LITS_ON_SOLUTION:
                     this.setSortLitsOnSolution(Boolean.parseBoolean(value));
                     break;
                 case SAT_CC_MIN_MODE:

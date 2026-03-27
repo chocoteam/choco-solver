@@ -97,28 +97,28 @@ public class PropDivXYZLight extends Propagator<IntVar> {
 
             // z >= ceil(x.min / y.max)
             hasChanged = Z.updateLowerBound(MathUtils.safeAdd(x_min, y_max - 1) / y_max, this,
-                    lcg() ? Reason.r(X.getMinLit(), Y.getMaxLit()) : Reason.undef());
+                    lcg() ? this.r(X.getMinLit(), Y.getMaxLit()) : Reason.undef());
             // z <= ceil(x.max / y.min)
             hasChanged |= Z.updateUpperBound(MathUtils.safeAdd(x_max, y_min - 1) / y_min, this,
-                    lcg() ? Reason.r(X.getMaxLit(), Y.getMinLit()) : Reason.undef());
+                    lcg() ? this.r(X.getMaxLit(), Y.getMinLit()) : Reason.undef());
 
             // x >= y.min * (z.min - 1) + 1
             hasChanged |= X.updateLowerBound(MathUtils.safeMultiply(y_min, (z_min - 1)) + 1, this,
-                    lcg() ? Reason.r(Y.getMinLit(), Z.getMinLit()) : Reason.undef());
+                    lcg() ? this.r(Y.getMinLit(), Z.getMinLit()) : Reason.undef());
             // x <= y.max * z.max
             hasChanged |= X.updateUpperBound(MathUtils.safeMultiply(y_max, z_max), this,
-                    lcg() ? Reason.r(Y.getMaxLit(), Z.getMaxLit()) : Reason.undef());
+                    lcg() ? this.r(Y.getMaxLit(), Z.getMaxLit()) : Reason.undef());
 
             // y >= ceil(x.min / z.max)
             if (z_max >= 1) {
                 hasChanged |= Y.updateLowerBound(MathUtils.safeAdd(x_min, z_max - 1) / z_max, this,
-                        lcg() ? Reason.r(X.getMinLit(), Z.getMaxLit()) : Reason.undef());
+                        lcg() ? this.r(X.getMinLit(), Z.getMaxLit()) : Reason.undef());
             }
 
             // y <= ceil(x.max / z.min-1) - 1
             if (z_min >= 2) {
                 hasChanged |= Y.updateUpperBound(MathUtils.safeAdd(x_max, z_min - 2) / (z_min - 1) - 1, this,
-                        lcg() ? Reason.r(X.getMaxLit(), Z.getMinLit()) : Reason.undef());
+                        lcg() ? this.r(X.getMaxLit(), Z.getMinLit()) : Reason.undef());
             }
         } while (hasChanged);
     }

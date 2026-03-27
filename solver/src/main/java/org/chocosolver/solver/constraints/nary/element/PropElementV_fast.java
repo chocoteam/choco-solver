@@ -93,7 +93,7 @@ public class PropElementV_fast extends Propagator<IntVar> {
                     // i has no support, remove from x
                     Reason r = Reason.undef();
                     if (lcg()) {
-                        r = Propagator.reason(null, var, vars[2 + i]);
+                        r = this.reason(null, var, vars[2 + i]);
                     }
                     filter |= index.removeValue(i, this, r);
                 } else {
@@ -104,7 +104,7 @@ public class PropElementV_fast extends Propagator<IntVar> {
                 if (disjoint(var, vars[2 + j])) {
                     Reason r = Reason.undef();
                     if (lcg()) {
-                        r = Propagator.reason(null, var, vars[2 + j]);
+                        r = this.reason(null, var, vars[2 + j]);
                     }
                     filter |= index.removeValue(j, this, r);
                 } else {
@@ -124,7 +124,7 @@ public class PropElementV_fast extends Propagator<IntVar> {
                         ps[m] = index.getEQLit(i);
                     }
                 }
-                r = Reason.r(ps);
+                r = this.r(ps);
             }
             filter |= var.updateLowerBound(min, this, r);
             r = Reason.undef();
@@ -139,7 +139,7 @@ public class PropElementV_fast extends Propagator<IntVar> {
                         ps[m] = index.getEQLit(i);
                     }
                 }
-                r = Reason.r(ps);
+                r = this.r(ps);
             }
             filter |= var.updateUpperBound(max, this, r); 
             if (index.isInstantiated()) {
@@ -156,10 +156,10 @@ public class PropElementV_fast extends Propagator<IntVar> {
 
     private boolean propagateEquality(IntVar a, IntVar b) throws ContradictionException {
         int s = a.getDomainSize() + b.getDomainSize();
-        boolean filter = a.updateLowerBound(b.getLB(), this, lcg() ? Reason.r(index.getValLit(), b.getMinLit()) : Reason.undef());
-        filter |= a.updateUpperBound(b.getUB(), this, lcg() ? Reason.r(index.getValLit(), b.getMaxLit()) : Reason.undef());
-        filter |= b.updateLowerBound(a.getLB(), this, lcg() ? Reason.r(index.getValLit(), a.getMinLit()) : Reason.undef());
-        filter |= b.updateUpperBound(a.getUB(), this, lcg() ? Reason.r(index.getValLit(), a.getMaxLit()) : Reason.undef());
+        boolean filter = a.updateLowerBound(b.getLB(), this, lcg() ? this.r(index.getValLit(), b.getMinLit()) : Reason.undef());
+        filter |= a.updateUpperBound(b.getUB(), this, lcg() ? this.r(index.getValLit(), b.getMaxLit()) : Reason.undef());
+        filter |= b.updateLowerBound(a.getLB(), this, lcg() ? this.r(index.getValLit(), a.getMinLit()) : Reason.undef());
+        filter |= b.updateUpperBound(a.getUB(), this, lcg() ? this.r(index.getValLit(), a.getMaxLit()) : Reason.undef());
         if (!fast || (a.getDomainSize() + b.getDomainSize() <= THRESHOLD)) {
             rem |= filterFrom(a, b);
             rem |= filterFrom(b, a);
@@ -178,7 +178,7 @@ public class PropElementV_fast extends Propagator<IntVar> {
             for (int i = lb; i <= ub; i = a.nextValue(i)) {
                 if (!b.contains(i)) {
                     filter |= a.removeValue(i, this,
-                            lcg() ? Reason.r(index.getValLit(), b.getEQLit(i)) : Reason.undef());
+                            lcg() ? this.r(index.getValLit(), b.getEQLit(i)) : Reason.undef());
                 }
             }
         }

@@ -736,7 +736,7 @@ public enum FConstraint {
                 } else if (annotations.stream().anyMatch(a -> a.id.toString().startsWith("bounds"))) {
                     model.allDifferent(vars, "BC").post();
                 } else {
-                    model.allDifferent(vars, "AC_TUNED").post();
+                    model.allDifferent(vars).post();
                 }
             }
         }

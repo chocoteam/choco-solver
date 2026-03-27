@@ -281,8 +281,11 @@ public class Datas {
         }
         if (level.is(Level.JSON)) {
             solver.log().printf(Locale.US, "\n\t],\n\t\"exit\":{\"time\":%.1f, " +
-                            "\"nodes\":%d, \"failures\":%d, \"restarts\":%d, \"status\":\"%s\"}\n}",
+                            "\"bound\":%d, \"nodes\":%d, \"failures\":%d, \"restarts\":%d, \"status\":\"%s\"}\n}",
                     solver.getTimeCount(),
+                    solver.getObjectiveManager().isOptimization() ?
+                            solver.getObjectiveManager().getBestSolutionValue().intValue() :
+                            solver.getSolutionCount(),
                     solver.getNodeCount(),
                     solver.getFailCount(),
                     solver.getRestartCount(),

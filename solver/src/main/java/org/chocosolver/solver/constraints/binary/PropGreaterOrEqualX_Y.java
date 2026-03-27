@@ -49,8 +49,8 @@ public final class PropGreaterOrEqualX_Y extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        x.updateLowerBound(y.getLB(), this, lcg() ? Reason.r(y.getMinLit()) : Reason.undef());
-        y.updateUpperBound(x.getUB(), this, lcg() ? Reason.r(x.getMaxLit()) : Reason.undef());
+        x.updateLowerBound(y.getLB(), this, lcg() ? this.r(y.getMinLit()) : Reason.undef());
+        y.updateUpperBound(x.getUB(), this, lcg() ? this.r(x.getMaxLit()) : Reason.undef());
         if (x.getLB() >= y.getUB()) {
             this.setPassive();
         }
@@ -59,9 +59,9 @@ public final class PropGreaterOrEqualX_Y extends Propagator<IntVar> {
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
         if (varIdx == 0) {
-            y.updateUpperBound(x.getUB(), this, lcg() ? Reason.r(x.getMaxLit()) : Reason.undef());
+            y.updateUpperBound(x.getUB(), this, lcg() ? this.r(x.getMaxLit()) : Reason.undef());
         } else {
-            x.updateLowerBound(y.getLB(), this, lcg() ? Reason.r(y.getMinLit()) : Reason.undef());
+            x.updateLowerBound(y.getLB(), this, lcg() ? this.r(y.getMinLit()) : Reason.undef());
         }
         if (x.getLB() >= y.getUB()) {
             this.setPassive();

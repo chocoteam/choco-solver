@@ -401,34 +401,34 @@ public class Task extends Propagator<IntVar> {
                                 end.getLB() - duration.getUB(),
                                 this,
 //                            Reason.r(end.getMinLit(), duration.getMaxLit())
-                                Reason.r(end.getLELit(end.getLB() - 1), duration.getGELit(duration.getUB() + 1))
+                                this.r(end.getLELit(end.getLB() - 1), duration.getGELit(duration.getUB() + 1))
                         );
                         hasFiltered |= updateLst(
                                 end.getUB() - duration.getLB(),
                                 this,
-                                Reason.r(end.getMaxLit(), duration.getMinLit())
+                                this.r(end.getMaxLit(), duration.getMinLit())
                         );
 
                         hasFiltered |= updateEct(
                                 start.getLB() + duration.getLB(),
                                 this,
-                                Reason.r(start.getMinLit(), duration.getMinLit())
+                                this.r(start.getMinLit(), duration.getMinLit())
                         );
                         hasFiltered |= updateLct(
                                 start.getUB() + duration.getUB(),
                                 this,
-                                Reason.r(start.getMaxLit(), duration.getMaxLit())
+                                this.r(start.getMaxLit(), duration.getMaxLit())
                         );
 
                         hasFiltered |= updateMinDuration(
                                 end.getLB() - start.getUB(),
                                 this,
-                                Reason.r(end.getMinLit(), start.getMaxLit())
+                                this.r(end.getMinLit(), start.getMaxLit())
                         );
                         hasFiltered |= updateMaxDuration(
                                 end.getUB() - start.getLB(),
                                 this,
-                                Reason.r(end.getMaxLit(), start.getMinLit())
+                                this.r(end.getMaxLit(), start.getMinLit())
                         );
                     } else {
                         hasFiltered = updateEst(end.getLB() - duration.getUB(), this);

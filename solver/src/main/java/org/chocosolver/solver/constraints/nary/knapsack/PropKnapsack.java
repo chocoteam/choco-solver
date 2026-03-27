@@ -81,10 +81,10 @@ public class PropKnapsack extends Propagator<IntVar> {
             maxPower += energy[i] * lb;
         }
         if (power.getLB() < maxPower) {
-            power.updateLowerBound(maxPower, this, lcg() ? Propagator.lbounds(power, vars) : Reason.undef());
+            power.updateLowerBound(maxPower, this, lcg() ? this.lbounds(power, vars) : Reason.undef());
         }
         if (remainingCapacity < 0) {
-            this.fails(lcg() ? Propagator.lbounds(power, vars) : Reason.undef());
+            this.fails(lcg() ? this.lbounds(power, vars) : Reason.undef());
         } else {
             int idx;
             for (int i = 0; i < n; i++) {
@@ -125,7 +125,7 @@ public class PropKnapsack extends Propagator<IntVar> {
             for(int j = 0; j <= i; j++){
                 lits[m++] = vars[order[j]].getMaxLit();
             }
-            r = Reason.r(lits);
+            r = this.r(lits);
         }
         return r;
     }

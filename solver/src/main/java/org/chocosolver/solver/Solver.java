@@ -10,6 +10,7 @@
 package org.chocosolver.solver;
 
 import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.sat.IReasonManager;
 import org.chocosolver.sat.MiniSat;
 import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.constraints.Constraint;
@@ -139,6 +140,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * SAT solver, only for LCG
      */
     private final MiniSat mSat;
+    private final IReasonManager reasonManager;
     /**
      * The objective manager declare
      */
@@ -270,9 +272,10 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         if (mModel.getSettings().isLCG()) {
             mSat = new MiniSat(true, aModel.getSettings().getSatCCMinMode());
             setLearner(new LazyClauseGeneration(this, mSat));
-            Reason.makeManager(getEnvironment(), mModel.getSettings().getReasonManager());
+            reasonManager = IReasonManager.makeManager(mModel.getEnvironment(), mModel.getSettings().getReasonManager());
         } else {
             mSat = null;
+            reasonManager = IReasonManager.makeManager(mModel.getEnvironment(), 0);
         }
         engine = new PropagationEngine(mModel, mSat);
     }
@@ -1093,6 +1096,16 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
 
     public MiniSat getSat() {
         return mSat;
+    }
+
+    /**
+     * The ReasonManager is the component in charge of managing the reasons for domain reductions and failures.
+     * It is used when learning is on, to record the reasons for propagations and contradictions, and to explain them when needed.
+     *
+     * @return the reason manager used in {@code this}.
+     */
+    public IReasonManager getReasonManager(){
+        return reasonManager;
     }
 
     /**

@@ -45,7 +45,7 @@ public class PropEnumDomainChanneling extends Propagator<IntVar> {
         this.offSet = offSet;
         this.idm = this.vars[n].monitorDelta(this);
         this.rem_proc = i -> vars[i - offSet].instantiateTo(0, this,
-                lcg() ? Reason.r(vars[n].getLit(i, IntVar.LR_EQ)) : Reason.undef());
+                lcg() ? this.r(vars[n].getLit(i, IntVar.LR_EQ)) : Reason.undef());
     }
 
     @Override
@@ -56,24 +56,24 @@ public class PropEnumDomainChanneling extends Propagator<IntVar> {
             if (vars[i].isInstantiated()) {
                 if (vars[i].getValue() == 0) {
                     vars[n].removeValue(i + offSet, this,
-                            lcg() ? Reason.r(vars[i].getValLit()) : Reason.undef());
+                            lcg() ? this.r(vars[i].getValLit()) : Reason.undef());
                 } else {
                     vars[n].instantiateTo(i + offSet, this,
-                            lcg() ? Reason.r(vars[i].getValLit()) : Reason.undef());
+                            lcg() ? this.r(vars[i].getValLit()) : Reason.undef());
                 }
             } else if (!vars[n].contains(i + offSet)) {
                 vars[i].instantiateTo(0, this,
-                        lcg() ? Reason.r(vars[n].getLit(i + offSet, IntVar.LR_EQ)) : Reason.undef());
+                        lcg() ? this.r(vars[n].getLit(i + offSet, IntVar.LR_EQ)) : Reason.undef());
             }
         }
         if (vars[n].isInstantiated()) {
             int v = vars[n].getValue() - offSet;
             vars[v].instantiateTo(1, this,
-                    lcg() ? Reason.r(vars[n].getValLit()) : Reason.undef());
+                    lcg() ? this.r(vars[n].getValLit()) : Reason.undef());
             for (int i = 0; i < n; i++) {
                 if (i != v) {
                     vars[i].instantiateTo(0, this,
-                            lcg() ? Reason.r(vars[n].getLit(i + offSet, IntVar.LR_EQ)) : Reason.undef());
+                            lcg() ? this.r(vars[n].getLit(i + offSet, IntVar.LR_EQ)) : Reason.undef());
                 }
             }
         }
@@ -87,21 +87,21 @@ public class PropEnumDomainChanneling extends Propagator<IntVar> {
         } else {
             if (vars[varIdx].getValue() == 1) {
                 vars[n].instantiateTo(varIdx + offSet, this,
-                        lcg() ? Reason.r(vars[varIdx].getValLit()) : Reason.undef());
+                        lcg() ? this.r(vars[varIdx].getValLit()) : Reason.undef());
                 for (int i = 0; i < n; i++) {
                     if (i != varIdx) {
                         vars[i].instantiateTo(0, this,
-                                lcg() ? Reason.r(vars[n].getLit(i + offSet, IntVar.LR_EQ)) : Reason.undef());
+                                lcg() ? this.r(vars[n].getLit(i + offSet, IntVar.LR_EQ)) : Reason.undef());
                     }
                 }
             } else {
                 vars[n].removeValue(varIdx + offSet, this,
-                        lcg() ? Reason.r(vars[varIdx].getValLit()) : Reason.undef());
+                        lcg() ? this.r(vars[varIdx].getValLit()) : Reason.undef());
             }
         }
         if (vars[n].isInstantiated()) {
             vars[vars[n].getValue() - offSet].instantiateTo(1, this,
-                    lcg() ? Reason.r(vars[n].getValLit()) : Reason.undef());
+                    lcg() ? this.r(vars[n].getValLit()) : Reason.undef());
         }
     }
 

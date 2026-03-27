@@ -77,11 +77,11 @@ public class PropReif extends Propagator<Variable> {
         } else {
             ESat sat = trueCons.isSatisfied();
             if (sat == ESat.TRUE) {
-                bVar.setToTrue(this, lcg() ? Propagator.reason(bVar, vars) : Reason.undef());
+                bVar.setToTrue(this, lcg() ? this.reason(bVar, vars) : Reason.undef());
                 setPassive();
                 reifCons.activate(0);
             } else if (sat == ESat.FALSE) {
-                bVar.setToFalse(this, lcg() ? Propagator.reason(bVar, vars) : Reason.undef());
+                bVar.setToFalse(this, lcg() ? this.reason(bVar, vars) : Reason.undef());
                 setPassive();
                 reifCons.activate(1);
             }

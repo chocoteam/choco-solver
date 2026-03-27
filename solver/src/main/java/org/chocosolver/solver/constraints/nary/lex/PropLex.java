@@ -252,7 +252,7 @@ public class PropLex extends Propagator<IntVar> {
                 ps[m++] = i == j ? 0 : x[j].getMinLit();
                 ps[m++] = i == (j + n) ? 0 : y[j].getMaxLit();
             }
-            return Reason.r(ps);
+            return this.r(ps);
         } else {
             return Reason.undef();
         }

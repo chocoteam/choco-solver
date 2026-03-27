@@ -51,7 +51,7 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
             idms[0] = vars[0].monitorDelta(this);
             idms[1] = vars[1].monitorDelta(this);
             rem_proc = i -> vars[indexToFilter].removeValue(cste - i, this,
-                    lcg() ? Reason.r(vars[1 - indexToFilter].getLit(i, IntVar.LR_EQ)) : Reason.undef());
+                    lcg() ? this.r(vars[1 - indexToFilter].getLit(i, IntVar.LR_EQ)) : Reason.undef());
         }
     }
 
@@ -71,13 +71,13 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
             int ub = x.getUB();
             for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
                 if (!y.contains(cste - val)) {
-                    x.removeValue(val, this, lcg() ? Reason.r(y.getLit(cste - val, IntVar.LR_EQ)) : Reason.undef());
+                    x.removeValue(val, this, lcg() ? this.r(y.getLit(cste - val, IntVar.LR_EQ)) : Reason.undef());
                 }
             }
             ub = y.getUB();
             for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
                 if (!x.contains(cste - val)) {
-                    y.removeValue(val, this, lcg() ? Reason.r(x.getLit(cste - val, IntVar.LR_EQ)) : Reason.undef());
+                    y.removeValue(val, this, lcg() ? this.r(x.getLit(cste - val, IntVar.LR_EQ)) : Reason.undef());
                 }
             }
             idms[0].startMonitoring();
@@ -97,10 +97,10 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
     @SuppressWarnings("StatementWithEmptyBody")
     private void updateBounds() throws ContradictionException {
         if (lcg()) {
-            while (x.updateLowerBound(cste - y.getUB(), this, Reason.r(y.getMaxLit()))
-                    | y.updateUpperBound(cste - x.getLB(), this, Reason.r(x.getMinLit()))) ;
-            while (x.updateUpperBound(cste - y.getLB(), this, Reason.r(y.getMinLit()))
-                    | y.updateLowerBound(cste - x.getUB(), this, Reason.r(x.getMaxLit()))) ;
+            while (x.updateLowerBound(cste - y.getUB(), this, this.r(y.getMaxLit()))
+                    | y.updateUpperBound(cste - x.getLB(), this, this.r(x.getMinLit()))) ;
+            while (x.updateUpperBound(cste - y.getLB(), this, this.r(y.getMinLit()))
+                    | y.updateLowerBound(cste - x.getUB(), this, this.r(x.getMaxLit()))) ;
         } else {
             while (x.updateLowerBound(cste - y.getUB(), this)
                     | y.updateUpperBound(cste - x.getLB(), this)) ;
