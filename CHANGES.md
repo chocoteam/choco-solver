@@ -14,6 +14,7 @@ NEXT MILESTONE
 - Reduce runtime for building table reformulations by excluding the result variable from the tuple generation
 - Fix integer overflow in PropDivXYZLight
 - Fix bounded domains management with LCG in PropDivXYZ
+- Faster modulo constraint with large domains
 
 ### Deprecated API (to be removed in next release):
 

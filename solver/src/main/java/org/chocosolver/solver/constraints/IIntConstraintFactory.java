@@ -789,9 +789,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         if (Y.isInstantiated()) {
             return mod(X, Y.getValue(), Z);
         } else if (TuplesFactory.canBeTupledWithResult(Z, X, Y)) {
-            return table(new IntVar[]{Z, X, Y}, TuplesFactory.modulo(Z, X, Y));
-        } else {
-            if (ref().getSolver().isLCG()) {
+            Tuples tuples = TuplesFactory.modulo(Z, X, Y);
+            return table(new IntVar[]{Z, X, Y}, tuples);
+        } else if (ref().getSolver().isLCG() || (long) X.getDomainSize() * Y.getDomainSize() > PropModXYZ.THRESHOLD) {
                 int xl = abs(X.getLB());
                 int xu = abs(X.getUB());
                 int b = Math.max(xl, xu);
@@ -800,8 +800,15 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 IntVar t2 = model.intVar(model.generateName("T2_"), -b, b, true);
                 div(X, Y, t1).post();
                 times(t1, Y, t2).post();
-                return sum(new IntVar[]{Z, t2}, "=", X);
-            }
+                // compute real modulo
+                int maxMod = Math.max(abs(Y.getLB()), abs(Y.getUB())) - 1;
+                IntVar modulo = model.intVar(model.generateName("mod_"), -maxMod, maxMod);
+                arithm(X,"-",t2,"=",modulo).post();
+                // The modulo has the same sign as X
+                ref().ifOnlyIf(arithm(X,">=",0), arithm(modulo,">=",0));
+                // returns equality constraint
+                return arithm(Z,"=",modulo);
+        } else {
             return new Constraint(X.getName() + " MOD " + Y.getName() + " = " + Z.getName(), new PropModXYZ(X, Y, Z));
         }
     }
