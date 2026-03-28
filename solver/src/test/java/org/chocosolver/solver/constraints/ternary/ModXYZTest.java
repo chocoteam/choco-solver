@@ -89,6 +89,20 @@ public class ModXYZTest extends AbstractTernaryTest {
 	}
 
 	@Test(groups="1s", timeOut=60000)
+	public void testMod3VarBigValues() throws ContradictionException {
+		Model model = new Model("model");
+		int maxVal = 100_000;
+		IntVar x = model.intVar("x", -maxVal, maxVal);
+		IntVar y = model.intVar("y", -maxVal, maxVal, false);
+		IntVar z = model.intVar("z", -maxVal, maxVal);
+		model.mod(x, y, z).post();
+		model.getSolver().propagate();
+		model.getSolver().limitSolution(10L);
+		while (model.getSolver().solve());
+		Assert.assertEquals(10L, model.getSolver().getSolutionCount());
+	}
+
+	@Test(groups="1s", timeOut=60000)
 	public void testMod3VarNegValues2() throws ContradictionException {
 		Model model = new Model("model");
 		IntVar x = model.intVar("x", -5, 0);
@@ -176,16 +190,16 @@ public class ModXYZTest extends AbstractTernaryTest {
 	}
 
 	@Test(groups="1s", timeOut=60000)
-	public void testMod3VarsPropMod() {
+	public void testMod3VarsPropModSmallDomain() {
 		Model model = new Model("model");
-		IntVar x = model.intVar("x", 0,10_000);
-		IntVar y = model.intVar("y", 0, 10_000);
-		IntVar z = model.intVar("z", 0, 10_000);
+		IntVar x = model.intVar("x", 1,100);
+		IntVar y = model.intVar("y", 1, 100);
+		IntVar z = model.intVar("z", 1, 100);
 		model.mod(x, y, z).post();
 		Assert.assertEquals(model.getNbCstrs(), 1);
 		Constraint constraint = model.getCstrs()[0];
 		Assert.assertEquals(constraint.getPropagators().length, 1);
-        Assert.assertSame(constraint.getPropagators()[0].getClass(), PropModXYZ.class);
+		Assert.assertSame(constraint.getPropagators()[0].getClass(), PropModXYZ.class);
 	}
 
 	@Test(groups="1s", timeOut=60000)
