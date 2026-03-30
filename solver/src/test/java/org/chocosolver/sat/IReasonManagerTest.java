@@ -30,20 +30,17 @@ public class IReasonManagerTest {
         for(int i = 0; i < 5; i++){
             assertEquals(r.getConflict()._g(i), i);
         }
-        System.out.println(r.getConflict());
         env.worldPush();
         Reason r2 = manager.gather(r, 5);
         assertEquals(r2.getConflict().size(), 6);
         for(int i = 0; i < 6; i++){
             assertEquals(r2.getConflict()._g(i), i);
         }
-        System.out.println(r2.getConflict());
         env.worldPop();
         env.worldPush();
         Reason r3 = manager.r(0,7,8);
         Reason r4 = manager.gather(r3, 9);
         assertEquals(r4.getConflict().size(), 4);
-        System.out.println(r4.getConflict());
         for(int i = 1; i < 3; i++){
             assertEquals(r4.getConflict()._g(i), i + 6);
         }
