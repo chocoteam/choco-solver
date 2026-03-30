@@ -232,9 +232,16 @@ public interface IReasonManager {
         }
 
         private void ensureCapacity(int startIndex, int size) {
-            while (startIndex + size > buffer.length) {
-                buffer = Arrays.copyOf(buffer, (int) (buffer.length * 1.5));
+            int current = buffer.length;
+            int required = startIndex + size;
+            if (required <= buffer.length) {
+                return;
             }
+            int newLen = current + (current >> 1);
+            if (newLen < required) {
+                newLen = required;
+            }
+            buffer = Arrays.copyOf(buffer, newLen);
         }
 
         @Override
