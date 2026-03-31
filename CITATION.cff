@@ -22,7 +22,7 @@ identifiers:
     description: The concept DOI of the software
 repository-code: 'https://github.com/chocoteam/choco-solver'
 url: 'https://choco-solver.org/'
-license: BSD-4-Clause
+license: BSD-3-Clause
 preferred-citation:
   authors:
     - given-names: Charles

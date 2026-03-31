@@ -2,11 +2,8 @@
 <!--
 
     This file is part of choco, http://choco-solver.org/
-
-    Copyright (c) 2026, IMT Atlantique. All rights reserved.
-
-    Licensed under the BSD 4-clause license.
-
+    Copyright (c) 1999, IMT Atlantique.
+    SPDX-License-Identifier: BSD-3-Clause.
     See LICENSE file in the project root for full license information.
 
 -->
@@ -22,6 +19,13 @@
     <description>
         A Free and Open-Source library dedicated to Constraint Programming.
     </description>
+    <inceptionYear>1999</inceptionYear>
+    <licenses>
+        <license>
+            <name>BSD-3-Clause</name>
+            <url>https://spdx.org/licenses/BSD-3-Clause.html</url>
+        </license>
+    </licenses>
 
     <modules>
         <module>solver</module>
@@ -75,13 +79,6 @@
         <developerConnection>scm:git:git@github.com:chocoteam/choco-solver.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
-
-    <licenses>
-        <license>
-            <name>BSD 4-Clause License</name>
-            <url>https://spdx.org/licenses/BSD-4-Clause.html</url>
-        </license>
-    </licenses>
 
     <developers>
         <developer>
@@ -375,7 +372,7 @@
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>4.1</version>
+                <version>4.3</version>
                 <configuration>
                     <header>${main_dir}/etc/header.txt</header>
                     <!--<header>LICENSE</header>-->

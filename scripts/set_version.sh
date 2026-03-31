@@ -36,7 +36,7 @@ then
 
     sedInPlace "s%Current stable version is .*.%Current stable version is $VERSION ($d).%"  README.md
     sedInPlace "s%<version>.*</version>%<version>$VERSION</version>%"  README.md
-    sedInPlace "s%Choco-solver is distributed.*.%Choco-solver is distributed under BSD 4-Clause License \(Copyright \(c\) 1999-$YEAR, IMT Atlantique).%"  README.md
+    sedInPlace "s%Choco-solver is distributed.*.%Choco-solver is distributed under BSD 3-Clause License \(Copyright \(c\) 1999-$YEAR, IMT Atlantique).%"  README.md
 
     ## The LICENSE
     sedInPlace "s%Copyright.*.%Copyright (c) $YEAR, IMT Atlantique%"  LICENSE

@@ -27,7 +27,7 @@ Choco-solver comes with:
 
 But also, facilities to interact with the search loop, factories to help modelling, many samples, etc.
 
-Choco-solver is distributed under BSD 4-Clause License (Copyright (c) 1999-2026, IMT Atlantique).
+Choco-solver is distributed under BSD 3-Clause License (Copyright (c) 1999-2026, IMT Atlantique).
 
 Contact:
 - [Choco-solver on Discord](https://discord.gg/aH6zxa7e64)
