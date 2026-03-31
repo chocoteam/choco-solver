@@ -14,7 +14,6 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.binary.*;
 import org.chocosolver.solver.constraints.binary.element.ElementFactory;
 import org.chocosolver.solver.constraints.extension.Tuples;
@@ -296,8 +295,6 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                     }
                 default:
                     switch (op2) {
-                        default:
-                            throw new SolverException("Unknown operators for arithm constraint");
                         case "*": // v1 OP v2 * cste
                             if (Operator.EQ.name().equals(op1)) {
                                 return times(var2, cste, var1);
@@ -318,6 +315,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                                 ref().div(var2, ref().intVar(cste), var4).post();
                                 return arithm(var1, op1, var4);
                             }
+                        default:
+                            throw new SolverException("Unknown operators for arithm constraint");
                     }
             }
         } else {
@@ -458,6 +457,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * <p>
      * - <b>CT</b>: table constraint which applies the Compact-Table algorithm,<br/>
      * - <b>CT+</b>: table constraint which applies the Compact-Table algorithm on allowed tuples,<br/>
+     * - <b>STR2+</b>: table constraint which applies the STR2 algorithm on allowed tuples,<br/>
      * - <b>AC2001</b>: table constraint which applies the AC2001 algorithm,<br/>
      * - <b>AC3</b>: table constraint which applies the AC3 algorithm,<br/>
      * - <b>AC3rm</b>: table constraint which applies the AC3 rm algorithm,<br/>
@@ -466,7 +466,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      *
      * @param var1   first variable
      * @param var2   second variable
-     * @param tuples the relation between the two variables, among {"AC3", "AC3rm", "AC3bit+rm", "AC2001", "CT+", "CT", "FC"}
+     * @param tuples the relation between the two variables, among {"AC3", "AC3rm", "AC3bit+rm", "AC2001", "CT+", "CT", "STR2+","FC"}
      */
     default Constraint table(IntVar var1, IntVar var2, Tuples tuples, String algo) {
         Object[] args = variableUniqueness(new IntVar[]{var1, var2});
@@ -501,6 +501,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                     } else {
                         p = new PropCompactTableNeg(new IntVar[]{var1, var2}, tuples);
                     }
+                    break;
+                case "STR2+":
+                    p = new PropTableStr2(new IntVar[]{var1, var2}, tuples);
                     break;
                 case "AC2001":
                     p = new PropBinAC2001(var1, var2, tuples);
@@ -1606,7 +1609,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param X collection of orthotopes
      * @param l collection of lengths (each length should be > 0)
      * @return a non-overlapping constraint
-     * @implNote This constraint is more general than {@link #diffN(IntVar[][], int[][])} that only considers 2 dimensions.
+     * @implNote This constraint is more general than {@link #diffN(IntVar[], IntVar[], IntVar[], IntVar[], boolean)}  that only considers 2 dimensions.
      * However, it is also more complex and less efficient.
      * @see #diffN(IntVar[][], int[][])
      */
@@ -2662,8 +2665,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      *
      * @param vars   variables forming the tuples
      * @param tuples the relation between the variables (list of allowed/forbidden tuples)
-     * @see Settings#getMaxSizeInMBToUseCompactTable()
-     * @see Settings#setMaxSizeInMBToUseCompactTable(int)
+     * @see org.chocosolver.solver.SettingsBuilder#getMaxSizeInMBToUseCompactTable()
+     * @see org.chocosolver.solver.SettingsBuilder#setMaxSizeInMBToUseCompactTable(int)
      */
     default Constraint table(IntVar[] vars, Tuples tuples) {
         String algo = "CT";
@@ -2724,12 +2727,12 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         if (!tuples.allowUniversalValue() && vars.length == 2) {
             switch (algo) {
                 case "FC":
+                case "CT+":
+                case "STR2+":
                     return table(vars[0], vars[1], tuples, algo);
                 case "AC2001":
                 case "GAC2001":
                     return table(vars[0], vars[1], tuples, "AC2001");
-                case "CT+":
-                    return table(vars[0], vars[1], tuples, "CT+");
                 case "GAC3rm":
                     return table(vars[0], vars[1], tuples, "AC3rm");
                 default:
