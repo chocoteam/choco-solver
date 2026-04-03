@@ -109,7 +109,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint arithm(IntVar x, String op, int cste) {
         // this preprocessing is no longer permitted within a dynamical context
-        if (ref().getSolver().getNodeCount() == 0) {
+        if (!ref().getSolver().isSolving()) {
             switch (op) {
                 case "=": {
                     if (x.isInstantiatedTo(cste)) return ref().trueConstraint();
@@ -289,7 +289,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint arithm(IntVar var1, String op, IntVar var2) {
         // this preprocessing is no longer permitted within a dynamical context
-        if (ref().getSolver().getNodeCount() == 0) {
+        if (!ref().getSolver().isSolving()) {
             if (var2.isInstantiated()) {
                 return arithm(var1, op, var2.getValue());
             }
