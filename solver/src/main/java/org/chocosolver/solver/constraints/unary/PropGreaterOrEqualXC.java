@@ -42,9 +42,10 @@ public class PropGreaterOrEqualXC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        vars[0].updateLowerBound(constant, this, Reason.undef());
-        assert vars[0].getLB() >= constant;
-        this.setPassive();
+        // with views such as abs(...), the prop can be not entailed after initial propagation
+        if (vars[0].getLB() >= constant || vars[0].updateLowerBound(constant, this, Reason.undef())) {
+            this.setPassive();
+        }
     }
 
     @Override

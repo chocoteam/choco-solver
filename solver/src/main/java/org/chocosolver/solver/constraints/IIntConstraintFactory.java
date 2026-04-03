@@ -100,15 +100,52 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     //##################################################################################################################
 
     /**
-     * Creates an arithmetic constraint : var op cste,
+     * Creates an arithmetic constraint : x op cste,
      * where op in {"=", "!=", ">","<",">=","<="}
      *
-     * @param var  a variable
+     * @param x  a variable
      * @param op   an operator
      * @param cste a constant
      */
-    default Constraint arithm(IntVar var, String op, int cste) {
-        return new Arithmetic(var, Operator.get(op), cste);
+    default Constraint arithm(IntVar x, String op, int cste) {
+        // this preprocessing is no longer permitted within a dynamical context
+        if (!ref().getSolver().isSolving()) {
+            switch (op) {
+                case "=": {
+                    if (x.isInstantiatedTo(cste)) return ref().trueConstraint();
+                    if (!x.contains(cste)) return ref().falseConstraint();
+                    break;
+                }
+                case "!=": {
+                    if (x.isInstantiatedTo(cste)) return ref().falseConstraint();
+                    if (!x.contains(cste)) return ref().trueConstraint();
+                    break;
+                }
+                case ">": {
+                    if (x.getLB() > cste) return ref().trueConstraint();
+                    if (x.getUB() <= cste) return ref().falseConstraint();
+                    break;
+                }
+                case ">=": {
+                    if (x.getLB() >= cste) return ref().trueConstraint();
+                    if (x.getUB() < cste) return ref().falseConstraint();
+                    break;
+                }
+                case "<": {
+                    if (x.getUB() < cste) return ref().trueConstraint();
+                    if (x.getLB() >= cste) return ref().falseConstraint();
+                    break;
+                }
+                case "<=": {
+                    if (x.getUB() <= cste) return ref().trueConstraint();
+                    if (x.getLB() > cste) return ref().falseConstraint();
+                    break;
+                }
+                default:
+                    throw new SolverException("Unknown operator " + op + ". Should be within : {\"=\", \"!=\", \">\",\"<\",\">=\",\"<=\"}");
+            }
+        }
+        return new Arithmetic(x, Operator.get(op), cste);
     }
 
     /**
@@ -251,11 +288,48 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param var2 second variable
      */
     default Constraint arithm(IntVar var1, String op, IntVar var2) {
-        if (var2.isInstantiated()) {
-            return arithm(var1, op, var2.getValue());
-        }
-        if (var1.isInstantiated()) {
-            return arithm(var2, Operator.getFlip(op), var1.getValue());
+        // this preprocessing is no longer permitted within a dynamical context
+        if (!ref().getSolver().isSolving()) {
+            if (var2.isInstantiated()) {
+                return arithm(var1, op, var2.getValue());
+            }
+            if (var1.isInstantiated()) {
+                return arithm(var2, Operator.getFlip(op), var1.getValue());
+            }
+            switch (op) {
+                case "=": {
+                    if (var2.isInstantiated() && var1.isInstantiatedTo(var2.getValue())) return ref().trueConstraint();
+                    if (var1.getLB() > var2.getUB() || var2.getLB() > var1.getUB()) return ref().falseConstraint();
+                    break;
+                }
+                case "!=": {
+                    if (var2.isInstantiated() && var1.isInstantiatedTo(var2.getValue())) return ref().falseConstraint();
+                    if (var1.getLB() > var2.getUB() || var2.getLB() > var1.getUB()) return ref().trueConstraint();
+                    break;
+                }
+                case ">": {
+                    if (var1.getLB() > var2.getUB()) return ref().trueConstraint();
+                    if (var1.getUB() <= var2.getLB()) return ref().falseConstraint();
+                    break;
+                }
+                case ">=": {
+                    if (var1.getLB() >= var2.getUB()) return ref().trueConstraint();
+                    if (var1.getUB() < var2.getLB()) return ref().falseConstraint();
+                    break;
+                }
+                case "<": {
+                    if (var1.getUB() < var2.getLB()) return ref().trueConstraint();
+                    if (var1.getLB() >= var2.getUB()) return ref().falseConstraint();
+                    break;
+                }
+                case "<=": {
+                    if (var1.getUB() <= var2.getLB()) return ref().trueConstraint();
+                    if (var1.getLB() > var2.getUB()) return ref().falseConstraint();
+                    break;
+                }
+                default:
+                    throw new SolverException("Unknown operator " + op + ". Should be within : {\"=\", \"!=\", \">\",\"<\",\">=\",\"<=\"}");
+            }
         }
         return new Arithmetic(var1, Operator.get(op), var2);
     }

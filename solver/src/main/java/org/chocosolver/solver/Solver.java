@@ -849,6 +849,16 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
+     * Return the minimum conflicting set that is causing contradiction.
+     *
+     * @return minimumConflictingSet of constraints (the root cause of contradiction)
+     * @throws SolverException when MCS is called during solving
+     */
+    public List<Constraint> findMinimumConflictingSet() {
+        return findMinimumConflictingSet(Arrays.asList(getModel().getCstrs()));
+    }
+
+    /**
      * Sets the following action in the search to be a restart instruction.
      * Note that the restart may not be immediate
      */
