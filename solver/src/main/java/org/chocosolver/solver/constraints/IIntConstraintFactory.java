@@ -108,6 +108,39 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param cste a constant
      */
     default Constraint arithm(IntVar var, String op, int cste) {
+        switch (op) {
+            case "=" : {
+                if (var.isInstantiatedTo(cste)) return ref().trueConstraint();
+                if (!var.contains(cste)) return ref().falseConstraint();
+                break;
+            }
+            case "!=" : {
+                if (var.isInstantiatedTo(cste)) return ref().falseConstraint();
+                if (!var.contains(cste)) return ref().trueConstraint();
+                break;
+            }
+            case ">" : {
+                if (var.getLB() > cste) return ref().trueConstraint();
+                if (var.getUB() <= cste) return ref().falseConstraint();
+                break;
+            }
+            case ">=" : {
+                if (var.getLB() >= cste) return ref().trueConstraint();
+                if (var.getUB() < cste) return ref().falseConstraint();
+                break;
+            }
+            case "<" : {
+                if (var.getUB() < cste) return ref().trueConstraint();
+                if (var.getLB() >= cste) return ref().falseConstraint();
+                break;
+            }
+            case "<=" : {
+                if (var.getUB() <= cste) return ref().trueConstraint();
+                if (var.getLB() > cste) return ref().falseConstraint();
+                break;
+            }
+            default: throw new SolverException("Unknown operator " + op +". Should be within : {\"=\", \"!=\", \">\",\"<\",\">=\",\"<=\"}");
+        }
         return new Arithmetic(var, Operator.get(op), cste);
     }
 
@@ -256,6 +289,39 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         }
         if (var1.isInstantiated()) {
             return arithm(var2, Operator.getFlip(op), var1.getValue());
+        }
+        switch (op) {
+            case "=" : {
+                if (var2.isInstantiated() && var1.isInstantiatedTo(var2.getValue())) return ref().trueConstraint();
+                if (var1.getLB() > var2.getUB() || var2.getLB() > var1.getUB()) return ref().falseConstraint();
+                break;
+            }
+            case "!=" : {
+                if (var2.isInstantiated() && var1.isInstantiatedTo(var2.getValue())) return ref().falseConstraint();
+                if (var1.getLB() > var2.getUB() || var2.getLB() > var1.getUB()) return ref().trueConstraint();
+                break;
+            }
+            case ">" : {
+                if (var1.getLB() > var2.getUB()) return ref().trueConstraint();
+                if (var1.getUB() <= var2.getLB()) return ref().falseConstraint();
+                break;
+            }
+            case ">=" : {
+                if (var1.getLB() >= var2.getUB()) return ref().trueConstraint();
+                if (var1.getUB() < var2.getLB()) return ref().falseConstraint();
+                break;
+            }
+            case "<" : {
+                if (var1.getUB() < var2.getLB()) return ref().trueConstraint();
+                if (var1.getLB() >= var2.getUB()) return ref().falseConstraint();
+                break;
+            }
+            case "<=" : {
+                if (var1.getUB() <= var2.getLB()) return ref().trueConstraint();
+                if (var1.getLB() > var2.getUB()) return ref().falseConstraint();
+                break;
+            }
+            default: throw new SolverException("Unknown operator " + op +". Should be within : {\"=\", \"!=\", \">\",\"<\",\">=\",\"<=\"}");
         }
         return new Arithmetic(var1, Operator.get(op), var2);
     }

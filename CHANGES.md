@@ -15,6 +15,7 @@ NEXT MILESTONE
 - Fix integer overflow in PropDivXYZLight
 - Fix bounded domains management with LCG in PropDivXYZ
 - Faster modulo constraint with large domains
+- Add arithm preprocessing
 
 ### Deprecated API (to be removed in next release):
 
