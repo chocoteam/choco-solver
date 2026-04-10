@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.reification;
@@ -55,17 +52,17 @@ public class PropXneYHalfReif extends Propagator<IntVar> {
             // if b is true, then x and y must be different
             if (x.isInstantiated()) {
                 y.removeValue(x.getValue(), this,
-                        lcg() ? Reason.r(x.getValLit(), b.getValLit()) : Reason.undef());
+                        lcg() ? this.r(x.getValLit(), b.getValLit()) : Reason.undef());
                 setPassive();
             }else if (y.isInstantiated()) {
                 x.removeValue(y.getValue(), this,
-                        lcg() ? Reason.r(y.getValLit(), b.getValLit()) : Reason.undef());
+                        lcg() ? this.r(y.getValLit(), b.getValLit()) : Reason.undef());
                 setPassive();
             }
         } else if (x.isInstantiated() && y.isInstantiated() && x.getValue() == y.getValue()) {
             // if x and y are instantiated and equal, then b must be false
             b.setToFalse(this,
-                    lcg() ? Reason.r(x.getValLit(), y.getValLit()) : Reason.undef());
+                    lcg() ? this.r(x.getValLit(), y.getValLit()) : Reason.undef());
         }
     }
 

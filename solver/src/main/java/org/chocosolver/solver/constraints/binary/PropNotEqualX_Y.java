@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.binary;
@@ -63,15 +60,15 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (x.isInstantiated() && y.isInstantiated() && x.isInstantiatedTo(y.getValue())) {
-            this.fails(lcg() ? Reason.r(x.getValLit(), y.getValLit()) : Reason.undef());
+            this.fails(lcg() ? this.r(x.getValLit(), y.getValLit()) : Reason.undef());
         }
 
         if (x.isInstantiated()) {
-            if (y.removeValue(x.getValue(), this, lcg() ? Reason.r(x.getValLit()) : Reason.undef()) || !y.contains(x.getValue())) {
+            if (y.removeValue(x.getValue(), this, lcg() ? this.r(x.getValLit()) : Reason.undef()) || !y.contains(x.getValue())) {
                 this.setPassive();
             }
         } else if (y.isInstantiated()) {
-            if (x.removeValue(y.getValue(), this, lcg() ? Reason.r(y.getValLit()) : Reason.undef()) || !x.contains(y.getValue())) {
+            if (x.removeValue(y.getValue(), this, lcg() ? this.r(y.getValLit()) : Reason.undef()) || !x.contains(y.getValue())) {
                 this.setPassive();
             }
         } else if (x.getUB() < (y.getLB()) || (y.getUB()) < x.getLB()) {

@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.nary.knapsack;
@@ -81,10 +78,10 @@ public class PropKnapsack extends Propagator<IntVar> {
             maxPower += energy[i] * lb;
         }
         if (power.getLB() < maxPower) {
-            power.updateLowerBound(maxPower, this, lcg() ? Propagator.lbounds(power, vars) : Reason.undef());
+            power.updateLowerBound(maxPower, this, lcg() ? this.lbounds(power, vars) : Reason.undef());
         }
         if (remainingCapacity < 0) {
-            this.fails(lcg() ? Propagator.lbounds(power, vars) : Reason.undef());
+            this.fails(lcg() ? this.lbounds(power, vars) : Reason.undef());
         } else {
             int idx;
             for (int i = 0; i < n; i++) {
@@ -125,7 +122,7 @@ public class PropKnapsack extends Propagator<IntVar> {
             for(int j = 0; j <= i; j++){
                 lits[m++] = vars[order[j]].getMaxLit();
             }
-            r = Reason.r(lits);
+            r = this.r(lits);
         }
         return r;
     }

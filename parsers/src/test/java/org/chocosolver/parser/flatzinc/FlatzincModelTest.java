@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.parser.flatzinc;
@@ -32,7 +29,6 @@ public class FlatzincModelTest {
         InputStream in = new ByteArrayInputStream(("var 1 .. 2: a::output_var;" + "constraint int_ne(a, 1);" + "solve satisfy;").getBytes());
 
         Flatzinc fzn = new Flatzinc(false, false, 1);
-        fzn.createSettings();
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model model = fzn.getModel();
@@ -48,7 +44,6 @@ public class FlatzincModelTest {
                 "solve satisfy;").getBytes());
 
         Flatzinc fzn = new Flatzinc(false, false, 1);
-        fzn.createSettings();
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model model = fzn.getModel();
@@ -66,7 +61,6 @@ public class FlatzincModelTest {
                 "solve satisfy;").getBytes());
 
         Flatzinc fzn = new Flatzinc(false, false, 1);
-        fzn.createSettings();
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model model = fzn.getModel();
@@ -86,7 +80,6 @@ public class FlatzincModelTest {
                 "solve satisfy;").getBytes());
 
         Flatzinc fzn = new Flatzinc(false, false, 1);
-        fzn.createSettings();
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model model = fzn.getModel();
@@ -104,7 +97,6 @@ public class FlatzincModelTest {
                 "solve  maximize X_INTRODUCED_1_;").getBytes());
 
         Flatzinc fzn = new Flatzinc(false, false, 1);
-        fzn.createSettings();
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model model = fzn.getModel();
@@ -131,7 +123,6 @@ public class FlatzincModelTest {
                 "constraint int_lin_le(X_INTRODUCED_11_,[X_INTRODUCED_0_,X_INTRODUCED_1_,X_INTRODUCED_2_,X_INTRODUCED_3_,X_INTRODUCED_4_,X_INTRODUCED_5_,X_INTRODUCED_6_,X_INTRODUCED_7_,X_INTRODUCED_8_,X_INTRODUCED_9_],3);\n" +
                 "solve :: warm_start_int(x,X_INTRODUCED_12_) satisfy;").getBytes());
         Flatzinc fzn = new Flatzinc(false, false, 1);
-        fzn.createSettings();
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         fzn.configureSearch();
@@ -148,7 +139,6 @@ public class FlatzincModelTest {
     public void testEmptyListOfVariablesInSearch() {
         InputStream in = new ByteArrayInputStream(("solve :: int_search([], largest, indomain_random, complete) satisfy;").getBytes());
         Flatzinc fzn = new Flatzinc(false, false, 1);
-        fzn.createSettings();
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         fzn.configureSearch();
@@ -163,7 +153,6 @@ public class FlatzincModelTest {
                 "constraint fzn_all_equal_int_reif([2,2],false);\n" +
                 "solve  satisfy;\n").getBytes());
         Flatzinc fzn = new Flatzinc(false, false, 1);
-        fzn.createSettings();
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         fzn.configureSearch();
@@ -184,7 +173,6 @@ public class FlatzincModelTest {
                         "solve  satisfy;\n").getBytes());
 
         Flatzinc fzn = new Flatzinc(true, false, 1);
-        fzn.createSettings();
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model model = fzn.getModel();
@@ -207,7 +195,6 @@ public class FlatzincModelTest {
                         "solve  satisfy;\n").getBytes());
 
         Flatzinc fzn = new Flatzinc(true, false, 1);
-        fzn.createSettings();
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model model = fzn.getModel();
@@ -231,7 +218,6 @@ public class FlatzincModelTest {
                         "\n").getBytes());
 
         Flatzinc fzn = new Flatzinc(true, false, 1);
-        fzn.createSettings();
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model model = fzn.getModel();
@@ -253,7 +239,6 @@ public class FlatzincModelTest {
                         "\n").getBytes());
 
         Flatzinc fzn = new Flatzinc(true, false, 1);
-        fzn.createSettings();
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model model = fzn.getModel();
@@ -274,7 +259,6 @@ public class FlatzincModelTest {
                         "\n").getBytes());
 
         Flatzinc fzn = new Flatzinc(true, false, 1);
-        fzn.createSettings();
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model model = fzn.getModel();
@@ -296,7 +280,6 @@ public class FlatzincModelTest {
                         "\n").getBytes());
 
         Flatzinc fzn = new Flatzinc(true, false, 1);
-        fzn.createSettings();
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model model = fzn.getModel();
@@ -319,7 +302,6 @@ public class FlatzincModelTest {
                         "\n").getBytes());
 
         Flatzinc fzn = new Flatzinc(true, false, 1);
-        fzn.createSettings();
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model model = fzn.getModel();
@@ -340,7 +322,6 @@ public class FlatzincModelTest {
                         "\n").getBytes());
 
         Flatzinc fzn = new Flatzinc(true, false, 1);
-        fzn.createSettings();
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model model = fzn.getModel();
@@ -366,7 +347,6 @@ public class FlatzincModelTest {
                         "\n").getBytes());
 
         Flatzinc fzn = new Flatzinc(true, false, 1);
-        fzn.createSettings();
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model model = fzn.getModel();
@@ -390,7 +370,6 @@ public class FlatzincModelTest {
                         "\n").getBytes());
 
         Flatzinc fzn = new Flatzinc(true, false, 1);
-        fzn.createSettings();
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model model = fzn.getModel();

@@ -1,17 +1,14 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.variables.view.integer;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Providers;
-import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
@@ -220,7 +217,7 @@ public class IntAffineViewTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProviderClass = Providers.class, dataProvider = "trueOrFalse")
     public void testViewAndReification(boolean lcg) {
-        Model m = new Model(Settings.init().setLCG(lcg));
+        Model m = new Model(SettingsBuilder.init().setLCG(lcg));
         IntVar x = m.intVar("x", -1, 6);
         IntVar y = m.intView(1, x, -5);
         BoolVar b = m.member(y, 0, 0).reify();

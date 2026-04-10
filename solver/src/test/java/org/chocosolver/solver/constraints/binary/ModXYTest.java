@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.binary;
@@ -153,6 +150,7 @@ public class ModXYTest extends AbstractBinaryTest {
         IntVar x = model.intVar("x", 0,9);
         IntVar y = model.intVar("y", 0, 9);
         model.mod(x, 0, y).post();
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 5);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -163,6 +161,7 @@ public class ModXYTest extends AbstractBinaryTest {
         IntVar z = model.intVar("z", 3);
         Constraint cstr = model.mod(x, y, z);
         Assert.assertTrue(cstr.getPropagator(0) instanceof PropMember);
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 10);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -174,6 +173,7 @@ public class ModXYTest extends AbstractBinaryTest {
         Assert.assertEquals(model.getNbCstrs(), 1);
         Constraint constraint = model.getCstrs()[0];
         Assert.assertEquals(constraint.getName(), ConstraintsName.TABLE);
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 10);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -186,5 +186,32 @@ public class ModXYTest extends AbstractBinaryTest {
         Constraint constraint = model.getCstrs()[0];
         Assert.assertEquals(constraint.getPropagators().length, 1);
         Assert.assertSame(constraint.getPropagators()[0].getClass(), PropModXY.class);
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 10_001);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMod2VarsTableReified() {
+        Model model = new Model("model");
+        int maxVal = 10_000;
+        IntVar x = model.intVar("x", -maxVal,maxVal);
+        IntVar y = model.intVar("y", -maxVal, maxVal);
+        model.ifThen(model.arithm(x, ">", 10), model.mod(x, 5, y));
+        long solLimit = 1000L;
+        model.getSolver().limitSolution(solLimit);
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), solLimit);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMod3VarBigValues() throws ContradictionException {
+        Model model = new Model("model");
+        int maxVal = 1_000_000;
+        IntVar x = model.intVar("x", -maxVal, maxVal);
+        IntVar y = model.intVar("y", 5);
+        IntVar z = model.intVar("z", -maxVal, maxVal);
+        model.mod(x, y, z).post();
+        model.getSolver().propagate();
+        long solLimit = 1000L;
+        model.getSolver().limitSolution(solLimit);
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), solLimit);
     }
 }

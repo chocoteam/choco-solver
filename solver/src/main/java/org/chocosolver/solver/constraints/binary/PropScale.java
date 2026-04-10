@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.binary;
@@ -54,16 +51,16 @@ public class PropScale extends Propagator<IntVar> {
 
     @Override
     public final void propagate(int evtmask) throws ContradictionException {
-        X.updateLowerBound(MathUtils.divCeil(Z.getLB(), Y), this, lcg() ? Reason.r(Z.getMinLit()) : Reason.undef());
-        X.updateUpperBound(MathUtils.divFloor(Z.getUB(), Y), this, lcg() ? Reason.r(Z.getMaxLit()) : Reason.undef());
+        X.updateLowerBound(MathUtils.divCeil(Z.getLB(), Y), this, lcg() ? this.r(Z.getMinLit()) : Reason.undef());
+        X.updateUpperBound(MathUtils.divFloor(Z.getUB(), Y), this, lcg() ? this.r(Z.getMaxLit()) : Reason.undef());
         boolean hasChanged;
-        hasChanged = Z.updateLowerBound(X.getLB() * Y, this, lcg() ? Reason.r(X.getMinLit()) : Reason.undef());
-        hasChanged |= Z.updateUpperBound(X.getUB() * Y, this, lcg() ? Reason.r(X.getMaxLit()) : Reason.undef());
+        hasChanged = Z.updateLowerBound(X.getLB() * Y, this, lcg() ? this.r(X.getMinLit()) : Reason.undef());
+        hasChanged |= Z.updateUpperBound(X.getUB() * Y, this, lcg() ? this.r(X.getMaxLit()) : Reason.undef());
         if (enumerated) {
             int zub = X.getUB();
             for (int v = X.getLB(); v <= zub; v = X.nextValue(v)) {
                 if (!Z.contains(v * Y)) {
-                    X.removeValue(v, this, lcg() ? Reason.r(Z.getLit(v * Y, IntVar.LR_EQ)) : Reason.undef());
+                    X.removeValue(v, this, lcg() ? this.r(Z.getLit(v * Y, IntVar.LR_EQ)) : Reason.undef());
                 }
             }
             int v = Z.getLB();
@@ -73,7 +70,7 @@ public class PropScale extends Propagator<IntVar> {
                     Z.removeValue(v, this, Reason.undef());
                 }
                 if (!X.contains(v / Y)) {
-                    Z.removeValue(v, this, lcg() ? Reason.r(X.getLit(v / Y, IntVar.LR_EQ)) : Reason.undef());
+                    Z.removeValue(v, this, lcg() ? this.r(X.getLit(v / Y, IntVar.LR_EQ)) : Reason.undef());
                 }
             }
         } else if (hasChanged && Z.hasEnumeratedDomain()) {

@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.binary;
@@ -86,18 +83,18 @@ public class PropAbsoluteLight extends Propagator<IntVar> {
             int l = Y.getLB();
             int u = Y.getUB();
             if (l >= 0) {
-                absY.updateLowerBound(l, this, lcg() ? Reason.r(Y.getMinLit()) : Reason.undef());
-                absY.updateUpperBound(u, this, lcg() ? Reason.r(Y.getMinLit(), Y.getMaxLit()) : Reason.undef());
+                absY.updateLowerBound(l, this, lcg() ? this.r(Y.getMinLit()) : Reason.undef());
+                absY.updateUpperBound(u, this, lcg() ? this.r(Y.getMinLit(), Y.getMaxLit()) : Reason.undef());
             } else if (u <= 0) {
-                absY.updateLowerBound(-u, this, lcg() ? Reason.r(Y.getMaxLit()) : Reason.undef());
-                absY.updateUpperBound(-l, this, lcg() ? Reason.r(Y.getMaxLit(), Y.getMinLit()) : Reason.undef());
+                absY.updateLowerBound(-u, this, lcg() ? this.r(Y.getMaxLit()) : Reason.undef());
+                absY.updateUpperBound(-l, this, lcg() ? this.r(Y.getMaxLit(), Y.getMinLit()) : Reason.undef());
             } else {
                 int t = Math.max(-l, u);
-                absY.updateUpperBound(t, this, lcg() ? Reason.r(Y.getMaxLit(), Y.getMinLit()) : Reason.undef());
+                absY.updateUpperBound(t, this, lcg() ? this.r(Y.getMaxLit(), Y.getMinLit()) : Reason.undef());
             }
             int au = absY.getUB();
-            loop = Y.updateUpperBound(au, this, lcg() ? Reason.r(absY.getMaxLit()) : Reason.undef());
-            loop |= Y.updateLowerBound(-au, this, lcg() ? Reason.r(absY.getMaxLit()) : Reason.undef());
+            loop = Y.updateUpperBound(au, this, lcg() ? this.r(absY.getMaxLit()) : Reason.undef());
+            loop |= Y.updateLowerBound(-au, this, lcg() ? this.r(absY.getMaxLit()) : Reason.undef());
         }while(loop);
     }
 

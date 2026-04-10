@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.binary;
@@ -29,16 +26,20 @@ public class PropModXY extends Propagator<IntVar> {
     private final IntVar x;
     private final IntVar y;
     private final int mod;
-    private IntIterableBitSet usedValues;
+    private IntIterableBitSet forbiddenValuesX;
+    private IntIterableBitSet usedValuesY;
 
     public PropModXY(IntVar x, int mod, IntVar y) {
         super(new IntVar[]{x, y}, PropagatorPriority.BINARY, false);
         this.x = x;
         this.y = y;
         this.mod = mod;
-        if(y.hasEnumeratedDomain()) {
-            usedValues = new IntIterableBitSet();
-            usedValues.setOffset(y.getLB());
+        if (x.hasUnfixedEnumeratedDomain() && y.hasUnfixedEnumeratedDomain()) {
+            usedValuesY = new IntIterableBitSet();
+            usedValuesY.setOffset(y.getLB());
+
+            forbiddenValuesX = new IntIterableBitSet();
+            forbiddenValuesX.setOffset(x.getLB());
         }
     }
 
@@ -49,20 +50,20 @@ public class PropModXY extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if(y.getLB()<0) {
-            y.updateLowerBound(-(mod-1), this);
+        if (y.getLB() < 0) {
+            y.updateLowerBound(-(mod - 1), this);
         }
-        if(y.getUB()>0) {
-            y.updateUpperBound(mod-1, this);
+        if (y.getUB() > 0) {
+            y.updateUpperBound(mod - 1, this);
         }
-        if(x.getUB() <= 0) {
+        if (x.getUB() <= 0) {
             y.updateUpperBound(0, this);
         }
-        if(x.getLB() >= 0) {
+        if (x.getLB() >= 0) {
             y.updateLowerBound(0, this);
         }
 
-        if(x.hasEnumeratedDomain() && y.hasEnumeratedDomain()) {
+        if (x.hasUnfixedEnumeratedDomain() && y.hasUnfixedEnumeratedDomain()) {
             propagateEnumerated();
         } else {
             propagateBounded();
@@ -70,46 +71,48 @@ public class PropModXY extends Propagator<IntVar> {
     }
 
     private void propagateEnumerated() throws ContradictionException {
-        usedValues.clear();
-        for(int v = x.getLB(); v<=x.getUB(); v=x.nextValue(v)) {
-            if(y.contains(v%mod)) {
-                usedValues.add(v%mod);
+        usedValuesY.clear();
+        forbiddenValuesX.clear();
+        for (int v = x.getLB(); v <= x.getUB(); v = x.nextValue(v)) {
+            if (y.contains(v % mod)) {
+                usedValuesY.add(v % mod);
             } else {
-                x.removeValue(v, this);
+                forbiddenValuesX.add(v);
             }
         }
-        y.removeAllValuesBut(usedValues, this);
+        x.removeValues(forbiddenValuesX, this);
+        y.removeAllValuesBut(usedValuesY, this);
     }
 
     private void propagateBounded() throws ContradictionException {
         boolean hasChange = true;
-        while(hasChange) {
+        while (hasChange) {
             hasChange = false;
 
             // filter bounds for X
-            while(!y.contains(x.getLB()%mod)) {
-                x.updateLowerBound(x.getLB()+1, this);
+            while (!y.contains(x.getLB() % mod)) {
+                x.updateLowerBound(x.getLB() + 1, this);
                 hasChange = true;
             }
-            while(!y.contains(x.getUB()%mod)) {
-                x.updateUpperBound(x.getUB()-1, this);
+            while (!y.contains(x.getUB() % mod)) {
+                x.updateUpperBound(x.getUB() - 1, this);
                 hasChange = true;
             }
             // filter bounds for Y
-            while(!containsOneDivid(x, mod, y.getLB())) {
-                y.updateLowerBound(y.getLB()+1, this);
+            while (!containsOneDivid(x, mod, y.getLB())) {
+                y.updateLowerBound(y.getLB() + 1, this);
                 hasChange = true;
             }
-            while(!containsOneDivid(x, mod, y.getUB())) {
-                y.updateUpperBound(y.getUB()-1, this);
+            while (!containsOneDivid(x, mod, y.getUB())) {
+                y.updateUpperBound(y.getUB() - 1, this);
                 hasChange = true;
             }
         }
     }
 
     private static boolean containsOneDivid(IntVar X, int mod, int value) {
-        for(int i = X.getLB(); i<=X.getUB(); i=X.nextValue(i)) {
-            if(i % mod == value) {
+        for (int i = X.getLB(); i <= X.getUB(); i = X.nextValue(i)) {
+            if (i % mod == value) {
                 return true;
             }
         }
@@ -118,15 +121,15 @@ public class PropModXY extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        if(x.isInstantiated() && y.isInstantiated()) {
-            return x.getValue()%mod == y.getValue() ? ESat.TRUE : ESat.FALSE;
+        if (x.isInstantiated() && y.isInstantiated()) {
+            return x.getValue() % mod == y.getValue() ? ESat.TRUE : ESat.FALSE;
         }
         return ESat.UNDEFINED;
     }
 
     @Override
     public String toString() {
-        return x.getName()+" % "+ mod +" = "+ y.getName();
+        return x.getName() + " % " + mod + " = " + y.getName();
     }
 
 }

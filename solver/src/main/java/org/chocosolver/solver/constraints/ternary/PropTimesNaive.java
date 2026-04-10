@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.ternary;
@@ -118,7 +115,7 @@ public class PropTimesNaive extends Propagator<IntVar> {
             ps[2] = vars[i].getMaxLit();
             ps[3] = vars[j].getMinLit();
             ps[4] = vars[j].getMaxLit();
-            return Reason.r(ps);
+            return this.r(ps);
         }
         return Reason.undef();
     }

@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.nary.lex;
@@ -223,7 +220,7 @@ public class PropLexInt extends Propagator<IntVar> implements UpdatablePropagato
         if (i == a && (i + 1) == b) {
             x[i].updateUpperBound(y[i] - 1, this, reason(i));
             if (y[i] < x[i].getLB() + 1) {
-                fails(lcg() ? Reason.r(x[i].getMinLit()) : Reason.undef());
+                fails(lcg() ? this.r(x[i].getMinLit()) : Reason.undef());
             }
             if (checkLex(i)) {
                 entailed = true;
@@ -235,7 +232,7 @@ public class PropLexInt extends Propagator<IntVar> implements UpdatablePropagato
         if (i == a && (i + 1) < b) {
             x[i].updateUpperBound(y[i], this, reason(i));
             if (y[i] < x[i].getLB()) {
-                fails(lcg() ? Reason.r(x[i].getMinLit()) : Reason.undef());
+                fails(lcg() ? this.r(x[i].getMinLit()) : Reason.undef());
             }
             if (checkLex(i)) {
                 entailed = true;
@@ -261,7 +258,7 @@ public class PropLexInt extends Propagator<IntVar> implements UpdatablePropagato
             for (int j = 0; j < n; j++) {
                 ps[m++] = i == j ? 0 : x[j].getMinLit();
             }
-            return Reason.r(ps);
+            return this.r(ps);
         } else {
             return Reason.undef();
         }

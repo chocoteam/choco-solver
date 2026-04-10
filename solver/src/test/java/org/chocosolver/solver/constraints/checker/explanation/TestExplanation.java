@@ -1,17 +1,14 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.checker.explanation;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Providers;
-import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.constraints.*;
 import org.chocosolver.solver.constraints.binary.*;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
@@ -31,7 +28,10 @@ import org.chocosolver.solver.constraints.nary.min_max.PropMax;
 import org.chocosolver.solver.constraints.nary.min_max.PropMin;
 import org.chocosolver.solver.constraints.nary.sum.*;
 import org.chocosolver.solver.constraints.reification.*;
-import org.chocosolver.solver.constraints.ternary.*;
+import org.chocosolver.solver.constraints.ternary.PropDivXYZ;
+import org.chocosolver.solver.constraints.ternary.PropMaxBC;
+import org.chocosolver.solver.constraints.ternary.PropMinBC;
+import org.chocosolver.solver.constraints.ternary.PropTimesNaive;
 import org.chocosolver.solver.constraints.unary.*;
 import org.chocosolver.solver.search.SearchState;
 import org.chocosolver.solver.search.loop.learn.LazyClauseGeneration;
@@ -46,6 +46,7 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
 import org.chocosolver.util.tools.VariableUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import java.lang.annotation.Annotation;
@@ -299,6 +300,25 @@ public class TestExplanation {
         mainLooop((l, s) -> buildModel(prop, parameterTypes, info, l, s), seed, Scalar::create);
     }
 
+    @Test(groups = "lcg", dataProvider = "seed")
+    @Ignore(value="for debugging")
+    public void testSinglePropagator(long seed) {
+
+        Class<? extends Propagator<IntVar>> prop = PropDivXYZ.class;
+        Class<?>[] parameterTypes = new Class[]{IntVar.class, IntVar.class, IntVar.class};
+        Object[] info = new Object[]{null};
+
+        boolean isExplained = false;
+        Annotation[] annotations = prop.getAnnotations();
+        for (Annotation annotation : annotations) {
+            if (Objects.equals(annotation.annotationType(), Explained.class)) {
+                isExplained = true;
+            }
+        }
+        Assert.assertTrue(isExplained);
+        mainLooop((l, s) -> buildModel(prop, parameterTypes, info, l, s), seed, Scalar::create);
+    }
+
     @Test(groups = "lcg", timeOut = 60000, dataProvider = "constraints")
     public void testFromFactory(String constraint, Class<?>[] parameterTypes, Object[] info, long seed) {
         mainLooop((l, s) -> buildModel(constraint, parameterTypes, info, l, s), seed, Scalar::create);
@@ -307,7 +327,7 @@ public class TestExplanation {
     @Test(groups = "1s", dataProvider = "seed")
     public void testReifyInS(long seed) {
         mainLooop((l, s) -> {
-            Model model = new Model(Settings.init().setLCG(l));
+            Model model = new Model(SettingsBuilder.init().setLCG(l));
             IntVar x = model.intVar("x", 1, 7);
             IntIterableRangeSet set = new IntIterableRangeSet();
             set.addBetween(2, 5);
@@ -380,7 +400,7 @@ public class TestExplanation {
                              boolean lcg, long seed) {
 
         try {
-            Model model = new Model(prop.getSimpleName(), Settings.init().setLCG(lcg));
+            Model model = new Model(prop.getSimpleName(), SettingsBuilder.init().setLCG(lcg));
             Constructor<?> constructor = prop.getConstructor(parameterTypes);
             Object[] parameters = new Object[parameterTypes.length];
             List<Variable> variables = new ArrayList<>();
@@ -399,7 +419,7 @@ public class TestExplanation {
     private Model buildModel(String method, Class<?>[] parameterTypes, Object[] info, boolean lcg, long seed) {
 
         try {
-            Model model = new Model(method, Settings.init().setLCG(lcg));
+            Model model = new Model(method, SettingsBuilder.init().setLCG(lcg));
             Method m = Model.class.getMethod(method, parameterTypes);
             Object[] parameters = new Object[parameterTypes.length];
             List<Variable> variables = new ArrayList<>();
@@ -579,7 +599,7 @@ public class TestExplanation {
     public void testTable2(boolean lcg) {
         // Test bug l.724 in ISatFactory
         // What if the model detects inconsistency during declaration?
-        Model model = new Model(Settings.init().setLCG(lcg));
+        Model model = new Model(SettingsBuilder.init().setLCG(lcg));
         IntVar x = model.intVar("x", 3, 4);
         IntVar y = model.intVar("y", 3, 4);
         Tuples t1 = new Tuples(true);
@@ -593,7 +613,7 @@ public class TestExplanation {
 
     @Test(groups = "lcg", timeOut = 60_000, dataProvider = "trueOrFalse", dataProviderClass = Providers.class)
     public void testDummy1(boolean lcg) {
-        Model model = new Model(Settings.init().setLCG(lcg));
+        Model model = new Model(SettingsBuilder.init().setLCG(lcg));
         IntVar x = model.intVar("x", 3, 4);
         model.member(x, 3, 4).post();
         Assert.assertTrue(model.getSolver().solve());
@@ -603,7 +623,7 @@ public class TestExplanation {
 
     @Test(groups = "lcg", timeOut = 60_000, dataProvider = "trueOrFalse", dataProviderClass = Providers.class)
     public void testDummy3(boolean lcg) {
-        Model model = new Model(Settings.init().setLCG(lcg));
+        Model model = new Model(SettingsBuilder.init().setLCG(lcg));
         IntVar x = model.intVar("x", 3, 4);
         model.member(x, 3, 4).post();
         model.setObjective(true, x);
@@ -615,7 +635,7 @@ public class TestExplanation {
 
     @Test(groups = "lcg", timeOut = 60_000, dataProvider = "trueOrFalse", dataProviderClass = Providers.class)
     public void testNotAllEquals1(boolean lcg) {
-        Model model = new Model(Settings.init().setLCG(lcg));
+        Model model = new Model(SettingsBuilder.init().setLCG(lcg));
         IntVar x = model.intVar("x", 3, 4);
         IntVar y = model.intVar("y", 3, 4);
         model.notAllEqual(x, y).post();
@@ -627,7 +647,7 @@ public class TestExplanation {
 
     @Test(groups = "lcg", timeOut = 60_000, dataProvider = "trueOrFalse", dataProviderClass = Providers.class)
     public void testAtMostNValues(boolean lcg) {
-        Model model = new Model(Settings.init().setLCG(lcg));
+        Model model = new Model(SettingsBuilder.init().setLCG(lcg));
         IntVar[] x = model.intVarArray("x", 3, 2, 4);
         IntVar z = model.intVar("z", 1, 2);
         model.atMostNValues(x, z, true).post();

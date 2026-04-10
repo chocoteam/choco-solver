@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.variables;
@@ -392,57 +389,60 @@ public class Task extends Propagator<IntVar> {
         }
         boolean hasFiltered;
         final boolean lcg = getModel().getSolver().isLCG();
-        do {
-            hasFiltered = false;
-            if (mayBePerformed()) {
-                if (lcg) {
-                    hasFiltered = updateEst(
-                            end.getLB() - duration.getUB(),
-                            this,
+        try {
+            do {
+                hasFiltered = false;
+                if (mayBePerformed()) {
+                    if (lcg) {
+                        hasFiltered = updateEst(
+                                end.getLB() - duration.getUB(),
+                                this,
 //                            Reason.r(end.getMinLit(), duration.getMaxLit())
-                            Reason.r(end.getLELit(end.getLB() - 1), duration.getGELit(duration.getUB() + 1))
-                    );
-                    hasFiltered |= updateLst(
-                            end.getUB() - duration.getLB(),
-                            this,
-                            Reason.r(end.getMaxLit(), duration.getMinLit())
-                    );
+                                this.r(end.getLELit(end.getLB() - 1), duration.getGELit(duration.getUB() + 1))
+                        );
+                        hasFiltered |= updateLst(
+                                end.getUB() - duration.getLB(),
+                                this,
+                                this.r(end.getMaxLit(), duration.getMinLit())
+                        );
 
-                    hasFiltered |= updateEct(
-                            start.getLB() + duration.getLB(),
-                            this,
-                            Reason.r(start.getMinLit(), duration.getMinLit())
-                    );
-                    hasFiltered |= updateLct(
-                            start.getUB() + duration.getUB(),
-                            this,
-                            Reason.r(start.getMaxLit(), duration.getMaxLit())
-                    );
+                        hasFiltered |= updateEct(
+                                start.getLB() + duration.getLB(),
+                                this,
+                                this.r(start.getMinLit(), duration.getMinLit())
+                        );
+                        hasFiltered |= updateLct(
+                                start.getUB() + duration.getUB(),
+                                this,
+                                this.r(start.getMaxLit(), duration.getMaxLit())
+                        );
 
-                    hasFiltered |= updateMinDuration(
-                            end.getLB() - start.getUB(),
-                            this,
-                            Reason.r(end.getMinLit(), start.getMaxLit())
-                    );
-                    hasFiltered |= updateMaxDuration(
-                            end.getUB() - start.getLB(),
-                            this,
-                            Reason.r(end.getMaxLit(), start.getMinLit())
-                    );
-                } else {
-                    hasFiltered = updateEst(end.getLB() - duration.getUB(), this);
-                    hasFiltered |= updateLst(end.getUB() - duration.getLB(), this);
+                        hasFiltered |= updateMinDuration(
+                                end.getLB() - start.getUB(),
+                                this,
+                                this.r(end.getMinLit(), start.getMaxLit())
+                        );
+                        hasFiltered |= updateMaxDuration(
+                                end.getUB() - start.getLB(),
+                                this,
+                                this.r(end.getMaxLit(), start.getMinLit())
+                        );
+                    } else {
+                        hasFiltered = updateEst(end.getLB() - duration.getUB(), this);
+                        hasFiltered |= updateLst(end.getUB() - duration.getLB(), this);
 
-                    hasFiltered |= updateEct(start.getLB() + duration.getLB(), this);
-                    hasFiltered |= updateLct(start.getUB() + duration.getUB(), this);
+                        hasFiltered |= updateEct(start.getLB() + duration.getLB(), this);
+                        hasFiltered |= updateLct(start.getUB() + duration.getUB(), this);
 
-                    hasFiltered |= updateMinDuration(end.getLB() - start.getUB(), this);
-                    hasFiltered |= updateMaxDuration(end.getUB() - start.getLB(), this);
+                        hasFiltered |= updateMinDuration(end.getLB() - start.getUB(), this);
+                        hasFiltered |= updateMaxDuration(end.getUB() - start.getLB(), this);
+                    }
+                    // TODO : add filtering for enumerated domains
                 }
-                // TODO : add filtering for enumerated domains
-            }
-        } while (hasFiltered);
-        insidePropagation = false;
+            } while (hasFiltered);
+        }finally {
+            insidePropagation = false;
+        }
     }
 
     @Override

@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.variables.impl;
@@ -279,7 +276,7 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
     private void channelMin(int v) {
         // Set [x >= v-1] to [x >= min+1] using [x >= i] \/ ![x >= v]
         // Set [x != v-1] to [x != min] using [x != i] \/ ![x >= v]
-        Reason r = Reason.r(MiniSat.neg(getGELit(v)));
+        Reason r = this.getModel().getSolver().getReasonManager().r(MiniSat.neg(getGELit(v)));
         int min = getLB();
         if (values == null) { // dense domain
             for (int i = v - 1; i > min; i--) {
@@ -311,7 +308,7 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
             int v = oldMin;
             while (v < newMin) {
                 // Set [x >= v+1] using [x >= v+1] \/ [x <= v-1] \/ [x = v]
-                Reason r = Reason.r(getLELit(v - 1), getEQLit(v));
+                Reason r = this.getModel().getSolver().getReasonManager().r(getLELit(v - 1), getEQLit(v));
                 sat.cEnqueue(getGELit(v + 1), r);
                 v++;
             }
@@ -320,7 +317,7 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
             int v = values[u];
             while (v < newMin) {
                 // Set [x >= v+1] using [x >= v+1] \/ [x <= v-1] \/ [x = v]
-                Reason r = Reason.r(getLELit(v - 1), getEQLit(v));
+                Reason r = this.getModel().getSolver().getReasonManager().r(getLELit(v - 1), getEQLit(v));
                 sat.cEnqueue(getGELit(v + 1), r);
                 v = values[++u];
             }
@@ -330,7 +327,7 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
     private void channelMax(int v) {
         // Set [x <= v+1] to [x <= max-1] to using [x <= i] \/ ![x <= v]
         // Set [x != v+1] to [x != max] to using ![x = i] \/ ![x <= v]
-        Reason r = Reason.r(MiniSat.neg(getLELit(v)));
+        Reason r = this.getModel().getSolver().getReasonManager().r(MiniSat.neg(getLELit(v)));
         int max = getUB();
         if (values == null) { // dense domain
             for (int i = v + 1; i < max; i++) {
@@ -362,7 +359,7 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
             int v = oldMax;
             while (v > newMax) {
                 // Set [x <= v-1] using [x <= v-1] \/ [x >= v+1] \/ [x = v]
-                Reason r = Reason.r(getGELit(v + 1), getEQLit(v));
+                Reason r = this.getModel().getSolver().getReasonManager().r(getGELit(v + 1), getEQLit(v));
                 sat.cEnqueue(getLELit(v - 1), r);
                 v--;
             }
@@ -371,7 +368,7 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
             int v = values[u];
             while (v > newMax) {
                 // Set [x <= v-1] using [x <= v-1] \/ [x >= v+1] \/ [x = v]
-                Reason r = Reason.r(getGELit(v + 1), getEQLit(v));
+                Reason r = this.getModel().getSolver().getReasonManager().r(getGELit(v + 1), getEQLit(v));
                 sat.cEnqueue(getLELit(v - 1), r);
                 v = values[--u];
             }
@@ -379,7 +376,7 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
     }
 
     private void channelFix(int v) {
-        Reason r = Reason.r(getNELit(v));
+        Reason r = this.getModel().getSolver().getReasonManager().r(getNELit(v));
         if (getLB() < v) {
             // Set [x >= v] using [x >= v] \/ ![x = v]
             sat.cEnqueue(getGELit(v), r);
@@ -394,7 +391,7 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
 
     private void updateFixed(int v) {
         // Set [x = v] using [x = v] \/ [x <= v-1] \/ [x >= v+1]
-        Reason r = Reason.r(getLELit(v - 1), getGELit(v + 1));
+        Reason r = this.getModel().getSolver().getReasonManager().r(getLELit(v - 1), getGELit(v + 1));
         sat.cEnqueue(getEQLit(v), r);
     }
 

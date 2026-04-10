@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.variables.impl;
@@ -12,6 +9,8 @@ package org.chocosolver.solver.variables.impl;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Providers;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -87,9 +86,9 @@ public class AbstractVariableTest {
         Assert.assertEquals(fix.instantiationWorldIndex(), 0);
     }
 
-    @Test(groups = "1s")
-    public void testAddMonitor() throws ContradictionException {
-        Model model = new Model();
+    @Test(groups = "1s", dataProvider = "trueOrFalse", dataProviderClass = Providers.class)
+    public void testAddMonitor(boolean check) throws ContradictionException {
+        Model model = new Model(SettingsBuilder.init().setCheckDeclaredMonitors(check));
         IntVar v1 = model.intVar(0, 10);
         final AtomicInteger score = new AtomicInteger(0);
         IVariableMonitor<IntVar> m1 = (var, evt) -> score.addAndGet(1);
@@ -99,26 +98,19 @@ public class AbstractVariableTest {
         v1.notifyMonitors(IntEventType.VOID);
         // 2 monitors added as they differ.
         Assert.assertEquals(score.get(), 4);
-
-        // Redundancy checker disabled, we expect all monitors to be updated.
         score.set(0);
         v1 = model.intVar(0, 20);
-        model.getSettings().setCheckDeclaredMonitors(false);
         v1.addMonitor(m1);
         v1.addMonitor(m1);
         v1.addMonitor(m2);
         v1.notifyMonitors(IntEventType.VOID);
-        Assert.assertEquals(score.get(), 5);
-
-        // Redundancy checker enabled, we expect only 1 m1 and the m2.
-        score.set(0);
-        v1 = model.intVar(0, 20);
-        model.getSettings().setCheckDeclaredMonitors(true);
-        v1.addMonitor(m1);
-        v1.addMonitor(m2);
-        v1.addMonitor(m1);
-        v1.notifyMonitors(IntEventType.VOID);
-        Assert.assertEquals(score.get(), 4);
+        if (!check) {
+            // Redundancy checker disabled, we expect all monitors to be updated.
+            Assert.assertEquals(score.get(), 5);
+        } else {
+            // Redundancy checker enabled, we expect only 1 m1 and the m2.
+            Assert.assertEquals(score.get(), 4);
+        }
     }
 
     private static class ProTester extends Propagator<IntVar> {

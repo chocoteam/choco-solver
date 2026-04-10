@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.nary.lex;
@@ -86,7 +83,10 @@ public class PropIncreasingTest {
         m.decreasing(new IntVar[]{x, y, z}, 0).post();
         Solver s = m.getSolver();
         s.setSearch(Search.inputOrderLBSearch(z, y, x));
-        s.findAllSolutions();
+        while (s.solve()) {
+            Assert.assertTrue(x.getValue() >= y.getValue());
+            Assert.assertTrue(y.getValue() >= z.getValue());
+        }
         Assert.assertEquals(s.getSolutionCount(), 10);
     }
 
@@ -99,7 +99,10 @@ public class PropIncreasingTest {
         m.decreasing(new IntVar[]{x, y, z}, 1).post();
         Solver s = m.getSolver();
         s.setSearch(Search.inputOrderLBSearch(z, y, x));
-        s.findAllSolutions();
+        while (s.solve()) {
+            Assert.assertTrue(x.getValue() > y.getValue());
+            Assert.assertTrue(y.getValue() > z.getValue());
+        }
         Assert.assertEquals(s.getSolutionCount(), 1);
     }
 
@@ -124,7 +127,9 @@ public class PropIncreasingTest {
         BoolVar b = m.increasing(new IntVar[]{x, y}, 0).reify();
         m.arithm(b, "=", 1).post();
         Solver s = m.getSolver();
-        s.findAllSolutions();
+        while (s.solve()) {
+            Assert.assertTrue(x.getValue() <= y.getValue());
+        }
         Assert.assertEquals(s.getSolutionCount(), 6);
     }
 

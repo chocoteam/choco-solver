@@ -1,16 +1,13 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
@@ -67,7 +64,7 @@ public class BoundGlobalCardinalityTest {
             int n = 1 + random.nextInt(6);
             int m = 1 + random.nextInt(4);
             //solver 1
-            Model model = new Model(Settings.init().setCheckDeclaredConstraints(false));
+            Model model = new Model(SettingsBuilder.init().setCheckDeclaredConstraints(false));
             int[] values = new int[m];
             for (int i = 0; i < values.length; i++) {
                 values[i] = i;
@@ -80,7 +77,7 @@ public class BoundGlobalCardinalityTest {
                 model.getSolver().setSearch(inputOrderLBSearch(append(vars, cards)));
             }
             // reformulation
-            Model ref = new Model(Settings.init().setCheckDeclaredConstraints(false));
+            Model ref = new Model(SettingsBuilder.init().setCheckDeclaredConstraints(false));
             {
                 IntVar[] vars = ref.intVarArray("vars", n, 0, m - 1, true);
                 IntVar[] cards = ref.intVarArray("cards", m, 0, n, true);
@@ -104,7 +101,7 @@ public class BoundGlobalCardinalityTest {
             int n = 1 + random.nextInt(6);
             int m = 1 + random.nextInt(4);
             //solver 1
-            Model model = new Model(Settings.init().setCheckDeclaredConstraints(false));
+            Model model = new Model(SettingsBuilder.init().setCheckDeclaredConstraints(false));
             int[] values = new int[m];
             for (int i = 0; i < values.length; i++) {
                 values[i] = i;
@@ -117,7 +114,7 @@ public class BoundGlobalCardinalityTest {
                 model.getSolver().setSearch(inputOrderLBSearch(vars));
             }
             // reformulation
-            Model ref = new Model(Settings.init().setCheckDeclaredConstraints(false));
+            Model ref = new Model(SettingsBuilder.init().setCheckDeclaredConstraints(false));
             {
                 IntVar[] cards = ref.intVarArray("cards", m, 0, n, true);
                 IntVar[] vars = ref.intVarArray("vars", n, 0, m - 1, true);

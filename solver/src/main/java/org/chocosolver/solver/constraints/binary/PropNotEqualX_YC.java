@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.binary;
@@ -68,15 +65,15 @@ public class PropNotEqualX_YC extends Propagator<IntVar> {
         // then B dec supp to 3 => 3 can also be removed du to A = 3.
         // this is why propagation is not incremental
         if (x.isInstantiated() && y.isInstantiated() && x.isInstantiatedTo(y.getValue() + cste)) {
-            this.fails(lcg() ? Reason.r(x.getValLit(), y.getValLit()) : Reason.undef());
+            this.fails(lcg() ? this.r(x.getValLit(), y.getValLit()) : Reason.undef());
         }
         if (x.isInstantiated()) {
-            if (y.removeValue(x.getValue() - this.cste, this, lcg() ? Reason.r(x.getValLit()) : Reason.undef())
+            if (y.removeValue(x.getValue() - this.cste, this, lcg() ? this.r(x.getValLit()) : Reason.undef())
                     || !y.contains(x.getValue() - cste)) {
                 this.setPassive();
             }
         } else if (y.isInstantiated()) {
-            if (x.removeValue(y.getValue() + this.cste, this, lcg() ? Reason.r(y.getValLit()) : Reason.undef())
+            if (x.removeValue(y.getValue() + this.cste, this, lcg() ? this.r(y.getValLit()) : Reason.undef())
                     || !x.contains(y.getValue() + cste)) {
                 this.setPassive();
             }

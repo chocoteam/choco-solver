@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.sat;
@@ -27,8 +24,8 @@ public class SatSolverTest {
     private int a, b, c, d;
 
     @BeforeMethod(alwaysRun = true)
-    public void setUp() throws Exception {
-        sat = new MiniSat(false);
+    public void setUp() {
+        sat = new MiniSat(false, 0);
         a = sat.newVariable();
         b = sat.newVariable();
         c = sat.newVariable();
@@ -36,7 +33,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testNewVariable() throws Exception {
+    public void testNewVariable() {
         Assert.assertEquals(a, 0);
         Assert.assertEquals(b, 1);
         Assert.assertEquals(c, 2);
@@ -52,7 +49,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddClause() throws Exception {
+    public void testAddClause() {
         Assert.assertEquals(sat.assignment_.get(a), MiniSat.lUndef);
         Assert.assertEquals(sat.assignment_.get(b), MiniSat.lUndef);
         Assert.assertEquals(sat.assignment_.get(c), MiniSat.lUndef);
@@ -67,12 +64,12 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testLearnClause() throws Exception {
+    public void testLearnClause() {
 
     }
 
     @Test(groups = "1s")
-    public void testAddClause1() throws Exception {
+    public void testAddClause1() {
         int ap = MiniSat.makeLiteral(a, true);
         int bp = MiniSat.makeLiteral(b, true);
         Assert.assertTrue(sat.addClause(ap, bp));
@@ -83,7 +80,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddClause2() throws Exception {
+    public void testAddClause2() {
         int ap = MiniSat.makeLiteral(a, true);
         int bp = MiniSat.makeLiteral(b, true);
         int cp = MiniSat.makeLiteral(c, true);
@@ -96,7 +93,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddClause3() throws Exception {
+    public void testAddClause3() {
         int ap = MiniSat.makeLiteral(a, true);
         int bp = MiniSat.makeLiteral(b, true);
         int cp = MiniSat.makeLiteral(c, true);
@@ -111,7 +108,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddClause4() throws Exception {
+    public void testAddClause4() {
         int a1 = MiniSat.makeLiteral(a, true);
         Assert.assertTrue(sat.addClause(new TIntArrayList(new int[]{a1, a1, a1, a1})));
         Assert.assertEquals(sat.assignment_.get(a), MiniSat.lTrue);
@@ -123,7 +120,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddClause5() throws Exception {
+    public void testAddClause5() {
         int a1 = MiniSat.makeLiteral(a, true);
         int a2 = MiniSat.makeLiteral(a, false);
         Assert.assertTrue(sat.addClause(new TIntArrayList(new int[]{a1, a2})));
@@ -136,7 +133,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddClause6() throws Exception {
+    public void testAddClause6() {
         int ap = MiniSat.makeLiteral(a, true);
         sat.uncheckedEnqueue(ap);
         Assert.assertEquals(sat.assignment_.get(a), MiniSat.lTrue);
@@ -149,7 +146,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testInitPropagator() throws Exception {
+    public void testInitPropagator() {
         sat.uncheckedEnqueue(MiniSat.makeLiteral(a, false));
         Assert.assertEquals(sat.valueVar(a), MiniSat.lFalse);
         //Assert.assertEquals(sat.touched_variables_.size(), 1);
@@ -158,7 +155,7 @@ public class SatSolverTest {
     
 
     @Test(groups = "1s")
-    public void testSign() throws Exception {
+    public void testSign() {
         Assert.assertTrue(MiniSat.sgn(3));
         Assert.assertTrue(MiniSat.sgn(1));
         Assert.assertFalse(MiniSat.sgn(0));
@@ -175,12 +172,12 @@ public class SatSolverTest {
 
 
     @Test(groups = "1s")
-    public void testNumvars() throws Exception {
+    public void testNumvars() {
         Assert.assertEquals(sat.num_vars_, 4);
     }
 
     @Test(groups = "1s")
-    public void testAddClause_() throws Exception {
+    public void testAddClause_() {
         sat.addClause(new int[]{a, b}, new int[]{c, d});
         sat.propagate();
         Assert.assertEquals(sat.valueVar(a), MiniSat.lUndef);
@@ -190,21 +187,21 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddTrue() throws Exception {
+    public void testAddTrue() {
         sat.addTrue(a);
         sat.propagate();
         Assert.assertEquals(sat.valueVar(a), MiniSat.lTrue);
     }
 
     @Test(groups = "1s")
-    public void testAddFalse() throws Exception {
+    public void testAddFalse() {
         sat.addFalse(a);
         sat.propagate();
         Assert.assertEquals(sat.valueVar(a), MiniSat.lFalse);
     }
 
     @Test(groups = "1s")
-    public void testAddBoolEq() throws Exception {
+    public void testAddBoolEq() {
         sat.addBoolEq(a, b);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(a, true));
         sat.propagate();
@@ -213,7 +210,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddBoolLe1() throws Exception {
+    public void testAddBoolLe1() {
         sat.addBoolLe(a, b);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(a, true));
         sat.propagate();
@@ -222,7 +219,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddBoolLe2() throws Exception {
+    public void testAddBoolLe2() {
         sat.addBoolLe(a, b);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(a, false));
         sat.propagate();
@@ -231,7 +228,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddBoolLe3() throws Exception {
+    public void testAddBoolLe3() {
         sat.addBoolLe(a, b);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(b, false));
         sat.propagate();
@@ -240,7 +237,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddBoolLt() throws Exception {
+    public void testAddBoolLt() {
         sat.addBoolLt(a, b);
         sat.propagate();
         Assert.assertEquals(sat.valueVar(a), MiniSat.lFalse);
@@ -248,7 +245,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddBoolNot() throws Exception {
+    public void testAddBoolNot() {
         sat.addBoolNot(a, b);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(a, true));
         sat.propagate();
@@ -257,7 +254,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddBoolOrArrayEqVar1() throws Exception {
+    public void testAddBoolOrArrayEqVar1() {
         sat.addBoolOrArrayEqVar(new int[]{a, b, c}, d);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(d, false));
         sat.propagate();
@@ -268,7 +265,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddBoolOrArrayEqVar2() throws Exception {
+    public void testAddBoolOrArrayEqVar2() {
         sat.addBoolOrArrayEqVar(new int[]{a, b, c}, d);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(a, true));
         sat.propagate();
@@ -279,7 +276,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddBoolAndArrayEqVar1() throws Exception {
+    public void testAddBoolAndArrayEqVar1() {
         sat.addBoolAndArrayEqVar(new int[]{a, b, c}, d);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(d, true));
         sat.propagate();
@@ -290,7 +287,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddBoolAndArrayEqVar2() throws Exception {
+    public void testAddBoolAndArrayEqVar2() {
         sat.addBoolAndArrayEqVar(new int[]{a, b, c}, d);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(d, false));
         sat.propagate();
@@ -301,7 +298,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddBoolAndArrayEqVar3() throws Exception {
+    public void testAddBoolAndArrayEqVar3() {
         sat.addBoolAndArrayEqVar(new int[]{a, b, c}, d);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(a, true));
         sat.uncheckedEnqueue(MiniSat.makeLiteral(b, true));
@@ -314,7 +311,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddBoolOrEqVar1() throws Exception {
+    public void testAddBoolOrEqVar1() {
         sat.addBoolOrEqVar(a, b, c);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(a, true));
         sat.propagate();
@@ -324,7 +321,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddBoolOrEqVar2() throws Exception {
+    public void testAddBoolOrEqVar2() {
         sat.addBoolOrEqVar(a, b, c);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(a, false));
         sat.uncheckedEnqueue(MiniSat.makeLiteral(c, true));
@@ -335,7 +332,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddBoolOrEqVar3() throws Exception {
+    public void testAddBoolOrEqVar3() {
         sat.addBoolOrEqVar(a, b, c);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(a, false));
         sat.uncheckedEnqueue(MiniSat.makeLiteral(b, false));
@@ -346,7 +343,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddBoolAndEqVar() throws Exception {
+    public void testAddBoolAndEqVar() {
         sat.addBoolAndEqVar(a, b, c);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(c, true));
         sat.propagate();
@@ -356,7 +353,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddBoolXorEqVar() throws Exception {
+    public void testAddBoolXorEqVar() {
         sat.addBoolXorEqVar(a, b, c);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(a, true));
         sat.uncheckedEnqueue(MiniSat.makeLiteral(c, true));
@@ -367,7 +364,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddBoolIsEqVar() throws Exception {
+    public void testAddBoolIsEqVar() {
         sat.addBoolIsEqVar(a, b, c);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(a, false));
         sat.uncheckedEnqueue(MiniSat.makeLiteral(c, true));
@@ -378,7 +375,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddBoolIsNeqVar() throws Exception {
+    public void testAddBoolIsNeqVar() {
         sat.addBoolIsNeqVar(a, b, c);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(a, false));
         sat.uncheckedEnqueue(MiniSat.makeLiteral(c, true));
@@ -389,7 +386,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddBoolIsLeVar() throws Exception {
+    public void testAddBoolIsLeVar() {
         sat.addBoolIsLeVar(a, b, c);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(a, false));
         sat.uncheckedEnqueue(MiniSat.makeLiteral(c, true));
@@ -400,7 +397,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddBoolIsLtVar() throws Exception {
+    public void testAddBoolIsLtVar() {
         sat.addBoolIsLtVar(a, b, c);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(a, false));
         sat.uncheckedEnqueue(MiniSat.makeLiteral(c, true));
@@ -411,7 +408,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddBoolOrArrayEqualTrue() throws Exception {
+    public void testAddBoolOrArrayEqualTrue() {
         sat.addBoolOrArrayEqualTrue(a, b, c, d);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(a, true));
         sat.propagate();
@@ -422,7 +419,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddBoolAndArrayEqualFalse() throws Exception {
+    public void testAddBoolAndArrayEqualFalse() {
         sat.addBoolAndArrayEqualFalse(a, b, c, d);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(a, false));
         sat.propagate();
@@ -433,7 +430,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddAtMostOne() throws Exception {
+    public void testAddAtMostOne() {
         sat.addAtMostOne(a, b, c, d);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(a, false));
         sat.propagate();
@@ -444,7 +441,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddAtMostNMinusOne() throws Exception {
+    public void testAddAtMostNMinusOne() {
         sat.addAtMostNMinusOne(a, b, c, d);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(a, false));
         sat.propagate();
@@ -455,7 +452,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddSumBoolArrayGreaterEqVar() throws Exception {
+    public void testAddSumBoolArrayGreaterEqVar() {
         sat.addSumBoolArrayGreaterEqVar(new int[]{a, b, c}, d);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(a, false));
         sat.propagate();
@@ -466,7 +463,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddMaxBoolArrayLessEqVar() throws Exception {
+    public void testAddMaxBoolArrayLessEqVar() {
         sat.addMaxBoolArrayLessEqVar(new int[]{a, b, c}, d);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(a, false));
         sat.propagate();
@@ -477,7 +474,7 @@ public class SatSolverTest {
     }
 
     @Test(groups = "1s")
-    public void testAddSumBoolArrayLessEqVar() throws Exception {
+    public void testAddSumBoolArrayLessEqVar() {
         sat.addSumBoolArrayLessEqKVar(new int[]{a, b, c}, d);
         sat.uncheckedEnqueue(MiniSat.makeLiteral(a, false));
         sat.propagate();

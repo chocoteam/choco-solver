@@ -1,16 +1,13 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.search.strategy.Search;
@@ -93,7 +90,7 @@ public class CryptoTest {
     public void testCS71234(String table){
         //initialize the Tuples: Xor_3_path, Xor_2_path, L_path
         Gen_path();
-        Settings settings = Settings.init().setWarnUser(false);
+        SettingsBuilder settings = SettingsBuilder.init().setWarnUser(false);
         Model model = new Model(settings);
 
     	/*   declare all vars at round    */

@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.variables.impl;
@@ -70,7 +67,7 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar, Lit
             throw new UnsupportedOperationException("IntVarLazyLit can only wrap bounded integer variables");
         }
         this.sat = getModel().getSolver().getSat();
-        if (getModel().getSettings().intVarLazyLitWithWeakBounds()) {
+        if (getModel().getSettings().enableIntVarLazyLitWithWeakBounds()) {
             bnd = new WeakBound(getModel());
         } else {
             bnd = new StrongBound(getModel(), min0, max0);
@@ -178,18 +175,18 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar, Lit
     }
 
     void channelMin(int v, int p) {
-        Reason r = Reason.r(MiniSat.neg(p));
+        Reason r = this.getModel().getSolver().getReasonManager().r(MiniSat.neg(p));
         int prev = previousValue(v);
         bnd.channelMin(prev, sat, r);
     }
 
     void channelMax(int v, int p) {
-        Reason r = Reason.r(MiniSat.neg(p));
+        Reason r = this.getModel().getSolver().getReasonManager().r(MiniSat.neg(p));
         bnd.channelMax(v, sat, r);
     }
 
     void updateFixed() {
-        Reason r = Reason.r(getMinLit(), getMaxLit());
+        Reason r = this.getModel().getSolver().getReasonManager().r(getMinLit(), getMaxLit());
         sat.cEnqueue(valLit, r);
     }
 
@@ -197,9 +194,11 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar, Lit
     public boolean removeValue(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         if (value == getLB()) {
-            return updateLowerBound(value + 1, cause, Reason.gather(reason, getMinLit()));
+            return updateLowerBound(value + 1, cause,
+                    this.getModel().getSolver().getReasonManager().gather(reason, getMinLit()));
         } else if (value == getUB()) {
-            return updateUpperBound(value - 1, cause, Reason.gather(reason, getMaxLit()));
+            return updateUpperBound(value - 1, cause,
+                    this.getModel().getSolver().getReasonManager().gather(reason, getMaxLit()));
         }
         return false;
     }

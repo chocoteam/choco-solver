@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 /**
@@ -118,7 +115,7 @@ public class PropSubcircuit extends Propagator<IntVar> {
         int last = end[val].get();  // last in [0, n-1]
         int start = origin[var].get(); // start in [0, n-1]
         if (origin[val].get() != val) {
-            fails(lcg() ? Propagator.reason(null, vars): Reason.undef());
+            fails(lcg() ? this.reason(null, vars) : Reason.undef());
         }
         if (end[var].get() != var) {
             // should not happen

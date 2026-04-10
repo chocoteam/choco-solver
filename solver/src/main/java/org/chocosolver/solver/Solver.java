@@ -1,15 +1,13 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver;
 
 import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.sat.IReasonManager;
 import org.chocosolver.sat.MiniSat;
 import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.constraints.Constraint;
@@ -48,11 +46,9 @@ import org.chocosolver.solver.search.strategy.strategy.StrategiesSequencer;
 import org.chocosolver.solver.search.strategy.strategy.WarmStart;
 import org.chocosolver.solver.trace.IOutputFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
-import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.logger.ANSILogger;
 import org.chocosolver.util.logger.Logger;
 
@@ -141,6 +137,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      * SAT solver, only for LCG
      */
     private final MiniSat mSat;
+    private final IReasonManager reasonManager;
     /**
      * The objective manager declare
      */
@@ -270,10 +267,12 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         L = new LearnNothing();
         restarter = AbstractRestart.NO_RESTART;
         if (mModel.getSettings().isLCG()) {
-            mSat = new MiniSat(true);
+            mSat = new MiniSat(true, aModel.getSettings().getSatCCMinMode());
             setLearner(new LazyClauseGeneration(this, mSat));
+            reasonManager = IReasonManager.makeManager(mModel.getEnvironment(), mModel.getSettings().getReasonManager());
         } else {
             mSat = null;
+            reasonManager = IReasonManager.makeManager(mModel.getEnvironment(), 0);
         }
         engine = new PropagationEngine(mModel, mSat);
     }
@@ -847,6 +846,16 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
+     * Return the minimum conflicting set that is causing contradiction.
+     *
+     * @return minimumConflictingSet of constraints (the root cause of contradiction)
+     * @throws SolverException when MCS is called during solving
+     */
+    public List<Constraint> findMinimumConflictingSet() {
+        return findMinimumConflictingSet(Arrays.asList(getModel().getCstrs()));
+    }
+
+    /**
      * Sets the following action in the search to be a restart instruction.
      * Note that the restart may not be immediate
      */
@@ -1097,6 +1106,16 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
+     * The ReasonManager is the component in charge of managing the reasons for domain reductions and failures.
+     * It is used when learning is on, to record the reasons for propagations and contradictions, and to explain them when needed.
+     *
+     * @return the reason manager used in {@code this}.
+     */
+    public IReasonManager getReasonManager(){
+        return reasonManager;
+    }
+
+    /**
      * @return the current move.
      */
     public Move getMove() {
@@ -1319,7 +1338,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     public void clearRestarter() {
         if (restarter != AbstractRestart.NO_RESTART) {
             restarter.setNext(this.restarter);
-            this.restarter = restarter;
         }
         this.restarter = AbstractRestart.NO_RESTART;
     }

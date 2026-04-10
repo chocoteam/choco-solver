@@ -1,19 +1,13 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.ternary;
 
 import org.chocosolver.memory.EnvironmentBuilder;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Providers;
-import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.*;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -104,7 +98,7 @@ public class TimesTest extends AbstractTernaryTest {
     @Test(groups = "1s", timeOut = 60000)
     public void testJL5() {
         Model s = new Model(
-                Settings.init().setEnvironmentSupplier(() -> new EnvironmentBuilder()
+                SettingsBuilder.init().setEnvironmentSupplier(() -> new EnvironmentBuilder()
                         .setWorldNumber(65536)
                         .setWorldSize(16)
                         .build()));
@@ -117,7 +111,7 @@ public class TimesTest extends AbstractTernaryTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testJL6() {
-        Model s = new Model(Settings.init().setEnableTableSubstitution(false));
+        Model s = new Model(SettingsBuilder.init().setEnableTableSubstitution(false));
         IntVar i1 = s.intVar("i1", new int[]{1, 55000});
         IntVar i2 = s.intVar("i2", new int[]{1, 55000});
         IntVar i3 = s.intVar("i3", new int[]{1, 55000});
@@ -126,7 +120,7 @@ public class TimesTest extends AbstractTernaryTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testJL7() {
-        Model s = new Model(Settings.init().setEnableTableSubstitution(false));
+        Model s = new Model(SettingsBuilder.init().setEnableTableSubstitution(false));
         IntVar i1 = s.intVar("i1", new int[]{1, 10000});
         IntVar i2 = s.intVar("i2", new int[]{1, 10000});
         IntVar i3 = s.intVar("i3", new int[]{1, 10000});
@@ -135,7 +129,7 @@ public class TimesTest extends AbstractTernaryTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testJL8() {
-        Model s = new Model(Settings.init().setEnableTableSubstitution(false));
+        Model s = new Model(SettingsBuilder.init().setEnableTableSubstitution(false));
         IntVar i1 = s.intVar("i1", new int[]{1, IntVar.MAX_INT_BOUND});
         IntVar i2 = s.intVar("i2", new int[]{1, IntVar.MAX_INT_BOUND});
         IntVar i3 = s.intVar("i3", new int[]{1, 10});
@@ -146,7 +140,7 @@ public class TimesTest extends AbstractTernaryTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "trueOrFalse", dataProviderClass = Providers.class)
     public void testMats1(boolean tableSubs) {
-        Model model = new Model("model", Settings.prod().setEnableTableSubstitution(tableSubs));
+        Model model = new Model("model", SettingsBuilder.prod().setEnableTableSubstitution(tableSubs));
         IntVar i1 = model.intVar("a", new int[]{-4, -1, 2});
         IntVar i2 = model.intVar("b", new int[]{-2, -1});
         model.times(i1, i2, i1).post();
@@ -155,7 +149,7 @@ public class TimesTest extends AbstractTernaryTest {
 
     @Test(groups = "1s", dataProviderClass = Providers.class, dataProvider = "trueOrFalse", timeOut = 60000)
     public void testJBSC1(boolean lcg){
-        Model model = new Model("model", Settings.dev().setLCG(lcg));
+        Model model = new Model("model", SettingsBuilder.dev().setLCG(lcg));
 
         // X =b_0_[2] = [0,1]
         BoolVar x = model.boolVar("x");

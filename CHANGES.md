@@ -4,6 +4,31 @@ Choco Solver ChangeLog
 This file is dedicated to sum up the new features added and bugs fixed in Choco-solver since the version, 4.0.0.
 **Note**: double-space is replaced by "\t" character on release process. Make sure the format is ok.
 
+5.0.1 - 10 Apr 2026
+---------------------
+
+### Major features:
+
+#### Constraints & LCG
+- Add table reformulation for pow constraint when LCG is on
+- Reduce runtime for building table reformulations by excluding the result variable from the tuple generation
+- Fix integer overflow in PropDivXYZLight
+- Fix bounded domains management with LCG in PropDivXYZ
+- Faster modulo constraint with large domains
+- Add arithm preprocessing
+- Fix decreasing constraint
+
+### Deprecated API (to be removed in next release):
+
+### Other closed issues and pull requests:
+See [milestone 5.0.1](https://github.com/chocoteam/choco-solver/milestone/41)
+
+#### Contributors to this release:
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
+- [Jean-Guillaume Fages](https://github.com/jgFages) (@jgFages)
+
+**Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v5.0.0...v5.0.1
+
 5.0.0 - 02 Feb 2026
 ---------------------
 
@@ -110,7 +135,7 @@ This new version has necessitated a rather intrusive revision of the way propaga
 
 By default, LCG is not enabled. The following code shows how to enable it:
 ```java
-Model model = new Model(Settings.init().setLCG(true));
+Model model = new Model(SettingsBuilder.init().setLCG(true));
 ```
 
 At this stage, this is a [beta version](https://github.com/orgs/chocoteam/projects/1).

@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.reification;
@@ -53,12 +50,12 @@ public class PropXneCHalfReif extends Propagator<IntVar> {
             setPassive();
         } else if (b.isInstantiatedTo(1)) {
             // if b is true, then x must be different from c
-            if(x.removeValue(c, this, lcg() ? Reason.r(b.getValLit()) : Reason.undef())) {
+            if(x.removeValue(c, this, lcg() ? this.r(b.getValLit()) : Reason.undef())) {
                 setPassive();
             }
         } else if (x.isInstantiatedTo(c)) {
             // if x and y are instantiated and equal, then b must be false
-            b.setToFalse(this, lcg() ? Reason.r(x.getValLit()) : Reason.undef());
+            b.setToFalse(this, lcg() ? this.r(x.getValLit()) : Reason.undef());
         }
     }
 

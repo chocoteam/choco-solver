@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.reification;
@@ -60,24 +57,24 @@ public class PropXeqYHalfReif extends Propagator<IntVar> {
             // if b is true, then x and y must be equal
             if (x.isInstantiated()) {
                 y.instantiateTo(x.getValue(), this,
-                        lcg() ? Reason.r(x.getValLit(), b.getValLit()) : Reason.undef());
+                        lcg() ? this.r(x.getValLit(), b.getValLit()) : Reason.undef());
                 setPassive();
             } else if (y.isInstantiated()) {
                 x.instantiateTo(y.getValue(), this,
-                        lcg() ? Reason.r(y.getValLit(), b.getValLit()) : Reason.undef());
+                        lcg() ? this.r(y.getValLit(), b.getValLit()) : Reason.undef());
                 setPassive();
             } else {
                 // x and y are not instantiated, but b is true, so x and y must be equal
                 do {
                     vars[0].updateLowerBound(vars[1].getLB(), this,
-                            lcg() ? Reason.r(vars[1].getMinLit(), b.getValLit()) : Reason.undef());
+                            lcg() ? this.r(vars[1].getMinLit(), b.getValLit()) : Reason.undef());
                 } while (vars[1].updateLowerBound(vars[0].getLB(), this,
-                        lcg() ? Reason.r(vars[0].getMinLit(), b.getValLit()) : Reason.undef()));
+                        lcg() ? this.r(vars[0].getMinLit(), b.getValLit()) : Reason.undef()));
                 do {
                     vars[0].updateUpperBound(vars[1].getUB(), this,
-                            lcg() ? Reason.r(vars[1].getMaxLit(), b.getValLit()) : Reason.undef());
+                            lcg() ? this.r(vars[1].getMaxLit(), b.getValLit()) : Reason.undef());
                 } while (vars[1].updateUpperBound(vars[0].getUB(), this,
-                        lcg() ? Reason.r(vars[0].getMaxLit(), b.getValLit()) : Reason.undef()));
+                        lcg() ? this.r(vars[0].getMaxLit(), b.getValLit()) : Reason.undef()));
 
                 // if x and y support value removal, then remove value from x if not in y and vice versa
                 if (vars[0].hasEnumeratedDomain() && vars[1].hasEnumeratedDomain()) {
@@ -86,14 +83,14 @@ public class PropXeqYHalfReif extends Propagator<IntVar> {
                     for (int val = vars[0].getLB(); val <= ub; val = vars[0].nextValue(val)) {
                         if (!vars[1].contains(val)) {
                             vars[0].removeValue(val, this,
-                                    lcg() ? Reason.r(vars[1].getLit(val, IntVar.LR_EQ), b.getValLit()) : Reason.undef());
+                                    lcg() ? this.r(vars[1].getLit(val, IntVar.LR_EQ), b.getValLit()) : Reason.undef());
                         }
                     }
                     ub = vars[1].getUB();
                     for (int val = vars[1].getLB(); val <= ub; val = vars[1].nextValue(val)) {
                         if (!vars[0].contains(val)) {
                             vars[1].removeValue(val, this,
-                                    lcg() ? Reason.r(vars[0].getLit(val, IntVar.LR_EQ), b.getValLit()) : Reason.undef());
+                                    lcg() ? this.r(vars[0].getLit(val, IntVar.LR_EQ), b.getValLit()) : Reason.undef());
                         }
                     }
                 }
@@ -105,19 +102,19 @@ public class PropXeqYHalfReif extends Propagator<IntVar> {
             switch (k) {
                 case 0b11:
                     if (x.getValue() != y.getValue()) {
-                        b.setToFalse(this, lcg() ? Reason.r(x.getValLit(), y.getValLit()) : Reason.undef());
+                        b.setToFalse(this, lcg() ? this.r(x.getValLit(), y.getValLit()) : Reason.undef());
                         setPassive();
                     }
                     break;
                 case 0b10:
                     if (!x.contains(y.getValue())) {
                         if(x.hasEnumeratedDomain() && y.hasEnumeratedDomain()) {
-                            b.setToFalse(this, lcg() ? Reason.r(y.getValLit(), x.getLit(y.getValue(), IntVar.LR_EQ)) : Reason.undef());
+                            b.setToFalse(this, lcg() ? this.r(y.getValLit(), x.getLit(y.getValue(), IntVar.LR_EQ)) : Reason.undef());
                         }else{
                             if(x.getUB() < y.getValue()) {
-                                b.setToFalse(this, lcg() ? Reason.r(x.getMaxLit(), y.getValLit()) : Reason.undef());
+                                b.setToFalse(this, lcg() ? this.r(x.getMaxLit(), y.getValLit()) : Reason.undef());
                             } else if (x.getLB() > y.getValue()) {
-                                b.setToFalse(this, lcg() ? Reason.r(x.getMinLit(), y.getValLit()) : Reason.undef());
+                                b.setToFalse(this, lcg() ? this.r(x.getMinLit(), y.getValLit()) : Reason.undef());
                             }
                         }
                         setPassive();
@@ -126,12 +123,12 @@ public class PropXeqYHalfReif extends Propagator<IntVar> {
                 case 0b01:
                     if (!y.contains(x.getValue())) {
                         if(x.hasEnumeratedDomain() && y.hasEnumeratedDomain()) {
-                            b.setToFalse(this, lcg() ? Reason.r(x.getValLit(), y.getLit(x.getValue(), IntVar.LR_EQ)) : Reason.undef());
+                            b.setToFalse(this, lcg() ? this.r(x.getValLit(), y.getLit(x.getValue(), IntVar.LR_EQ)) : Reason.undef());
                         }else{
                             if(y.getUB() < x.getValue()) {
-                                b.setToFalse(this, lcg() ? Reason.r(y.getMaxLit(), x.getValLit()) : Reason.undef());
+                                b.setToFalse(this, lcg() ? this.r(y.getMaxLit(), x.getValLit()) : Reason.undef());
                             } else if (y.getLB() > x.getValue()) {
-                                b.setToFalse(this, lcg() ? Reason.r(y.getMinLit(), x.getValLit()) : Reason.undef());
+                                b.setToFalse(this, lcg() ? this.r(y.getMinLit(), x.getValLit()) : Reason.undef());
                             }
                         }
                         setPassive();
@@ -139,10 +136,10 @@ public class PropXeqYHalfReif extends Propagator<IntVar> {
                     break;
                 case 0b00:
                     if (x.getLB() > y.getUB()) {
-                        b.setToFalse(this, lcg() ? Reason.r(x.getMinLit(), y.getMaxLit()) : Reason.undef());
+                        b.setToFalse(this, lcg() ? this.r(x.getMinLit(), y.getMaxLit()) : Reason.undef());
                         setPassive();
                     } else if (x.getUB() < y.getLB()) {
-                        b.setToFalse(this, lcg() ? Reason.r(x.getMaxLit(), y.getMinLit()) : Reason.undef());
+                        b.setToFalse(this, lcg() ? this.r(x.getMaxLit(), y.getMinLit()) : Reason.undef());
                         setPassive();
                     }
                     if ((long) vars[0].getDomainSize() + vars[1].getDomainSize() > THRESHOLD) return;
@@ -156,7 +153,7 @@ public class PropXeqYHalfReif extends Propagator<IntVar> {
                         }
                     }
                     // if no common value, then b must be false
-                    b.setToFalse(this, lcg() ? Propagator.reason(b, x, y) : Reason.undef());
+                    b.setToFalse(this, lcg() ? this.reason(b, x, y) : Reason.undef());
                 default:
                     break;
             }

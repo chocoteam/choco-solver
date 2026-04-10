@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.ternary;
@@ -79,9 +76,9 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
         int lb = vars[0].getLB() + vars[1].getLB();
         int ub = vars[0].getUB() + vars[1].getUB();
         boolean change = vars[2].updateLowerBound(lb, this,
-                lcg() ? Reason.r(vars[0].getMinLit(), vars[1].getMinLit()) : Reason.undef());
+                lcg() ? this.r(vars[0].getMinLit(), vars[1].getMinLit()) : Reason.undef());
         change |= vars[2].updateUpperBound(ub, this,
-                lcg() ? Reason.r(vars[0].getMaxLit(), vars[1].getMaxLit()) : Reason.undef());
+                lcg() ? this.r(vars[0].getMaxLit(), vars[1].getMaxLit()) : Reason.undef());
         if (isAC(vars[0], vars[1])) {
             set.clear();
             int ub1 = vars[0].getUB();
@@ -116,9 +113,9 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
         int lb = vars[2].getLB() - vars[vo].getUB();
         int ub = vars[2].getUB() - vars[vo].getLB();
         boolean change = vars[vr].updateLowerBound(lb, this,
-                lcg() ? Reason.r(vars[2].getMinLit(), vars[vo].getMaxLit()) : Reason.undef());
+                lcg() ? this.r(vars[2].getMinLit(), vars[vo].getMaxLit()) : Reason.undef());
         change |= vars[vr].updateUpperBound(ub, this,
-                lcg() ? Reason.r(vars[2].getMaxLit(), vars[vo].getMinLit()) : Reason.undef());
+                lcg() ? this.r(vars[2].getMaxLit(), vars[vo].getMinLit()) : Reason.undef());
         if (isAC(vars[2], vars[vo])) {
             set.clear();
             int ub1 = vars[2].getUB();

@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.sat;
@@ -53,8 +50,8 @@ public class SatDecorator extends MiniSat {
 
     private final TIntArrayList touched_variables_;
 
-    public SatDecorator(Model model) {
-        super(false);
+    public SatDecorator(Model model, int ccmin_mode) {
+        super(false, ccmin_mode);
         sat_trail_ = model.getEnvironment().makeInt();
         early_deductions_ = new TIntArrayList();
         touched_variables_ = new TIntArrayList();
@@ -87,7 +84,7 @@ public class SatDecorator extends MiniSat {
                 ok_ = (confl == C_Undef);
                 return;
             default:
-                Clause cr = new Clause(ps);
+                Clause cr = new ArrayClause(ps);
                 //removeDominated(cr);
                 dynClauses.add(cr);
                 attachClause(cr);
@@ -162,8 +159,8 @@ public class SatDecorator extends MiniSat {
                 return ESat.FALSE;
             case lTrue:
                 return ESat.TRUE;
-            default:
             case lUndef:
+            default:
                 return ESat.UNDEFINED;
         }
     }

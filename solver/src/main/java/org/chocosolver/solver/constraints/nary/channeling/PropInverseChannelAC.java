@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.nary.channeling;
@@ -41,7 +38,7 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
     private final IntVar[] Y;
     private final RemProc rem_proc;
     private final IIntDeltaMonitor[] idms;
-    private final ICause cause;
+    private final PropInverseChannelAC cause;
 
     public PropInverseChannelAC(IntVar[] X, IntVar[] Y, int minX, int minY) {
         super(ArrayUtils.append(X, Y), PropagatorPriority.LINEAR, true);
@@ -92,7 +89,7 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
         for (int v = min; v <= max; v = X[var].nextValue(v)) {
             if (!Y[v - minX].contains(var + minY)) {
                 X[var].removeValue(v, this,
-                        lcg()? Reason.r(Y[v - minX].getLit(var + minY, IntVar.LR_EQ)) : Reason.undef());
+                        lcg() ? this.r(Y[v - minX].getLit(var + minY, IntVar.LR_EQ)) : Reason.undef());
             }
         }
     }
@@ -104,7 +101,7 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
         for (int v = min; v <= max; v = Y[var].nextValue(v)) {
             if (!X[v - minY].contains(var + minX)) {
                 Y[var].removeValue(v, this,
-                        lcg()? Reason.r(X[v - minY].getLit(var + minX, IntVar.LR_EQ)) : Reason.undef());
+                        lcg() ? this.r(X[v - minY].getLit(var + minX, IntVar.LR_EQ)) : Reason.undef());
             }
         }
     }
@@ -122,10 +119,10 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
         public void execute(int val) throws ContradictionException {
             if (var < n) {
                 Y[val - minX].removeValue(var + minY, cause,
-                        lcg()? Reason.r(X[var].getLit(val, IntVar.LR_EQ)) : Reason.undef());
+                        lcg() ? cause.r(X[var].getLit(val, IntVar.LR_EQ)) : Reason.undef());
             } else {
                 X[val - minY].removeValue(var - n + minX, cause,
-                        lcg()? Reason.r(Y[var - n].getLit(val, IntVar.LR_EQ)) : Reason.undef());
+                        lcg() ? cause.r(Y[var - n].getLit(val, IntVar.LR_EQ)) : Reason.undef());
             }
         }
     }

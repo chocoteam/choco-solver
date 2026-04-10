@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.unary;
@@ -42,9 +39,10 @@ public class PropGreaterOrEqualXC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        vars[0].updateLowerBound(constant, this, Reason.undef());
-        assert vars[0].getLB() >= constant;
-        this.setPassive();
+        // with views such as abs(...), the prop can be not entailed after initial propagation
+        if (vars[0].getLB() >= constant || vars[0].updateLowerBound(constant, this, Reason.undef())) {
+            this.setPassive();
+        }
     }
 
     @Override

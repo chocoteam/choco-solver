@@ -1,20 +1,14 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.parser.dimacs;
 
 import org.chocosolver.parser.Level;
 import org.chocosolver.parser.RegParser;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.*;
 import org.chocosolver.solver.search.restart.GeometricalCutoff;
 import org.chocosolver.solver.search.restart.Restarter;
 import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
@@ -50,12 +44,6 @@ public class DIMACS extends RegParser {
     }
 
     @Override
-    public void createSettings() {
-        defaultSettings = Settings.prod()
-                .setEnableSAT(!cp);
-    }
-
-    @Override
     public Thread actionOnKill() {
         return new Thread(() -> {
             if (userinterruption) {
@@ -73,7 +61,7 @@ public class DIMACS extends RegParser {
         String iname = Paths.get(instance).getFileName().toString();
         parsers = new DIMACSParser[nb_cores];
         for (int i = 0; i < nb_cores; i++) {
-            Model threadModel = new Model(iname + "_" + (i + 1), defaultSettings);
+            Model threadModel = new Model(iname + "_" + (i + 1), this.setEnableSAT(!cp));
             threadModel.getSolver().logWithANSI(ansi);
             portfolio.addModel(threadModel);
             parsers[i] = new DIMACSParser();

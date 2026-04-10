@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints;
@@ -659,10 +656,9 @@ public interface ISatFactory extends ISelf<Model> {
         assert (ref().getSolver().isLCG() || ref().getSettings().enableSAT());
         Tuples t = new Tuples(true);
         for (int i = 0; i < TABLE.length; i++) {
-//        for(int i : INDEX){
-            t.add(i, TABLE[i]);
+            t.add(i + OFFSET, TABLE[i]);
         }
-        addTable(new IntVar[]{ref().intView(1, INDEX, -OFFSET), VALUE}, t);
+        addTable(new IntVar[]{INDEX, VALUE}, t);
         return true;
     }
 

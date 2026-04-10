@@ -1,17 +1,14 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.variables.view;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
@@ -455,7 +452,7 @@ public class BoolGeqViewTest {
     @Test(groups = "1s")
     public void testToTable() throws ContradictionException {
         for (int i = 0; i < 100; i++) {
-            Model mod = new Model(Settings.init().setEnableViews(false));
+            Model mod = new Model(SettingsBuilder.init().setEnableViews(false));
             IntVar res = mod.intVar("r", 0, 1004);
             IntVar[] xs = mod.intVarArray(5, new int[]{2, 3, 4, 5});
             BoolVar[] vs = new BoolVar[5];

@@ -1,17 +1,14 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.ternary;
 
-import org.chocosolver.solver.Providers;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.Providers;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.binary.PropModXY;
@@ -89,6 +86,20 @@ public class ModXYZTest extends AbstractTernaryTest {
 	}
 
 	@Test(groups="1s", timeOut=60000)
+	public void testMod3VarBigValues() throws ContradictionException {
+		Model model = new Model("model");
+		int maxVal = 100_000;
+		IntVar x = model.intVar("x", -maxVal, maxVal);
+		IntVar y = model.intVar("y", -maxVal, maxVal, false);
+		IntVar z = model.intVar("z", -maxVal, maxVal);
+		model.mod(x, y, z).post();
+		model.getSolver().propagate();
+		model.getSolver().limitSolution(10L);
+		while (model.getSolver().solve());
+		Assert.assertEquals(10L, model.getSolver().getSolutionCount());
+	}
+
+	@Test(groups="1s", timeOut=60000)
 	public void testMod3VarNegValues2() throws ContradictionException {
 		Model model = new Model("model");
 		IntVar x = model.intVar("x", -5, 0);
@@ -154,7 +165,7 @@ public class ModXYZTest extends AbstractTernaryTest {
 
 	@Test(groups="1s", timeOut=60000)
 	public void testMod3VarsIntoMod2VarsMod() {
-		Model model = new Model(Settings.init().setEnableTableSubstitution(false));
+		Model model = new Model(SettingsBuilder.init().setEnableTableSubstitution(false));
 		System.out.printf("%s\n", model.getClass());
 		IntVar x = model.intVar("x", 0,9);
 		IntVar y = model.intVar("y", 5);
@@ -176,16 +187,16 @@ public class ModXYZTest extends AbstractTernaryTest {
 	}
 
 	@Test(groups="1s", timeOut=60000)
-	public void testMod3VarsPropMod() {
+	public void testMod3VarsPropModSmallDomain() {
 		Model model = new Model("model");
-		IntVar x = model.intVar("x", 0,10_000);
-		IntVar y = model.intVar("y", 0, 10_000);
-		IntVar z = model.intVar("z", 0, 10_000);
+		IntVar x = model.intVar("x", 1,100);
+		IntVar y = model.intVar("y", 1, 100);
+		IntVar z = model.intVar("z", 1, 100);
 		model.mod(x, y, z).post();
 		Assert.assertEquals(model.getNbCstrs(), 1);
 		Constraint constraint = model.getCstrs()[0];
 		Assert.assertEquals(constraint.getPropagators().length, 1);
-        Assert.assertSame(constraint.getPropagators()[0].getClass(), PropModXYZ.class);
+		Assert.assertSame(constraint.getPropagators()[0].getClass(), PropModXYZ.class);
 	}
 
 	@Test(groups="1s", timeOut=60000)
@@ -207,7 +218,7 @@ public class ModXYZTest extends AbstractTernaryTest {
 
 	@Test(groups = "1s", timeOut = 60000, dataProvider = "trueOrFalse", dataProviderClass = Providers.class)
 	public void testMats1(boolean tableSubs) {
-		Model model = new Model("model", Settings.prod().setEnableTableSubstitution(tableSubs));
+		Model model = new Model("model", SettingsBuilder.prod().setEnableTableSubstitution(tableSubs));
 		IntVar x = model.intVar("A", new int[]{-8,-1});
 		IntVar y = model.intVar("B", new int[]{-8,-7,-2});
 		model.mod(y, y, x).post();

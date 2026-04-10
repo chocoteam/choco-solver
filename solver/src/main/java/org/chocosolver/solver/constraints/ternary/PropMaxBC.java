@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.ternary;
@@ -50,20 +47,20 @@ public class PropMaxBC extends Propagator<IntVar> {
         boolean change;
         do {
             change = vars[0].updateLowerBound(Math.max(vars[1].getLB(), vars[2].getLB()), this,
-                    lcg() ? Reason.r(vars[1].getMinLit(), vars[2].getMinLit()) : Reason.undef());
+                    lcg() ? this.r(vars[1].getMinLit(), vars[2].getMinLit()) : Reason.undef());
             change |= vars[0].updateUpperBound(Math.max(vars[1].getUB(), vars[2].getUB()), this,
-                    lcg() ? Reason.r(vars[1].getMaxLit(), vars[2].getMaxLit()) : Reason.undef());
+                    lcg() ? this.r(vars[1].getMaxLit(), vars[2].getMaxLit()) : Reason.undef());
             change |= vars[1].updateUpperBound(vars[0].getUB(), this,
-                    lcg() ? Reason.r(vars[0].getMaxLit()) : Reason.undef());
+                    lcg() ? this.r(vars[0].getMaxLit()) : Reason.undef());
             change |= vars[2].updateUpperBound(vars[0].getUB(), this,
-                    lcg() ? Reason.r(vars[0].getMaxLit()) : Reason.undef());
+                    lcg() ? this.r(vars[0].getMaxLit()) : Reason.undef());
             if (vars[2].getUB() < vars[0].getLB()) {
                 change |= vars[1].updateLowerBound(vars[0].getLB(), this,
-                        lcg() ? Reason.r(vars[0].getMinLit(), vars[2].getMaxLit()) : Reason.undef());
+                        lcg() ? this.r(vars[0].getMinLit(), vars[2].getMaxLit()) : Reason.undef());
             }
             if (vars[1].getUB() < vars[0].getLB()) {
                 change |= vars[2].updateLowerBound(vars[0].getLB(), this,
-                        lcg() ? Reason.r(vars[0].getMinLit(), vars[1].getMaxLit()) : Reason.undef());
+                        lcg() ? this.r(vars[0].getMinLit(), vars[1].getMaxLit()) : Reason.undef());
             }
         } while (change);
         if (vars[0].isInstantiated()) {

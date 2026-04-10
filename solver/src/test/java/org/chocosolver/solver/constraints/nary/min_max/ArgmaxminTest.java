@@ -1,17 +1,14 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.nary.min_max;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Providers;
-import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
@@ -67,7 +64,7 @@ public class ArgmaxminTest {
 
     @Test(groups = "1s", dataProvider = "seeds")
     public void testResultMin(long seed) {
-        Model model = new Model(Settings.init());
+        Model model = new Model(SettingsBuilder.init());
         IntVar[] x = new IntVar[4];
         x[0] = model.intVar("x1", 1, 3);
         x[1] = model.intVar("x2", 2, 10);
@@ -88,7 +85,7 @@ public class ArgmaxminTest {
 
     @Test(groups = "1s", dataProvider = "seeds")
     public void testResultMax(long seed) {
-        Model model = new Model(Settings.init());
+        Model model = new Model(SettingsBuilder.init());
         IntVar[] x = new IntVar[4];
         x[0] = model.intVar("x1", 1, 3);
         x[1] = model.intVar("x2", 2, 10);
@@ -109,7 +106,7 @@ public class ArgmaxminTest {
 
     @Test(groups = "1s", dataProvider = "decAndSeed")
     public void test1(boolean dec, long seed) {
-        Model model = new Model(Settings.init());
+        Model model = new Model(SettingsBuilder.init());
         IntVar[] x = new IntVar[4];
         IntVar z = model.intVar("z", new int[]{0, 2, 3});
         x[0] = model.intVar("x1", 1, 3);
@@ -129,7 +126,7 @@ public class ArgmaxminTest {
 
     @Test(groups = "1s", dataProvider = "decAndSeed")
     public void test1o(boolean dec, long seed) {
-        Model model = new Model(Settings.init());
+        Model model = new Model(SettingsBuilder.init());
         IntVar[] x = new IntVar[4];
         IntVar z = model.intVar("z", new int[]{1, 3, 4});
         x[0] = model.intVar("x1", 1, 3);
@@ -149,7 +146,7 @@ public class ArgmaxminTest {
 
     @Test(groups = "1s", dataProvider = "decAndSeed")
     public void test1o2(boolean dec, long seed) {
-        Model model = new Model(Settings.init());
+        Model model = new Model(SettingsBuilder.init());
         IntVar[] x = new IntVar[5];
         IntVar z = model.intVar("z", 1, 5);
         x[0] = model.intVar("X_INTRODUCED_143_", new int[]{14, 19, 25});
@@ -171,7 +168,7 @@ public class ArgmaxminTest {
     @Test(groups = "1s", dataProvider = "seeds")
     public void test11(int seed) {
         int n = 20;
-        Model model = new Model(Settings.init());
+        Model model = new Model(SettingsBuilder.init());
         IntVar[] x = model.intVarArray("x", n, 0, n - 1);
         int[][] pi = new int[n][n];
         Random rnd = new Random(0);
@@ -194,7 +191,7 @@ public class ArgmaxminTest {
 
     @Test(groups = "1s", dataProvider = "decAndSeed")
     public void test2(boolean dec, long seed) {
-        Model model = new Model(Settings.init());
+        Model model = new Model(SettingsBuilder.init());
         IntVar[] x = new IntVar[4];
         IntVar z = model.intVar("z", new int[]{0, 2, 3});
         x[0] = model.intVar("x1", 1, 3);
@@ -214,7 +211,7 @@ public class ArgmaxminTest {
 
     @Test(groups = "1s", dataProvider = "decAndSeed")
     public void test2o(boolean dec, long seed) {
-        Model model = new Model(Settings.init());
+        Model model = new Model(SettingsBuilder.init());
         IntVar[] x = new IntVar[4];
         IntVar z = model.intVar("z", new int[]{1, 3, 4});
         x[0] = model.intVar("x1", 1, 3);
@@ -235,7 +232,7 @@ public class ArgmaxminTest {
     @Test(groups = "1s", dataProvider = "seeds")
     public void test21(int seed) {
         int n = 20;
-        Model model = new Model(Settings.init());
+        Model model = new Model(SettingsBuilder.init());
         IntVar[] x = model.intVarArray("x", n, 0, n - 1);
         int[][] pi = new int[n][n];
         Random rnd = new Random(0);
@@ -258,7 +255,7 @@ public class ArgmaxminTest {
 
     @Test(groups = "1s", dataProvider = "decAndOffset")
     public void testAAA0(boolean dec, int o) {
-        Model model = new Model(Settings.init());
+        Model model = new Model(SettingsBuilder.init());
         IntVar[] x = new IntVar[4];
         IntVar z = model.intVar("z", new int[]{o, 1 + o, 2 + o, 3 + o});
         x[0] = model.intVar("x1", 1, 3);
@@ -279,7 +276,7 @@ public class ArgmaxminTest {
 
     @Test(groups = "1s", dataProvider = "decAndOffset")
     public void testAAB0(boolean dec, int o) {
-        Model model = new Model(Settings.init());
+        Model model = new Model(SettingsBuilder.init());
         IntVar[] x = new IntVar[4];
         IntVar z = model.intVar("z", new int[]{3 + o});
         x[0] = model.intVar("x1", 1);
@@ -300,7 +297,7 @@ public class ArgmaxminTest {
 
     @Test(groups = "1s", dataProvider = "decAndOffset")
     public void testAAC0(boolean dec, int o) {
-        Model model = new Model(Settings.init());
+        Model model = new Model(SettingsBuilder.init());
         IntVar[] x = new IntVar[4];
         IntVar z = model.intVar("z", new int[]{2 + o, 3 + o});
         x[0] = model.intVar("x1", 4, 5);
@@ -321,7 +318,7 @@ public class ArgmaxminTest {
 
     @Test(groups = "1s", dataProvider = "decAndOffset")
     public void testAAD0(boolean dec, int o) {
-        Model model = new Model(Settings.init());
+        Model model = new Model(SettingsBuilder.init());
         IntVar[] x = new IntVar[4];
         IntVar z = model.intVar("z", new int[]{o, 3 + o});
         x[0] = model.intVar("x1", 4, 5);
@@ -342,7 +339,7 @@ public class ArgmaxminTest {
 
     @Test(groups = "1s", dataProvider = "decAndOffset")
     public void testAAE0(boolean dec, int o) {
-        Model model = new Model(Settings.init());
+        Model model = new Model(SettingsBuilder.init());
         IntVar[] x = new IntVar[4];
         IntVar z = model.intVar("z", new int[]{o, 3 + o});
         x[0] = model.intVar("x1", 4);
@@ -363,7 +360,7 @@ public class ArgmaxminTest {
 
     @Test(groups = "1s", dataProvider = "trueOrFalse", dataProviderClass = Providers.class)
     public void testMats1(boolean dec) {
-        Model model = new Model(Settings.init());
+        Model model = new Model(SettingsBuilder.init());
         IntVar[] x = new IntVar[5];
         x[0] = model.intVar("B", new int[]{1, 7});
         x[1] = model.intVar("E", new int[]{1, 7});

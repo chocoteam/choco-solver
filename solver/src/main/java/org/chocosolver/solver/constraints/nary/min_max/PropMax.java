@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.nary.min_max;
@@ -53,14 +50,14 @@ public class PropMax extends Propagator<IntVar> {
             // update max
             for (int i = 0; i < n; i++) {
                 filter |= vars[i].updateUpperBound(max, this,
-                        lcg() ? Reason.r(vars[n].getMaxLit()) : Reason.undef());
+                        lcg() ? this.r(vars[n].getMaxLit()) : Reason.undef());
                 lb = Math.max(lb, vars[i].getLB());
                 ub = Math.max(ub, vars[i].getUB());
             }
             filter |= vars[n].updateLowerBound(lb, this,
-                    lcg() ? Propagator.lbounds(vars[n], vars) : Reason.undef());
+                    lcg() ? this.lbounds(vars[n], vars) : Reason.undef());
             filter |= vars[n].updateUpperBound(ub, this,
-                    lcg() ? Propagator.ubounds(vars[n], vars) : Reason.undef());
+                    lcg() ? this.ubounds(vars[n], vars) : Reason.undef());
             lb = Math.max(lb, vars[n].getLB());
             // back-propagation
             int c = 0, idx = -1;
@@ -79,7 +76,7 @@ public class PropMax extends Propagator<IntVar> {
                         ps[m] = vars[i].getMaxLit();
                     }
                     ps[idx + 1] = vars[n].getMinLit();
-                    r = Reason.r(ps);
+                    r = this.r(ps);
                 }
                 filter = vars[idx].updateLowerBound(vars[n].getLB(), this, r);
                 if (vars[n].isInstantiated() && vars[idx].isInstantiatedTo(vars[n].getValue())) {

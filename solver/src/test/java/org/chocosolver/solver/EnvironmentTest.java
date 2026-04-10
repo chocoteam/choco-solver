@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 /**
@@ -43,7 +40,7 @@ public class EnvironmentTest {
 	public void testSize(EnvironmentTrailing env) {
 		int n = 12;
 		IntVar[] vars, vectors;
-		Model model = new Model("CostasArrays", Settings.init().setEnvironmentSupplier(() -> env));
+		Model model = new Model("CostasArrays", SettingsBuilder.init().setEnvironmentSupplier(() -> env));
 		vars = model.intVarArray("v", n, 0, n - 1, false);
 		vectors = new IntVar[n * n - n];
 		int idx = 0;

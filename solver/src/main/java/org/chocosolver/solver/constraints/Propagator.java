@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints;
@@ -13,6 +10,8 @@ package org.chocosolver.solver.constraints;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.memory.structure.IOperation;
+import org.chocosolver.sat.IReasonManager;
+import org.chocosolver.sat.IndexBasedReason;
 import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Identity;
@@ -80,7 +79,7 @@ import static org.chocosolver.solver.variables.events.PropagatorEventType.CUSTOM
  * @see Constraint
  * @since 0.01
  */
-public abstract class Propagator<V extends Variable> implements ICause, Identity, Comparable<Propagator<V>> {
+public abstract class Propagator<V extends Variable> implements ICause, Identity, Comparable<Propagator<V>>, IReasonManager {
 
     /**
      * Status of this propagator on creation.
@@ -625,7 +624,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     @Override
     public Function<Reason, Reason> manageReification() {
         if (model.getSolver().isLCG() && isReified() && reifVar.isInstantiated()) {
-            return r -> Reason.gather(r, reifVar.isInstantiated() ? reifVar.getValLit() : 1);
+            return r -> getReasonManager().gather(r, reifVar.isInstantiated() ? reifVar.getValLit() : 1);
         } else {
             return ICause.super.manageReification();
         }
@@ -797,6 +796,46 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     }
 
     /**
+     * The reason manager of the solver this propagator belongs to.
+     * It is used to manage the reasons of the propagations and contradictions of this propagator.
+     *
+     * @return the reason manager of the solver this propagator belongs to
+     */
+    public IReasonManager getReasonManager(){
+        return this.model.getSolver().getReasonManager();
+    }
+
+    @Override
+    public IndexBasedReason.ReasonClause getSharedIndexBasedClause() {
+        return getReasonManager().getSharedIndexBasedClause();
+    }
+
+    @Override
+    public Reason r(int d1) {
+        return getReasonManager().r(d1);
+    }
+
+    @Override
+    public Reason r(int d1, int d2) {
+        return getReasonManager().r(d1, d2);
+    }
+
+    @Override
+    public Reason r(int... ds) {
+        return getReasonManager().r(ds);
+    }
+
+    @Override
+    public Reason r(TIntArrayList ds) {
+        return getReasonManager().r(ds);
+    }
+
+    @Override
+    public Reason gather(Reason r, int p) {
+        return getReasonManager().gather(r, p);
+    }
+
+    /**
      * @implSpec by default, all variables but the pivot are the reason of the modification
      */
     public Reason defaultReason(Variable pivot) {
@@ -805,7 +844,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         } else return Reason.undef();
     }
 
-    public static Reason reason(Variable pivot, Variable... variables) {
+    public Reason reason(Variable pivot, Variable... variables) {
         assert variables.length > 0 : "A propagator should have at least one variable";
         assert variables[0].getModel().getSolver().isLCG() : "This method should not be called if the LCG is not enabled";
         TIntList ps = new TIntArrayList();
@@ -827,10 +866,10 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
                 }
             }
         }
-        return Reason.r(ps.toArray());
+        return r(ps.toArray());
     }
 
-    public static Reason bounds(Variable pivot, Variable... variables) {
+    public Reason bounds(Variable pivot, Variable... variables) {
         assert variables.length > 0 : "A propagator should have at least one variable";
         assert variables[0].getModel().getSolver().isLCG() : "This method should not be called if the LCG is not enabled";
         TIntList ps = new TIntArrayList();
@@ -842,10 +881,10 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
                 ps.add(var.getMaxLit());
             }
         }
-        return Reason.r(ps.toArray());
+        return getReasonManager().r(ps.toArray());
     }
 
-    public static Reason lbounds(Variable pivot, Variable... variables) {
+    public Reason lbounds(Variable pivot, Variable... variables) {
         assert variables.length > 0 : "A propagator should have at least one variable";
         assert variables[0].getModel().getSolver().isLCG() : "This method should not be called if the LCG is not enabled";
         TIntList ps = new TIntArrayList();
@@ -856,11 +895,11 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
                 ps.add(var.getMinLit());
             }
         }
-        return Reason.r(ps.toArray());
+        return getReasonManager().r(ps.toArray());
     }
 
 
-    public static Reason ubounds(Variable pivot, Variable... variables) {
+    public Reason ubounds(Variable pivot, Variable... variables) {
         assert variables.length > 0 : "A propagator should have at least one variable";
         assert variables[0].getModel().getSolver().isLCG() : "This method should not be called if the LCG is not enabled";
         TIntList ps = new TIntArrayList();
@@ -871,7 +910,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
                 ps.add(var.getMaxLit());
             }
         }
-        return Reason.r(ps.toArray());
+        return getReasonManager().r(ps.toArray());
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 /**
@@ -129,6 +126,7 @@ module org.chocosolver.solver {
     requires org.jgrapht.core;
     requires automaton;
     requires sizeof;
+    requires args4j;
 
     opens org.chocosolver.memory to org.testng, sizeof;
     opens org.chocosolver.solver.constraints.unary to org.chocosolver.parsers, sizeof;
@@ -161,7 +159,7 @@ module org.chocosolver.solver {
     opens org.chocosolver.solver.constraints.nary.alldifferent.algo to sizeof;
 
     // to org.ehcache
-    opens org.chocosolver.solver to sizeof;
+    opens org.chocosolver.solver to sizeof, args4j;
     opens org.chocosolver.solver.variables.impl to sizeof;
     opens org.chocosolver.solver.variables.delta to sizeof;
     opens org.chocosolver.solver.variables.delta.monitor to sizeof;

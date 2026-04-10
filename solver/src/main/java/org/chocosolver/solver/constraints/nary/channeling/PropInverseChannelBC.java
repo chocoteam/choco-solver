@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.nary.channeling;
@@ -108,7 +105,7 @@ public class PropInverseChannelBC extends Propagator<IntVar> {
         for (int v = min; v <= max; v = X[var].nextValue(v)) {
             if (!Y[v - minX].contains(var + minY)) {
                 X[var].removeValue(v, this,
-                        lcg() ? Reason.r(Y[v - minX].getLit(var + minY, IntVar.LR_EQ)) : Reason.undef());
+                        lcg() ? this.r(Y[v - minX].getLit(var + minY, IntVar.LR_EQ)) : Reason.undef());
                 toCompute.set(v - minX);
             } else {
                 break;
@@ -117,7 +114,7 @@ public class PropInverseChannelBC extends Propagator<IntVar> {
         for (int v = max; v >= min; v = X[var].previousValue(v)) {
             if (!Y[v - minX].contains(var + minY)) {
                 X[var].removeValue(v, this,
-                        lcg() ? Reason.r(Y[v - minX].getLit(var + minY, IntVar.LR_EQ)) : Reason.undef());
+                        lcg() ? this.r(Y[v - minX].getLit(var + minY, IntVar.LR_EQ)) : Reason.undef());
                 toCompute.set(v - minX);
             } else {
                 break;
@@ -132,7 +129,7 @@ public class PropInverseChannelBC extends Propagator<IntVar> {
         for (int v = min; v <= max; v = Y[var].nextValue(v)) {
             if (!X[v - minY].contains(var + minX)) {
                 Y[var].removeValue(v, this,
-                        lcg() ? Reason.r(X[v - minY].getLit(var + minX, IntVar.LR_EQ)) : Reason.undef());
+                        lcg() ? this.r(X[v - minY].getLit(var + minX, IntVar.LR_EQ)) : Reason.undef());
                 toCompute.set(v - minY);
             } else {
                 break;
@@ -141,7 +138,7 @@ public class PropInverseChannelBC extends Propagator<IntVar> {
         for (int v = max; v >= min; v = Y[var].previousValue(v)) {
             if (!X[v - minY].contains(var + minX)) {
                 Y[var].removeValue(v, this,
-                        lcg() ? Reason.r(X[v - minY].getLit(var + minX, IntVar.LR_EQ)) : Reason.undef());
+                        lcg() ? this.r(X[v - minY].getLit(var + minX, IntVar.LR_EQ)) : Reason.undef());
                 toCompute.set(v - minY);
             } else {
                 break;

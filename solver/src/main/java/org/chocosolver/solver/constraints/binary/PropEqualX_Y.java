@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.binary;
@@ -51,7 +48,7 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
             idms[0] = vars[0].monitorDelta(this);
             idms[1] = vars[1].monitorDelta(this);
             rem_proc = i -> vars[indexToFilter].removeValue(i, this,
-                    lcg() ? Reason.r(vars[1 - indexToFilter].getLit(i, IntVar.LR_EQ)) : Reason.undef());
+                    lcg() ? this.r(vars[1 - indexToFilter].getLit(i, IntVar.LR_EQ)) : Reason.undef());
         }
     }
 
@@ -65,11 +62,11 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
 
     @SuppressWarnings("StatementWithEmptyBody")
     private void updateBounds() throws ContradictionException {
-        while (x.updateLowerBound(y.getLB(), this, lcg() ? Reason.r(y.getMinLit()) : Reason.undef())
-                | y.updateLowerBound(x.getLB(), this, lcg() ? Reason.r(x.getMinLit()) : Reason.undef()))
+        while (x.updateLowerBound(y.getLB(), this, lcg() ? this.r(y.getMinLit()) : Reason.undef())
+                | y.updateLowerBound(x.getLB(), this, lcg() ? this.r(x.getMinLit()) : Reason.undef()))
             ;
-        while (x.updateUpperBound(y.getUB(), this, lcg() ? Reason.r(y.getMaxLit()) : Reason.undef())
-                | y.updateUpperBound(x.getUB(), this, lcg() ? Reason.r(x.getMaxLit()) : Reason.undef()))
+        while (x.updateUpperBound(y.getUB(), this, lcg() ? this.r(y.getMaxLit()) : Reason.undef())
+                | y.updateUpperBound(x.getUB(), this, lcg() ? this.r(x.getMaxLit()) : Reason.undef()))
             ;
     }
 
@@ -81,13 +78,13 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
             int ub = x.getUB();
             for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
                 if (!(y.contains(val))) {
-                    x.removeValue(val, this, lcg() ? Reason.r(y.getLit(val, IntVar.LR_EQ)) : Reason.undef());
+                    x.removeValue(val, this, lcg() ? this.r(y.getLit(val, IntVar.LR_EQ)) : Reason.undef());
                 }
             }
             ub = y.getUB();
             for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
                 if (!(x.contains(val))) {
-                    y.removeValue(val, this, lcg() ? Reason.r(x.getLit(val, IntVar.LR_EQ)) : Reason.undef());
+                    y.removeValue(val, this, lcg() ? this.r(x.getLit(val, IntVar.LR_EQ)) : Reason.undef());
                 }
             }
             idms[0].startMonitoring();

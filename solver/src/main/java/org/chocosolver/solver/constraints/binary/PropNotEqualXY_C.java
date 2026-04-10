@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.binary;
@@ -63,13 +60,13 @@ public class PropNotEqualXY_C extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         if (x.isInstantiated()) {
             if (y.removeValue(cste - x.getValue(), this,
-                    lcg() ? Reason.r(x.getValLit()): Reason.undef())
+                    lcg() ? this.r(x.getValLit()) : Reason.undef())
                     || !y.contains(cste - x.getValue())) {
                 this.setPassive();
             }
         } else if (y.isInstantiated()) {
             if (x.removeValue(cste - y.getValue(), this,
-                    lcg() ? Reason.r(y.getValLit()): Reason.undef())
+                    lcg() ? this.r(y.getValLit()) : Reason.undef())
                     || !x.contains(cste - y.getValue())) {
                 this.setPassive();
             }

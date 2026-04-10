@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.parser;
@@ -14,10 +11,7 @@ import org.chocosolver.parser.handlers.LimitHandler;
 import org.chocosolver.parser.handlers.RestartHandler;
 import org.chocosolver.parser.handlers.ValSelHandler;
 import org.chocosolver.parser.handlers.VarSelHandler;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ParallelPortfolio;
-import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.*;
 import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.SearchParams;
@@ -41,7 +35,7 @@ import java.util.Comparator;
  * Created by cprudhom on 01/09/15.
  * Project: choco-parsers.
  */
-public abstract class RegParser implements IParser {
+public abstract class RegParser extends SettingsBuilder implements IParser {
     /**
      * Name of the parser
      */
@@ -171,16 +165,8 @@ public abstract class RegParser implements IParser {
     @Option(name = "--cp-profiler", usage = "Connect to CP-Profiler. Two comma-separated values are expected: the execution id and the port.")
     public String cpProfiler = null;
 
-    @Option(name = "-lcg", usage = "Set Lazy Clause Generation (LCG) on. ")
-    protected boolean lcg = false;
-
     @Option(name = "--disable-shutdown-hook", usage = "Disable the shutdown hook.")
     protected boolean disableShutdownHook = false;
-
-    /**
-     * Default settings to apply
-     */
-    protected Settings defaultSettings;
 
     /**
      * The resolution portfolio
@@ -210,14 +196,6 @@ public abstract class RegParser implements IParser {
     protected RegParser(String parser_cmd) {
         this.time = System.currentTimeMillis();
         this.parser_cmd = parser_cmd;
-    }
-
-    public void createSettings() {
-        defaultSettings = Settings.prod().setLCG(lcg);
-    }
-
-    public final Settings getSettings() {
-        return defaultSettings;
     }
 
     /**
@@ -263,7 +241,6 @@ public abstract class RegParser implements IParser {
         if (valsel == null) {
             valsel = new SearchParams.ValSelConf(valH, best, bestRate, last);
         }
-        createSettings();
         if (!disableShutdownHook) {
             Runtime.getRuntime().addShutdownHook(statOnKill);
         }

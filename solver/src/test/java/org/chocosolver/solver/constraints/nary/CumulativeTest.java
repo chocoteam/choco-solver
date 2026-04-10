@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.nary;
@@ -200,7 +197,7 @@ public class CumulativeTest {
 
     @Test(groups = "1s", dataProvider = "trueOrFalse", dataProviderClass = Providers.class)
     public void testGCCAT(boolean lcg) {
-        Model model = new Model(Settings.dev().setLCG(lcg));
+        Model model = new Model(SettingsBuilder.dev().setLCG(lcg));
         int[][] s = new int[][]{{1, 5}, {2, 7}, {3, 6}, {1, 8}};
         int[][] d = new int[][]{{4, 4}, {6, 6}, {3, 6}, {2, 3}};
         int[][] e = new int[][]{{1, 9}, {1, 9}, {1, 9}, {1, 9}};

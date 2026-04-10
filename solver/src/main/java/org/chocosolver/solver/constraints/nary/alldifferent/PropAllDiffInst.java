@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.nary.alldifferent;
@@ -130,7 +127,7 @@ public class PropAllDiffInst extends Propagator<IntVar> {
     }
 
     private Reason explain(int i, int j) {
-        return Reason.r(vars[i].getValLit(), j > -1 ? vars[j].getValLit() : 0);
+        return this.r(vars[i].getValLit(), j > -1 ? vars[j].getValLit() : 0);
     }
 
 

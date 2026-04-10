@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 /**
@@ -507,13 +504,13 @@ public class TableTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void test329() {
-        Model s1 = new Model(Settings.init().setMaxTupleSizeForSubstitution(0));
+        Model s1 = new Model(SettingsBuilder.init().setMaxTupleSizeForSubstitution(0));
         {
             BoolVar[] bs = s1.boolVarArray("b", 3);
             BoolVar r = s1.boolVar("r");
             s1.scalar(bs, new int[]{-1, -1, -1}, "<=", -2).reifyWith(r);
         }
-        Model s2 = new Model(Settings.init().setMaxTupleSizeForSubstitution(1000));
+        Model s2 = new Model(SettingsBuilder.init().setMaxTupleSizeForSubstitution(1000));
         {
             BoolVar[] bs = s2.boolVarArray("b", 3);
             BoolVar r = s2.boolVar("r");

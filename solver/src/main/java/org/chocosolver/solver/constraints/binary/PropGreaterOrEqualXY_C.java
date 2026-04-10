@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.binary;
@@ -50,9 +47,9 @@ public final class PropGreaterOrEqualXY_C extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         x.updateLowerBound(MathUtils.safeSubstract(this.cste, y.getUB()), this,
-                lcg() ? Reason.r(y.getMaxLit()) : Reason.undef());
+                lcg() ? this.r(y.getMaxLit()) : Reason.undef());
         y.updateLowerBound(MathUtils.safeSubstract(this.cste, x.getUB()), this,
-                lcg() ? Reason.r(x.getMaxLit()) : Reason.undef());
+                lcg() ? this.r(x.getMaxLit()) : Reason.undef());
         if (x.getLB() + y.getLB() >= this.cste) {
             this.setPassive();
         }
@@ -62,10 +59,10 @@ public final class PropGreaterOrEqualXY_C extends Propagator<IntVar> {
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         if (idxVarInProp == 0) {
             y.updateLowerBound(this.cste - x.getUB(), this,
-                    lcg() ? Reason.r(x.getMaxLit()) : Reason.undef());
+                    lcg() ? this.r(x.getMaxLit()) : Reason.undef());
         } else {
             x.updateLowerBound(this.cste - y.getUB(), this,
-                    lcg() ? Reason.r(y.getMaxLit()) : Reason.undef());
+                    lcg() ? this.r(y.getMaxLit()) : Reason.undef());
         }
         if (x.getLB() + y.getLB() >= this.cste) {
             this.setPassive();

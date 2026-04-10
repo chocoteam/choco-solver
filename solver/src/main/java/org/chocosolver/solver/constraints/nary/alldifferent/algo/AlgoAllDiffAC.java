@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.nary.alldifferent.algo;
@@ -191,7 +188,7 @@ public class AlgoAllDiffAC implements IAlldifferentAlgorithm {
                     ps[m++] = MiniSat.neg(vars[l].getLit(set.max(), LR_LE));
                 }
                 assert m == ps.length;
-                reason = Reason.r(ps);
+                reason = aCause.r(ps);
 
             }
             aCause.fails(reason);
@@ -283,7 +280,7 @@ public class AlgoAllDiffAC implements IAlldifferentAlgorithm {
                         int vidx = digraph.getSuccessorsOf(j).min();
                         if (vars[vidx].isInstantiated()) {
                             assert vars[vidx].isInstantiatedTo(k);
-                            reason = Reason.r(vars[vidx].getValLit());
+                            reason = aCause.r(vars[vidx].getValLit());
                         } else {
                             // todo: While the component variable has not yet been determined,
                             //  but will be shortly, the chronology of events has not been respected.
@@ -302,7 +299,7 @@ public class AlgoAllDiffAC implements IAlldifferentAlgorithm {
                             }
                         }
                         assert m == ps.length;
-                        reason = Reason.r(ps);
+                        reason = aCause.r(ps);
                     }
                 }
                 if (v.removeValue(k, aCause, reason)) {

@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.parser.flatzinc.ast;
@@ -281,8 +278,11 @@ public class Datas {
         }
         if (level.is(Level.JSON)) {
             solver.log().printf(Locale.US, "\n\t],\n\t\"exit\":{\"time\":%.1f, " +
-                            "\"nodes\":%d, \"failures\":%d, \"restarts\":%d, \"status\":\"%s\"}\n}",
+                            "\"bound\":%d, \"nodes\":%d, \"failures\":%d, \"restarts\":%d, \"status\":\"%s\"}\n}",
                     solver.getTimeCount(),
+                    solver.getObjectiveManager().isOptimization() ?
+                            solver.getObjectiveManager().getBestSolutionValue().intValue() :
+                            solver.getSolutionCount(),
                     solver.getNodeCount(),
                     solver.getFailCount(),
                     solver.getRestartCount(),

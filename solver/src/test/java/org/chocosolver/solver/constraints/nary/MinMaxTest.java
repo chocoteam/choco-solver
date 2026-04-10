@@ -1,18 +1,12 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.*;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.limits.BacktrackCounter;
@@ -28,7 +22,8 @@ import java.util.List;
 import java.util.Random;
 
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 /**
  * @author Jean-Guillaume Fages
@@ -493,7 +488,7 @@ public class MinMaxTest {
         for(int n = 2; n < s; n++) {
             for (int i = 0; i < l; i++) {
                 rnd.setSeed(i * s + n);
-                Settings settings = Settings.init().setWarnUser(false);
+                SettingsBuilder settings = SettingsBuilder.init().setWarnUser(false);
                 Model model = new Model(settings);
                 BoolVar[] bvars = new BoolVar[n];
                 for (int j = 0; j < n; j++) {
@@ -520,7 +515,7 @@ public class MinMaxTest {
         for(int n = 2; n < s; n++) {
             for (int i = 0; i < l; i++) {
                 rnd.setSeed(i * s + n);
-                Settings settings = Settings.init().setWarnUser(false);
+                SettingsBuilder settings = SettingsBuilder.init().setWarnUser(false);
                 Model model = new Model(settings);
                 BoolVar[] bvars = new BoolVar[n];
                 for (int j = 0; j < n; j++) {

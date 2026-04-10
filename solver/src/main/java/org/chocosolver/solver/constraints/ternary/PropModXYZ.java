@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.ternary;
@@ -31,7 +28,7 @@ public class PropModXYZ extends Propagator<IntVar> {
     private final IntVar z;
     private IntIterableBitSet usedValues;
     private final boolean allEnnums;
-    private static final int THRESHOLD = 10_000;
+    public static final int THRESHOLD = 10_000;
 
     public PropModXYZ(IntVar x, IntVar y, IntVar z) {
         super(new IntVar[]{x, y, z}, PropagatorPriority.TERNARY, false);
@@ -53,17 +50,18 @@ public class PropModXYZ extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         y.removeValue(0, this);
-        int zlb, zub;
+        int zlb;
+        int zub;
         int xlb = x.getLB();
         int xub = x.getUB();
         int ylb = y.getLB();
         int yub = y.getUB();
         if (xlb >= 0) {
             zlb = 0;
-            zub = Math.min(xub, Math.max(Math.abs(y.getLB()), Math.abs(y.getUB())) - 1);
+            zub = Math.min(xub, Math.max(Math.abs(ylb), Math.abs(yub)) - 1);
         } else if (xub < 0) {
             zub = 0;
-            zlb = Math.max(xlb, -Math.max(Math.abs(y.getLB()), Math.abs(y.getUB())) + 1);
+            zlb = Math.max(xlb, -Math.max(Math.abs(ylb), Math.abs(yub)) + 1);
         } else {
             zlb = Math.max(xlb, Math.min(ylb, Math.min(-ylb, -yub)) + 1);
             zub = Math.min(xub, Math.max(yub, Math.max(-ylb, -yub)) - 1);

@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints;
@@ -14,7 +11,6 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.binary.*;
 import org.chocosolver.solver.constraints.binary.element.ElementFactory;
 import org.chocosolver.solver.constraints.extension.Tuples;
@@ -101,15 +97,52 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     //##################################################################################################################
 
     /**
-     * Creates an arithmetic constraint : var op cste,
+     * Creates an arithmetic constraint : x op cste,
      * where op in {"=", "!=", ">","<",">=","<="}
      *
-     * @param var  a variable
+     * @param x  a variable
      * @param op   an operator
      * @param cste a constant
      */
-    default Constraint arithm(IntVar var, String op, int cste) {
-        return new Arithmetic(var, Operator.get(op), cste);
+    default Constraint arithm(IntVar x, String op, int cste) {
+        // this preprocessing is no longer permitted within a dynamical context
+        if (!ref().getSolver().isSolving()) {
+            switch (op) {
+                case "=": {
+                    if (x.isInstantiatedTo(cste)) return ref().trueConstraint();
+                    if (!x.contains(cste)) return ref().falseConstraint();
+                    break;
+                }
+                case "!=": {
+                    if (x.isInstantiatedTo(cste)) return ref().falseConstraint();
+                    if (!x.contains(cste)) return ref().trueConstraint();
+                    break;
+                }
+                case ">": {
+                    if (x.getLB() > cste) return ref().trueConstraint();
+                    if (x.getUB() <= cste) return ref().falseConstraint();
+                    break;
+                }
+                case ">=": {
+                    if (x.getLB() >= cste) return ref().trueConstraint();
+                    if (x.getUB() < cste) return ref().falseConstraint();
+                    break;
+                }
+                case "<": {
+                    if (x.getUB() < cste) return ref().trueConstraint();
+                    if (x.getLB() >= cste) return ref().falseConstraint();
+                    break;
+                }
+                case "<=": {
+                    if (x.getUB() <= cste) return ref().trueConstraint();
+                    if (x.getLB() > cste) return ref().falseConstraint();
+                    break;
+                }
+                default:
+                    throw new SolverException("Unknown operator " + op + ". Should be within : {\"=\", \"!=\", \">\",\"<\",\">=\",\"<=\"}");
+            }
+        }
+        return new Arithmetic(x, Operator.get(op), cste);
     }
 
     /**
@@ -252,11 +285,48 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param var2 second variable
      */
     default Constraint arithm(IntVar var1, String op, IntVar var2) {
-        if (var2.isInstantiated()) {
-            return arithm(var1, op, var2.getValue());
-        }
-        if (var1.isInstantiated()) {
-            return arithm(var2, Operator.getFlip(op), var1.getValue());
+        // this preprocessing is no longer permitted within a dynamical context
+        if (!ref().getSolver().isSolving()) {
+            if (var2.isInstantiated()) {
+                return arithm(var1, op, var2.getValue());
+            }
+            if (var1.isInstantiated()) {
+                return arithm(var2, Operator.getFlip(op), var1.getValue());
+            }
+            switch (op) {
+                case "=": {
+                    if (var2.isInstantiated() && var1.isInstantiatedTo(var2.getValue())) return ref().trueConstraint();
+                    if (var1.getLB() > var2.getUB() || var2.getLB() > var1.getUB()) return ref().falseConstraint();
+                    break;
+                }
+                case "!=": {
+                    if (var2.isInstantiated() && var1.isInstantiatedTo(var2.getValue())) return ref().falseConstraint();
+                    if (var1.getLB() > var2.getUB() || var2.getLB() > var1.getUB()) return ref().trueConstraint();
+                    break;
+                }
+                case ">": {
+                    if (var1.getLB() > var2.getUB()) return ref().trueConstraint();
+                    if (var1.getUB() <= var2.getLB()) return ref().falseConstraint();
+                    break;
+                }
+                case ">=": {
+                    if (var1.getLB() >= var2.getUB()) return ref().trueConstraint();
+                    if (var1.getUB() < var2.getLB()) return ref().falseConstraint();
+                    break;
+                }
+                case "<": {
+                    if (var1.getUB() < var2.getLB()) return ref().trueConstraint();
+                    if (var1.getLB() >= var2.getUB()) return ref().falseConstraint();
+                    break;
+                }
+                case "<=": {
+                    if (var1.getUB() <= var2.getLB()) return ref().trueConstraint();
+                    if (var1.getLB() > var2.getUB()) return ref().falseConstraint();
+                    break;
+                }
+                default:
+                    throw new SolverException("Unknown operator " + op + ". Should be within : {\"=\", \"!=\", \">\",\"<\",\">=\",\"<=\"}");
+            }
         }
         return new Arithmetic(var1, Operator.get(op), var2);
     }
@@ -296,8 +366,6 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                     }
                 default:
                     switch (op2) {
-                        default:
-                            throw new SolverException("Unknown operators for arithm constraint");
                         case "*": // v1 OP v2 * cste
                             if (Operator.EQ.name().equals(op1)) {
                                 return times(var2, cste, var1);
@@ -318,6 +386,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                                 ref().div(var2, ref().intVar(cste), var4).post();
                                 return arithm(var1, op1, var4);
                             }
+                        default:
+                            throw new SolverException("Unknown operators for arithm constraint");
                     }
             }
         } else {
@@ -410,8 +480,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 
         if (Z.isInstantiated()) {
             return mod(X, y, Z.getValue());
-        } else if (TuplesFactory.canBeTupled(X, Z)) {
-            return table(X, Z, TuplesFactory.modulo(X, y, Z));
+        } else if (TuplesFactory.canBeTupledWithResult(Z, X)) {
+            return table(Z, X, TuplesFactory.modulo(Z, X, y));
         } else {
             if (ref().getSolver().isLCG()) {
                 int xl = abs(X.getLB());
@@ -458,6 +528,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * <p>
      * - <b>CT</b>: table constraint which applies the Compact-Table algorithm,<br/>
      * - <b>CT+</b>: table constraint which applies the Compact-Table algorithm on allowed tuples,<br/>
+     * - <b>STR2+</b>: table constraint which applies the STR2 algorithm on allowed tuples,<br/>
      * - <b>AC2001</b>: table constraint which applies the AC2001 algorithm,<br/>
      * - <b>AC3</b>: table constraint which applies the AC3 algorithm,<br/>
      * - <b>AC3rm</b>: table constraint which applies the AC3 rm algorithm,<br/>
@@ -466,7 +537,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      *
      * @param var1   first variable
      * @param var2   second variable
-     * @param tuples the relation between the two variables, among {"AC3", "AC3rm", "AC3bit+rm", "AC2001", "CT+", "CT", "FC"}
+     * @param tuples the relation between the two variables, among {"AC3", "AC3rm", "AC3bit+rm", "AC2001", "CT+", "CT", "STR2+","FC"}
      */
     default Constraint table(IntVar var1, IntVar var2, Tuples tuples, String algo) {
         Object[] args = variableUniqueness(new IntVar[]{var1, var2});
@@ -501,6 +572,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                     } else {
                         p = new PropCompactTableNeg(new IntVar[]{var1, var2}, tuples);
                     }
+                    break;
+                case "STR2+":
+                    p = new PropTableStr2(new IntVar[]{var1, var2}, tuples);
                     break;
                 case "AC2001":
                     p = new PropBinAC2001(var1, var2, tuples);
@@ -569,7 +643,11 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             return arithm(result, "=", base);
         }
         if (ref().getSolver().isLCG()) {
-            throw new SolverException("Power constraint is not supported in LCG mode");
+            if (TuplesFactory.canBeTupledWithResult(result, base)) {
+                return table(new IntVar[]{result, base}, TuplesFactory.square(result, base));
+            } else {
+                throw new SolverException("Power constraint is not supported in LCG mode");
+            }
         }
         if ((exponent % 2) == 0) {
             return new Constraint(ConstraintsName.POWER, new PropPowEven(result, base, exponent));
@@ -784,10 +862,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 
         if (Y.isInstantiated()) {
             return mod(X, Y.getValue(), Z);
-        } else if (TuplesFactory.canBeTupled(X, Y, Z)) {
-            return table(new IntVar[]{X, Y, Z}, TuplesFactory.modulo(X, Y, Z));
-        } else {
-            if (ref().getSolver().isLCG()) {
+        } else if (TuplesFactory.canBeTupledWithResult(Z, X, Y)) {
+            Tuples tuples = TuplesFactory.modulo(Z, X, Y);
+            return table(new IntVar[]{Z, X, Y}, tuples);
+        } else if (ref().getSolver().isLCG() || (long) X.getDomainSize() * Y.getDomainSize() > PropModXYZ.THRESHOLD) {
                 int xl = abs(X.getLB());
                 int xu = abs(X.getUB());
                 int b = Math.max(xl, xu);
@@ -796,8 +874,15 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 IntVar t2 = model.intVar(model.generateName("T2_"), -b, b, true);
                 div(X, Y, t1).post();
                 times(t1, Y, t2).post();
-                return sum(new IntVar[]{Z, t2}, "=", X);
-            }
+                // compute real modulo
+                int maxMod = Math.max(abs(Y.getLB()), abs(Y.getUB())) - 1;
+                IntVar modulo = model.intVar(model.generateName("mod_"), -maxMod, maxMod);
+                arithm(X,"-",t2,"=",modulo).post();
+                // The modulo has the same sign as X
+                ref().ifOnlyIf(arithm(X,">=",0), arithm(modulo,">=",0));
+                // returns equality constraint
+                return arithm(Z,"=",modulo);
+        } else {
             return new Constraint(X.getName() + " MOD " + Y.getName() + " = " + Z.getName(), new PropModXYZ(X, Y, Z));
         }
     }
@@ -817,8 +902,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             return times(X, Y.getValue(), Z);
         } else if (X.isInstantiated()) {
             return times(Y, X.getValue(), Z);
-        } else if (TuplesFactory.canBeTupled(X, Y, Z)) {
-            return table(new IntVar[]{X, Y, Z}, TuplesFactory.times(X, Y, Z));
+        } else if (TuplesFactory.canBeTupledWithResult(Z, X, Y)) {
+            return table(new IntVar[]{Z, X, Y}, TuplesFactory.times(Z, X, Y));
         } else {
             long a = X.getLB(), b = X.getUB(), c = Y.getLB(), d = Y.getUB();
             long min = Math.min(Math.min(a * c, a * d), Math.min(b * c, b * d));
@@ -1523,7 +1608,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     default Constraint decreasing(IntVar[] vars, int delta) {
         IntVar[] rvars = vars.clone();
         ArrayUtils.reverse(rvars);
-        return increasing(vars, delta);
+        return increasing(rvars, delta);
     }
 
     /**
@@ -1595,7 +1680,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param X collection of orthotopes
      * @param l collection of lengths (each length should be > 0)
      * @return a non-overlapping constraint
-     * @implNote This constraint is more general than {@link #diffN(IntVar[][], int[][])} that only considers 2 dimensions.
+     * @implNote This constraint is more general than {@link #diffN(IntVar[], IntVar[], IntVar[], IntVar[], boolean)}  that only considers 2 dimensions.
      * However, it is also more complex and less efficient.
      * @see #diffN(IntVar[][], int[][])
      */
@@ -2651,8 +2736,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      *
      * @param vars   variables forming the tuples
      * @param tuples the relation between the variables (list of allowed/forbidden tuples)
-     * @see Settings#getMaxSizeInMBToUseCompactTable()
-     * @see Settings#setMaxSizeInMBToUseCompactTable(int)
+     * @see org.chocosolver.solver.SettingsBuilder#getMaxSizeInMBToUseCompactTable()
+     * @see org.chocosolver.solver.SettingsBuilder#setMaxSizeInMBToUseCompactTable(int)
      */
     default Constraint table(IntVar[] vars, Tuples tuples) {
         String algo = "CT";
@@ -2713,12 +2798,12 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         if (!tuples.allowUniversalValue() && vars.length == 2) {
             switch (algo) {
                 case "FC":
+                case "CT+":
+                case "STR2+":
                     return table(vars[0], vars[1], tuples, algo);
                 case "AC2001":
                 case "GAC2001":
                     return table(vars[0], vars[1], tuples, "AC2001");
-                case "CT+":
-                    return table(vars[0], vars[1], tuples, "CT+");
                 case "GAC3rm":
                     return table(vars[0], vars[1], tuples, "AC3rm");
                 default:

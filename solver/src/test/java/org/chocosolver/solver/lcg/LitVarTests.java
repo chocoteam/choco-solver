@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.lcg;
@@ -12,7 +9,7 @@ package org.chocosolver.solver.lcg;
 import org.chocosolver.sat.MiniSat;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -37,7 +34,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}")
     public void testBoolVar0() {
         Model model = new Model("LCG testBoolVar0",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         BoolVar b = model.boolVar("b");
         Assert.assertEquals(b.satVar(), 2);
@@ -77,7 +74,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}")
     public void testBoolVar1() throws ContradictionException {
         Model model = new Model("LCG testBoolVar1",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         BoolVar b = model.boolVar("b");
         Assert.assertTrue(b.setToTrue(Cause.Null));
@@ -90,7 +87,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}")
     public void testBoolVar2() throws ContradictionException {
         Model model = new Model("LCG testBoolVar2",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         BoolVar b = model.boolVar("b");
         Assert.assertTrue(b.setToFalse(Cause.Null));
@@ -103,7 +100,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}")
     public void testBoolVar3() {
         Model model = new Model("LCG testBoolVar0",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         BoolVar a = model.boolVar("a");
         BoolVar b = a.not();
@@ -144,7 +141,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}")
     public void testBoolVar4() throws ContradictionException {
         Model model = new Model("LCG testBoolVar1",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         BoolVar a = model.boolVar("a");
         BoolVar b = a.not();
@@ -158,7 +155,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}")
     public void testBoolVar5() throws ContradictionException {
         Model model = new Model("LCG testBoolVar2",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         BoolVar a = model.boolVar("a");
         BoolVar b = a.not();
@@ -172,7 +169,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}")
     public void testBoolVar6() {
         Model model = new Model("LCG testBoolVar0",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         BoolVar b1 = model.boolVar("b1");
         BoolVar b2 = model.boolVar("b2");
@@ -193,7 +190,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}")
     public void testBoolVar7() {
         Model model = new Model("LCG testBoolVar0",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         BoolVar b1 = model.boolVar("b1");
         IntVar v1 = new IntVarEagerLit(new BitsetIntVarImpl("b", 2, 3, model));
@@ -240,7 +237,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}", dataProvider = "range")
     public void testIntVarEL0(int l, int u) {
         Model model = new Model("LCG testIntVarEL0",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         IntVar b = new IntVarEagerLit(new BitsetIntVarImpl("b", l, u, model));
 
@@ -281,7 +278,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}", dataProvider = "range")
     public void testIntVarEL1(int l, int u) throws ContradictionException {
         Model model = new Model("LCG testIntVarEL1",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         IntVar b = new IntVarEagerLit(new BitsetIntVarImpl("b", l, u, model));
         Assert.assertTrue(b.instantiateTo(u, Cause.Null));
@@ -294,7 +291,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}", dataProvider = "range")
     public void testIntVarEL2(int l, int u) throws ContradictionException {
         Model model = new Model("LCG testIntVarEL0",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         IntVar b = new IntVarEagerLit(new BitsetIntVarImpl("b", l, u, model));
         Assert.assertTrue(b.instantiateTo(l, Cause.Null));
@@ -307,7 +304,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}")
     public void testIntVarLL0() {
         Model model = new Model("LCG testIntVarEL0",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         IntVar b = model.intVar("a", 1, 3, true);
         // those fail
@@ -348,7 +345,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}")
     public void testIntVarLL1() throws ContradictionException {
         Model model = new Model("LCG testIntVarEL1",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         IntVar b = model.intVar("a", 1, 3, true);
         Assert.assertTrue(b.instantiateTo(1, Cause.Null));
@@ -363,7 +360,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}")
     public void testIntVarLL2() throws ContradictionException {
         Model model = new Model("LCG testIntVarEL2",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         IntVar b = model.intVar("a", 1, 3, true);
         Assert.assertTrue(b.instantiateTo(2, Cause.Null));
@@ -378,7 +375,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}")
     public void testIntVarLL3() throws ContradictionException {
         Model model = new Model("LCG testIntVarEL3",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         IntVar b = model.intVar("a", 1, 3, true);
         Assert.assertTrue(b.instantiateTo(3, Cause.Null));
@@ -404,7 +401,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}", dataProvider = "holes")
     public void testIntVarSL0(int l, int u) {
         Model model = new Model("LCG testIntVarEL0",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         IntVar b = new IntVarEagerLit(new BitsetIntVarImpl("b", new int[]{l, u}, model));
 
@@ -453,7 +450,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}", dataProvider = "holes")
     public void testIntVarSL1(int l, int u) throws ContradictionException {
         Model model = new Model("LCG testIntVarEL0",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         IntVar b = new IntVarEagerLit(new BitsetIntVarImpl("b", new int[]{l, u}, model));
         Assert.assertTrue(b.instantiateTo(u, Cause.Null));
@@ -466,7 +463,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}", dataProvider = "holes")
     public void testIntVarSL2(int l, int u) throws ContradictionException {
         Model model = new Model("LCG testIntVarEL0",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         IntVar b = new IntVarEagerLit(new BitsetIntVarImpl("b", new int[]{l, u}, model));
         Assert.assertTrue(b.instantiateTo(l, Cause.Null));
@@ -479,7 +476,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}", dataProvider = "holes")
     public void testIntVarSL4(int l, int u) throws ContradictionException {
         Model model = new Model("LCG testIntVarEL0",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         IntVar b = new IntVarEagerLit(new BitsetIntVarImpl("b", new int[]{l, u}, model));
         Assert.assertTrue(b.updateLowerBound(l + (u - l) / 2, Cause.Null));
@@ -492,7 +489,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}", dataProvider = "holes")
     public void testIntVarSL5(int l, int u) throws ContradictionException {
         Model model = new Model("LCG testIntVarEL0",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         IntVar b = new IntVarEagerLit(new BitsetIntVarImpl("b", new int[]{l, u}, model));
         Assert.assertTrue(b.updateUpperBound(l + (u - l) / 2, Cause.Null));
@@ -505,7 +502,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}", dataProvider = "holes")
     public void testIntVarSL6(int l, int u) throws ContradictionException {
         Model model = new Model("LCG testIntVarEL0",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         IntVar b = new IntVarEagerLit(new BitsetIntVarImpl("b", new int[]{l, u}, model));
         Assert.assertTrue(b.removeValue(l, Cause.Null));
@@ -518,7 +515,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}", dataProvider = "holes")
     public void testIntVarSL7(int l, int u) throws ContradictionException {
         Model model = new Model("LCG testIntVarEL0",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         IntVar b = new IntVarEagerLit(new BitsetIntVarImpl("b", new int[]{l, u}, model));
         Assert.assertTrue(b.removeValue(u, Cause.Null));
@@ -531,7 +528,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}", dataProvider = "holes")
     public void testIntVarSL8(int l, int u) throws ContradictionException {
         Model model = new Model("LCG testIntVarEL0",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         IntVar b = new IntVarEagerLit(new BitsetIntVarImpl("b", new int[]{l, u}, model));
         Assert.assertFalse(b.removeValue(l + (u - l) / 2, Cause.Null));
@@ -540,7 +537,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}", dataProvider = "holes")
     public void testBoolEqView0(int l, int u) throws ContradictionException {
         Model model = new Model("LCG testBoolEqView0",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         IntVar x = new IntVarEagerLit(new BitsetIntVarImpl("b", l, u, model));
         int t = l + (u - l) / 2;
@@ -569,7 +566,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}", dataProvider = "holes")
     public void testBoolGeqView0(int l, int u) throws ContradictionException {
         Model model = new Model("LCG testBoolLeqView0",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         IntVar x = new IntVarEagerLit(new BitsetIntVarImpl("b", l, u, model));
         int t = l + (u - l) / 2;
@@ -598,7 +595,7 @@ public class LitVarTests {
     @Test(groups = "{1s,lcg}")
         public void testCste10() {
         Model model = new Model("LCG testCste10",
-                Settings.init().setLCG(true)
+                SettingsBuilder.init().setLCG(true)
                         .setWarnUser(true));
         int l = 10;
         IntVar b = new IntVarEagerLit(new BitsetIntVarImpl("b", l, l, model));

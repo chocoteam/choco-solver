@@ -1,10 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 /**
@@ -114,7 +111,7 @@ public class PropNoSubtour extends Propagator<IntVar> {
         int last = end[val].get(); // last in [0,n-1]
         int start = origin[var].get(); // start in [0,n-1]
         if (origin[val].get() != val) {
-            fails(lcg() ? Propagator.reason(null, vars) : Reason.undef());
+            fails(lcg() ? this.reason(null, vars) : Reason.undef());
         }
         if (end[var].get() != var) {
             // should not happen
@@ -129,7 +126,7 @@ public class PropNoSubtour extends Propagator<IntVar> {
             size[start].add(size[val].get());
             if (size[start].get() == n) {
                 vars[last].instantiateTo(start + offset, this,
-                        lcg() ? Propagator.reason(vars[last], vars) : Reason.undef());
+                        lcg() ? this.reason(vars[last], vars) : Reason.undef());
                 setPassive();
 //                throw new UnsupportedOperationException("unexpected situation");
             }
@@ -157,7 +154,7 @@ public class PropNoSubtour extends Propagator<IntVar> {
                 m++;
                 var = vars[var].getValue() - offset;
             }
-            return Reason.r(ps);
+            return this.r(ps);
         }
         return Reason.undef();
     }

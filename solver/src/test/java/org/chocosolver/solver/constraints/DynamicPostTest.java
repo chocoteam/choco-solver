@@ -1,16 +1,13 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
- *
- * Copyright (c) 2026, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints;
 
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.reification.PropConditional;
 import org.chocosolver.solver.search.loop.monitors.IMonitorOpenNode;
@@ -144,7 +141,7 @@ public class DynamicPostTest {
 
     private void pareto(boolean clauses) {
         // Objectives are to maximize "a" and maximize "b".
-        Model model = new Model(Settings.init().setSwapOnPassivate(false));
+        Model model = new Model(SettingsBuilder.init().setSwapOnPassivate(false));
         IntVar a = model.intVar("a", 0, 2, false);
         IntVar b = model.intVar("b", 0, 2, false);
         IntVar c = model.intVar("c", 0, 2, false);
