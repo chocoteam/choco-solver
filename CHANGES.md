@@ -16,6 +16,7 @@ NEXT MILESTONE
 - Fix bounded domains management with LCG in PropDivXYZ
 - Faster modulo constraint with large domains
 - Add arithm preprocessing
+- Fix decreasing constraint
 
 ### Deprecated API (to be removed in next release):
 

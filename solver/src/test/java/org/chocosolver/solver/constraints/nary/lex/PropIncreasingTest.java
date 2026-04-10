@@ -86,7 +86,10 @@ public class PropIncreasingTest {
         m.decreasing(new IntVar[]{x, y, z}, 0).post();
         Solver s = m.getSolver();
         s.setSearch(Search.inputOrderLBSearch(z, y, x));
-        s.findAllSolutions();
+        while (s.solve()) {
+            Assert.assertTrue(x.getValue() >= y.getValue());
+            Assert.assertTrue(y.getValue() >= z.getValue());
+        }
         Assert.assertEquals(s.getSolutionCount(), 10);
     }
 
@@ -99,7 +102,10 @@ public class PropIncreasingTest {
         m.decreasing(new IntVar[]{x, y, z}, 1).post();
         Solver s = m.getSolver();
         s.setSearch(Search.inputOrderLBSearch(z, y, x));
-        s.findAllSolutions();
+        while (s.solve()) {
+            Assert.assertTrue(x.getValue() > y.getValue());
+            Assert.assertTrue(y.getValue() > z.getValue());
+        }
         Assert.assertEquals(s.getSolutionCount(), 1);
     }
 
@@ -124,7 +130,9 @@ public class PropIncreasingTest {
         BoolVar b = m.increasing(new IntVar[]{x, y}, 0).reify();
         m.arithm(b, "=", 1).post();
         Solver s = m.getSolver();
-        s.findAllSolutions();
+        while (s.solve()) {
+            Assert.assertTrue(x.getValue() <= y.getValue());
+        }
         Assert.assertEquals(s.getSolutionCount(), 6);
     }
 
