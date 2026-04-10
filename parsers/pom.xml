@@ -14,12 +14,12 @@
     <parent>
         <groupId>org.choco-solver</groupId>
         <artifactId>choco</artifactId>
-        <version>5.0.1</version>
+        <version>5.0.2-SNAPSHOT</version>
     </parent>
     <!--suppress MavenRedundantGroupId -->
     <groupId>org.choco-solver</groupId>
     <artifactId>choco-parsers</artifactId>
-    <version>5.0.1</version>
+    <version>5.0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>choco-parsers</name>
