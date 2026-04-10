@@ -1611,7 +1611,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     default Constraint decreasing(IntVar[] vars, int delta) {
         IntVar[] rvars = vars.clone();
         ArrayUtils.reverse(rvars);
-        return increasing(vars, delta);
+        return increasing(rvars, delta);
     }
 
     /**
