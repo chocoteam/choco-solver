@@ -39,12 +39,12 @@ then
     sedInPlace "s%Choco-solver is distributed.*.%Choco-solver is distributed under BSD 3-Clause License \(Copyright \(c\) 1999-$YEAR, IMT Atlantique).%"  README.md
 
     ## The LICENSE
-    sedInPlace "s%Copyright.*.%Copyright (c) $YEAR, IMT Atlantique%"  LICENSE
+    #sedInPlace "s%Copyright.*.%Copyright (c) $YEAR, IMT Atlantique%"  LICENSE
 
     ## The configuration file
-    sedInPlace "s%.*Constraint Programming Solver, Copyright.*%        \"** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyright \(c\) 2010-$YEAR\";%"  ./solver/src/main/java/org/chocosolver/solver/trace/IOutputFactory.java
-    sedInPlace "s|            System.out.printf(\"c Choco.*|            System.out.printf(\"c Choco-solver%s ($VERSION, $DATE)\\\n\", lcg? \" with LCG\" : \"\");|" parsers/src/main/java/org/chocosolver/parser/xcsp/XCSP.java
-    sedInPlace "s|            System.out.printf(\"%% Choco.*|            System.out.printf(\"%% Choco-solver%s ($VERSION, $DATE)\\\n\", lcg? \" with LCG\" : \"\");|" parsers/src/main/java/org/chocosolver/parser/flatzinc/Flatzinc.java
+    sedInPlace "s%.*Constraint Programming Solver, Copyright.*%        \"** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyright \(c\) 1999-$YEAR\";%"  ./solver/src/main/java/org/chocosolver/solver/trace/IOutputFactory.java
+    sedInPlace "s|            System.out.printf(\"c Choco.*|            System.out.printf(\"c Choco-solver%s ($VERSION, $DATE)\\\n\", this.isLCG()? \" with LCG\" : \"\");|" parsers/src/main/java/org/chocosolver/parser/xcsp/XCSP.java
+    sedInPlace "s|            System.out.printf(\"%% Choco.*|            System.out.printf(\"%% Choco-solver%s ($VERSION, $DATE)\\\n\", this.isLCG()? \" with LCG\" : \"\");|" parsers/src/main/java/org/chocosolver/parser/flatzinc/Flatzinc.java
 
     ## For MiniZinc
     sedInPlace "s%  \"version\": .*%  \"version\": \"$VERSION\",%"  ./parsers/src/main/minizinc/choco.msc
