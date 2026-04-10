@@ -28,6 +28,8 @@
 
     <properties>
         <main_dir>.${file.separator}..</main_dir>
+        <maven.deploy.skip>true</maven.deploy.skip>
+        <central.publishing.skip>true</central.publishing.skip>
     </properties>
 
     <dependencies>
