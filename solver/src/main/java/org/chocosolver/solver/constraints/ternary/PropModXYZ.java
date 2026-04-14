@@ -140,11 +140,19 @@ public class PropModXYZ extends Propagator<IntVar> {
         return false;
     }
 
-    private static boolean containsOneDivid(IntVar X, int v, IntVar Z) {
-        if (v != 0) {
+    private static boolean containsOneDivid(IntVar X, int mod, IntVar Z) {
+        if (mod != 0) {
+            int absMod = Math.abs(mod);
+            int domainSize = X.getDomainSize();
+            if (!X.hasEnumeratedDomain() &&
+                    (domainSize > 2 * absMod
+                            || domainSize > absMod && (X.getLB() >= 0 || X.getUB() <= 0))) {
+                return true;
+            }
+
             for (int vx = X.getLB(); vx <= X.getUB(); vx = X.nextValue(vx)) {
                 for (int vz = Z.getLB(); vz <= Z.getUB(); vz = Z.nextValue(vz)) {
-                    if (vx % v == vz) {
+                    if (vx % mod == vz) {
                         return true;
                     }
                 }
@@ -154,6 +162,14 @@ public class PropModXYZ extends Propagator<IntVar> {
     }
 
     private static boolean containsOneDividLB(IntVar X, IntVar Y, int v) {
+        int absMod = Math.max(Math.abs(Y.getLB()), Math.abs(Y.getUB()));
+        int domainSize = X.getDomainSize();
+        if (!X.hasEnumeratedDomain() &&
+                (domainSize > 2 * absMod
+                        || domainSize > absMod && (X.getLB() >= 0 || X.getUB() <= 0))) {
+            return true;
+        }
+
         for (int vy = Y.getLB(); vy <= Y.getUB(); vy = Y.nextValue(vy)) {
             if (vy == 0) continue;
             for (int vx = X.getLB(); vx <= X.getUB(); vx = X.nextValue(vx)) {
@@ -166,6 +182,14 @@ public class PropModXYZ extends Propagator<IntVar> {
     }
 
     private static boolean containsOneDividUB(IntVar X, IntVar Y, int v) {
+        int absMod = Math.max(Math.abs(Y.getLB()), Math.abs(Y.getUB()));
+        int domainSize = X.getDomainSize();
+        if (!X.hasEnumeratedDomain() &&
+                (domainSize > 2 * absMod
+                        || domainSize > absMod && (X.getLB() >= 0 || X.getUB() <= 0))) {
+            return true;
+        }
+
         for (int vy = Y.getUB(); vy >= Y.getLB(); vy = Y.previousValue(vy)) {
             if (vy == 0) continue;
             for (int vx = X.getUB(); vx >= X.getLB(); vx = X.previousValue(vx)) {

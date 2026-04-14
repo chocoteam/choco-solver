@@ -13,6 +13,7 @@ import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.unary.PropMember;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -213,5 +214,28 @@ public class ModXYTest extends AbstractBinaryTest {
         long solLimit = 1000L;
         model.getSolver().limitSolution(solLimit);
         Assert.assertEquals(model.getSolver().findAllSolutions().size(), solLimit);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMod2Perf() {
+        Model model = new Model("model");
+        int maxVal = 1_000_000;
+        int size = 1000;
+        int mod = 60;
+        IntVar[] x = model.intVarArray("x", size, -maxVal, maxVal, true);
+        IntVar[] y = model.intVarArray("y", size, 0, mod-1, true);
+        for (int i = 0; i<x.length; i++) {
+            model.mod(x[i], mod, y[i]).post();
+        }
+        model.allDifferent(x).post();
+        Assert.assertEquals(model.getNbCstrs(), size+1);
+        Constraint constraint = model.getCstrs()[0];
+        Assert.assertEquals(constraint.getPropagators().length, 1);
+        Assert.assertSame(constraint.getPropagators()[0].getClass(), PropModXY.class);
+        model.getSolver().setSearch(Search.inputOrderLBSearch(x));
+        model.getSolver().solve();
+        for (int i = 0; i<x.length; i++) {
+            Assert.assertEquals(x[i].getValue() % mod, y[i].getValue());
+        }
     }
 }

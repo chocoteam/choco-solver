@@ -14,6 +14,7 @@ import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.binary.PropModXY;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -224,5 +225,26 @@ public class ModXYZTest extends AbstractTernaryTest {
 		model.mod(y, y, x).post();
 		model.getSolver().findAllSolutions();
 		Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
+	}
+
+	@Test(groups="1s", timeOut=60000)
+	public void testMod3Perf() {
+		Model model = new Model("model");
+		int maxVal = 1_000_000;
+		int size = 1000;
+		int mod = 60;
+		IntVar[] x = model.intVarArray("x", size, -maxVal, maxVal, true);
+		IntVar[] y = model.intVarArray("y", size, new int[]{-12, 30, 60});
+		IntVar[] z = model.intVarArray("y", size, -(mod-1), mod-1, false);
+		for (int i = 0; i<x.length; i++) {
+			model.mod(x[i], y[i], z[i]).post();
+			new Constraint("modulo", new PropModXYZ(x[i], y[i], z[i])).post();
+		}
+		model.allDifferent(x).post();
+		model.getSolver().setSearch(Search.inputOrderUBSearch(y), Search.inputOrderLBSearch(x));
+		model.getSolver().solve();
+		for (int i = 0; i<x.length; i++) {
+			Assert.assertEquals(x[i].getValue() % y[i].getValue(), z[i].getValue());
+		}
 	}
 }
