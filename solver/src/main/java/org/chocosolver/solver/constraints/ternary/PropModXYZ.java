@@ -142,14 +142,6 @@ public class PropModXYZ extends Propagator<IntVar> {
 
     private static boolean containsOneDivid(IntVar X, int mod, IntVar Z) {
         if (mod != 0) {
-            int absMod = Math.abs(mod);
-            int domainSize = X.getDomainSize();
-            if (!X.hasEnumeratedDomain() &&
-                    (domainSize > 2 * absMod
-                            || domainSize > absMod && (X.getLB() >= 0 || X.getUB() <= 0))) {
-                return true;
-            }
-
             for (int vx = X.getLB(); vx <= X.getUB(); vx = X.nextValue(vx)) {
                 for (int vz = Z.getLB(); vz <= Z.getUB(); vz = Z.nextValue(vz)) {
                     if (vx % mod == vz) {
