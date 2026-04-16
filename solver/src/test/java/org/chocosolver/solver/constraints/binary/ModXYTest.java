@@ -238,4 +238,166 @@ public class ModXYTest extends AbstractBinaryTest {
             Assert.assertEquals(x[i].getValue() % mod, y[i].getValue());
         }
     }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testJT1Expr(){
+        Model model = new Model("model");
+        IntVar a = model.intVar("a", 2,6);
+        int b = 2;
+        IntVar c = model.mod("c", a, b);
+        model.arithm(c, ">=", 0).post();
+        model.arithm(c, "<=", 1).post();
+        model.mod(a, b, c).post();
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 5);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMod2VarExpr(){
+        Model model = new Model("model");
+        IntVar x = model.intVar("x", 0,9);
+        IntVar z = model.mod("z", x, 2);
+        model.arithm(z, ">=", 0).post();
+        model.arithm(z, "<=", 9).post();
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 10);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMod2Var2Expr(){
+        Model model = new Model("model");
+        IntVar x = model.intVar("x", 0,9);
+        IntVar z = model.mod("z", x, 2);
+        model.arithm(z, ">=", 0).post();
+        model.arithm(z, "<=", 9).post();
+        model.mod(z, 2, 1).post();
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 5);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMod2VarPropagExpr() throws ContradictionException {
+        Model model = new Model("model");
+        IntVar x = model.intVar("x", new int[]{0, 2, 3, 5});
+        IntVar z = model.mod("z", x, 3);
+        model.arithm(z, ">=", 1).post();
+        model.arithm(z, "<=", 3).post();
+        model.getSolver().propagate();
+        Assert.assertTrue(z.isInstantiatedTo(2));
+        Assert.assertEquals(x.getDomainSize(), 2);
+        Assert.assertEquals(x.getLB(), 2);
+        Assert.assertEquals(x.getUB(), 5);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMod2VarNegValuesExpr() throws ContradictionException {
+        Model model = new Model("model");
+        IntVar x = model.intVar("x", -5, 5);
+        IntVar z = model.mod("z", x, 3);
+        model.arithm(z, ">=", -5).post();
+        model.arithm(z, "<=", 5).post();
+        model.getSolver().propagate();
+        Assert.assertEquals(z.getDomainSize(), 5);
+        Assert.assertEquals(x.getDomainSize(), 11);
+        for(int i = -5; i<=5; i++) {
+            Assert.assertTrue(x.contains(i));
+        }
+        for(int j = -2; j<=2; j++) {
+            Assert.assertTrue(z.contains(j));
+        }
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMod2VarNegValues2Expr() throws ContradictionException {
+        Model model = new Model("model");
+        IntVar x = model.intVar("x", -5, 0);
+        IntVar z = model.mod("z", x, 3);
+        model.arithm(z, ">=", -5).post();
+        model.arithm(z, "<=", 5).post();
+        model.getSolver().propagate();
+        Assert.assertEquals(z.getDomainSize(), 3);
+        Assert.assertEquals(x.getDomainSize(), 6);
+        for(int i = -5; i<=0; i++) {
+            Assert.assertTrue(x.contains(i));
+        }
+        for(int j = -2; j<=0; j++) {
+            Assert.assertTrue(z.contains(j));
+        }
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMod2VarNegValues3Expr() throws ContradictionException {
+        Model model = new Model("model");
+        IntVar x = model.intVar("x", -5, 5);
+        IntVar z = model.mod("z", x, 3);
+        model.arithm(z, ">=", -5).post();
+        model.arithm(z, "<=", 0).post();
+        model.getSolver().propagate();
+        Assert.assertEquals(z.getDomainSize(), 3);
+        Assert.assertEquals(x.getDomainSize(), 7);
+        for(int i = -5; i<=0; i++) {
+            Assert.assertTrue(x.contains(i));
+        }
+        Assert.assertTrue(x.contains(3));
+        for(int j = -2; j<=0; j++) {
+            Assert.assertTrue(z.contains(j));
+        }
+    }
+
+    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    public void testMod2VarsZeroDivExpr() {
+        Model model = new Model("model");
+        IntVar x = model.intVar("x", 0,9);
+        IntVar z = model.mod("z", x, 0);
+        model.arithm(z, ">=", 0).post();
+        model.arithm(z, "<=", 9).post();
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 5);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMod2VarsTableExpr() {
+        Model model = new Model("model");
+        IntVar x = model.intVar("x", 0,9);
+        IntVar z = model.mod("z", x, 5);
+        model.arithm(z, ">=", 0).post();
+        model.arithm(z, "<=", 9).post();
+        Assert.assertEquals(model.getNbCstrs(), 3);
+        Constraint constraint = model.getCstrs()[0];
+        Assert.assertEquals(constraint.getName(), ConstraintsName.TABLE);
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 10);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMod2VarsPropModExpr() {
+        Model model = new Model("model");
+        IntVar x = model.intVar("x", 0,10_000);
+        IntVar z = model.mod("z", x, 5_000);
+        model.arithm(z, ">=", 0).post();
+        model.arithm(z, "<=", 10_000).post();
+        Assert.assertEquals(model.getNbCstrs(), 3);
+        Constraint constraint = model.getCstrs()[0];
+        Assert.assertEquals(constraint.getPropagators().length, 1);
+        Assert.assertSame(constraint.getPropagators()[0].getClass(), PropModXY.class);
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 10_001);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMod2PerfExpr() {
+        Model model = new Model("model");
+        int maxVal = 1_000_000;
+        int size = 1000;
+        int mod = 60;
+        IntVar[] x = model.intVarArray("x", size, -maxVal, maxVal, true);
+        IntVar[] y = new IntVar[x.length];
+        for (int i = 0; i<x.length; i++) {
+            y[i] = x[i].mod(mod).intVar();
+        }
+        model.allDifferent(x).post();
+        Assert.assertEquals(model.getNbCstrs(), size+1);
+        Constraint constraint = model.getCstrs()[0];
+        Assert.assertEquals(constraint.getPropagators().length, 1);
+        Assert.assertSame(constraint.getPropagators()[0].getClass(), PropModXY.class);
+        model.getSolver().setSearch(Search.inputOrderLBSearch(x));
+        model.getSolver().solve();
+        for (int i = 0; i<x.length; i++) {
+            Assert.assertEquals(x[i].getValue() % mod, y[i].getValue());
+        }
+    }
 }

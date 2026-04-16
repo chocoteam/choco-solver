@@ -8,6 +8,7 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.exception.SolverException;
 
 import java.util.Arrays;
 
@@ -18,6 +19,45 @@ import java.util.Arrays;
  * @author Jean-Guillaume FAGES
  */
 public interface IResultVariableFactory extends ISelf<Model> {
+
+	//*************************************************************************************
+	// MODULO
+	//*************************************************************************************
+
+	/**
+	 * Creates an integer variable equal to x % c
+	 * @param name the result variable name
+	 * @param x an integer variable
+	 * @param mod an integer
+	 * @return an intvar equal to x % c
+	 */
+	default IntVar mod(String name, IntVar x, int mod) {
+		if (mod == 0) {
+			throw new SolverException("a should not be 0 for " + x.getName() + " MOD a = " + name);
+		}
+		final IntVar result;
+		if (x.hasEnumeratedDomain() && x.getDomainSize() <= 10) {
+			int[] domain = x.stream().map(v -> v % mod).toArray();
+			result = ref().intVar(name, domain);
+		} else {
+			int lb;
+			int ub;
+			int absMod = Math.abs(mod);
+			if (x.getLB() >= 0) {
+				lb = 0;
+				ub = absMod - 1;
+			} else if (x.getUB() < 0) {
+				lb = -absMod + 1;
+				ub = 0;
+			} else {
+				lb = -absMod + 1;
+				ub = absMod - 1;
+			}
+			result = ref().intVar(name, lb, ub);
+		}
+		ref().mod(x, mod, result).post();
+		return result;
+	}
 
 	//*************************************************************************************
 	// SUM
