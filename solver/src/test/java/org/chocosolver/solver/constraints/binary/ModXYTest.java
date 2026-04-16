@@ -365,6 +365,15 @@ public class ModXYTest extends AbstractBinaryTest {
     }
 
     @Test(groups="1s", timeOut=60000)
+    public void testNegExpr() {
+        Model model = new Model("model");
+        IntVar x = model.intVar("x", -7);
+        IntVar y = model.intVar("x", 3);
+        IntVar z = x.mod(y).intVar();
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 1);
+    }
+
+    @Test(groups="1s", timeOut=60000)
     public void testMod2VarsPropModExpr() {
         Model model = new Model("model");
         IntVar x = model.intVar("x", 0,10_000);

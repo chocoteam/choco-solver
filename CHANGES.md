@@ -11,6 +11,7 @@ NEXT MILESTONE
 
 #### Constraints & LCG
 - Faster modulo constraints with bounded variables
+- Fix modulo constraint with negative values
 
 ### Deprecated API (to be removed in next release):
 

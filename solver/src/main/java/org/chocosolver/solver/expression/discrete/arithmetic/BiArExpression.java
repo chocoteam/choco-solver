@@ -98,9 +98,7 @@ public class BiArExpression implements ArExpression {
                     model.div(v1, v2, me).post();
                     break;
                 case MOD:
-                    bounds = VariableUtils.boundsForModulo(v1, v2);
-                    me = model.intVar(model.generateName("mod_exp_"), bounds[0], bounds[1]);
-                    model.mod(v1, v2, me).post();
+                    me = model.mod(model.generateName("mod_exp_"), v1, v2);
                     break;
                 case POW:
                     bounds = VariableUtils.boundsForPow(v1, v2);
