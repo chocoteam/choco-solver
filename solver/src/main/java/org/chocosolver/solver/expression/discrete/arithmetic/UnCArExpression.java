@@ -83,11 +83,11 @@ public class UnCArExpression implements ArExpression {
                     me = model.offset(v1, -e2);
                     break;
                 case MUL:
-                    if(e2 > 0){
+                    if (e2 > 0) {
                         me = model.mul(v1, e2);
-                    }else{
+                    } else {
                         bounds = new int[]{
-                                Math.min(v1.getLB()*e2, v1.getUB()*e2),Math.max(v1.getLB()*e2, v1.getUB()*e2)};
+                                Math.min(v1.getLB() * e2, v1.getUB() * e2), Math.max(v1.getLB() * e2, v1.getUB() * e2)};
                         me = model.intVar(model.generateName("mul_exp_"), bounds[0], bounds[1]);
                         model.times(v1, e2, me).post();
                     }
@@ -99,21 +99,17 @@ public class UnCArExpression implements ArExpression {
                     model.div(v1, v2, me).post();
                 }
                 break;
-                case MOD: {
-                    int min = v1.stream().map(v -> v % e2).min().orElse(0);
-                    int max = v1.stream().map(v -> v % e2).max().orElse(v1.getDomainSize());
-                    me = model.intVar(model.generateName("mod_exp_"), min, max);
-                    model.mod(v1, e2, me).post();
-                }
-                break;
+                case MOD:
+                    me = model.mod(model.generateName("mod_exp_"), v1, e2);
+                    break;
                 case POW: // todo as intension constraint
                 {
-                    int min = v1.stream().map(v -> (int)Math.floor(Math.pow(v, e2))).min().orElse(IntVar.MIN_INT_BOUND);
-                    int max = v1.stream().map(v -> (int)Math.ceil(Math.pow(v, e2))).max().orElse(IntVar.MAX_INT_BOUND);
+                    int min = v1.stream().map(v -> (int) Math.floor(Math.pow(v, e2))).min().orElse(IntVar.MIN_INT_BOUND);
+                    int max = v1.stream().map(v -> (int) Math.ceil(Math.pow(v, e2))).max().orElse(IntVar.MAX_INT_BOUND);
                     me = model.intVar(model.generateName("pow_exp_"), min, max);
                     model.pow(v1, e2, me).post();
                 }
-                    break;
+                break;
                 case MIN:
                     me = model.intVar(model.generateName("min_exp_"),
                             Math.min(v1.getLB(), e2), Math.min(v1.getUB(), e2));
