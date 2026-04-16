@@ -59,6 +59,35 @@ public interface IResultVariableFactory extends ISelf<Model> {
 		return result;
 	}
 
+	/**
+	 * Creates an integer variable equal to x % y
+	 * @param name the result variable name
+	 * @param x an integer variable
+	 * @param y an integer variable
+	 * @return an intvar equal to x % y
+	 */
+	default IntVar mod(String name, IntVar x, IntVar y) {
+		if (y.isInstantiated()) {
+			return mod(name, x, y.getValue());
+		}
+		int lb;
+		int ub;
+		int absMod = Math.max(Math.abs(y.getLB()), Math.abs(y.getUB()));
+		if (x.getLB() >= 0) {
+			lb = 0;
+			ub = absMod - 1;
+		} else if (x.getUB() < 0) {
+			lb = -absMod + 1;
+			ub = 0;
+		} else {
+			lb = -absMod + 1;
+			ub = absMod - 1;
+		}
+		IntVar result = ref().intVar(name, lb, ub);
+		ref().mod(x, y, result).post();
+		return result;
+	}
+
 	//*************************************************************************************
 	// SUM
 	//*************************************************************************************
