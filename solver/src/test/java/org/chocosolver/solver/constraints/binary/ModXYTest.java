@@ -245,8 +245,6 @@ public class ModXYTest extends AbstractBinaryTest {
         IntVar a = model.intVar("a", 2,6);
         int b = 2;
         IntVar c = model.mod("c", a, b);
-        model.arithm(c, ">=", 0).post();
-        model.arithm(c, "<=", 1).post();
         model.mod(a, b, c).post();
         Assert.assertEquals(model.getSolver().findAllSolutions().size(), 5);
     }
@@ -256,8 +254,6 @@ public class ModXYTest extends AbstractBinaryTest {
         Model model = new Model("model");
         IntVar x = model.intVar("x", 0,9);
         IntVar z = model.mod("z", x, 2);
-        model.arithm(z, ">=", 0).post();
-        model.arithm(z, "<=", 9).post();
         Assert.assertEquals(model.getSolver().findAllSolutions().size(), 10);
     }
 
@@ -266,8 +262,6 @@ public class ModXYTest extends AbstractBinaryTest {
         Model model = new Model("model");
         IntVar x = model.intVar("x", 0,9);
         IntVar z = model.mod("z", x, 2);
-        model.arithm(z, ">=", 0).post();
-        model.arithm(z, "<=", 9).post();
         model.mod(z, 2, 1).post();
         Assert.assertEquals(model.getSolver().findAllSolutions().size(), 5);
     }
@@ -278,7 +272,6 @@ public class ModXYTest extends AbstractBinaryTest {
         IntVar x = model.intVar("x", new int[]{0, 2, 3, 5});
         IntVar z = model.mod("z", x, 3);
         model.arithm(z, ">=", 1).post();
-        model.arithm(z, "<=", 3).post();
         model.getSolver().propagate();
         Assert.assertTrue(z.isInstantiatedTo(2));
         Assert.assertEquals(x.getDomainSize(), 2);
@@ -291,8 +284,6 @@ public class ModXYTest extends AbstractBinaryTest {
         Model model = new Model("model");
         IntVar x = model.intVar("x", -5, 5);
         IntVar z = model.mod("z", x, 3);
-        model.arithm(z, ">=", -5).post();
-        model.arithm(z, "<=", 5).post();
         model.getSolver().propagate();
         Assert.assertEquals(z.getDomainSize(), 5);
         Assert.assertEquals(x.getDomainSize(), 11);
@@ -309,8 +300,6 @@ public class ModXYTest extends AbstractBinaryTest {
         Model model = new Model("model");
         IntVar x = model.intVar("x", -5, 0);
         IntVar z = model.mod("z", x, 3);
-        model.arithm(z, ">=", -5).post();
-        model.arithm(z, "<=", 5).post();
         model.getSolver().propagate();
         Assert.assertEquals(z.getDomainSize(), 3);
         Assert.assertEquals(x.getDomainSize(), 6);
@@ -327,7 +316,6 @@ public class ModXYTest extends AbstractBinaryTest {
         Model model = new Model("model");
         IntVar x = model.intVar("x", -5, 5);
         IntVar z = model.mod("z", x, 3);
-        model.arithm(z, ">=", -5).post();
         model.arithm(z, "<=", 0).post();
         model.getSolver().propagate();
         Assert.assertEquals(z.getDomainSize(), 3);
@@ -346,8 +334,6 @@ public class ModXYTest extends AbstractBinaryTest {
         Model model = new Model("model");
         IntVar x = model.intVar("x", 0,9);
         IntVar z = model.mod("z", x, 0);
-        model.arithm(z, ">=", 0).post();
-        model.arithm(z, "<=", 9).post();
         Assert.assertEquals(model.getSolver().findAllSolutions().size(), 5);
     }
 
@@ -356,9 +342,7 @@ public class ModXYTest extends AbstractBinaryTest {
         Model model = new Model("model");
         IntVar x = model.intVar("x", 0,9);
         IntVar z = model.mod("z", x, 5);
-        model.arithm(z, ">=", 0).post();
-        model.arithm(z, "<=", 9).post();
-        Assert.assertEquals(model.getNbCstrs(), 3);
+        Assert.assertEquals(model.getNbCstrs(), 1);
         Constraint constraint = model.getCstrs()[0];
         Assert.assertEquals(constraint.getName(), ConstraintsName.TABLE);
         Assert.assertEquals(model.getSolver().findAllSolutions().size(), 10);
@@ -378,9 +362,6 @@ public class ModXYTest extends AbstractBinaryTest {
         Model model = new Model("model");
         IntVar x = model.intVar("x", 0,10_000);
         IntVar z = model.mod("z", x, 5_000);
-        model.arithm(z, ">=", 0).post();
-        model.arithm(z, "<=", 10_000).post();
-        Assert.assertEquals(model.getNbCstrs(), 3);
         Constraint constraint = model.getCstrs()[0];
         Assert.assertEquals(constraint.getPropagators().length, 1);
         Assert.assertSame(constraint.getPropagators()[0].getClass(), PropModXY.class);

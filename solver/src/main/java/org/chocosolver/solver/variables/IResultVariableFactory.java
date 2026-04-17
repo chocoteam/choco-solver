@@ -26,9 +26,10 @@ public interface IResultVariableFactory extends ISelf<Model> {
 
 	/**
 	 * Creates an integer variable equal to x % c
+	 *
 	 * @param name the result variable name
-	 * @param x an integer variable
-	 * @param mod an integer
+	 * @param x    an integer variable
+	 * @param mod  an integer
 	 * @return an intvar equal to x % c
 	 */
 	default IntVar mod(String name, IntVar x, int mod) {
@@ -61,9 +62,10 @@ public interface IResultVariableFactory extends ISelf<Model> {
 
 	/**
 	 * Creates an integer variable equal to x % y
+	 *
 	 * @param name the result variable name
-	 * @param x an integer variable
-	 * @param y an integer variable
+	 * @param x    an integer variable
+	 * @param y    an integer variable
 	 * @return an intvar equal to x % y
 	 */
 	default IntVar mod(String name, IntVar x, IntVar y) {
@@ -94,11 +96,12 @@ public interface IResultVariableFactory extends ISelf<Model> {
 
 	/**
 	 * Creates an integer variable equal to the sum of input variables toSum
-	 * @param name name of the resulting variable
+	 *
+	 * @param name  name of the resulting variable
 	 * @param toSum integer variables to be summed
 	 * @return an integer variable equal to the sum of input variables toSum
 	 */
-	default IntVar sum(String name, IntVar... toSum){
+	default IntVar sum(String name, IntVar... toSum) {
 		int lb = Arrays.stream(toSum).mapToInt(IntVar::getLB).sum();
 		int ub = Arrays.stream(toSum).mapToInt(IntVar::getUB).sum();
 		IntVar result = ref().intVar(name, lb, ub, true);
@@ -114,9 +117,10 @@ public interface IResultVariableFactory extends ISelf<Model> {
 
 	/**
 	 * Creates a variable counting how many variables in vars are equal to value
-	 * @param name name of the result variable
+	 *
+	 * @param name  name of the result variable
 	 * @param value integer value whose occurrence in vars to be counted
-	 * @param vars integer variables to be counted
+	 * @param vars  integer variables to be counted
 	 * @return a variable counting how many variables in vars are equal to value
 	 */
 	default IntVar count(String name, int value, IntVar... vars) {
@@ -131,13 +135,14 @@ public interface IResultVariableFactory extends ISelf<Model> {
 
 	/**
 	 * Creates a variable counting how many variables in vars are equal to value
-	 * @param name name of the result variable
+	 *
+	 * @param name  name of the result variable
 	 * @param value integer variable whose occurrence in vars is to be counted
-	 * @param vars integer variables to be counted
+	 * @param vars  integer variables to be counted
 	 * @return a variable counting how many variables in vars are equal to value
 	 */
 	default IntVar count(String name, IntVar value, IntVar... vars) {
-		if(value.isInstantiated()) {
+		if (value.isInstantiated()) {
 			return count(name, value.getValue(), vars);
 		}
 		IntVar result = ref().intVar(name, 0, vars.length, true);
@@ -153,50 +158,53 @@ public interface IResultVariableFactory extends ISelf<Model> {
 
 	/**
 	 * Creates a variable equal to table[index-offser]
-	 * @param name name of the result variable
-	 * @param table array of integer values
-	 * @param index variable indicating which cell to select
+	 *
+	 * @param name   name of the result variable
+	 * @param table  array of integer values
+	 * @param index  variable indicating which cell to select
 	 * @param offset parameter applying to index
 	 * @return a variable equal to table[index-offser]
 	 */
-	default IntVar element(String name, int[] table, IntVar index, int offset){
+	default IntVar element(String name, int[] table, IntVar index, int offset) {
 		IntVar result = ref().intVar(name, index.stream()
-				.filter(v-> v>=offset && v<table.length+offset)
-				.map(v->table[v-offset]).toArray());
+				.filter(v -> v >= offset && v < table.length + offset)
+				.map(v -> table[v - offset]).toArray());
 		if (!result.isInstantiated()) {
 			ref().element(result, table, index, offset).post();
-		} else if(index.getLB()<offset || index.getUB()>offset+table.length-1){
-			ref().member(index, offset, offset+table.length-1).post();
+		} else if (index.getLB() < offset || index.getUB() > offset + table.length - 1) {
+			ref().member(index, offset, offset + table.length - 1).post();
 		}
 		return result;
 	}
 
 	/**
 	 * Creates a variable equal to table[index-offser]
-	 * @param name name of the result variable
-	 * @param table array of integer variables
-	 * @param index variable indicating which cell to select
+	 *
+	 * @param name   name of the result variable
+	 * @param table  array of integer variables
+	 * @param index  variable indicating which cell to select
 	 * @param offset parameter applying to index
 	 * @return a variable equal to table[index-offser]
 	 */
 	default IntVar element(String name, IntVar[] table, IntVar index, int offset) {
 		int lb = index.stream()
-				.filter(v-> v>=offset && v<table.length+offset)
-				.map(v->table[v-offset].getLB()).min().getAsInt();
+				.filter(v -> v >= offset && v < table.length + offset)
+				.map(v -> table[v - offset].getLB()).min().getAsInt();
 		int ub = index.stream()
-				.filter(v-> v>=offset && v<table.length+offset)
-				.map(v->table[v-offset].getUB()).max().getAsInt();
+				.filter(v -> v >= offset && v < table.length + offset)
+				.map(v -> table[v - offset].getUB()).max().getAsInt();
 		IntVar result = ref().intVar(name, lb, ub);
 		if (!result.isInstantiated()) {
 			ref().element(result, table, index, offset).post();
-		} else if(index.getLB()<offset || index.getUB()>offset+table.length-1){
-			ref().member(index, offset, offset+table.length-1).post();
+		} else if (index.getLB() < offset || index.getUB() > offset + table.length - 1) {
+			ref().member(index, offset, offset + table.length - 1).post();
 		}
 		return result;
 	}
 
 	/**
 	 * Creates a variable equal to min(vars)
+	 *
 	 * @param name name of the result variable
 	 * @param vars a set of integer variables
 	 * @return a variable equal to min(vars)
@@ -213,6 +221,7 @@ public interface IResultVariableFactory extends ISelf<Model> {
 
 	/**
 	 * Creates a variable equal to max(vars)
+	 *
 	 * @param name name of the result variable
 	 * @param vars a set of integer variables
 	 * @return a variable equal to max(vars)
@@ -229,12 +238,13 @@ public interface IResultVariableFactory extends ISelf<Model> {
 
 	/**
 	 * Creates a variable equal to argmin(vars)
+	 *
 	 * @param name name of the result variable
 	 * @param vars a set of integer variables
 	 * @return a variable equal to argmin(vars)
 	 */
 	default IntVar argmin(String name, IntVar[] vars) {
-		IntVar result = ref().intVar(name, 0, vars.length-1, false);
+		IntVar result = ref().intVar(name, 0, vars.length - 1, false);
 		if (!result.isInstantiated()) {
 			ref().argmin(result, 0, vars).post();
 		}
@@ -243,12 +253,13 @@ public interface IResultVariableFactory extends ISelf<Model> {
 
 	/**
 	 * Creates a variable equal to argmax(vars)
+	 *
 	 * @param name name of the result variable
 	 * @param vars a set of integer variables
 	 * @return a variable equal to argmax(vars)
 	 */
 	default IntVar argmax(String name, IntVar[] vars) {
-		IntVar result = ref().intVar(name, 0, vars.length-1, false);
+		IntVar result = ref().intVar(name, 0, vars.length - 1, false);
 		if (!result.isInstantiated()) {
 			ref().argmax(result, 0, vars).post();
 		}
@@ -262,6 +273,7 @@ public interface IResultVariableFactory extends ISelf<Model> {
 
 	/**
 	 * Creates a set variable equal to the union of vars
+	 *
 	 * @param name name of the result variable
 	 * @param vars integer variables
 	 * @return a set variable equal to the union of vars
@@ -278,13 +290,14 @@ public interface IResultVariableFactory extends ISelf<Model> {
 
 	/**
 	 * Creates a set variable equal to the union of sets
+	 *
 	 * @param name name of the result variable
 	 * @param sets set variables
 	 * @return a set variable equal to the union of sets
 	 */
 	default SetVar union(String name, SetVar... sets) {
 		int[] lb = new int[0];
-		int[] ub = Arrays.stream(sets).flatMapToInt(s-> Arrays.stream(s.getUB().toArray())).distinct().toArray();
+		int[] ub = Arrays.stream(sets).flatMapToInt(s -> Arrays.stream(s.getUB().toArray())).distinct().toArray();
 		SetVar result = ref().setVar(name, lb, ub);
 		if (!result.isInstantiated()) {
 			ref().union(sets, result).post();
@@ -294,13 +307,14 @@ public interface IResultVariableFactory extends ISelf<Model> {
 
 	/**
 	 * Creates a set variable equal to the intersection of sets
+	 *
 	 * @param name name of the result variable
 	 * @param sets set variables
 	 * @return a set variable equal to the intersection of sets
 	 */
 	default SetVar intersection(String name, SetVar... sets) {
 		int[] lb = new int[0];
-		int[] ub = Arrays.stream(sets).flatMapToInt(s-> Arrays.stream(s.getUB().toArray())).distinct().toArray();
+		int[] ub = Arrays.stream(sets).flatMapToInt(s -> Arrays.stream(s.getUB().toArray())).distinct().toArray();
 		SetVar result = ref().setVar(name, lb, ub);
 		if (!result.isInstantiated()) {
 			ref().intersection(sets, result).post();
@@ -310,13 +324,14 @@ public interface IResultVariableFactory extends ISelf<Model> {
 
 	/**
 	 * Creates a variable counting how many set variables are empty
+	 *
 	 * @param name name of the result variable
 	 * @param vars set variables
 	 * @return an integer variable counting how many set variables are empty
 	 */
-	default IntVar nbEmpty(String name, SetVar... vars){
-		int lb = (int) Arrays.stream(vars).filter(s->s.getUB().isEmpty()).count();
-		int ub = (int) Arrays.stream(vars).filter(s->s.getLB().isEmpty()).count();
+	default IntVar nbEmpty(String name, SetVar... vars) {
+		int lb = (int) Arrays.stream(vars).filter(s -> s.getUB().isEmpty()).count();
+		int ub = (int) Arrays.stream(vars).filter(s -> s.getLB().isEmpty()).count();
 		IntVar result = ref().intVar(name, lb, ub, true);
 		if (!result.isInstantiated()) {
 			ref().nbEmpty(vars, result).post();
@@ -326,15 +341,16 @@ public interface IResultVariableFactory extends ISelf<Model> {
 
 	/**
 	 * Creates an integer variable equal to SUM_i_in_indices_(values[i-offset])
-	 * @param name name of the result variable
+	 *
+	 * @param name    name of the result variable
 	 * @param values
 	 * @param offset
 	 * @param indices
 	 * @return an integer variable equal to SUM_i_in_indices_(values[i-offset])
 	 */
-	default IntVar sum(String name, int[] values, int offset, SetVar indices){
-		int lb = Arrays.stream(indices.getLB().toArray()).map(i->values[i-offset]).sum();
-		int ub = Arrays.stream(indices.getUB().toArray()).map(i->values[i-offset]).sum();
+	default IntVar sum(String name, int[] values, int offset, SetVar indices) {
+		int lb = Arrays.stream(indices.getLB().toArray()).map(i -> values[i - offset]).sum();
+		int ub = Arrays.stream(indices.getUB().toArray()).map(i -> values[i - offset]).sum();
 		IntVar result = ref().intVar(name, lb, ub, true);
 		if (!result.isInstantiated()) {
 			ref().sumElements(indices, values, offset, result).post();
@@ -356,13 +372,13 @@ public interface IResultVariableFactory extends ISelf<Model> {
 	default SetVar element(String name, IntVar index, SetVar[] sets, int offset) {
 		int[] lb = new int[0];
 		int[] ub = index.stream()
-				.filter(i -> i>= offset && i<sets.length+offset)
-				.flatMap(i-> Arrays.stream(sets[i].getUB().toArray())).distinct().toArray();
+				.filter(i -> i >= offset && i < sets.length + offset)
+				.flatMap(i -> Arrays.stream(sets[i].getUB().toArray())).distinct().toArray();
 		SetVar result = ref().setVar(name, lb, ub);
 		if (!result.isInstantiated()) {
 			ref().element(index, sets, offset, result).post();
-		} else if(index.getLB()<offset || index.getUB()>offset+sets.length-1){
-			ref().member(index, offset, offset+sets.length-1).post();
+		} else if (index.getLB() < offset || index.getUB() > offset + sets.length - 1) {
+			ref().member(index, offset, offset + sets.length - 1).post();
 		}
 		return result;
 	}
