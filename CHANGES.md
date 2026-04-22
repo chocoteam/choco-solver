@@ -12,6 +12,7 @@ NEXT MILESTONE
 #### Constraints & LCG
 - Faster modulo constraints with bounded variables
 - Fix modulo constraint with negative values
+- Add `lcgExtractFromVariablesOnSolution` setting to control whether the solution-forbidding clause is built from variable assignments (true) or from the decision path (false, default)
 
 ### Deprecated API (to be removed in next release):
 

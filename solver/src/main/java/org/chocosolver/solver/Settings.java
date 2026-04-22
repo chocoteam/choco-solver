@@ -92,6 +92,8 @@ public class Settings {
 
     private final int satCCMinMode;
 
+    private final boolean lcgExtractFromVariablesOnSolution;
+
     private final Supplier<IEnvironment> environmentSupplier;
 
     protected Settings(SettingsBuilder builder) {
@@ -125,6 +127,7 @@ public class Settings {
         this.reasonManager = builder.getReasonManager();
         this.sortLitsOnSolution = builder.sortLitsOnSolution();
         this.satCCMinMode = builder.getSatCCMinMode();
+        this.lcgExtractFromVariablesOnSolution = builder.lcgExtractFromVariablesOnSolution();
         this.environmentSupplier = builder.getEnvironmentSupplier();
         this.additionalSettings = new HashMap<>(builder.getAdditionalSettings());
     }
@@ -328,6 +331,14 @@ public class Settings {
      */
     public int getSatCCMinMode() {
         return this.satCCMinMode;
+    }
+
+    /**
+     * @return true if the clause generated on a solution is built from the current variable assignments,
+     * false if it is built from the decisions taken in the search tree (default is false).
+     */
+    public boolean lcgExtractFromVariablesOnSolution() {
+        return this.lcgExtractFromVariablesOnSolution;
     }
 
     /**

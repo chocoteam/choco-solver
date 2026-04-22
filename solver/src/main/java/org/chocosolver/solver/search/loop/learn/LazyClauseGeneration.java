@@ -69,6 +69,7 @@ public class LazyClauseGeneration implements Learn {
     private final long reduceBase;
     private final long reduceFactor;
     private int reductions = 0;
+    private boolean extractFromVariablesOnSolution;
     /**
      * A temporary storage for learnt clauses.
      */
@@ -83,6 +84,7 @@ public class LazyClauseGeneration implements Learn {
         this.reduceBase = solver.getModel().getSettings().getReduceLearntClausesBase();
         this.reduceFactor = solver.getModel().getSettings().getReduceLearntClausesFactor();
         this.nextReductionCall = reduceBase;
+        this.extractFromVariablesOnSolution = solver.getModel().getSettings().lcgExtractFromVariablesOnSolution();
     }
 
     @Override
@@ -137,8 +139,11 @@ public class LazyClauseGeneration implements Learn {
         assert mSat.confl == MiniSat.C_Undef;
         if (!mSolver.getObjectiveManager().isOptimization()) {
             learnt_clause.resetQuick();
-            extractFromVariables();
-            //extractFromDecisions();
+            if (extractFromVariablesOnSolution) {
+                extractFromVariables();
+            } else {
+                extractFromDecisions();
+            }
 
             mSat.confl = new ArrayClause(learnt_clause, false /*?*/);
             int backtrack_level = analyze(mSolver.getContradictionException().set(Cause.Sat, null, null), ON_SOLUTION);
@@ -161,7 +166,6 @@ public class LazyClauseGeneration implements Learn {
         }
     }
 
-    @SuppressWarnings("unused")
     private void extractFromDecisions() {
         //todo deal with LazyLit
         DecisionPath path = mSolver.getDecisionPath();
