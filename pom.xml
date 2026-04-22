@@ -144,7 +144,6 @@
                         <configuration>
                             <doctitle>${project.groupId}-${project.artifactId} ${project.version} API</doctitle>
                             <windowtitle>${project.groupId}-${project.artifactId} ${project.version} API</windowtitle>
-                            <!--<quiet />-->
                             <doclint>none</doclint>
                         </configuration>
                         <executions>
@@ -152,32 +151,6 @@
                                 <id>attach-javadocs</id>
                                 <goals>
                                     <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>coverage</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>0.8.10</version>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>prepare-agent</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>report</id>
-                                <phase>prepare-package</phase>
-                                <goals>
-                                    <goal>report</goal>
                                 </goals>
                             </execution>
                         </executions>
@@ -231,18 +204,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>3.5.0</version>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.codehaus.mojo</groupId>
-                            <artifactId>extra-enforcer-rules</artifactId>
-                            <version>1.9.0</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>org.apache.maven.shared</groupId>
-                            <artifactId>maven-dependency-tree</artifactId>
-                            <version>3.2.1</version>
-                        </dependency>
-                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -334,7 +295,6 @@
                 <version>4.3</version>
                 <configuration>
                     <header>${main_dir}/etc/header.txt</header>
-                    <!--<header>LICENSE</header>-->
                     <properties>
                         <year>${maven.build.timestamp}</year>
                         <owner>IMT Atlantique</owner>
