@@ -128,7 +128,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.0.1</version>
+                        <version>3.2.8</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -142,7 +142,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.4.1</version>
+                        <version>3.12.0</version>
                         <configuration>
                             <doctitle>${project.groupId}-${project.artifactId} ${project.version} API</doctitle>
                             <windowtitle>${project.groupId}-${project.artifactId} ${project.version} API</windowtitle>
@@ -176,7 +176,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <version>3.0.0-M7</version>
+                        <version>3.5.5</version>
                         <configuration>
                             <groups>1s,10s,checker</groups>
                             <disableXmlReport>true</disableXmlReport>
@@ -194,7 +194,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.13.0</version>
+                    <version>3.15.0</version>
                     <configuration>
                         <encoding>UTF-8</encoding>
                         <release>${java.version}</release>
@@ -205,12 +205,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.5.0</version>
+                    <version>3.6.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>3.6.0</version>
                     <configuration>
                         <configLocation>checkstyle.xml</configLocation>
                         <outputEncoding>UTF-8</outputEncoding>
@@ -242,7 +242,7 @@
                         <dependency>
                             <groupId>com.puppycrawl.tools</groupId>
                             <artifactId>checkstyle</artifactId>
-                            <version>10.6.0</version>
+                            <version>13.4.0</version>
                         </dependency>
                     </dependencies>
                     <executions>
@@ -283,7 +283,7 @@
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.9.0</version>
+                <version>0.10.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <publishingServerId>central</publishingServerId>
@@ -294,27 +294,31 @@
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>4.3</version>
+                <version>5.0.0</version>
                 <configuration>
-                    <header>${main_dir}/etc/header.txt</header>
-                    <properties>
-                        <year>${maven.build.timestamp}</year>
-                        <owner>IMT Atlantique</owner>
-                        <project>${project.artifactId}</project>
-                        <prurl>${project.url}</prurl>
-                    </properties>
+                    <licenseSets>
+                        <licenseSet>
+                            <header>${main_dir}/etc/header.txt</header>
+                            <properties>
+                                <year>${maven.build.timestamp}</year>
+                                <owner>IMT Atlantique</owner>
+                                <project>${project.artifactId}</project>
+                                <prurl>${project.url}</prurl>
+                            </properties>
+                            <includes>
+                                <include>**/*.java</include>
+                                <include>**/*.template</include>
+                                <include>**/pom.xml</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/cpp/**</exclude>
+                            </excludes>
+                        </licenseSet>
+                    </licenseSets>
                     <mapping>
                         <template>JAVADOC_STYLE</template>
                         <java>SLASHSTAR_STYLE</java>
                     </mapping>
-                    <includes>
-                        <include>**/*.java</include>
-                        <include>**/*.template</include>
-                        <include>**/pom.xml</include>
-                    </includes>
-                    <excludes>
-                        <exclude>**/cpp/**</exclude>
-                    </excludes>
                 </configuration>
                 <executions>
                     <execution>
@@ -328,7 +332,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>2.6.0</version>
+                <version>2.7.1</version>
                 <executions>
                     <!-- Generates the third-party licenses file -->
                     <execution>
@@ -354,7 +358,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>3.4.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -367,7 +371,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.4.1</version>
+                <version>3.12.0</version>
                 <configuration>
                     <doclint>none</doclint>
                     <sourceFileExcludes>
@@ -378,7 +382,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.10</version>
+                <version>0.8.14</version>
                 <executions>
                     <execution>
                         <goals>
@@ -410,7 +414,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>3.4.1</version>
+                <version>3.9.0</version>
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -425,7 +429,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-report-plugin</artifactId>
-                <version>2.22.2</version>
+                <version>3.5.5</version>
                 <configuration>
                     <linkXRef>false</linkXRef>
                 </configuration>
@@ -461,7 +465,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.10</version>
+                <version>0.8.14</version>
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -527,7 +531,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.4.1</version>
+                <version>3.12.0</version>
                 <configuration>
                     <doclint>none</doclint>
                     <source>${java.version}</source>
