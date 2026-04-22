@@ -182,7 +182,12 @@ public class LazyClauseGeneration implements Learn {
                 IntVar var = dec.getDecisionVariable();
                 if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntEq())) {
                     if (dec.hasNext() || dec.getArity() == 1) {
-                        learnt_clause.add(var.getLit(dec.getDecisionValue(), IntVar.LR_NE));
+                        if (var.hasEnumeratedDomain()) {
+                            learnt_clause.add(var.getLit(dec.getDecisionValue(), IntVar.LR_NE));
+                        } else {
+                            learnt_clause.add(var.getLit(dec.getDecisionValue() - 1, IntVar.LR_LE));
+                            learnt_clause.add(var.getLit(dec.getDecisionValue() + 1, IntVar.LR_GE));
+                        }
                     } else {
                         learnt_clause.add(var.getLit(dec.getDecisionValue(), IntVar.LR_EQ));
                     }
@@ -190,7 +195,12 @@ public class LazyClauseGeneration implements Learn {
                     if (dec.hasNext() || dec.getArity() == 1) {
                         learnt_clause.add(var.getLit(dec.getDecisionValue(), IntVar.LR_EQ));
                     } else {
-                        learnt_clause.add(var.getLit(dec.getDecisionValue(), IntVar.LR_NE));
+                        if (var.hasEnumeratedDomain()) {
+                            learnt_clause.add(var.getLit(dec.getDecisionValue(), IntVar.LR_NE));
+                        } else {
+                            learnt_clause.add(var.getLit(dec.getDecisionValue() - 1, IntVar.LR_LE));
+                            learnt_clause.add(var.getLit(dec.getDecisionValue() + 1, IntVar.LR_GE));
+                        }
                     }
                 } else if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntSplit())) { // <=
                     if (dec.hasNext() || dec.getArity() == 1) {
