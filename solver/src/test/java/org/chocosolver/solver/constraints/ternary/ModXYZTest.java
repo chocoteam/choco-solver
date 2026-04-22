@@ -17,6 +17,7 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.Search.randomSearch;
@@ -246,5 +247,38 @@ public class ModXYZTest extends AbstractTernaryTest {
 		for (int i = 0; i<x.length; i++) {
 			Assert.assertEquals(x[i].getValue() % y[i].getValue(), z[i].getValue());
 		}
+	}
+
+	@DataProvider
+	public Object[][] cases() {
+		return new Object[][]{
+			// {x, y, expected_%}
+			{-7,  3, -1},
+			{ 7,  3,  1},
+			{ 7, -3,  1},
+			{-7, -3, -1},
+			{ 6,  3,  0},
+			{-6,  3,  0},
+			{ 0,  3,  0},
+			{ 1,  3,  1},
+			{-1,  3, -1},
+		};
+	}
+
+	@Test(groups = "1s", timeOut = 60000, dataProvider = "cases")
+	public void testModNegativeCases(Object[] values) {
+		int x = (int) values[0];
+		int y = (int) values[1];
+		int z = (int) values[2];
+		Model model = new Model(SettingsBuilder.init().setLCG(true));
+		IntVar xVar = model.intVar("x", x-10, x+10, true);
+		IntVar yVar = model.intVar("y", y, y+2, true);
+		model.arithm(xVar, "=", x).post();
+		model.arithm(yVar, "=", y).post();
+		IntVar modVar = xVar.mod(yVar).intVar();
+		while (model.getSolver().solve()) {
+			Assert.assertEquals(z, modVar.getValue());
+		}
+		Assert.assertEquals(1L, model.getSolver().getSolutionCount());
 	}
 }

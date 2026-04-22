@@ -865,23 +865,25 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         } else if (TuplesFactory.canBeTupledWithResult(Z, X, Y)) {
             Tuples tuples = TuplesFactory.modulo(Z, X, Y);
             return table(new IntVar[]{Z, X, Y}, tuples);
-        } else if (ref().getSolver().isLCG() || (long) X.getDomainSize() * Y.getDomainSize() > PropModXYZ.THRESHOLD) {
-                int xl = abs(X.getLB());
-                int xu = abs(X.getUB());
-                int b = Math.max(xl, xu);
-                Model model = X.getModel();
-                IntVar t1 = model.intVar(model.generateName("T1_"), -b, b, true);
-                IntVar t2 = model.intVar(model.generateName("T2_"), -b, b, true);
-                div(X, Y, t1).post();
-                times(t1, Y, t2).post();
-                // compute real modulo
-                int maxMod = Math.max(abs(Y.getLB()), abs(Y.getUB())) - 1;
-                IntVar modulo = model.intVar(model.generateName("mod_"), -maxMod, maxMod);
-                arithm(X,"-",t2,"=",modulo).post();
-                // The modulo has the same sign as X
-                ref().ifOnlyIf(arithm(X,">=",0), arithm(modulo,">=",0));
-                // returns equality constraint
-                return arithm(Z,"=",modulo);
+        } else if (ref().getSolver().isLCG()
+                || (long) X.getDomainSize() * Y.getDomainSize() > PropModXYZ.THRESHOLD) {
+            int xl = abs(X.getLB());
+            int xu = abs(X.getUB());
+            int b = Math.max(xl, xu);
+            Model model = X.getModel();
+            IntVar t1 = model.intVar(model.generateName("T1_"), -b, b, true);
+            IntVar t2 = model.intVar(model.generateName("T2_"), -b, b, true);
+            div(X, Y, t1).post();
+            times(t1, Y, t2).post();
+            // compute real modulo
+            int maxMod = Math.max(abs(Y.getLB()), abs(Y.getUB())) - 1;
+            IntVar modulo = model.intVar(model.generateName("mod_"), -maxMod, maxMod);
+            arithm(X, "-", t2, "=", modulo).post();
+            // The modulo has the same sign as X (except when modulo = 0)
+            ref().ifThen(arithm(X, ">=", 0), arithm(modulo, ">=", 0));
+            ref().ifThen(arithm(X, "<", 0), arithm(modulo, "<=", 0));
+            // returns equality constraint
+            return arithm(Z, "=", modulo);
         } else {
             return new Constraint(X.getName() + " MOD " + Y.getName() + " = " + Z.getName(), new PropModXYZ(X, Y, Z));
         }
