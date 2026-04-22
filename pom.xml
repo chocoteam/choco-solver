@@ -15,7 +15,7 @@
     <version>5.0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>choco</name>
-    <url>http://choco-solver.org/</url>
+    <url>https://choco-solver.org/</url>
     <description>
         A Free and Open-Source library dedicated to Constraint Programming.
     </description>
