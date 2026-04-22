@@ -27,6 +27,15 @@
         </license>
     </licenses>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
+        <main_dir>./</main_dir>
+        <java.version>17</java.version>
+        <testng.version>7.12.0</testng.version>
+        <args4j.version>2.37</args4j.version>
+    </properties>
+
     <modules>
         <module>solver</module>
         <module>parsers</module>
@@ -42,7 +51,7 @@
         <dependency>
             <groupId>args4j</groupId>
             <artifactId>args4j</artifactId>
-            <version>2.33</version>
+            <version>${args4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -53,7 +62,7 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>7.5.1</version>
+            <version>${testng.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -102,13 +111,6 @@
             </organizationUrl>
         </developer>
     </developers>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
-        <main_dir>./</main_dir>
-        <java.version>17</java.version>
-    </properties>
 
     <profiles>
         <profile>

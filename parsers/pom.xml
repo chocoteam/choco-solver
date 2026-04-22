@@ -29,7 +29,7 @@
 
     <properties>
         <main_dir>.${file.separator}..</main_dir>
-        <antlr.version>4.9.3</antlr.version>
+        <antlr.version>4.13.2</antlr.version>
     </properties>
 
     <dependencies>
@@ -183,21 +183,10 @@
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
-                <!--version 4.5 is the last one that generates
-                in the right ouptut directory
-                without specific configurations -->
                 <version>${antlr.version}</version>
                 <configuration>
                     <listener>false</listener>
                     <visitor>false</visitor>
-                    <outputDirectory>${basedir}/src/main/java/org/chocosolver/parser/flatzinc</outputDirectory>
-                    <arguments>
-                        <argument>-no-visitor</argument>
-                        <argument>-no-listener</argument>
-                        <argument>-Xlog</argument>
-                        <argument>-package</argument>
-                        <argument>org.chocosolver.parser.flatzinc</argument>
-                    </arguments>
                 </configuration>
                 <executions>
                     <execution>
