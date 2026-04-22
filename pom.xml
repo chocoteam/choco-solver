@@ -107,6 +107,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
         <main_dir>./</main_dir>
+        <java.version>17</java.version>
     </properties>
 
     <profiles>
@@ -218,67 +219,23 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.10.1</version>
-                    <executions>
-                        <execution>
-                            <id>default-compile</id>
-                            <configuration>
-                                <!-- compile everything to ensure module-info contains right entries -->
-                                <release>9</release>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>base-compile</id>
-                            <goals>
-                                <goal>compile</goal>
-                            </goals>
-                            <!-- recompile everything for target VM except the module-info.java -->
-                            <configuration>
-                                <excludes>
-                                    <exclude>module-info.java</exclude>
-                                </excludes>
-                            </configuration>
-                        </execution>
-                    </executions>
-                    <!-- defaults for compile and testCompile -->
+                    <version>3.13.0</version>
                     <configuration>
                         <encoding>UTF-8</encoding>
+                        <release>${java.version}</release>
                         <showDeprecation>true</showDeprecation>
                         <showWarnings>true</showWarnings>
-                        <!-- Only required when JAVA_HOME isn't at least Java 9 and when haven't configured the maven-toolchains-plugin -->
-                        <jdkToolchain>
-                            <version>9</version>
-                        </jdkToolchain>
-                        <release>8</release>
                     </configuration>
                 </plugin>
                 <plugin>
-                    <!-- see http://www.mojohaus.org/extra-enforcer-rules/enforceBytecodeVersion.html -->
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.1.0
-                    </version> <!-- find the latest version at http://maven.apache.org/plugins/maven-enforcer-plugin/ -->
-                    <executions>
-                        <execution>
-                            <id>enforce-bytecode-version</id>
-                            <goals>
-                                <goal>enforce</goal>
-                            </goals>
-                            <configuration>
-                                <rules>
-                                    <enforceBytecodeVersion>
-                                        <maxJdkVersion>1.8</maxJdkVersion>
-                                    </enforceBytecodeVersion>
-                                </rules>
-                                <fail>true</fail>
-                            </configuration>
-                        </execution>
-                    </executions>
+                    <version>3.5.0</version>
                     <dependencies>
                         <dependency>
                             <groupId>org.codehaus.mojo</groupId>
                             <artifactId>extra-enforcer-rules</artifactId>
-                            <version>1.6.1</version>
+                            <version>1.9.0</version>
                         </dependency>
                         <dependency>
                             <groupId>org.apache.maven.shared</groupId>
@@ -341,7 +298,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.1.0</version>
                 <executions>
                     <execution>
                         <id>enforce-maven</id>
@@ -351,8 +307,11 @@
                         <configuration>
                             <rules>
                                 <requireMavenVersion>
-                                    <version>3.1.1</version>
+                                    <version>3.6.0</version>
                                 </requireMavenVersion>
+                                <requireJavaVersion>
+                                    <version>${java.version}</version>
+                                </requireJavaVersion>
                             </rules>
                         </configuration>
                     </execution>
@@ -609,10 +568,7 @@
                 <version>3.4.1</version>
                 <configuration>
                     <doclint>none</doclint>
-                    <source>8</source>
-                    <!--                    <sourceFileExcludes>-->
-                    <!--                        <sourceFileExclude>module-info.java</sourceFileExclude>-->
-                    <!--                    </sourceFileExcludes>-->
+                    <source>${java.version}</source>
                 </configuration>
                 <reportSets>
                     <!-- reportSet executed in all modules -->
