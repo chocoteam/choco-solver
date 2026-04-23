@@ -22,7 +22,7 @@ import java.util.Map;
 
 /**
  * A factory that selects the most adapted element propagator.
- * 
+ *
  * @author Charles Prud'homme
  * @author Jean-Guillaume Fages
  * @since 29/09/15
@@ -48,11 +48,11 @@ public class ElementFactory {
             return buildElementMember(value, table, index, offset);
         }
         // bounded domain for result variable
-        if (!value.hasEnumeratedDomain()) {
+        if (index.hasEnumeratedDomain() && !value.hasEnumeratedDomain()) {
             return buildElementBC(value, table, index, offset);
         }
         // large tables
-        if (n > 50) {
+        if (n > 50 && index.hasEnumeratedDomain()) {
             // table reduction by merging same value cells
             if (nbValues * 10 < n && value.hasEnumeratedDomain() && index.hasEnumeratedDomain()) {
                 return buildReducedElementAC(value, table, index, offset);
