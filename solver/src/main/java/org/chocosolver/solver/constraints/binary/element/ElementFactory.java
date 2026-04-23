@@ -6,12 +6,19 @@
  */
 package org.chocosolver.solver.constraints.binary.element;
 
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.unary.PropEqualXC;
 import org.chocosolver.solver.constraints.unary.PropMember;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A factory that selects the most adapted element propagator.
@@ -53,24 +60,51 @@ public class ElementFactory {
     }
 
     /**
-     * Detect and return the most adapted Element propagator wrt to the values in TABLE
+     * Detect and return the most adapted Element propagator wrt to the values in table
      *
-     * @param VALUE  the result variable
-     * @param TABLE  the array of values
-     * @param INDEX  the index variable
-     * @param OFFSET the offset
+     * @param value  the result variable
+     * @param table  the array of values
+     * @param index  the index variable
+     * @param offset the offset
      * @return an Element constraint
      */
-    public static Constraint detect(IntVar VALUE, int[] TABLE, IntVar INDEX, int OFFSET) {
+    public static Constraint detect(IntVar value, int[] table, IntVar index, int offset) {
         // first check the variables match
-        int st = sawtooth(TABLE);
-        if (st == -1) { // all values from TABLE are the same OR TABLE only contains one value
-            assert TABLE[0] == TABLE[TABLE.length - 1];
+        int st = sawtooth(table);
+        if (st == -1) { // all values from table are the same OR table only contains one value
+            assert table[0] == table[table.length - 1];
             return new Constraint("FAKE_ELMT",
-                    new PropMember(INDEX, new IntIterableRangeSet(OFFSET, OFFSET + TABLE.length - 1), false),
-                    new PropEqualXC(VALUE, TABLE[0])
+                    new PropMember(index, new IntIterableRangeSet(offset, offset + table.length - 1), false),
+                    new PropEqualXC(value, table[0])
             );
         }
-        return new Constraint(ConstraintsName.ELEMENT, new PropElement(VALUE, TABLE, INDEX, OFFSET));
+        int nbValues = (int) Arrays.stream(table).distinct().count();
+        if (nbValues * 10 < table.length && value.hasEnumeratedDomain() && index.hasEnumeratedDomain()) {
+            // regroup indexes leading to the same value to work on a smaller element constraint
+            Map<Integer, IntIterableSet> indexesByValue = new HashMap<>();
+            for (int i = 0; i < table.length; i++) {
+                int val = table[i];
+                if (!indexesByValue.containsKey(val)) {
+                    indexesByValue.put(val, new IntIterableBitSet());
+                }
+                indexesByValue.get(val).add(i + offset);
+            }
+            int newSize = indexesByValue.size();
+            int[] reducedTable = new int[newSize];
+            IntIterableSet[] indexSets = new IntIterableSet[newSize];
+            int idx = 0;
+            for (Map.Entry<Integer, IntIterableSet> entry : indexesByValue.entrySet()) {
+                reducedTable[idx] = entry.getKey();
+                indexSets[idx] = entry.getValue();
+                idx++;
+            }
+            Model model = index.getModel();
+            IntVar reducedIndex = model.intVar(0, newSize - 1, false);
+            // new element on the restricted size + element on the sets
+            return new Constraint(ConstraintsName.ELEMENT,
+                    new PropElement(value, reducedTable, reducedIndex, 0),
+                    new PropElementIn(index, indexSets, reducedIndex));
+        }
+        return new Constraint(ConstraintsName.ELEMENT, new PropElement(value, table, index, offset));
     }
 }

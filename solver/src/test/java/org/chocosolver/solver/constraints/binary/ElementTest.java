@@ -14,9 +14,11 @@ import org.chocosolver.solver.search.strategy.strategy.FullyRandom;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import static java.lang.System.currentTimeMillis;
@@ -47,6 +49,35 @@ public class ElementTest {
         assertEquals(r.getMeasures().getSolutionCount(), nbSol, "nb sol");
     }
 
+    @Test(groups = "1s", timeOut = 60000)
+    public void testLargeEnumerated() {
+        int length = 20_000;
+        int n = 200;
+        Random rd = new Random(0);
+        Model m = new Model();
+        int[] array = new int[length];
+        int maxVal = 10;
+        for (int i=0;i<length;i++) {
+            array[i] = rd.nextInt(maxVal);
+        }
+        IntVar[] indexes = m.intVarArray("index", n, 0, length, false);
+        IntVar[] values = Arrays.stream(indexes)
+                .map(i -> m.element("values", array, i, 0))
+                .toArray(IntVar[]::new);
+        m.allDifferent(indexes).post();
+        m.sum("", values).eq(n * maxVal / 2).post();
+        Solver s = m.getSolver();
+        s.setSearch(randomSearch(ArrayUtils.append(indexes, values), 0));
+        s.limitSolution(10_000);
+        while (s.solve()) {
+            for (int i=0;i<n;i++) {
+                Assert.assertEquals(array[indexes[i].getValue()], values[i].getValue());
+            }
+            long nbSols = s.getSolutionCount();
+            if (nbSols % 1000 == 0) System.out.println(nbSols);
+        }
+        Assert.assertEquals(10_000L, s.getSolutionCount());
+    }
 
     @Test(groups = "1s", timeOut = 60000)
     public void testAllSame() {
