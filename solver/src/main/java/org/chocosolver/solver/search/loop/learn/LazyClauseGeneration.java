@@ -69,6 +69,7 @@ public class LazyClauseGeneration implements Learn {
     private final long reduceBase;
     private final long reduceFactor;
     private int reductions = 0;
+    private boolean extractFromVariablesOnSolution;
     /**
      * A temporary storage for learnt clauses.
      */
@@ -83,6 +84,7 @@ public class LazyClauseGeneration implements Learn {
         this.reduceBase = solver.getModel().getSettings().getReduceLearntClausesBase();
         this.reduceFactor = solver.getModel().getSettings().getReduceLearntClausesFactor();
         this.nextReductionCall = reduceBase;
+        this.extractFromVariablesOnSolution = solver.getModel().getSettings().lcgExtractFromVariablesOnSolution();
     }
 
     @Override
@@ -137,8 +139,11 @@ public class LazyClauseGeneration implements Learn {
         assert mSat.confl == MiniSat.C_Undef;
         if (!mSolver.getObjectiveManager().isOptimization()) {
             learnt_clause.resetQuick();
-            extractFromVariables();
-            //extractFromDecisions();
+            if (extractFromVariablesOnSolution) {
+                extractFromVariables();
+            } else {
+                extractFromDecisions();
+            }
 
             mSat.confl = new ArrayClause(learnt_clause, false /*?*/);
             int backtrack_level = analyze(mSolver.getContradictionException().set(Cause.Sat, null, null), ON_SOLUTION);
@@ -161,7 +166,6 @@ public class LazyClauseGeneration implements Learn {
         }
     }
 
-    @SuppressWarnings("unused")
     private void extractFromDecisions() {
         //todo deal with LazyLit
         DecisionPath path = mSolver.getDecisionPath();
@@ -178,7 +182,12 @@ public class LazyClauseGeneration implements Learn {
                 IntVar var = dec.getDecisionVariable();
                 if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntEq())) {
                     if (dec.hasNext() || dec.getArity() == 1) {
-                        learnt_clause.add(var.getLit(dec.getDecisionValue(), IntVar.LR_NE));
+                        if (var.hasEnumeratedDomain()) {
+                            learnt_clause.add(var.getLit(dec.getDecisionValue(), IntVar.LR_NE));
+                        } else {
+                            learnt_clause.add(var.getLit(dec.getDecisionValue() - 1, IntVar.LR_LE));
+                            learnt_clause.add(var.getLit(dec.getDecisionValue() + 1, IntVar.LR_GE));
+                        }
                     } else {
                         learnt_clause.add(var.getLit(dec.getDecisionValue(), IntVar.LR_EQ));
                     }
@@ -186,7 +195,12 @@ public class LazyClauseGeneration implements Learn {
                     if (dec.hasNext() || dec.getArity() == 1) {
                         learnt_clause.add(var.getLit(dec.getDecisionValue(), IntVar.LR_EQ));
                     } else {
-                        learnt_clause.add(var.getLit(dec.getDecisionValue(), IntVar.LR_NE));
+                        if (var.hasEnumeratedDomain()) {
+                            learnt_clause.add(var.getLit(dec.getDecisionValue(), IntVar.LR_NE));
+                        } else {
+                            learnt_clause.add(var.getLit(dec.getDecisionValue() - 1, IntVar.LR_LE));
+                            learnt_clause.add(var.getLit(dec.getDecisionValue() + 1, IntVar.LR_GE));
+                        }
                     }
                 } else if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntSplit())) { // <=
                     if (dec.hasNext() || dec.getArity() == 1) {

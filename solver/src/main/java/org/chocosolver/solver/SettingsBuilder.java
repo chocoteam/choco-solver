@@ -248,6 +248,13 @@ public class SettingsBuilder {
                     "When set to 2, recursive minimization is applied (default is 0).")
     private int satCCMinMode = 0;
 
+    public static final String LCG_EXTRACT_FROM_VARIABLES_ON_SOLUTION = "lcgExtractFromVariablesOnSolution";
+    @Option(name = "--lcgExtractFromVariablesOnSolution",
+            aliases = {"--model.lcg.extractFromVariables", "-lcgefvos"},
+            usage = "when true, the clause generated on a solution is built from the current variable assignments. " +
+                    "when false (default), the clause is built from the decisions taken in the search tree.")
+    private boolean lcgExtractFromVariablesOnSolution = false;
+
     public static final String ENVIRONMENT_SUPPLIER = "environmentSupplier";
     private Supplier<IEnvironment> environmentSupplier = () -> new EnvironmentBuilder().fromFlat().build();
 
@@ -420,6 +427,9 @@ public class SettingsBuilder {
                     break;
                 case SAT_CC_MIN_MODE:
                     this.setSatCCMinMode(Integer.parseInt(value));
+                    break;
+                case LCG_EXTRACT_FROM_VARIABLES_ON_SOLUTION:
+                    this.setLcgExtractFromVariablesOnSolution(Boolean.parseBoolean(value));
                     break;
                 default:
                     this.set(key, value);
@@ -957,6 +967,26 @@ public class SettingsBuilder {
      */
     public int getSatCCMinMode() {
         return this.satCCMinMode;
+    }
+
+    /**
+     * Set whether the clause generated on a solution is built from the current variable assignments (true)
+     * or from the decisions taken in the search tree (false, default).
+     *
+     * @param lcgExtractFromVariablesOnSolution true to extract from variables, false to extract from decisions
+     * @return the current instance
+     */
+    public SettingsBuilder setLcgExtractFromVariablesOnSolution(boolean lcgExtractFromVariablesOnSolution) {
+        this.lcgExtractFromVariablesOnSolution = lcgExtractFromVariablesOnSolution;
+        return this;
+    }
+
+    /**
+     * @return true if the clause generated on a solution is built from the current variable assignments,
+     * false if it is built from the decisions taken in the search tree (default is false).
+     */
+    public boolean lcgExtractFromVariablesOnSolution() {
+        return this.lcgExtractFromVariablesOnSolution;
     }
 
     /**
