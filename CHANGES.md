@@ -14,6 +14,14 @@ NEXT MILESTONE
 - Fix modulo constraint with negative values
 - Add `lcgExtractFromVariablesOnSolution` setting to control whether the solution-forbidding clause is built from variable assignments (true) or from the decision path (false, default)
 
+#### Build, CI & Tooling
+- Migrate to Java 17 (`<release>17</release>`); Java 17 language features and APIs are now available
+- Simplify Maven compiler configuration: remove multi-release JAR dual-compilation strategy (Java 8 + module-info at Java 9)
+- Enforce minimum Java 17 and Maven 3.6.0 via `maven-enforcer-plugin`
+- Upgrade ANTLR from 4.9.3 to 4.13.2; migrate grammars to standard `src/main/antlr4/` layout; generated parser sources are no longer committed to the repository
+- Upgrade TestNG from 7.5.1 to 7.12.0
+- Upgrade args4j from 2.33 to 2.37
+
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:

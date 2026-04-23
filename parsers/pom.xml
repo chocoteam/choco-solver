@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 
     This file is part of choco-parsers, http://choco-solver.org/
@@ -28,6 +29,7 @@
 
     <properties>
         <main_dir>.${file.separator}..</main_dir>
+        <antlr.version>4.13.2</antlr.version>
     </properties>
 
     <dependencies>
@@ -44,12 +46,12 @@
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
-            <version>4.9.3</version>
+            <version>${antlr.version}</version>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4</artifactId>
-            <version>4.9.3</version>
+            <version>${antlr.version}</version>
         </dependency>
     </dependencies>
 
@@ -58,7 +60,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.4.1</version>
+                <version>3.6.2</version>
                 <executions>
                     <execution>
                         <id>lite</id>
@@ -122,7 +124,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.5.0</version>
                 <executions>
                     <execution>
                         <id>copy-licenses</id>
@@ -146,7 +148,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.4.2</version>
+                <version>3.8.0</version>
                 <executions>
                     <execution>
                         <id>make-assembly</id>
@@ -172,7 +174,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M7</version>
+                <version>3.5.5</version>
                 <configuration>
                     <!--suppress UnresolvedMavenProperty -->
                     <argLine>${argLine} -Djava.library.path=/usr/local/lib</argLine>
@@ -181,21 +183,10 @@
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
-                <!--version 4.5 is the last one that generates
-                in the right ouptut directory
-                without specific configurations -->
-                <version>4.9.3</version>
+                <version>${antlr.version}</version>
                 <configuration>
                     <listener>false</listener>
                     <visitor>false</visitor>
-                    <outputDirectory>${basedir}/src/main/java/org/chocosolver/parser/flatzinc</outputDirectory>
-                    <arguments>
-                        <argument>-no-visitor</argument>
-                        <argument>-no-listener</argument>
-                        <argument>-Xlog</argument>
-                        <argument>-package</argument>
-                        <argument>org.chocosolver.parser.flatzinc</argument>
-                    </arguments>
                 </configuration>
                 <executions>
                     <execution>
