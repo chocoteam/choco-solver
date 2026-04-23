@@ -22,41 +22,14 @@ import java.util.Map;
 
 /**
  * A factory that selects the most adapted element propagator.
- * Created by cprudhom on 29/09/15.
- * Project: choco.
+ * 
+ * @author Charles Prud'homme
+ * @author Jean-Guillaume Fages
+ * @since 29/09/15
  */
 public class ElementFactory {
-    private ElementFactory() {
-    }
 
-    /**
-     * Count the number of time the values in TABLE increase or decrease (ie, count picks and valleys).
-     *
-     * @param TABLE an array of values
-     * @return the number of picks and valleys
-     */
-    private static int sawtooth(int[] TABLE) {
-        int i = 0;
-        while (i < TABLE.length - 1 && TABLE[i] == TABLE[i + 1]) {
-            i++;
-        }
-        if (i == TABLE.length - 1) {
-            return -1;
-        }
-        boolean up = TABLE[i] < TABLE[i + 1];
-        int c = 0;
-        i++;
-        while (i < TABLE.length - 1) {
-            if (up && TABLE[i] > TABLE[i + 1]) {
-                c++;
-                up = false;
-            } else if (!up && TABLE[i] < TABLE[i + 1]) {
-                c++;
-                up = true;
-            }
-            i++;
-        }
-        return c;
+    private ElementFactory() {
     }
 
     /**
@@ -69,42 +42,108 @@ public class ElementFactory {
      * @return an Element constraint
      */
     public static Constraint detect(IntVar value, int[] table, IntVar index, int offset) {
-        // first check the variables match
-        int st = sawtooth(table);
-        if (st == -1) { // all values from table are the same OR table only contains one value
-            assert table[0] == table[table.length - 1];
-            return new Constraint("FAKE_ELMT",
-                    new PropMember(index, new IntIterableRangeSet(offset, offset + table.length - 1), false),
-                    new PropEqualXC(value, table[0])
-            );
-        }
         int nbValues = (int) Arrays.stream(table).distinct().count();
-        if (nbValues * 10 < table.length && value.hasEnumeratedDomain() && index.hasEnumeratedDomain()) {
-            // regroup indexes leading to the same value to work on a smaller element constraint
-            Map<Integer, IntIterableSet> indexesByValue = new HashMap<>();
-            for (int i = 0; i < table.length; i++) {
-                int val = table[i];
-                if (!indexesByValue.containsKey(val)) {
-                    indexesByValue.put(val, new IntIterableBitSet());
-                }
-                indexesByValue.get(val).add(i + offset);
-            }
-            int newSize = indexesByValue.size();
-            int[] reducedTable = new int[newSize];
-            IntIterableSet[] indexSets = new IntIterableSet[newSize];
-            int idx = 0;
-            for (Map.Entry<Integer, IntIterableSet> entry : indexesByValue.entrySet()) {
-                reducedTable[idx] = entry.getKey();
-                indexSets[idx] = entry.getValue();
-                idx++;
-            }
-            Model model = index.getModel();
-            IntVar reducedIndex = model.intVar(0, newSize - 1, false);
-            // new element on the restricted size + element on the sets
-            return new Constraint(ConstraintsName.ELEMENT,
-                    new PropElement(value, reducedTable, reducedIndex, 0),
-                    new PropElementIn(index, indexSets, reducedIndex));
+        int n = table.length;
+        if (nbValues == 1) { // all values from table are the same OR table only contains one value
+            return buildElementMember(value, table, index, offset);
         }
+        // bounded domain for result variable
+        if (!value.hasEnumeratedDomain()) {
+            return buildElementBC(value, table, index, offset);
+        }
+        // large tables
+        if (n > 50) {
+            // table reduction by merging same value cells
+            if (nbValues * 10 < n && value.hasEnumeratedDomain() && index.hasEnumeratedDomain()) {
+                return buildReducedElementAC(value, table, index, offset);
+            } else {
+                // bound counsistency on result variable (fast)
+                return buildElementBC(value, table, index, offset);
+            }
+        }
+        // classical element constraint
+        return buildElementAC(value, table, index, offset);
+    }
+
+    /**
+     * Creates an Element propagator optimized for bounded results (AC on index, BC on result)
+     *
+     * @param value the result variable
+     * @param table the array of values
+     * @param index the index variable
+     * @param offset facultative offset for the index variable
+     * @return an element constraint
+     */
+    public static Constraint buildElementMember(IntVar value, int[] table, IntVar index, int offset) {
+        assert table[0] == table[table.length - 1];
+        return new Constraint("FAKE_ELMT",
+                new PropMember(index, new IntIterableRangeSet(offset, offset + table.length - 1), false),
+                new PropEqualXC(value, table[0])
+        );
+    }
+
+    /**
+     * Creates an Element propagator optimized for bounded results (AC on index, BC on result)
+     *
+     * @param value the result variable
+     * @param table the array of values
+     * @param index the index variable
+     * @param offset facultative offset for the index variable
+     * @return an element constraint
+     */
+    public static Constraint buildElementBC(IntVar value, int[] table, IntVar index, int offset) {
+        return new Constraint(ConstraintsName.ELEMENT, new PropElementBound(value, table, index, offset));
+    }
+
+    /**
+     * Creates an Element propagator optimized for enumerated results (AC)
+     *
+     * @param value the result variable
+     * @param table the array of values
+     * @param index the index variable
+     * @param offset facultative offset for the index variable
+     * @return an element constraint
+     */
+    public static Constraint buildElementAC(IntVar value, int[] table, IntVar index, int offset) {
         return new Constraint(ConstraintsName.ELEMENT, new PropElement(value, table, index, offset));
+    }
+
+    /**
+     * Creates an Element propagator optimized for large table using multiple times the same value (AC)
+     *
+     * @param value the result variable
+     * @param table the array of values
+     * @param index the index variable
+     * @param offset facultative offset for the index variable
+     * @return an element constraint
+     */
+    public static Constraint buildReducedElementAC(IntVar value, int[] table, IntVar index, int offset) {
+        Model model = index.getModel();
+        // offset management
+        IntVar shiftedIndex = offset == 0 ? index : model.intView(1, index, -offset);
+        // group indexes leading to the same value
+        Map<Integer, IntIterableSet> indexesByValue = new HashMap<>();
+        for (int i = 0; i < table.length; i++) {
+            int val = table[i];
+            if (!indexesByValue.containsKey(val)) {
+                indexesByValue.put(val, new IntIterableBitSet());
+            }
+            indexesByValue.get(val).add(i);
+        }
+        int newSize = indexesByValue.size();
+        int[] reducedTable = new int[newSize];
+        IntIterableSet[] indexSets = new IntIterableSet[newSize];
+        int idx = 0;
+        for (Map.Entry<Integer, IntIterableSet> entry : indexesByValue.entrySet()) {
+            reducedTable[idx] = entry.getKey();
+            indexSets[idx] = entry.getValue();
+            idx++;
+        }
+        // new index on reduced table
+        IntVar reducedIndex = model.intVar(0, newSize - 1, false);
+        // new element on the restricted size + element on the sets
+        return new Constraint(ConstraintsName.ELEMENT,
+                new PropElement(value, reducedTable, reducedIndex, 0),
+                new PropElementIn(shiftedIndex, indexSets, reducedIndex));
     }
 }
