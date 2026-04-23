@@ -191,7 +191,7 @@ public interface IResultVariableFactory extends ISelf<Model> {
 		}
 		IntVar result;
 		// large tables
-		if (n > 50) {
+		if (n > 50 && index.hasEnumeratedDomain()) {
 			// table reduction by merging same value cells
 			if (nbValues * 10 < n && index.hasEnumeratedDomain()) {
 				result = index.getModel().intVar(name, table);
