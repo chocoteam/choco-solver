@@ -73,10 +73,8 @@ public class ElementTest {
             for (int i=0;i<n;i++) {
                 Assert.assertEquals(array[indexes[i].getValue()], values[i].getValue());
             }
-            long nbSols = s.getSolutionCount();
-            if (nbSols % 1000 == 0) System.out.println(nbSols);
         }
-        Assert.assertEquals(10_000L, s.getSolutionCount());
+        Assert.assertEquals(s.getSolutionCount(), 10_000L);
     }
 
     @Test(groups = "1s", timeOut = 60000)

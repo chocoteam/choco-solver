@@ -8,6 +8,7 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.constraints.binary.element.ElementFactory;
 import org.chocosolver.solver.exception.SolverException;
 
 import java.util.Arrays;
@@ -157,22 +158,55 @@ public interface IResultVariableFactory extends ISelf<Model> {
 	//*************************************************************************************
 
 	/**
-	 * Creates a variable equal to table[index-offser]
+	 * Creates a variable equal to table[index]
 	 *
 	 * @param name   name of the result variable
-	 * @param table  array of integer values
-	 * @param index  variable indicating which cell to select
+	 * @param table  the array of values
+	 * @param index  the index variable
+	 * @return an integer variable
+	 */
+	default IntVar element(String name, int[] table, IntVar index) {
+		return element(name, table, index, 0);
+	}
+
+	/**
+	 * Creates a variable equal to table[index-offset]
+	 *
+	 * @param name   name of the result variable
+	 * @param table  the array of values
+	 * @param index  the index variable
 	 * @param offset parameter applying to index
-	 * @return a variable equal to table[index-offser]
+	 * @return an integer variable
 	 */
 	default IntVar element(String name, int[] table, IntVar index, int offset) {
-		IntVar result = ref().intVar(name, index.stream()
-				.filter(v -> v >= offset && v < table.length + offset)
-				.map(v -> table[v - offset]).toArray());
-		if (!result.isInstantiated()) {
-			ref().element(result, table, index, offset).post();
-		} else if (index.getLB() < offset || index.getUB() > offset + table.length - 1) {
+		int n = table.length;
+		if (n == 0) {
+			throw new IllegalArgumentException("empty table");
+		}
+		// single value
+		int nbValues = (int) Arrays.stream(table).distinct().count();
+		if (nbValues == 1) {
 			ref().member(index, offset, offset + table.length - 1).post();
+			return ref().intVar(name, table[0]);
+		}
+		IntVar result;
+		// large tables
+		if (n > 50) {
+			// table reduction by merging same value cells
+			if (nbValues * 10 < n && index.hasEnumeratedDomain()) {
+				result = index.getModel().intVar(name, table);
+				ElementFactory.buildReducedElementAC(result, table, index, 0).post();
+			} else {
+				// bound counsistency on result variable (fast)
+				int lb = Arrays.stream(table).min().getAsInt();
+				int ub = Arrays.stream(table).max().getAsInt();
+				result = index.getModel().intVar(name, lb, ub, true);
+				ElementFactory.buildElementBC(result, table, index, 0).post();
+			}
+		} else {
+			// classical element constraint
+			result = index.getModel().intVar(name, table);
+			ElementFactory.buildElementAC(result, table, index, 0).post();
 		}
 		return result;
 	}

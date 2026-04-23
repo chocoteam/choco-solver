@@ -28,6 +28,10 @@ import org.chocosolver.util.tools.ArrayUtils;
 @Explained(ignored = true, comment = "Not explained")
 public class PropElementIn extends Propagator<IntVar> {
 
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
+
 	/**
 	 * Table of values
 	 */
@@ -63,6 +67,10 @@ public class PropElementIn extends Propagator<IntVar> {
 	 */
 	private final IntIterableBitSet pVals;
 
+	//***********************************************************************************
+	// CONSTRUCTOR
+	//***********************************************************************************
+
 	/**
 	 * Create a propagator which ensures that VALUE IN TABLE[INDEX] holds.
 	 *
@@ -87,6 +95,10 @@ public class PropElementIn extends Propagator<IntVar> {
 			throw new IllegalArgumentException("PropElementIn only accepts enumerated domains");
 		}
 	}
+
+	//***********************************************************************************
+	// FILTERING
+	//***********************************************************************************
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
@@ -213,6 +225,10 @@ public class PropElementIn extends Propagator<IntVar> {
 		}
 		return null;
 	}
+
+	//***********************************************************************************
+	// OTHER
+	//***********************************************************************************
 
 	@Override
 	public ESat isEntailed() {
