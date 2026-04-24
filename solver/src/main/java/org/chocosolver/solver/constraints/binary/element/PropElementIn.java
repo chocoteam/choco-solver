@@ -250,9 +250,6 @@ public class PropElementIn extends Propagator<IntVar> {
 		if (isCompletelyInstantiated()) {
 			IntIterableSet set = values[index.getValue()];
 			int value = result.getValue();
-			if (!set.contains(value)) {
-				throw new UnsupportedOperationException();
-			}
 			return ESat.eval(set.contains(value));
 		} else if (result.isInstantiated()) {
 			int val = result.getValue();
