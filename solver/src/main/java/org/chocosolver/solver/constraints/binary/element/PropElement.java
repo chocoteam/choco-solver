@@ -78,6 +78,10 @@ public class PropElement extends Propagator<IntVar> {
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
 		index.updateBounds(offset, values.length - 1 + offset, this);
+		if (index.isInstantiated()) {
+			result.instantiateTo(values[index.getValue() - offset], this);
+			return;
+		}
 		fidx.clear();
 		pVals.clear();
 		int iub = index.getUB();
@@ -139,6 +143,7 @@ public class PropElement extends Propagator<IntVar> {
 		}
 	}
 
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(32);
 		sb.append("element(").append(this.result).append(" = ");
