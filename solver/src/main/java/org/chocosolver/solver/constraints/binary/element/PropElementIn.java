@@ -188,39 +188,51 @@ public class PropElementIn extends Propagator<IntVar> {
 			return watcher;
 		}
 		if (result.getDomainSize() < set.size()) {
-			int iub = result.getUB();
-			if (watcher == null) {
-				watcher = result.getLB();
-			}
-			// starts from watcher
-			for (int v = watcher; v <= iub; v = result.nextValue(v)) {
-				if (set.contains(v)) {
-					return v;
-				}
-			}
-			// if no support has been found, check from left
-			for (int v = result.getLB(); v < watcher; v = result.nextValue(v)) {
-				if (set.contains(v)) {
-					return v;
-				}
-			}
+			return getSupportFromResult(set, watcher);
 		} else {
-			int min = set.min();
-			int max = set.max();
-			if (watcher == null) {
-				watcher = min;
+			return getSupportFromSet(set, watcher);
+		}
+	}
+
+	private Integer getSupportFromResult(IntIterableSet set, Integer watcher) {
+		int iub = result.getUB();
+		if (watcher == null) {
+			watcher = result.getLB();
+		}
+		if (!result.contains(watcher)) {
+			watcher = result.nextValue(watcher);
+		}
+		// starts from watcher
+		for (int v = watcher; v <= iub; v = result.nextValue(v)) {
+			if (set.contains(v)) {
+				return v;
 			}
-			// starts from watcher
-			for (int v = watcher; v <= max; v = set.nextValue(v)) {
-				if (result.contains(v)) {
-					return v;
-				}
+		}
+		// if no support has been found, check from left
+		for (int v = result.getLB(); v < watcher; v = result.nextValue(v)) {
+			if (set.contains(v)) {
+				return v;
 			}
-			// if no support has been found, check from left
-			for (int v = min; v < watcher; v = set.nextValue(v)) {
-				if (result.contains(v)) {
-					return v;
-				}
+		}
+		return null;
+	}
+
+	private Integer getSupportFromSet(IntIterableSet set, Integer watcher) {
+		int min = set.min();
+		int max = set.max();
+		if (watcher == null) {
+			watcher = min;
+		}
+		// starts from watcher
+		for (int v = watcher; v <= max; v = set.nextValue(v)) {
+			if (result.contains(v)) {
+				return v;
+			}
+		}
+		// if no support has been found, check from left
+		for (int v = min; v < watcher; v = set.nextValue(v)) {
+			if (result.contains(v)) {
+				return v;
 			}
 		}
 		return null;
