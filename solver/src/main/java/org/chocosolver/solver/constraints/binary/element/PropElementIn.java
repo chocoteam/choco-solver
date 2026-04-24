@@ -45,7 +45,7 @@ public class PropElementIn extends Propagator<IntVar> {
 	/**
 	 * For each position, a support value
 	 */
-	private final int[] watchLiterals;
+	private final Integer[] watchLiterals;
 
 	/**
 	 * Index variable
@@ -81,7 +81,7 @@ public class PropElementIn extends Propagator<IntVar> {
 	public PropElementIn(IntVar value, IntIterableSet[] values, IntVar index) {
 		super(ArrayUtils.toArray(value, index), PropagatorPriority.LINEAR, true);
 		this.values = values;
-		this.watchLiterals = new int[values.length];
+		this.watchLiterals = new Integer[values.length];
 		this.index = index;
 		this.result = value;
 		this.fidx = new IntIterableBitSet();
