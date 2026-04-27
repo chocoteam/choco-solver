@@ -191,22 +191,22 @@ public interface IResultVariableFactory extends ISelf<Model> {
 		}
 		IntVar result;
 		// large tables
-		if (n > 50 && index.hasEnumeratedDomain()) {
+		if (n > 50 && index.hasEnumeratedDomain() && !ref().getSettings().isLCG()) {
 			// table reduction by merging same value cells
-			if (nbValues * 10 < n && index.hasEnumeratedDomain()) {
+			if (nbValues * 10 < n) {
 				result = index.getModel().intVar(name, table);
-				ElementFactory.buildReducedElementAC(result, table, index, 0).post();
+				ElementFactory.buildReducedElementAC(result, table, index, offset).post();
 			} else {
 				// bound counsistency on result variable (fast)
 				int lb = Arrays.stream(table).min().getAsInt();
 				int ub = Arrays.stream(table).max().getAsInt();
 				result = index.getModel().intVar(name, lb, ub, true);
-				ElementFactory.buildElementBC(result, table, index, 0).post();
+				ElementFactory.buildElementBC(result, table, index, offset).post();
 			}
 		} else {
 			// classical element constraint
 			result = index.getModel().intVar(name, table);
-			ElementFactory.buildElementAC(result, table, index, 0).post();
+			ref().element(result, table, index, offset).post();
 		}
 		return result;
 	}
