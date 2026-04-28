@@ -28,12 +28,33 @@
     </licenses>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
-        <main_dir>./</main_dir>
+        <argLine>-Djava.library.path=/usr/local/lib:/usr/local/lib/ibex/3rd</argLine>
         <java.version>17</java.version>
-        <testng.version>7.12.0</testng.version>
+        <main_dir>./</main_dir>
+        <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Dependency versions -->
         <args4j.version>2.37</args4j.version>
+        <testng.version>7.12.0</testng.version>
+
+        <!-- Plugin versions moved here -->
+        <com.puppycrawl.tools.version>10.13.0</com.puppycrawl.tools.version>
+        <maven.assembly.plugin.version>3.8.0</maven.assembly.plugin.version>
+        <maven.checkstyle.plugin.version>3.6.0</maven.checkstyle.plugin.version>
+        <maven.checkstyle.report.plugin.version>3.2.0</maven.checkstyle.report.plugin.version>
+        <maven.compiler.plugin.version>3.15.0</maven.compiler.plugin.version>
+        <maven.enforcer.plugin.version>3.6.2</maven.enforcer.plugin.version>
+        <maven.gpg.plugin.version>3.2.8</maven.gpg.plugin.version>
+        <maven.javadoc.plugin.version>3.12.0</maven.javadoc.plugin.version>
+        <maven.project.info.reports.plugin.version>3.9.0</maven.project.info.reports.plugin.version>
+        <maven.source.plugin.version>3.4.0</maven.source.plugin.version>
+        <maven.surefire.plugin.version>3.5.5</maven.surefire.plugin.version>
+        <maven.surefire.report.plugin.version>3.5.5</maven.surefire.report.plugin.version>
+        <central.publishing.maven.plugin.version>0.10.0</central.publishing.maven.plugin.version>
+        <com.mycila.license.maven.plugin.version>5.0.0</com.mycila.license.maven.plugin.version>
+        <jacoco.maven.plugin.version>0.8.14</jacoco.maven.plugin.version>
+        <org.codehaus.mojo.license.maven.plugin.version>2.7.1</org.codehaus.mojo.license.maven.plugin.version>
     </properties>
 
     <modules>
@@ -128,7 +149,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.2.8</version>
+                        <version>${maven.gpg.plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -142,7 +163,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.12.0</version>
+                        <version>${maven.javadoc.plugin.version}</version>
                         <configuration>
                             <doctitle>${project.groupId}-${project.artifactId} ${project.version} API</doctitle>
                             <windowtitle>${project.groupId}-${project.artifactId} ${project.version} API</windowtitle>
@@ -176,7 +197,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <version>3.5.5</version>
+                        <version>${maven.surefire.plugin.version}</version>
                         <configuration>
                             <groups>1s,10s,checker</groups>
                             <disableXmlReport>true</disableXmlReport>
@@ -194,7 +215,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.15.0</version>
+                    <version>${maven.compiler.plugin.version}</version>
                     <configuration>
                         <encoding>UTF-8</encoding>
                         <release>${java.version}</release>
@@ -205,12 +226,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.6.2</version>
+                    <version>${maven.enforcer.plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>3.6.0</version>
+                    <version>${maven.checkstyle.plugin.version}</version>
                     <configuration>
                         <configLocation>checkstyle.xml</configLocation>
                         <outputEncoding>UTF-8</outputEncoding>
@@ -242,7 +263,7 @@
                         <dependency>
                             <groupId>com.puppycrawl.tools</groupId>
                             <artifactId>checkstyle</artifactId>
-                            <version>10.13.0</version>
+                            <version>${com.puppycrawl.tools.version}</version>
                         </dependency>
                     </dependencies>
                     <executions>
@@ -270,7 +291,7 @@
                         <configuration>
                             <rules>
                                 <requireMavenVersion>
-                                    <version>3.6.0</version>
+                                    <version>${maven.enforcer.plugin.version}</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
                                     <version>${java.version}</version>
@@ -283,7 +304,7 @@
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.10.0</version>
+                <version>${central.publishing.maven.plugin.version}</version>
                 <extensions>true</extensions>
                 <configuration>
                     <publishingServerId>central</publishingServerId>
@@ -294,7 +315,7 @@
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>5.0.0</version>
+                <version>${com.mycila.license.maven.plugin.version}</version>
                 <configuration>
                     <licenseSets>
                         <licenseSet>
@@ -332,7 +353,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>2.7.1</version>
+                <version>${org.codehaus.mojo.license.maven.plugin.version}</version>
                 <executions>
                     <!-- Generates the third-party licenses file -->
                     <execution>
@@ -358,7 +379,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>${maven.source.plugin.version}</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -371,7 +392,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.12.0</version>
+                <version>${maven.javadoc.plugin.version}</version>
                 <configuration>
                     <doclint>none</doclint>
                     <sourceFileExcludes>
@@ -382,7 +403,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.14</version>
+                <version>${jacoco.maven.plugin.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -414,7 +435,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>3.9.0</version>
+                <version>${maven.project.info.reports.plugin.version}</version>
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -429,7 +450,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-report-plugin</artifactId>
-                <version>3.5.5</version>
+                <version>${maven.surefire.report.plugin.version}</version>
                 <configuration>
                     <linkXRef>false</linkXRef>
                 </configuration>
@@ -465,7 +486,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.14</version>
+                <version>${jacoco.maven.plugin.version}</version>
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -479,7 +500,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>${maven.checkstyle.report.plugin.version}</version>
                 <configuration>
                     <configLocation>checkstyle.xml</configLocation>
                     <outputEncoding>UTF-8</outputEncoding>
@@ -531,7 +552,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.12.0</version>
+                <version>${maven.javadoc.plugin.version}</version>
                 <configuration>
                     <doclint>none</doclint>
                     <source>${java.version}</source>
