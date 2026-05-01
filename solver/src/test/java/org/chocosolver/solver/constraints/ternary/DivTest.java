@@ -29,6 +29,16 @@ import static org.chocosolver.util.ESat.TRUE;
  */
 public class DivTest extends AbstractTernaryTest {
 
+    @DataProvider(name = "divSolve")
+    private static Object[][] divSolve() {
+        return new Object[][]{
+                new Object[]{new int[][]{{-2, 1}, {-2, 0}, {0, 1}}, 2},
+                new Object[]{new int[][]{{-2, 1}, {2}, {-1, 0}}, 2},
+                new Object[]{new int[][]{{0, 1, 2}, {-1, 0, 1}, {-1, 0, 1}}, 4},
+                new Object[]{new int[][]{{-1, 0, 1, 2}, {-2, -1, 0, 1}, {-2, 0, 1, 2}}, 9}
+        };
+    }
+
     @Override
     protected int validTuple(int vx, int vy, int vz) {
         return vy != 0 && vz == vx / vy ? 1 : 0;
@@ -39,7 +49,7 @@ public class DivTest extends AbstractTernaryTest {
         return model.div(vars[0], vars[1], vars[2]);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testJL() {
         Model model = new Model();
         IntVar i = model.intVar("i", 0, 2, false);
@@ -48,7 +58,7 @@ public class DivTest extends AbstractTernaryTest {
         while (model.getSolver().solve()) ;
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void testJL2() {
         for (int i = 0; i < 100000; i++) {
             final Model s = new Model();
@@ -68,8 +78,8 @@ public class DivTest extends AbstractTernaryTest {
         }
     }
 
-    @Test(groups="10s", timeOut=60000)
-    public void testTP1(){
+    @Test(groups = "10s", timeOut = 60000)
+    public void testTP1() {
         final Model s = new Model();
         IntVar a = s.intVar("a", 0, 525000);
         IntVar b = s.intVar("b", 0, 5000);
@@ -108,7 +118,6 @@ public class DivTest extends AbstractTernaryTest {
         //			Time to best solution : 32,084s
     }
 
-
     @Test
     public void testPropag() {
         Model m = new Model();
@@ -142,15 +151,5 @@ public class DivTest extends AbstractTernaryTest {
             // Finding all solutions to the model
         }
         Assert.assertEquals(model.getSolver().getSolutionCount(), nbSolutions);
-    }
-
-    @DataProvider(name = "divSolve")
-    private static Object[][] divSolve() {
-        return new Object[][]{
-            new Object[]{new int[][]{{-2, 1}, {-2, 0}, {0, 1}}, 2},
-            new Object[]{new int[][]{{-2, 1}, {2}, {-1, 0}}, 2},
-            new Object[]{new int[][]{{0, 1, 2}, {-1, 0, 1}, {-1, 0, 1}}, 4},
-            new Object[]{new int[][]{{-1, 0, 1, 2}, {-2, -1, 0, 1}, {-2, 0, 1, 2}}, 9}
-        };
     }
 }
