@@ -98,7 +98,7 @@ public interface ArSetExpression {
      * @return a boolean expression representing the containment relation.
      */
     default ReExpression contains(ArSetExpression y) {
-        return new BiReSetExpression(SetOperator.CONTAINS, this, y);
+        return y.subSet(this);
     }
 
     /**
@@ -108,7 +108,7 @@ public interface ArSetExpression {
      * @return a boolean expression representing the non-membership relation.
      */
     default ReExpression notContains(ArSetExpression y) {
-        return new BiReSetExpression(SetOperator.NOT_CONTAINS, this, y);
+        return new BiReSetExpression(SetOperator.DISJOINT, this, y);
     }
 
     /**
@@ -118,7 +118,7 @@ public interface ArSetExpression {
      * @return a boolean expression representing the subset relationship.
      */
     default ReExpression subSet(int... y) {
-        return new BiReSetExpression(SetOperator.SUBSET, this, this.getModel().setVar(Arrays.stream(y).toArray()));
+        return subSet(this.getModel().setVar(y));
     }
 
     /**
@@ -128,7 +128,7 @@ public interface ArSetExpression {
      * @return a boolean expression representing equality.
      */
     default ReExpression eq(int... y) {
-        return new BiReSetExpression(SetOperator.EQ, this, this.getModel().setVar(Arrays.stream(y).toArray()));
+        return eq(this.getModel().setVar(y));
     }
 
     /**
@@ -138,7 +138,7 @@ public interface ArSetExpression {
      * @return a boolean expression representing non-membership.
      */
     default ReExpression notContains(int... y) {
-        return new BiReSetExpression(SetOperator.NOT_CONTAINS, this, this.getModel().setVar(Arrays.stream(y).toArray()));
+        return notContains(this.getModel().setVar(y));
     }
 
     /**
@@ -148,7 +148,7 @@ public interface ArSetExpression {
      * @return a boolean expression representing membership.
      */
     default ReExpression contains(int... y) {
-        return new BiReSetExpression(SetOperator.CONTAINS, this, this.getModel().setVar(Arrays.stream(y).toArray()));
+        return contains(this.getModel().setVar(y));
     }
 
     /**
@@ -158,7 +158,7 @@ public interface ArSetExpression {
      * @return a boolean expression representing inequality.
      */
     default ReExpression ne(int... y) {
-        return new BiReSetExpression(SetOperator.NE, this, this.getModel().setVar(Arrays.stream(y).toArray()));
+        return ne(this.getModel().setVar(y));
     }
 
     /**
