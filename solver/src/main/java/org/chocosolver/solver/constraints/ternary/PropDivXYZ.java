@@ -69,12 +69,12 @@ public class PropDivXYZ extends Propagator<IntVar> {
 
             int vx, vy, vz;
             switch (mask) {
-                case 0: // nothing instanciated
+                case 0: // nothing instantiated
                     hasChanged |= updateAbsX();
                     hasChanged |= updateAbsY();
                     hasChanged |= updateAbsZ();
                     break;
-                case 1: // X is instanciated
+                case 1: // X is instantiated
                     hasChanged |= updateAbsY();
                     hasChanged |= updateAbsZ();
                     if (X.isInstantiatedTo(0)) {
@@ -83,11 +83,11 @@ public class PropDivXYZ extends Propagator<IntVar> {
                                 lcg() ? this.r(X.getValLit()) : Reason.undef());
                     }
                     break;
-                case 2: // Y is instanciated
+                case 2: // Y is instantiated
                     hasChanged |= updateAbsX();
                     hasChanged |= updateAbsZ();
                     break;
-                case 3: // X and Y are instanciated
+                case 3: // X and Y are instantiated
                     vx = X.getValue();
                     vy = Y.getValue();
                     hasChanged |= updateAbsX();
@@ -96,7 +96,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
                     if (inInterval(Z, vz, vz, lcg() ? this.r(X.getValLit(), Y.getValLit()) : Reason.undef()))
                         return; // entail
                     break;
-                case 4: // Z is instanciated
+                case 4: // Z is instantiated
                     hasChanged |= updateAbsX();
                     hasChanged |= updateAbsY();
                     // sZ = 0 && sX!=0 => |x| < |y|
@@ -105,7 +105,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
                                 lcg() ? this.r(0, Z.getValLit(), X.getLit(0, LR_EQ), absY.getMaxLit()) : Reason.undef());
                     }
                     break;
-                case 5: // X and Z are instanciated
+                case 5: // X and Z are instantiated
                     vx = X.getValue();
                     vz = Z.getValue();
                     hasChanged |= updateAbsX();
@@ -115,7 +115,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
                     }
                     hasChanged |= updateAbsY();
                     break;
-                case 6: // Y and Z are instanciated
+                case 6: // Y and Z are instantiated
                     vy = Y.getValue();
                     vz = Z.getValue();
                     hasChanged |= updateAbsY();
@@ -127,7 +127,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
                         hasChanged |= updateAbsX();
                     }
                     break;
-                case 7: // X, Y and Z are instanciated
+                case 7: // X, Y and Z are instantiated
                     vx = X.getValue();
                     vy = Y.getValue();
                     vz = Z.getValue();
@@ -142,21 +142,15 @@ public class PropDivXYZ extends Propagator<IntVar> {
                     throw new SolverException("Unexpected mask " + mask);
             }
             //------ update sign ---------
-            // at this step, Y != 0 => sY != 0
+            hasChanged |= filterSignZ();
+            hasChanged |= filterSignY();
+            hasChanged |= filterSignX();
             if (absX.getUB() < absY.getLB()) {
-                // sX!=0 && |X|<|Y| => sZ=0
                 hasChanged |= Z.instantiateTo(0, this, lcg() ? this.r(absX.getMaxLit(), absY.getMinLit()) : Reason.undef());
-            } else if (X.getLB() > 0 && absX.getLB() >= absY.getUB()) {
-                // sX=1 && |X|>=|Y| => sZ=sY
-                Reason r = lcg() ? this.r(0, X.getMinLit(), absX.getMinLit(), absY.getMaxLit()) : Reason.undef();
-                hasChanged |= sameSign(Z, Y, r);
-                hasChanged |= sameSign(Y, Z, r);
-            } else if (X.getUB() < 0 && absX.getLB() >= absY.getUB()) {
-                // sX=-1 && |X|>=|Y| => sZ=-sY
-                Reason r = lcg() ? this.r(0, X.getMaxLit(), absX.getMinLit(), absY.getMaxLit()) : Reason.undef();
-                hasChanged |= oppSign(Z, Y, r);
-                hasChanged |= oppSign(Y, Z, r);
-            } //*/
+            } else if (Z.isInstantiatedTo(0)) {
+                hasChanged |= absX.updateUpperBound(absY.getUB() - 1, this, lcg() ? this.r(Z.getValLit(), absY.getMaxLit()) : Reason.undef());
+                hasChanged |= absY.updateLowerBound(absX.getLB() + 1, this, lcg() ? this.r(Z.getValLit(), absX.getMinLit()) : Reason.undef());
+            }
         } while (hasChanged);
     }
 
@@ -346,50 +340,46 @@ public class PropDivXYZ extends Propagator<IntVar> {
         return res;
     }
 
-    /**
-     * A take the signs of B
-     *
-     * @param a first var
-     * @param b second var
-     */
-    protected boolean sameSign(IntVar a, IntVar b, Reason r) throws ContradictionException {
-        boolean res = false;
-        if (b.getLB() >= 0) {
-            int minValue = b.getLB() > 0 ? 1 : 0;
-            res = a.updateLowerBound(minValue, this,
-                    lcg() ? this.gather(r, b.getMinLit()) : Reason.undef());
-        } else if (b.getUB() <= 0) {
-            int maxValue = b.getUB() < 0 ? -1 : 0;
-            res |= a.updateUpperBound(maxValue, this,
-                    lcg() ? this.gather(r, b.getMaxLit()) : Reason.undef());
-        } else if (!b.contains(0)) {
-            res |= a.removeValue(0, this,
-                    lcg() ? this.gather(r, b.getLit(0, LR_EQ)) : Reason.undef());
+    private boolean filterSignZ() throws ContradictionException {
+        if (X.getLB() >= 0 && Y.getLB() >= 0) {
+            return Z.updateLowerBound(0, this, lcg() ? this.r(X.getMinLit(), Y.getMinLit()) : Reason.undef());
+        } else if (X.getUB() <= 0 && Y.getUB() <= 0) {
+            return Z.updateLowerBound(0, this, lcg() ? this.r(X.getMaxLit(), Y.getMaxLit()) : Reason.undef());
+        } else if (X.getLB() >= 0 && Y.getUB() <= 0) {
+            return Z.updateUpperBound(0, this, lcg() ? this.r(X.getMinLit(), Y.getMaxLit()) : Reason.undef());
+        } else if (X.getUB() <= 0 && Y.getLB() >= 0) {
+            return Z.updateUpperBound(0, this, lcg() ? this.r(X.getMaxLit(), Y.getMinLit()) : Reason.undef());
+        } else {
+            return false;
         }
-        return res;
     }
 
-    /**
-     * A take the opposite signs of B
-     *
-     * @param a first var
-     * @param b second var
-     */
-    protected boolean oppSign(IntVar a, IntVar b, Reason r) throws ContradictionException {
-        boolean res = false;
-        if (b.getLB() >= 0) {
-            res = a.updateUpperBound(0, this,
-                    lcg() ? this.gather(r, b.getMinLit()) : Reason.undef());
+    private boolean filterSignY() throws ContradictionException {
+        if (X.getLB() >= 0 && Z.getLB() > 0) {
+            return Y.updateLowerBound(1, this, lcg() ? this.r(X.getMinLit(), Z.getMinLit()) : Reason.undef());
+        } else if (X.getUB() <= 0 && Z.getUB() < 0) {
+            return Y.updateLowerBound(1, this, lcg() ? this.r(X.getMaxLit(), Z.getMaxLit()) : Reason.undef());
+        } else if (X.getLB() >= 0 && Z.getUB() < 0) {
+            return Y.updateUpperBound(-1, this, lcg() ? this.r(X.getMinLit(), Z.getMaxLit()) : Reason.undef());
+        } else if (X.getUB() <= 0 && Z.getLB() > 0) {
+            return Y.updateUpperBound(-1, this, lcg() ? this.r(X.getMaxLit(), Z.getMinLit()) : Reason.undef());
+        } else {
+            return false;
         }
-        if (b.getUB() <= 0) {
-            res |= a.updateLowerBound(0, this,
-                    lcg() ? this.gather(r, b.getMaxLit()) : Reason.undef());
-        }
-        if (b.contains(0)) {
-            res |= a.removeValue(0, this,
-                    lcg() ? this.gather(r, b.getLit(0, LR_NE)) : Reason.undef());
-        }
-        return res;
     }
 
+    private boolean filterSignX() throws ContradictionException {
+        final int absLb = absY.getLB() * absZ.getLB();
+        if (Y.getLB() > 0 && Z.getLB() > 0) {
+            return X.updateLowerBound(absLb, this, lcg() ? this.r(Y.getMinLit(), Z.getMinLit()) : Reason.undef());
+        } else if (Y.getUB() < 0 && Z.getUB() < 0) {
+            return X.updateLowerBound(absLb, this, lcg() ? this.r(Y.getMaxLit(), Z.getMaxLit()) : Reason.undef());
+        } else if (Y.getLB() > 0 && Z.getUB() < 0) {
+            return X.updateUpperBound(-absLb, this, lcg() ? this.r(Y.getMinLit(), Z.getMaxLit()) : Reason.undef());
+        } else if (Y.getUB() < 0 && Z.getLB() > 0) {
+            return X.updateUpperBound(-absLb, this, lcg() ? this.r(Y.getMaxLit(), Z.getMinLit()) : Reason.undef());
+        } else {
+            return false;
+        }
+    }
 }
