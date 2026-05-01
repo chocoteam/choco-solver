@@ -10,10 +10,12 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.Search.randomSearch;
@@ -104,5 +106,51 @@ public class DivTest extends AbstractTernaryTest {
         //			Building time : 14,074s
         //			Resolution time : 32,093s
         //			Time to best solution : 32,084s
+    }
+
+
+    @Test
+    public void testPropag() {
+        Model m = new Model();
+        IntVar duration = m.intVar("duration", -100, 214);
+        duration.ge(0).post(); // doit être >= 0 mais pas évident via domaine initial
+        IntVar dmul = duration.mul(4000).intVar(); // donc toujours >= 0
+
+        IntVar div = dmul.div(60).intVar(); // on divise un truc >=0 par 60, ça devrait être >= 0 après propag initiale
+
+        try {
+            m.getSolver().propagate();
+        } catch (ContradictionException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println(duration);
+        Assert.assertTrue(duration.getLB() >= 0);
+        System.out.println("dmul " + dmul);
+        Assert.assertTrue(dmul.getLB() >= 0);
+        System.out.println("div " + div);
+        Assert.assertTrue(div.getLB() >= 0);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "divSolve")
+    public void testSolve(int[][] domains, int nbSolutions) {
+        Model model = new Model();
+        IntVar x = model.intVar("x", domains[0]);
+        IntVar y = model.intVar("y", domains[1]);
+        IntVar z = model.intVar("z", domains[2]);
+        model.div(x, y, z).post();
+        while (model.getSolver().solve()) {
+            // Finding all solutions to the model
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), nbSolutions);
+    }
+
+    @DataProvider(name = "divSolve")
+    private static Object[][] divSolve() {
+        return new Object[][]{
+            new Object[]{new int[][]{{-2, 1}, {-2, 0}, {0, 1}}, 2},
+            new Object[]{new int[][]{{-2, 1}, {2}, {-1, 0}}, 2},
+            new Object[]{new int[][]{{0, 1, 2}, {-1, 0, 1}, {-1, 0, 1}}, 4},
+            new Object[]{new int[][]{{-1, 0, 1, 2}, {-2, -1, 0, 1}, {-2, 0, 1, 2}}, 9}
+        };
     }
 }
