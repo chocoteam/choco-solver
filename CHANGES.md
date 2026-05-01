@@ -14,6 +14,7 @@ NEXT MILESTONE
 - Fix modulo constraint with negative values
 - Add `lcgExtractFromVariablesOnSolution` setting to control whether the solution-forbidding clause is built from variable assignments (true) or from the decision path (false, default)
 - Add optimized implementations for the `element` constraint
+- Improve filtering of signs of variables in PropDivXYZ
 
 #### Build, CI & Tooling
 - Migrate to Java 17 (`<release>17</release>`); Java 17 language features and APIs are now available
@@ -31,6 +32,7 @@ See [milestone 5.0.2](https://github.com/chocoteam/choco-solver/milestone/42)
 #### Contributors to this release:
 - [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
 - [Jean-Guillaume Fages](https://github.com/jgFages) (@jgFages)
+- [Arthur Godet](https://github.com/ArthurGodet) (@ArthurGodet)
 
 
 **Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v5.0.1...v5.0.2

@@ -17,7 +17,6 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.MathUtils;
 
 import static org.chocosolver.solver.variables.IntVar.LR_EQ;
-import static org.chocosolver.solver.variables.IntVar.LR_NE;
 
 /**
  * X/Y = Z
@@ -65,7 +64,9 @@ public class PropDivXYZ extends Propagator<IntVar> {
             mask += Z.isInstantiated() ? 4 : 0;
 
             hasChanged = Y.removeValue(0, this, Reason.undef());
-            if (outInterval(Y, 0, 0)) return;
+            if (outInterval(Y, 0, 0)) {
+                return;
+            }
 
             int vx, vy, vz;
             switch (mask) {
@@ -93,8 +94,9 @@ public class PropDivXYZ extends Propagator<IntVar> {
                     hasChanged |= updateAbsX();
                     hasChanged |= updateAbsY();
                     vz = vx / vy;//(int) Math.floor((double) (vx + ((vx * vy < 0 ? 1 : 0) * (vy - 1))) / (double) vy);
-                    if (inInterval(Z, vz, vz, lcg() ? this.r(X.getValLit(), Y.getValLit()) : Reason.undef()))
+                    if (inInterval(Z, vz, vz, lcg() ? this.r(X.getValLit(), Y.getValLit()) : Reason.undef())) {
                         return; // entail
+                    }
                     break;
                 case 4: // Z is instantiated
                     hasChanged |= updateAbsX();
@@ -121,8 +123,9 @@ public class PropDivXYZ extends Propagator<IntVar> {
                     hasChanged |= updateAbsY();
                     hasChanged |= updateAbsZ();
                     if (vz == 0) {
-                        if (inInterval(X, -Math.abs(vy) + 1, Math.abs(vy) - 1, lcg() ? this.r(Z.getValLit(), Y.getValLit()) : Reason.undef()))
+                        if (inInterval(X, -Math.abs(vy) + 1, Math.abs(vy) - 1, lcg() ? this.r(Z.getValLit(), Y.getValLit()) : Reason.undef())) {
                             return;
+                        }
                     } else { // Y*Z > 0  ou < 0
                         hasChanged |= updateAbsX();
                     }
