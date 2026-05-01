@@ -76,9 +76,7 @@ public class BiReSetExpression implements ReExpression {
                 return model.allEqual(xSet, ySet);
             case NE:
                 return model.allDifferent(xSet, ySet);
-            case CONTAINS:
-                return model.subsetEq(ySet, xSet);
-            case NOT_CONTAINS:
+            case DISJOINT:
                 return model.disjoint(xSet, ySet);
             case NOT_EMPTY:
                 return model.notEmpty(xSet);

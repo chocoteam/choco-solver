@@ -19,9 +19,8 @@ public enum SetOperator {
     SUBSET,
     EQ,
     NE,
-    CONTAINS,
     NOT_EMPTY,
-    NOT_CONTAINS,
+    DISJOINT,
     UNION,
     INTERSECTION
 }

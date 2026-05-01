@@ -12,23 +12,26 @@ package org.chocosolver.examples.set.expression;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.SetVar;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import java.util.Arrays;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+@Test(groups = "1s")
 public class SetVarExpressionTest {
 
     /**
      * Basic
-     * ============= Relacional ============= values and sets
+     * ============= Relational ============= values and sets
      * EQ (Equals) -> set = n value | setA = setB
      * NE (not equals) -> set != n values | setA != setB
      * Contains -> set contains n values | setA contains setB
      * NC (Not Contains) -> set notContains n values | setA notContains setB
      * SUBSET  -> set = is a subset of a SuperSet (values or set)
      * <p>
-     * Basic relacionals => and, imp, or...
+     * Basic relationals => and, imp, or...
      * <p>
      * ============= Basic Arithmetic =============
      * UNION
@@ -42,12 +45,11 @@ public class SetVarExpressionTest {
      * Empty
      */
 
-    @Test
+    @Test(expectedExceptions = ContradictionException.class)
     public void notEmptyTest() throws ContradictionException {
         Model model = new Model();
         SetVar setA = model.setVar("setA", new int[]{}, new int[]{0, 1, 2, 3});
 
-//        model.notEmpty(setA).post(); Choco
         setA.notEmpty().post();
 
         model.getSolver().propagate();
@@ -59,6 +61,9 @@ public class SetVarExpressionTest {
         model.getSolver().propagate();
 
         assertEquals(2, setA.getValue().toArray()[0]);
+
+        model.notMember(2, setA).post();
+        model.getSolver().propagate();
     }
 
     @Test()
@@ -88,7 +93,7 @@ public class SetVarExpressionTest {
 
         model.getSolver().propagate();
 
-        assertArrayEquals(new int[]{1}, setA.getValue().toArray());
+        assertTrue(Arrays.equals(new int[]{1}, setA.getValue().toArray()));
     }
 
     @Test()
@@ -101,8 +106,8 @@ public class SetVarExpressionTest {
 
         model.getSolver().propagate();
 
-        assertArrayEquals(new int[]{1}, setA.getValue().toArray());
-        assertArrayEquals(new int[]{2}, setB.getValue().toArray());
+        assertTrue(Arrays.equals(new int[]{1}, setA.getValue().toArray()));
+        assertTrue(Arrays.equals(new int[]{2}, setB.getValue().toArray()));
     }
 
     @Test()
@@ -113,7 +118,7 @@ public class SetVarExpressionTest {
 
         model.getSolver().propagate();
 
-        assertArrayEquals(new int[]{1, 2, 3}, setA.getValue().toArray());
+        assertTrue(Arrays.equals(new int[]{1, 2, 3}, setA.getValue().toArray()));
     }
 
     @Test()
@@ -126,8 +131,8 @@ public class SetVarExpressionTest {
 
         model.getSolver().propagate();
 
-        assertArrayEquals(new int[]{2}, setA.getValue().toArray());
-        assertArrayEquals(new int[]{2}, setB.getValue().toArray());
+        assertTrue(Arrays.equals(new int[]{2}, setA.getValue().toArray()));
+        assertTrue(Arrays.equals(new int[]{2}, setB.getValue().toArray()));
     }
 
     @Test()
@@ -138,7 +143,7 @@ public class SetVarExpressionTest {
 
         model.getSolver().propagate();
 
-        assertArrayEquals(new int[]{1, 2, 3}, setA.getLB().toArray());
+        assertTrue(Arrays.equals(new int[]{1, 2, 3}, setA.getLB().toArray()));
     }
 
     @Test()
@@ -149,7 +154,7 @@ public class SetVarExpressionTest {
 
         model.getSolver().propagate();
 
-        assertArrayEquals(new int[]{0, 4, 5, 6, 7, 8, 9}, setA.getUB().toArray());
+        assertTrue(Arrays.equals(new int[]{0, 4, 5, 6, 7, 8, 9}, setA.getUB().toArray()));
     }
 
 
@@ -161,13 +166,12 @@ public class SetVarExpressionTest {
 
         model.getSolver().propagate();
 
-        assertArrayEquals(new int[]{1, 2, 3, 4, 5}, setA.getUB().toArray());
+        assertTrue(Arrays.equals(new int[]{1, 2, 3, 4, 5}, setA.getUB().toArray()));
 
-        setA.notEmpty().post();
         setA.notContains(4, 5).post();
         model.getSolver().propagate();
 
-        assertArrayEquals(new int[]{1, 2, 3}, setA.getUB().toArray());
+        assertTrue(Arrays.equals(new int[]{1, 2, 3}, setA.getUB().toArray()));
     }
 
     @Test()
@@ -181,8 +185,8 @@ public class SetVarExpressionTest {
 
         model.getSolver().propagate();
 
-        assertArrayEquals(new int[]{1, 2}, setA.getValue().toArray());
-        assertArrayEquals(new int[]{1, 2}, setB.getValue().toArray());
+        assertTrue(Arrays.equals(new int[]{1, 2}, setA.getValue().toArray()));
+        assertTrue(Arrays.equals(new int[]{1, 2}, setB.getValue().toArray()));
     }
 
     @Test()
@@ -199,10 +203,10 @@ public class SetVarExpressionTest {
 
         model.getSolver().propagate();
 
-        assertArrayEquals(new int[]{1, 2, 3}, setA.getValue().toArray());
-        assertArrayEquals(new int[]{1, 2, 3}, setB.getValue().toArray());
-        assertArrayEquals(new int[]{4, 5}, setC.getValue().toArray());
-        assertArrayEquals(new int[]{4, 5}, setD.getValue().toArray());
+        assertTrue(Arrays.equals(new int[]{1, 2, 3}, setA.getValue().toArray()));
+        assertTrue(Arrays.equals(new int[]{1, 2, 3}, setB.getValue().toArray()));
+        assertTrue(Arrays.equals(new int[]{4, 5}, setC.getValue().toArray()));
+        assertTrue(Arrays.equals(new int[]{4, 5}, setD.getValue().toArray()));
     }
 
     @Test()
@@ -214,7 +218,7 @@ public class SetVarExpressionTest {
 
         model.getSolver().propagate();
 
-        assertArrayEquals(setA.getValue().toArray(), setB.getValue().toArray());
+        assertTrue(Arrays.equals(setA.getValue().toArray(), setB.getValue().toArray()));
     }
 
     @Test()
@@ -230,8 +234,8 @@ public class SetVarExpressionTest {
 
         model.getSolver().propagate();
 
-        assertArrayEquals(new int[]{3, 4}, setA.getValue().toArray());
-        assertArrayEquals(new int[]{1, 2}, setB.getValue().toArray());
+        assertTrue(Arrays.equals(new int[]{3, 4}, setA.getValue().toArray()));
+        assertTrue(Arrays.equals(new int[]{1, 2}, setB.getValue().toArray()));
     }
 
     @Test()
@@ -244,9 +248,9 @@ public class SetVarExpressionTest {
 
         model.getSolver().propagate();
 
-        assertArrayEquals(new int[]{1, 2, 3}, setB.getValue().toArray());
-        assertArrayEquals(new int[]{1, 2, 3}, setA.getLB().toArray());
-        assertArrayEquals(new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, setA.getUB().toArray());
+        assertTrue(Arrays.equals(new int[]{1, 2, 3}, setB.getValue().toArray()));
+        assertTrue(Arrays.equals(new int[]{1, 2, 3}, setA.getLB().toArray()));
+        assertTrue(Arrays.equals(new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, setA.getUB().toArray()));
     }
 
 
@@ -260,7 +264,7 @@ public class SetVarExpressionTest {
 
         model.getSolver().propagate();
 
-        assertArrayEquals(new int[]{0, 4, 5, 6, 7, 8, 9}, setA.getUB().toArray());
+        assertTrue(Arrays.equals(new int[]{0, 4, 5, 6, 7, 8, 9}, setA.getUB().toArray()));
     }
 
     @Test()
@@ -272,15 +276,14 @@ public class SetVarExpressionTest {
 
         model.getSolver().propagate();
 
-        assertArrayEquals(new int[]{1, 2, 3, 4, 5}, setA.getUB().toArray());
-        assertArrayEquals(new int[]{1, 2, 3, 4, 5}, setB.getUB().toArray());
+        assertTrue(Arrays.equals(new int[]{1, 2, 3, 4, 5}, setA.getUB().toArray()));
+        assertTrue(Arrays.equals(new int[]{1, 2, 3, 4, 5}, setB.getUB().toArray()));
 
-        setA.notEmpty().post();
         setA.notContains(4, 5).post();
         model.getSolver().propagate();
 
-        assertArrayEquals(new int[]{1, 2, 3}, setA.getUB().toArray());
-        assertArrayEquals(new int[]{1, 2, 3, 4, 5}, setB.getUB().toArray());
+        assertTrue(Arrays.equals(new int[]{1, 2, 3}, setA.getUB().toArray()));
+        assertTrue(Arrays.equals(new int[]{1, 2, 3, 4, 5}, setB.getUB().toArray()));
     }
 
     @Test()
@@ -293,7 +296,7 @@ public class SetVarExpressionTest {
         setCD.eq(setC.union(setD)).post();
         model.getSolver().propagate();
 
-        assertArrayEquals(new int[]{1, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14}, setCD.getUB().toArray());
+        assertTrue(Arrays.equals(new int[]{1, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14}, setCD.getUB().toArray()));
     }
 
     @Test()
@@ -306,7 +309,7 @@ public class SetVarExpressionTest {
         setBCD.eq(setB.intersection(setCD)).post();
         model.getSolver().propagate();
 
-        assertArrayEquals(new int[]{4, 6, 10, 12, 14}, setBCD.getUB().toArray());
+        assertTrue(Arrays.equals(new int[]{4, 6, 10, 12, 14}, setBCD.getUB().toArray()));
     }
 
     @Test()
@@ -320,7 +323,7 @@ public class SetVarExpressionTest {
         setBCD.eq(setB.intersection(setC.union(setD))).post();
         model.getSolver().propagate();
 
-        assertArrayEquals(new int[]{4, 6, 10, 12, 14}, setBCD.getUB().toArray());
+        assertTrue(Arrays.equals(new int[]{4, 6, 10, 12, 14}, setBCD.getUB().toArray()));
     }
 
     @Test()
@@ -333,7 +336,7 @@ public class SetVarExpressionTest {
         setEF.eq(setE.intersection(setF)).post();
         model.getSolver().propagate();
 
-        assertArrayEquals(new int[]{}, setEF.getUB().toArray());
+        assertTrue(Arrays.equals(new int[]{}, setEF.getUB().toArray()));
     }
 
 
@@ -352,7 +355,7 @@ public class SetVarExpressionTest {
         setBCDEF.eq((setB.intersection(setC.union(setD)).union(setE.intersection(setF)))).post();
         model.getSolver().propagate();
 
-        assertArrayEquals(new int[]{4, 6, 10, 12, 14}, setBCDEF.getUB().toArray());
+        assertTrue(Arrays.equals(new int[]{4, 6, 10, 12, 14}, setBCDEF.getUB().toArray()));
     }
 
     @Test()
@@ -369,12 +372,12 @@ public class SetVarExpressionTest {
         setA.eq((setB.intersection(setC.union(setD)).union(setE.intersection(setF))).intersection(setG)).post();
         model.getSolver().propagate();
 
-        assertArrayEquals(new int[]{6}, setA.getUB().toArray());
-        assertArrayEquals(new int[]{2, 4, 6, 8, 10, 12, 14}, setB.getUB().toArray());
-        assertArrayEquals(new int[]{1, 3, 5, 7, 9, 11, 13}, setC.getUB().toArray());
-        assertArrayEquals(new int[]{4, 5, 6, 7, 10, 12, 14}, setD.getUB().toArray());
-        assertArrayEquals(new int[]{3, 5, 9, 11, 15, 17, 19}, setE.getUB().toArray());
-        assertArrayEquals(new int[]{4, 8, 12, 16, 20}, setF.getUB().toArray());
-        assertArrayEquals(new int[]{2, 6, 10, 14, 18}, setG.getUB().toArray());
+        assertTrue(Arrays.equals(new int[]{6}, setA.getUB().toArray()));
+        assertTrue(Arrays.equals(new int[]{2, 4, 6, 8, 10, 12, 14}, setB.getUB().toArray()));
+        assertTrue(Arrays.equals(new int[]{1, 3, 5, 7, 9, 11, 13}, setC.getUB().toArray()));
+        assertTrue(Arrays.equals(new int[]{4, 5, 6, 7, 10, 12, 14}, setD.getUB().toArray()));
+        assertTrue(Arrays.equals(new int[]{3, 5, 9, 11, 15, 17, 19}, setE.getUB().toArray()));
+        assertTrue(Arrays.equals(new int[]{4, 8, 12, 16, 20}, setF.getUB().toArray()));
+        assertTrue(Arrays.equals(new int[]{2, 6, 10, 14, 18}, setG.getUB().toArray()));
     }
 }
