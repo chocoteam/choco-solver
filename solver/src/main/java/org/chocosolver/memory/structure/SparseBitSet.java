@@ -452,8 +452,13 @@ public class SparseBitSet implements IStateBitSet {
       // All the bits are set, check the previous block.
       curBlock--;
     }
-    // No cleared bit in any block.
-    return absIndex(curBlock + 1, 0) - 1;
+    if (curBlock == fromBlock) {
+      // block of fromIndex was completely cleared
+      return fromIndex;
+    } else {
+      // No cleared bit in any block.
+      return absIndex(curBlock + 1, 0) - 1;
+    }
   }
 
   @Override
