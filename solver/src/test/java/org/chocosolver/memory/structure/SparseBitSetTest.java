@@ -154,6 +154,18 @@ public class SparseBitSetTest {
   }
 
   @Test
+  public void testPrevClearBit3() {
+    IEnvironment env = new EnvironmentTrailing();
+    IStateBitSet bs = env.makeSparseBitset(64);
+    bs.set(14);
+    bs.set(20);
+    bs.set(899);
+    bs.set(929);
+
+    Assert.assertEquals(bs.prevClearBit(893), 893);
+  }
+
+  @Test
   public void testPrevSetBit() {
     IEnvironment env = new EnvironmentTrailing();
     IStateBitSet bs = env.makeSparseBitset(64);
@@ -385,8 +397,7 @@ public class SparseBitSetTest {
     checkEquivalence(ref, test, 1010);
   }
 
-  public void checkEquivalence(final IStateBitSet ref, final SparseBitSet got,
-                               final int max) {
+  public void checkEquivalence(final IStateBitSet ref, final SparseBitSet got, final int max) {
     // Check that the two bitsets are equivalent. This consists in checking
     // every public APIs.
     Assert.assertEquals(ref.cardinality(), got.cardinality());

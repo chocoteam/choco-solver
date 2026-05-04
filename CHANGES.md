@@ -15,6 +15,7 @@ NEXT MILESTONE
 - Add `lcgExtractFromVariablesOnSolution` setting to control whether the solution-forbidding clause is built from variable assignments (true) or from the decision path (false, default)
 - Add optimized implementations for the `element` constraint
 - Improve filtering of signs of variables in PropDivXYZ
+- Fix `SparseBitSet.prevClearBit(final int fromIndex)`
 
 #### Build, CI & Tooling
 - Migrate to Java 17 (`<release>17</release>`); Java 17 language features and APIs are now available
