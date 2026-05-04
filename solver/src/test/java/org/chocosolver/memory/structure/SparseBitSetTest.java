@@ -162,6 +162,8 @@ public class SparseBitSetTest {
     bs.set(899);
     bs.set(929);
 
+    Assert.assertEquals(bs.prevClearBit(60), 60);
+    Assert.assertEquals(bs.prevClearBit(300), 300);
     Assert.assertEquals(bs.prevClearBit(893), 893);
   }
 
