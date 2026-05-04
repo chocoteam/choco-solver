@@ -388,7 +388,7 @@ public class SparseBitSet implements IStateBitSet {
     }
     final int fromBlock = blockIndex(fromIndex);
     int curBlock = fromBlock;
-    if (!index.get(curBlock)) {
+    if (curBlock >= index.length() || !index.get(curBlock)) {
       return fromIndex;
     }
     while (curBlock < blocks.length) {
@@ -424,11 +424,11 @@ public class SparseBitSet implements IStateBitSet {
       return -1;
     }
     final int fromBlock = blockIndex(fromIndex);
-    if (fromBlock >= index.length()) {
+    int curBlock = fromBlock;
+    if (curBlock >= index.length() || !index.get(curBlock)) {
       // Outside the current index. For sure there is a cleared bit at fromIndex.
       return fromIndex;
     }
-    int curBlock = fromBlock;
     while (curBlock >= 0) {
       if (!index.get(curBlock)) {
         // null block. fromIndex is then clear for sure. Possibly also a cleared
@@ -452,13 +452,8 @@ public class SparseBitSet implements IStateBitSet {
       // All the bits are set, check the previous block.
       curBlock--;
     }
-    if (curBlock == fromBlock) {
-      // block of fromIndex was completely cleared
-      return fromIndex;
-    } else {
-      // No cleared bit in any block.
-      return absIndex(curBlock + 1, 0) - 1;
-    }
+    // No cleared bit in any block.
+    return absIndex(curBlock + 1, 0) - 1;
   }
 
   @Override
