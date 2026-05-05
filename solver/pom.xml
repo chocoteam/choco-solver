@@ -31,7 +31,6 @@
         <automaton.version>1.11-8</automaton.version>
         <jgrapht.core.version>1.5.3</jgrapht.core.version>
         <sizeof.version>0.4.4</sizeof.version>
-        <slf4j.nop.version>2.0.5</slf4j.nop.version>
         <main_dir>.${file.separator}..</main_dir>
 
     </properties>
@@ -51,12 +50,6 @@
             <groupId>org.ehcache</groupId>
             <artifactId>sizeof</artifactId>
             <version>${sizeof.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-nop</artifactId>
-            <version>${slf4j.nop.version}</version>
-            <!--<scope>test</scope>-->
         </dependency>
     </dependencies>
 
