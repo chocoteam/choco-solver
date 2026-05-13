@@ -103,14 +103,15 @@ public class XCSP extends RegParser {
                 if (level.is(Level.JSON)) {
                     s.getMeasures().setReadingTimeCount(System.nanoTime() - s.getModel().getCreationTime());
                     s.log().printf(Locale.US,
-                            "{\t\"name\":\"%s\",\n" +
-                                    "\t\"variables\": %d,\n" +
-                                    "\t\"constraints\": %d,\n" +
-                                    "\t\"policy\": \"%s\",\n" +
-                                    "\t\"parsing time\": %.3f,\n" +
-                                    "\t\"building time\": %.3f,\n" +
-                                    "\t\"memory\": %d,\n" +
-                                    "\t\"stats\":[",
+                            """
+                                    {\t"name":"%s",
+                                    \t"variables": %d,
+                                    \t"constraints": %d,
+                                    \t"policy": "%s",
+                                    \t"parsing time": %.3f,
+                                    \t"building time": %.3f,
+                                    \t"memory": %d,
+                                    \t"stats":[""",
                             instance,
                             m.getNbVars(),
                             m.getNbCstrs(),
@@ -133,18 +134,19 @@ public class XCSP extends RegParser {
 
     public void parse(Model target, XCSPParser parser) throws Exception {
         parser.model(target, instance);
-        // and define a search strategy
-        BlackBoxConfigurator bb = BlackBoxConfigurator.init();
-        // variable selection
-        bb.setIntVarStrategy(Search::roundRobinSearch)
-                .setRestartPolicy(s -> new Restarter(new InnerOuterCutoff(50, 1.01, 1.01),
-                        c -> s.getFailCount() >= c, 50_000, true))
-                .setNogoodOnRestart(!this.isLCG())
-                .setRestartOnSolution(this.isLCG())
-                .setRefinedPartialAssignmentGeneration(false)
-                .setExcludeObjective(true)
-                .setExcludeViews(false);
-        bb.make(target);
+        if (!(free && nb_cores == 1)) {
+            // define default search strategy (skipped in single-core free search mode, freesearch() handles it)
+            BlackBoxConfigurator bb = BlackBoxConfigurator.init();
+            bb.setIntVarStrategy(Search::roundRobinSearch)
+                    .setRestartPolicy(s -> new Restarter(new InnerOuterCutoff(50, 1.01, 1.01),
+                            c -> s.getFailCount() >= c, 50_000, true))
+                    .setNogoodOnRestart(!this.isLCG())
+                    .setRestartOnSolution(this.isLCG())
+                    .setRefinedPartialAssignmentGeneration(false)
+                    .setExcludeObjective(true)
+                    .setExcludeViews(false);
+            bb.make(target);
+        }
     }
 
 
@@ -189,7 +191,7 @@ public class XCSP extends RegParser {
         if (level.isLoggable(Level.INFO)) {
             solver.log().println(bb.toString());
         }
-        bb.complete(solver.getModel(), solver.getSearch());
+        bb.make(solver.getModel());
     }
 
     protected void singleThread() {
@@ -311,8 +313,12 @@ public class XCSP extends RegParser {
                     solver.getTimeCount());
         }
         if (level.is(Level.JSON)) {
-            solver.log().printf(Locale.US, "\n\t],\n\t\"exit\":{\"time\":%.1f, " +
-                            "\"bound\":%d, \"nodes\":%d, \"failures\":%d, \"restarts\":%d, \"status\":\"%s\"}\n}",
+            solver.log().printf(Locale.US, """
+                            
+                            \t],
+                            \t"exit":{"time":%.1f, \
+                            "bound":%d, "nodes":%d, "failures":%d, "restarts":%d, "status":"%s"}
+                            }""",
                     solver.getTimeCount(),
                     solver.getObjectiveManager().isOptimization() ?
                             solver.getObjectiveManager().getBestSolutionValue().intValue() :
