@@ -45,12 +45,14 @@ public abstract class RegParser extends SettingsBuilder implements IParser {
     public String instance;
 
     @SuppressWarnings({"unused", "FieldMayBeFinal"})
-    @Option(name = "-pa", aliases = {"--parser"}, usage = "Parser to use.\n" +
-            "0: automatic\n " +
-            "1: FlatZinc (.fzn)\n" +
-            "2: XCSP3 (.xml or .lzma)\n" +
-            "3: DIMACS (.cnf),\n" +
-            "4: MPS (.mps)")
+    @Option(name = "-pa", aliases = {"--parser"}, usage = """
+            Parser to use.
+            0: automatic
+             \
+            1: FlatZinc (.fzn)
+            2: XCSP3 (.xml or .lzma)
+            3: DIMACS (.cnf),
+            4: MPS (.mps)""")
     private int pa = 0;
 
     @Option(name = "-ansi", usage = "Enable ANSI colour codes (default: false).")
@@ -278,10 +280,8 @@ public abstract class RegParser extends SettingsBuilder implements IParser {
         if (level.is(Level.VERBOSE)) {
             solver.verboseSolving(1000);
         }
-        if (nb_cores == 1) {
-            if (free) {
-                freesearch(solver);
-            }
+        if (nb_cores == 1 && free) {
+            freesearch(solver);
         }
         for (int i = 0; i < nb_cores; i++) {
             if (limits.getTime() > -1) {
