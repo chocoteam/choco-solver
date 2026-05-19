@@ -50,11 +50,12 @@ public class PropModXY extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+        int absMod = Math.abs(mod);
         if (y.getLB() < 0) {
-            y.updateLowerBound(-(mod - 1), this);
+            y.updateLowerBound(-(absMod - 1), this);
         }
         if (y.getUB() > 0) {
-            y.updateUpperBound(mod - 1, this);
+            y.updateUpperBound(absMod - 1, this);
         }
         if (x.getUB() <= 0) {
             y.updateUpperBound(0, this);

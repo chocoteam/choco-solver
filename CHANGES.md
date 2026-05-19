@@ -9,12 +9,17 @@ NEXT MILESTONE
 
 ### Major features:
 
+#### Constraints & LCG
+- Fix PropModXY in case of negative mod
+
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:
 See [milestone 6.0.1](https://github.com/chocoteam/choco-solver/milestone/xx)
 
 #### Contributors to this release:
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
+- [Jean-Guillaume Fages](https://github.com/jgFages) (@jgFages)
 
 
 **Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v6.0.0...v6.0.1
