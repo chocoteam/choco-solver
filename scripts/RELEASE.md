@@ -4,24 +4,19 @@
 
 2. Check maven dependencies, update if necessary, and clean also (using archiva f-ex.)
 
+        mvn -U versions:display-dependency-updates
+        mvn -U versions:display-plugin-updates
 
-    $ mvn -U versions:display-dependency-updates
+3. Run the release script:
 
-    $ mvn -U versions:display-plugin-updates
+        ./scripts/release.sh
 
+   The script will automatically:
+   - Verify you are on `develop` with a clean working directory
+   - Generate a changelog summary using the Claude agent (`generate_changelog.sh`)
+   - Pause for you to review and update **CHANGES.md** (issues, contributors, milestone link)
+   - Create the release branch, update versions, deploy, tag, and merge back
 
-3. Check that ALL issues are reported in **CHANGES.md** files
+   Use `--dry-run` to simulate the full process without pushing or deploying:
 
-
-    ltag=`git describe --abbrev=0 --tags`;git log ${ltag}..master | grep "#[0-9]"
-
-
-4. Update **CHANGES.md** file with authors and link to milestone.
-
-
-    ltag=`git describe --abbrev=0 --tags`;git log --format='%aE' ${ltag}..master|sort -u
-
-5. Now you can run the command: 
-
-
-    ./scripts/release.sh
+        ./scripts/release.sh --dry-run

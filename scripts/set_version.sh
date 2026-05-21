@@ -4,25 +4,17 @@ dir="$(dirname "$0")"
 source "${dir}"/commons.sh
 #Script to notify the website about a release
 
-function sedInPlace() {
-	if [ "$(uname)" = "Darwin" ]; then
-		sed -i '' "$1" $2
-	else
-		sed -i'' "$1" $2
-	fi
-}
-
-if [ $1 == "--next" ]; then
-    OVERSION=$2
-    VERSION=$(guess ${OVERSION})
+if [ "$1" == "--next" ]; then
+    OVERSION="$2"
+    VERSION=$(guess "${OVERSION}")
     NEXTMIL="no"
 else
-    VERSION=$1
+    VERSION="$1"
     NEXTMIL="yes"
 fi
 echo "New version is ${VERSION}"
 #Update the poms
-mvn -q versions:set -DnewVersion=${VERSION} -DgenerateBackupPoms=false
+mvn -q versions:set -DnewVersion="${VERSION}" -DgenerateBackupPoms=false
 
 if test "${NEXTMIL}" = "yes"
 then

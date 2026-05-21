@@ -12,10 +12,10 @@ function guess() {
 }
 
 function sedInPlace() {
-	if [ $(uname) = "Darwin" ]; then
-		sed -i '' "$1" $2
+	if [ "$(uname)" = "Darwin" ]; then
+		sed -i '' "$1" "$2"
 	else
-		sed -i'' "$1" $2
+		sed -i'' "$1" "$2"
 	fi
 }
 
