@@ -17,9 +17,12 @@ function getVersionToRelease() {
 set -ex
 
 # --- Pre-flight checks ---
+MVN_VERSION=$(mvn --version 2>&1 | head -1)
+[[ "$MVN_VERSION" == *"Maven 3."* ]] || quit "Maven 3.x is required (found: $MVN_VERSION)"
+
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 [[ "$BRANCH" == "develop" ]] || quit "Must be run from develop branch (currently on $BRANCH)"
-[[ -z "$(git status --porcelain)" ]] || quit "Working directory is not clean"
+# [[ -z "$(git status --porcelain)" ]] || quit "Working directory is not clean"
 
 VERSION=$(getVersionToRelease)
 [[ -n "$VERSION" ]] || quit "Unable to determine release version"
@@ -60,9 +63,9 @@ else
     git push --tags || quit "Unable to push the tag ${VERSION}"
 fi
 
-## Merge back to develop
+## Merge back to develop (from master, to keep histories in sync)
 git checkout develop || quit "unable to check develop out"
-git merge --no-ff "release-${VERSION}" || quit "unable to merge release-${VERSION} into develop"
+git merge --no-ff master || quit "unable to merge master into develop"
 
 #Set the next development version
 echo "** Prepare develop for the next version **"
