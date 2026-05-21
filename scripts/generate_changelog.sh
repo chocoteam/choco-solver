@@ -4,7 +4,7 @@
 
 set -e
 
-LAST_TAG=$(git describe --abbrev=0 --tags 2>/dev/null)
+LAST_TAG=$(git tag --sort=-v:refname | head -1)
 if [ -z "$LAST_TAG" ]; then
     echo "ERROR: No previous tag found"
     exit 1
@@ -68,15 +68,9 @@ ${CONTRIBUTORS}"
 CHANGELOG=$(echo "$PROMPT" | claude -p --model sonnet 2>/dev/null)
 
 echo ""
-echo "========================================="
-echo "  GENERATED CHANGELOG since ${LAST_TAG}"
-echo "========================================="
-echo ""
 echo "$CHANGELOG"
 echo ""
-echo "========================================="
-echo "  CONTRIBUTORS"
-echo "========================================="
+echo "#### Contributors to this release:"
 echo "$CONTRIBUTORS"
 echo ""
 

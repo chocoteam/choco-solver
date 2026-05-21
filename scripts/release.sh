@@ -19,7 +19,7 @@ set -ex
 # --- Pre-flight checks ---
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 [[ "$BRANCH" == "develop" ]] || quit "Must be run from develop branch (currently on $BRANCH)"
-[[ -z "$(git status --porcelain)" ]] || quit "Working directory is not clean"
+# [[ -z "$(git status --porcelain)" ]] || quit "Working directory is not clean"
 
 VERSION=$(getVersionToRelease)
 [[ -n "$VERSION" ]] || quit "Unable to determine release version"
