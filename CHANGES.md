@@ -24,28 +24,10 @@ See [milestone 6.0.2](https://github.com/chocoteam/choco-solver/milestone/xx)
 
 ### Major features:
 
-#### Constraints & LCG
-- Improved `element` constraint: new propagator for bounded result variables and optimized handling of large arrays with repeated values
-- Improved `modulo` constraint: faster propagation for both binary and ternary cases; fixed handling of negative values in expressions and `mod` with negatives
-- Improved `div` constraint (`PropDivXYZ`): better filtering based on sign analysis of variables
-- LCG: added `extractFromVariables` setting to extract nogoods from variable domains (rather than decision path) on solution (#1193)
-- Fixed `PropModXY` incorrect filtering
-- Fixed `PropElementIn` propagator
-- Fixed `SparseBitSet.prevClearBit()` and unified its implementation with `nextClearBit()`
-
-#### Build, CI & Tooling
-- Migrated build and GitHub Actions CI to Java 17
-- Upgraded ANTLR from 4.9.3 to 4.13.2, TestNG from 7.5.1 to 7.12.0, and args4j from 2.33 to 2.37
-- Bumped jgrapht, sizeof, slf4j, and Maven plugin versions
-- Moved `slf4j-nop` to test scope to avoid classpath conflicts in applications depending on choco-solver
-- Centralized dependency versions in POM properties and cleaned up redundant POM configuration
-- Updated release scripts and changelog generation tooling
-
-### Other closed issues and pull requests:
-- #1193: Add a parameter to extract nogoods from variables on solution (LCG)
+#### Constraints
+- Fix PropModXY in case of negative mod
 
 #### Contributors to this release:
-- Arthur Godet <arth.godet@gmail.com>
 - Charles Prud'homme <charles.prudhomme@imt-atlantique.fr>
 - Jean-Guillaume Fages <jg.fages@cosling.com>
 
