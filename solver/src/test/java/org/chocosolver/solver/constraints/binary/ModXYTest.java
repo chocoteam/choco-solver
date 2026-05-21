@@ -7,6 +7,7 @@
 package org.chocosolver.solver.constraints.binary;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ConstraintsName;
@@ -389,5 +390,16 @@ public class ModXYTest extends AbstractBinaryTest {
         for (int i = 0; i<x.length; i++) {
             Assert.assertEquals(x[i].getValue() % mod, y[i].getValue());
         }
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testNegModCst() {
+        Model model = new Model(SettingsBuilder.init().setEnableTableSubstitution(false));
+        IntVar x = model.intVar("x", -12, 42);
+        IntVar y = model.mod("mod", x, -3);
+        while (model.getSolver().solve()) {}
+        long solutionCount = model.getSolver().getSolutionCount();
+        Assert.assertTrue(solutionCount > 0);
+        Assert.assertEquals(55, solutionCount);
     }
 }
