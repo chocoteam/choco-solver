@@ -159,9 +159,6 @@ public abstract class RegParser extends SettingsBuilder implements IParser {
             "--nb-cores"}, usage = "Number of cores available for parallel search (default: 1).")
     protected int nb_cores = 1;
 
-    @Option(name = "-seed", usage = "Set the seed for random number generator. ")
-    protected long seed = 1_000_000_007L;
-
     @Option(name = "--cp-profiler", usage = "Connect to CP-Profiler. Two comma-separated values are expected: the execution id and the port.")
     public String cpProfiler = null;
 
