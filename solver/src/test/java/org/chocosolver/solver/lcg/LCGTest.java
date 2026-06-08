@@ -13,6 +13,9 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
+import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -765,5 +768,18 @@ public class LCGTest {
         IntVar b = model.intVar("b", new int[]{offset, 10, 20, 30});
         model.arithm(a, "=", b).post();
         model.getSolver().solve();
+    }
+
+    @Test(groups = "{1s,lcg}", timeOut = 60000)
+    public void testSpuriousUnsatOnPrunedValueDecision() {
+        // IntDomainMiddle used to propose x=2, a value already pruned by 'x != 2'; instantiating
+        // to it raised a reasonless conflict that made LCG report UNSAT on this satisfiable model.
+        Model model = new Model(SettingsBuilder.init().setLCG(true));
+        IntVar x = model.intVar("x", 0, 4);
+        model.arithm(x, "!=", 2).post();
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.intVarSearch(new InputOrder<>(model), new IntDomainMiddle(true),
+                DecisionOperatorFactory.makeIntEq(), x));
+        Assert.assertTrue(solver.solve(), "spurious UNSAT reported on a satisfiable model");
     }
 }

@@ -22,6 +22,7 @@ import java.util.function.ToDoubleFunction;
  * would result in no inference)
  *
  * @author Charles Prud'homme, Jean-Guillaume Fages
+ * @author Rasmus Ros
  * @since 2 juil. 2010
  */
 public class IntDomainMiddle implements IntValueSelector {
@@ -61,12 +62,16 @@ public class IntDomainMiddle implements IntValueSelector {
             } else {
                 value = min + (max - min + 1) / 2;
             }
+            // the midpoint may have been pruned from the domain; snap to an existing value so the
+            // generated decision is consistent (an out-of-domain value leads to a spurious failure)
+            value = var.nextValue(value - 1);
         } else {
             if (roundingPolicy == FLOOR) {
                 value = var.getLB();
             } else {
                 value = var.getUB();
             }
+            value = var.previousValue(value + 1);
         }
         return value;
     }
