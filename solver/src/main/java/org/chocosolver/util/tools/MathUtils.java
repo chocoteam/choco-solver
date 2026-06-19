@@ -6,6 +6,10 @@
  */
 package org.chocosolver.util.tools;
 
+import java.util.Arrays;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+
 /**
  * various mathematics utilities. The functions do not exist in the basic math package Math.*
  *
@@ -15,12 +19,15 @@ package org.chocosolver.util.tools;
  */
 public final class MathUtils {
 
+    public static final int MIN_VALUE = Integer.MIN_VALUE + 1;
+    public static final int MAX_VALUE = Integer.MAX_VALUE - 1;
+
     /**
      * Precision for rounded logarithm.
      */
-    public final static double ROUNDED_LOG_PRECISION = 10000;
+    public static final double ROUNDED_LOG_PRECISION = 10000;
 
-    public final static double LOG10_2 = Math.log10(2);
+    public static final double LOG10_2 = Math.log10(2);
 
     private MathUtils() {
         //do nothing
@@ -257,9 +264,36 @@ public final class MathUtils {
         // HD 2-12 Overflow iff both arguments have the opposite sign of the result
         if (((x ^ r) & (y ^ r)) < 0) {
             long rr = (long)x + y;
-            return rr > 0 ? Integer.MAX_VALUE:Integer.MIN_VALUE;
+            return rr > 0 ? MAX_VALUE:MIN_VALUE;
         }
         return r;
+    }
+
+    /**
+     * Compute a safe sum of integers
+     * @param values integers to sum
+     * @return the sum of values bounded to [MIN_VALUE, MAX_VALUE] to avoid integer overflows
+     */
+    public static int safeSum(int[] values) {
+        return safeSum(Arrays.stream(values));
+    }
+
+    /**
+     * Compute a safe sum of integers
+     * @param stream integers to sum
+     * @return the sum of stream bounded to [MIN_VALUE, MAX_VALUE] to avoid integer overflows
+     */
+    public static int safeSum(IntStream stream) {
+        return safeSum(stream.mapToLong(i -> (long) i));
+    }
+
+    /**
+     * Compute a safe sum of longs with an integer result
+     * @param stream long values to sum
+     * @return the sum of stream bounded to [MIN_VALUE, MAX_VALUE] to avoid integer overflows
+     */
+    public static int safeSum(LongStream stream) {
+        return safeCast(stream.sum());
     }
 
     /**
@@ -276,7 +310,7 @@ public final class MathUtils {
         // HD 2-12 Overflow iff both arguments have the opposite sign of the result
         if (((x ^ y) & (x ^ r)) < 0) {
             long rr = (long)x - y;
-            return rr > 0 ? Integer.MAX_VALUE:Integer.MIN_VALUE;
+            return rr > 0 ? MAX_VALUE:MIN_VALUE;
         }
         return r;
     }
@@ -294,7 +328,7 @@ public final class MathUtils {
         long r = (long)x * (long)y;
         // HD 2-12 Overflow iff both arguments have the opposite sign of the result
         if ((int)r != r) {
-            return r > 0 ? Integer.MAX_VALUE:Integer.MIN_VALUE;
+            return r > 0 ? MAX_VALUE:MIN_VALUE;
         }
         return (int)r;
     }
@@ -303,9 +337,13 @@ public final class MathUtils {
      * @param x long to cast
      * @return the closest int value when safe casting a long into an int
      */
-    public static int safeCast(long x){
-        if(x > Integer.MAX_VALUE)return Integer.MAX_VALUE;
-        if(x < Integer.MIN_VALUE)return Integer.MIN_VALUE;
+    public static int safeCast(long x) {
+        if (x > MAX_VALUE) {
+            return MAX_VALUE;
+        }
+        if (x < MIN_VALUE) {
+            return MIN_VALUE;
+        }
         return (int) x;
     }
 
