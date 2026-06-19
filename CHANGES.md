@@ -8,6 +8,7 @@ NEXT MILESTONE
 ---------------------
 
 ### Major features:
+- Reduced integer overflows on large sum domain definition
 
 ### Deprecated API (to be removed in next release):
 
@@ -15,6 +16,8 @@ NEXT MILESTONE
 See [milestone 6.0.2](https://github.com/chocoteam/choco-solver/milestone/xx)
 
 #### Contributors to this release:
+- Charles Prud'homme <charles.prudhomme@imt-atlantique.fr>
+- Jean-Guillaume Fages <jg.fages@cosling.com>
 
 
 **Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v6.0.1...v6.0.2
