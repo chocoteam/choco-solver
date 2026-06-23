@@ -4,7 +4,7 @@
 ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 PRETTY_DATE := $(shell date +'%Y-%m-%dT%H:%M')
 DATE := $(shell date +'%y%m%d_%H%M')
-CURRENT_VERSION := $(shell mvn help:evaluate -Dexpression=project.version | grep -v "\[INFO\]" | grep -v "\[WARNING\]")
+CURRENT_VERSION := $(shell mvn help:evaluate -Dexpression=project.version -q -DforceStdout 2>/dev/null | tail -1 | sed 's/.*] //')
 
 .PHONY: all clean compile tests 1s 10s ibex checker mzn xcsp mps dimacs expl update_date compet msc delmsc help
 .DEFAULT_GOAL := package
@@ -53,8 +53,8 @@ tests : 1s 10s ibex checker mzn xcsp mps dimacs expl lcg
 	mvn test -DtestFailureIgnore=true -Dgroups="$@"
 
 update_date:
-	@sed -i '' 's|\s*System.out.printf("c Choco.*|System.out.printf("c Choco-solver%s ($(CURRENT_VERSION), $(PRETTY_DATE))\\n", lcg? " with LCG" : "");|' parsers/src/main/java/org/chocosolver/parser/xcsp/XCSP.java
-	@sed -i '' 's|\s*System.out.printf("%% Choco.*|System.out.printf("%% Choco-solver%s ($(CURRENT_VERSION), $(PRETTY_DATE))\\n", lcg? " with LCG" : "");|' parsers/src/main/java/org/chocosolver/parser/flatzinc/Flatzinc.java
+	@sed -i '' 's|\s*System.out.printf("c Choco.*|System.out.printf("c Choco-solver%s ($(CURRENT_VERSION), $(PRETTY_DATE))\\n", this.isLCG() ? " with LCG" : "");|' parsers/src/main/java/org/chocosolver/parser/xcsp/XCSP.java
+	@sed -i '' 's|\s*System.out.printf("%% Choco.*|System.out.printf("%% Choco-solver%s ($(CURRENT_VERSION), $(PRETTY_DATE))\\n", this.isLCG() ? " with LCG" : "");|' parsers/src/main/java/org/chocosolver/parser/flatzinc/Flatzinc.java
 
 compet: update_date clean package
 
