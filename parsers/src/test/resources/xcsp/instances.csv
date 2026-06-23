@@ -5,8 +5,8 @@ basics;Auction-cnt-example_c18.xml.lzma;3;54;9;4
 basics;Auction-sum-example_c18.xml.lzma;3;54;9;4
 basics;Bacp-m1-06_c18.xml.lzma;6;10;85444;73520
 basics;Bacp-m2-06_c18.xml.lzma;6;10;286861;238402
-basics;Bibd-sc-06-050-25-03-10.xml.lzma;1;_;3525;2231
-basics;Bibd-sum-06-050-25-03-10.xml.lzma;1;_;997;587
+basics;Bibd-sc-06-050-25-03-10.xml.lzma;1;_;1723;932
+basics;Bibd-sum-06-050-25-03-10.xml.lzma;1;_;2238;1358
 basics;Blackhole-04-3-00.xml.lzma;1;_;7;0
 basics;BusScheduling-cnt-t1.xml.lzma;1;7;185;174
 basics;CarSequencing-dingbas.xml.lzma;1;_;12;7
@@ -46,8 +46,8 @@ basics;Mario-easy-4.xml.lzma;16;545;9345;8664
 #basics;MarketSplit-01.xml.lzma;0;_;1113575;919484
 basics;MSPSP-easy_01.xml.lzma;14;26;1816;800
 basics;MSPSP-hard_01.xml.lzma;4;35;627;512
-basics;MultiKnapsack-1-0_X2.xml.lzma;1;_;2;0
-basics;MultiKnapsack-1-01.xml.lzma;1;_;2;0
+basics;MultiKnapsack-1-0_X2.xml.lzma;1;_;3;1
+basics;MultiKnapsack-1-01.xml.lzma;1;_;3;1
 basics;NFC-12_2_10.xml.lzma;31;848;173;108
 basics;NFC-12_2_5.xml.lzma;14;1074;76;49
 basics;Nonogram-001-regular.xml.lzma;1;_;76;51
@@ -60,7 +60,7 @@ basics;Pb-robin08.xml.lzma;1;_;1652;578
 basics;PeacableArmies-m1-05_c18.xml.lzma;5;4;6482;5148
 basics;PeacableArmies-m2-05_c18.xml.lzma;5;4;2997;2551
 basics;PizzaVoucher-10a_c18.xml.lzma;16;210;11508;10338
-basics;Primes-15-20-2-1.xml.lzma;1;_;6;0
+basics;Primes-15-20-2-1.xml.lzma;1;_;16;10
 basics;PrizeCollecting-15-3-5-0.xml.lzma;8;20;1946;1785
 basics;qcp-15-120-00_X2.xml.lzma;1;_;1126;786
 basics;QuadraticAssignment-qap_c18.xml.lzma;13;4776;2606;2452
@@ -77,9 +77,9 @@ basics;RoomMate-sr0050-int.xml.lzma;1;_;2;0
 basics;SocialGolfers-4-3-4-cp.xml.lzma;1;_;225;151
 #basics;Sonet-s2ring02.xml.lzma;9;14;815744;621835
 basics;SportsScheduling-08.xml.lzma;1;_;270;224
-basics;SteelMillSlab-m1-simple_c18.xml.lzma;9;0;229;188
-basics;SteelMillSlab-m2-simple_c18.xml.lzma;1;0;75;50
-basics;SteelMillSlab-m2s-mini-simple_c18.xml.lzma;1;0;138;50
+basics;SteelMillSlab-m1-simple_c18.xml.lzma;2;0;204;165
+basics;SteelMillSlab-m2-simple_c18.xml.lzma;4;0;169;129
+basics;SteelMillSlab-m2s-mini-simple_c18.xml.lzma;1;0;124;50
 basics;StillLife-03-06.xml.lzma;5;10;424;381
 basics;StillLife-wastage-03.xml.lzma;3;6;23;18
 basics;StripPacking-C1P1.xml.lzma;1;_;23702;17004

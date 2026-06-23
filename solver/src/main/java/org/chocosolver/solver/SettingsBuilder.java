@@ -73,7 +73,7 @@ public class SettingsBuilder {
     @Option(name = "--enableTableSubstitution",
             aliases = {"--model.enableTableSubstitution", "-ets"},
             usage = "if true, some intension constraints can be replaced by extension constraints (default is true).")
-    private boolean enableTableSubstitution = true;
+    private boolean enableTableSubstitution = false;
 
     public static final String MAX_TUPLE_SIZE_FOR_SUBSTITUTION = "maxTupleSizeForSubstitution";
     @Option(name = "--maxTupleSizeForSubstitution",

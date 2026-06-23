@@ -10,7 +10,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Providers;
 import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.binary.PropModXY;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
@@ -185,7 +184,7 @@ public class ModXYZTest extends AbstractTernaryTest {
 		model.mod(x, y, z).post();
 		Assert.assertEquals(model.getNbCstrs(), 1);
 		Constraint constraint = model.getCstrs()[0];
-        Assert.assertEquals(constraint.getName(), ConstraintsName.TABLE);
+        Assert.assertSame(constraint.getPropagators()[0].getClass(), PropModXYZ.class);
 	}
 
 	@Test(groups="1s", timeOut=60000)
