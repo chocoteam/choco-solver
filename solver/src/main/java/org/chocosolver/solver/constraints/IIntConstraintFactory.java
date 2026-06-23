@@ -2053,6 +2053,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             }
             return ref().voidConstraint();
         }
+        if(vars[0].length == 1){
+            // if the vectors are of size 1, then lexChainLess is equivalent to increasing
+            IntVar[] rvars = new IntVar[vars.length];
+            for (int i = 0; i < vars.length; i++) {
+                rvars[i] = vars[i][0];
+            }
+            return increasing(rvars, 1);
+        }
         return new Constraint(ConstraintsName.LEXCHAIN, new PropLexChain(vars, true));
     }
 
@@ -2078,6 +2086,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 ref().lexLessEq(vars[i], vars[i + 1]).post();
             }
             return ref().voidConstraint();
+        }
+        if(vars[0].length == 1){
+            // if the vectors are of size 1, then lexChainLessEq is equivalent to increasing
+            IntVar[] rvars = new IntVar[vars.length];
+            for (int i = 0; i < vars.length; i++) {
+                rvars[i] = vars[i][0];
+            }
+            return increasing(rvars, 0);
         }
         return new Constraint(ConstraintsName.LEXCHAIN, new PropLexChain(vars, false));
     }
