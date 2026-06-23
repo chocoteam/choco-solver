@@ -45,13 +45,14 @@ public class PropCompactTable extends Propagator<IntVar> {
         /**
          * Factory method to create a support structure.
          * The choice of the support structure depends on the range and the number of values.
-         * @param range the range of the variable, that is the difference between the upper and lower bounds.
+         *
+         * @param range   the range of the variable, that is the difference between the upper and lower bounds.
          * @param nValues the number of values in the domain of the variable.
-         * @param nWords the number of words in the bitset.
+         * @param nWords  the number of words in the bitset.
          * @return a support structure.
          */
-        static ISupport make(int range, int nValues, int nWords){
-            if(range > 256 && range >= 1.1 * nValues){
+        static ISupport make(int range, int nValues, int nWords) {
+            if (range > 256 && range >= 1.1 * nValues) {
                 // If the variable seems sparse, we use a sparse support structure
                 return new SparseSupport(nValues, nWords);
             } else {
@@ -62,6 +63,7 @@ public class PropCompactTable extends Propagator<IntVar> {
 
         /**
          * Get the support for a given value.
+         *
          * @param val the value for which we want the support.
          * @return the support for the given value.
          */
@@ -103,7 +105,7 @@ public class PropCompactTable extends Propagator<IntVar> {
         @Override
         public long[] get(int val) {
             long[] m = map.get(val);
-            if(m == null){
+            if (m == null) {
                 m = new long[nWords];
                 map.put(val, m);
             }
@@ -331,14 +333,37 @@ public class PropCompactTable extends Propagator<IntVar> {
 
     private void enumFilter(int i) throws ContradictionException {
         int ub = vars[i].getUB();
-        for (int v = vars[i].getLB(); v <= ub; v = vars[i].nextValue(v)) {
-            int index = residues[i][v - offset[i]];
-            if ((currTable.words[index].get() & supports[i].get(v - offset[i])[index]) == 0L) {
-                index = currTable.intersectIndex(supports[i].get(v - offset[i]));
-                if (index == -1) {
-                    vars[i].removeValue(v, this);
-                } else {
-                    residues[i][v - offset[i]] = index;
+        double density = (double) vars[i].getDomainSize() / (vars[i].getRange());
+        if (density < 0.5) {
+            // Dense domain: iterate sequentially over contiguous blocks
+            int v = vars[i].getLB();
+            int nc = vars[i].nextValueOut(v);
+            do {
+                for (; v < nc; v++) {
+                    int index = residues[i][v - offset[i]];
+                    if ((currTable.words[index].get() & supports[i].get(v - offset[i])[index]) == 0L) {
+                        index = currTable.intersectIndex(supports[i].get(v - offset[i]));
+                        if (index == -1) {
+                            vars[i].removeValue(v, this);
+                        } else {
+                            residues[i][v - offset[i]] = index;
+                        }
+                    }
+                }
+                v = vars[i].nextValue(nc);
+                nc = vars[i].nextValueOut(v);
+            } while (v <= ub);
+        } else {
+            // Sparse domain: use nextValue to skip holes directly
+            for (int v = vars[i].getLB(); v <= ub; v = vars[i].nextValue(v)) {
+                int index = residues[i][v - offset[i]];
+                if ((currTable.words[index].get() & supports[i].get(v - offset[i])[index]) == 0L) {
+                    index = currTable.intersectIndex(supports[i].get(v - offset[i]));
+                    if (index == -1) {
+                        vars[i].removeValue(v, this);
+                    } else {
+                        residues[i][v - offset[i]] = index;
+                    }
                 }
             }
         }
