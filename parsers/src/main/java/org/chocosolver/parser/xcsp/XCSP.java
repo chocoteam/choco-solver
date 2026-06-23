@@ -166,7 +166,7 @@ public class XCSP extends RegParser {
                     .setExcludeObjective(true)
                     .setExcludeViews(false)
                     .setMetaStrategy(
-                            lc > 0 ? m -> Search.lastConflict(m, 1) :
+                            lc > 0 ? m -> Search.lastConflict(m, lc) :
                                     cos ? Search::conflictOrderingSearch :
                                             m -> m);
         } else {
