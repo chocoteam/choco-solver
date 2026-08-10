@@ -47,9 +47,9 @@ clean:
 compile:
 	mvn -q compile -DskipTests
 
-tests : 1s 10s ibex checker mzn xcsp mps dimacs expl lcg
+tests : 1s 10s checker mzn xcsp mps dimacs expl lcg ibex
 
-1s 10s ibex checker mzn xcsp mps dimacs lcg:
+1s 10s checker mzn xcsp mps dimacs lcg ibex:
 	mvn test -DtestFailureIgnore=true -Dgroups="$@"
 
 update_date:
