@@ -1,39 +1,47 @@
 #------------------------------------------------------------------------------#
-# This file contains the setup for the Choco submission to the MiniZinc
-# challenge. It uses two stages. In the first stage, it builds/compiles
-# Choco in the same OS as the MiniZinc Challenge docker image. The second
-# stage extends the provided MiniZinc Challenge docker image by copying the
-# Choc executable and its MiniZinc library across from the first stage as
-# well as installing Java for running Choco.
+# Choco Solver for MiniZinc Challenge - Multi-stage build
+# Stage 1: Prepare Choco files with dependencies
+# Stage 2: Runtime image with minimal footprint
 #------------------------------------------------------------------------------#
-#
-# 1. Stage: Setup of Choco in the MiniZinc Challenge docker image
 
-# Using the MiniZinc Challenge docker image
-FROM minizinc/mznc2025:latest AS build
+# Stage 1: Build/Prepare stage - gather Choco files
+FROM minizinc/mznc2026:latest AS builder
 
-# Install Java 21               @
-RUN apt-get update && \
-	apt-get install -y  \
-    #default-jre-headless
-	openjdk-21-jre-headless \
+# Extra arguments appended to fzn-choco.py invocation (e.g. "-lcg")
+ARG EXTRA_FZN_ARGS=""
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openjdk-25-jre-headless \
     python3 \
-    vim
+    vim \
+    && rm -rf /var/lib/apt/lists/*
 
-# The following command is used to disable caching for the ADD command and the next ones
-ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
-# Copy Choco's files from the local repository
 COPY ./parsers/target/choco-solver-*-light.jar /choco/choco.jar
 COPY ./parsers/src/main/minizinc/fzn-choco.py /choco/fzn-choco.py
 COPY ./parsers/src/main/minizinc/fzn-choco.sh /choco/fzn-choco.sh
 COPY ./parsers/src/main/minizinc/choco.msc /choco/choco.msc
 COPY ./parsers/src/main/minizinc/mzn_lib/* /choco/mzn-lib/
 
-# Update files
 RUN sed -i 's&JAR_FILE=.*&JAR_FILE="/choco/choco.jar"&g' /choco/fzn-choco.py && \
-    #sed -i 's&python3 .*&python3 /choco/fzn-choco.py "$@"&g' /choco/fzn-choco.sh && \
     sed -i 's&"mznlib".*&"mznlib":"/choco/mzn-lib/",&g' /choco/choco.msc && \
     sed -i 's&"executable".*&"executable":"/choco/fzn-choco.sh",&g' /choco/choco.msc && \
-    cd /minizinc/ && \
-    echo '{"mzn_solver_path": ["/choco/"],'        > $HOME/.minizinc/Preferences.json && \
-    echo '"tagDefaults": [["", "org.choco.choco"]]}' >> $HOME/.minizinc/Preferences.json
+    mkdir -p /root/.minizinc && \
+    echo '{"mzn_solver_path": ["/choco"],' > /root/.minizinc/Preferences.json && \
+    echo '"tagDefaults": [["", "org.choco.choco"]]}' >> /root/.minizinc/Preferences.json && \
+    chmod +x /choco/fzn-choco.sh && \
+    if [ -n "$EXTRA_FZN_ARGS" ]; then \
+      echo '#!/bin/bash' > /choco/fzn-choco.sh && \
+      echo 'python3 "$(dirname "$0")/fzn-choco.py" "$@" "'"$EXTRA_FZN_ARGS"'"' >> /choco/fzn-choco.sh; \
+    fi
+
+# Stage 2: Runtime image - lean and efficient
+FROM minizinc/mznc2026:latest
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openjdk-25-jre-headless \
+    python3 \
+    vim \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /choco /choco
+COPY --from=builder /root/.minizinc /root/.minizinc
