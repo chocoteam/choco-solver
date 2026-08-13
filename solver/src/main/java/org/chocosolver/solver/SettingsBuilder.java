@@ -255,6 +255,22 @@ public class SettingsBuilder {
                     "when false (default), the clause is built from the decisions taken in the search tree.")
     private boolean lcgExtractFromVariablesOnSolution = false;
 
+    public static final String NOGOOD_FROM_RESTART_WITH_SAT = "nogoodFromRestartWithSAT";
+    @Option(name = "-ngsat",
+            aliases = {"--nogood.withSAT"},
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class,
+            usage = "when true (default), nogoods from restarts are managed by the SAT solver. " +
+                    "when false, nogoods are managed by the dedicated NogoodBase propagator.")
+    private boolean nogoodFromRestartWithSAT = true;
+
+    public static final String NOGOOD_FROM_RESTART_MINIMIZE = "nogoodFromRestartMinimize";
+    @Option(name = "-ngmin",
+            aliases = {"--nogood.minimize"},
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class,
+            usage = "when true, nogood minimization is enabled when using the NogoodBase propagator. " +
+                    "Ignored when -ngsat true (default is false).")
+    private boolean nogoodFromRestartMinimize = false;
+
     public static final String ENVIRONMENT_SUPPLIER = "environmentSupplier";
     private Supplier<IEnvironment> environmentSupplier = () -> new EnvironmentBuilder().fromFlat().build();
 
@@ -430,6 +446,12 @@ public class SettingsBuilder {
                     break;
                 case LCG_EXTRACT_FROM_VARIABLES_ON_SOLUTION:
                     this.setLcgExtractFromVariablesOnSolution(Boolean.parseBoolean(value));
+                    break;
+                case NOGOOD_FROM_RESTART_WITH_SAT:
+                    this.setNogoodFromRestartWithSAT(Boolean.parseBoolean(value));
+                    break;
+                case NOGOOD_FROM_RESTART_MINIMIZE:
+                    this.setNogoodFromRestartMinimize(Boolean.parseBoolean(value));
                     break;
                 default:
                     this.set(key, value);
@@ -1151,5 +1173,42 @@ public class SettingsBuilder {
      */
     public Map<String, String> getAdditionalSettings() {
         return this.additionalSettings;
+    }
+
+    /**
+     * @return <i>true</i> if nogoods from restarts are managed by the SAT solver (default is true).
+     */
+    public boolean nogoodFromRestartWithSAT() {
+        return nogoodFromRestartWithSAT;
+    }
+
+    /**
+     * Set whether nogoods from restarts are managed by the SAT solver or by the dedicated NogoodBase propagator.
+     *
+     * @param nogoodFromRestartWithSAT {@code true} to use the SAT solver, {@code false} to use NogoodBase
+     * @return the current instance
+     */
+    public SettingsBuilder setNogoodFromRestartWithSAT(boolean nogoodFromRestartWithSAT) {
+        this.nogoodFromRestartWithSAT = nogoodFromRestartWithSAT;
+        return this;
+    }
+
+    /**
+     * @return <i>true</i> if nogood minimization is enabled when using NogoodBase (default is false).
+     */
+    public boolean nogoodFromRestartMinimize() {
+        return nogoodFromRestartMinimize;
+    }
+
+    /**
+     * Set whether nogood minimization is enabled when using the NogoodBase propagator.
+     * Has no effect when nogoods are managed by the SAT solver.
+     *
+     * @param nogoodFromRestartMinimize {@code true} to enable minimization, {@code false} to disable
+     * @return the current instance
+     */
+    public SettingsBuilder setNogoodFromRestartMinimize(boolean nogoodFromRestartMinimize) {
+        this.nogoodFromRestartMinimize = nogoodFromRestartMinimize;
+        return this;
     }
 }
