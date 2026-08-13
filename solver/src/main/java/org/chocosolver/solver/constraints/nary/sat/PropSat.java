@@ -23,11 +23,33 @@ import org.chocosolver.util.ESat;
 import java.util.ArrayList;
 
 /**
- * A propagator to deal with clauses and interface a {@link MiniSat}.
- * <br/>
+ * A propagator that bridges Constraint Programming (CP) and SAT solving by interfacing with a {@link MiniSat} solver.
+ *
+ * <p>This propagator enables the integration of SAT solving techniques within Choco-Solver's CP framework.
+ * It maintains a {@link SatDecorator} instance that wraps a MiniSat solver, allowing CP constraints to be
+ * translated into SAT clauses and vice versa. This hybrid approach leverages the efficiency of SAT solvers
+ * for clause propagation and conflict analysis while maintaining the expressive power of CP modeling.
+ *
+ * <p><b>Primary Use Case:</b> This propagator is <em>not</em> used for lazy clause generation. Its main purpose is to
+ * manage <em>nogoods from restarts</em> and <em>nogoods from solutions</em>, providing an efficient mechanism to
+ * prevent re-exploring equivalent search subspaces that have already been proven inconsistent or suboptimal.
+ *
+ * <p>The propagator supports:
+ * <ul>
+ *   <li>Creation of SAT literals from CP variables (bool, int equality, int less-or-equal, set membership)</li>
+ *   <li>Addition of both user-defined and learnt clauses to the SAT solver</li>
+ *   <li>Bidirectional propagation between CP and SAT layers</li>
+ * </ul>
+ *
+ * <p>This implementation is based on the MiniSat solver architecture, originally presented in
+ * "An Extensible SAT-solver" (SAT 2003). The integration approach follows CP-SAT hybridization techniques
+ * described in the constraint programming literature.
  *
  * @author Charles Prud'homme
  * @since 12/07/13
+ * @see MiniSat
+ * @see SatDecorator
+ * @see Propagator
  */
 public class PropSat extends Propagator<Variable> {
 
@@ -64,6 +86,17 @@ public class PropSat extends Propagator<Variable> {
     }
 
 
+    /**
+     * Propagates constraints by synchronizing with the underlying SAT solver.
+     * <p>
+     * First initializes the propagator (adding any pending variables), then checks if the SAT solver
+     * is in a consistent state. If a contradiction is detected in the SAT layer, it triggers a failure.
+     * Otherwise, it clears the SAT solver's trail, stores early deductions from the SAT solver,
+     * applies those deductions to the CP layer, and propagates bounds for all variables.
+     *
+     * @param evtmask the propagation event mask
+     * @throws ContradictionException if the SAT solver detects a contradiction
+     */
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         initialize();
@@ -76,6 +109,16 @@ public class PropSat extends Propagator<Variable> {
         }
     }
 
+    /**
+     * Propagates bound changes for a specific variable to the SAT solver.
+     * <p>
+     * Called when a variable in the propagator's scope has changed. Delegates to {@link #doBound(int)}
+     * to update the corresponding SAT literal bounds.
+     *
+     * @param idxVarInProp the index of the variable in this propagator's variable array
+     * @param mask the propagation event mask
+     * @throws ContradictionException if a contradiction is detected during bound propagation
+     */
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         doBound(idxVarInProp);
@@ -88,7 +131,7 @@ public class PropSat extends Propagator<Variable> {
     @Override
     public ESat isEntailed() {
         if (isCompletelyInstantiated()) {
-            return ESat.eval(sat_.clauseEntailed(sat_.clauses) && sat_.clauseEntailed(sat_.dynClauses));
+            return ESat.eval(sat_.clauseEntailed(sat_.clauses) && sat_.clauseEntailed(sat_.getLearnts()));
         }
         return ESat.UNDEFINED;
     }
@@ -171,6 +214,15 @@ public class PropSat extends Propagator<Variable> {
                 this::lazyAddVar);
     }
 
+    /**
+     * Lazily adds a variable to this propagator's scope.
+     * <p>
+     * If the propagator is already initialized, the variable is added immediately via {@link #addVariable(Variable[])}.
+     * Otherwise, the variable is stored in a temporary list and will be added when {@link #initialize()}
+     * is called. This allows variables to be added before the propagator is fully initialized.
+     *
+     * @param var the variable to add to this propagator's scope
+     */
     public void lazyAddVar(Variable var) {
         if (initialized) {
             addVariable(var);
@@ -211,9 +263,9 @@ public class PropSat extends Propagator<Variable> {
     /**
      * Reset the underlying SAT decorator.
      * <p>
-     *     This method removes all learnt clauses and literals from the SAT solver.
+     * This method removes all learnt clauses and literals from the SAT solver.
      */
-    public void reset(){
+    public void reset() {
         sat_.reset();
     }
 

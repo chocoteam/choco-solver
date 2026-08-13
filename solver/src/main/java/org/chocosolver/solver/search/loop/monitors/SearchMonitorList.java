@@ -140,6 +140,13 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
     }
 
     @Override
+    public void duringRestart() {
+        for (int i = 0; i < mrest.size(); i++) {
+            mrest.get(i).duringRestart();
+        }
+    }
+
+    @Override
     public void afterRestart() {
         for (int i = 0; i < mrest.size(); i++) {
             mrest.get(i).afterRestart();

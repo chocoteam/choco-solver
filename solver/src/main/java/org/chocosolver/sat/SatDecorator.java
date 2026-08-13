@@ -27,8 +27,6 @@ import java.util.function.Consumer;
  */
 public class SatDecorator extends MiniSat {
 
-    // store clauses dynamically added from outside
-    public ArrayList<Clause> dynClauses = new ArrayList<>();
     // store literals dynamically added from outside
     public TIntArrayList dynLits = new TIntArrayList();
     private final TIntObjectHashMap<Literalizer> lits = new TIntObjectHashMap<>();
@@ -86,7 +84,7 @@ public class SatDecorator extends MiniSat {
             default:
                 Clause cr = new ArrayClause(ps);
                 //removeDominated(cr);
-                dynClauses.add(cr);
+                learnts.add(cr);
                 attachClause(cr);
                 break;
         }
@@ -97,9 +95,10 @@ public class SatDecorator extends MiniSat {
      *
      * @param last the clause to compare the other with
      */
+    @SuppressWarnings("unused")
     private void removeDominated(Clause last) {
-        for (int c = dynClauses.size() - 1; c >= 0; c--) {
-            Clause prev = dynClauses.get(c);
+        for (int c = learnts.size() - 1; c >= 0; c--) {
+            Clause prev = learnts.get(c);
             if (last.size() < prev.size()) {
                 int i = 0, j = 0;
                 while (i < last.size() && j < prev.size()) {
@@ -120,9 +119,9 @@ public class SatDecorator extends MiniSat {
     }
 
     private void detachLearnt(int ci) {
-        Clause cr = dynClauses.get(ci);
+        Clause cr = learnts.get(ci);
         detachClause(cr);
-        dynClauses.remove(ci);
+        learnts.remove(ci);
     }
 
     public void reset() {
@@ -131,10 +130,10 @@ public class SatDecorator extends MiniSat {
     }
 
     private void deleteLearntClauses() {
-        for (int i = dynClauses.size() - 1; i >= 0; i--) {
-            detachClause(dynClauses.get(i));
+        for (int i = learnts.size() - 1; i >= 0; i--) {
+            detachClause(learnts.get(i));
         }
-        dynClauses.clear();
+        learnts.clear();
     }
 
 
@@ -149,20 +148,12 @@ public class SatDecorator extends MiniSat {
         touched_variables_.add(l);
     }
 
-    public int nLearnt() {
-        return dynClauses.size();
-    }
-
     public ESat value(int svar) {
-        switch (valueVar(svar)) {
-            case lFalse:
-                return ESat.FALSE;
-            case lTrue:
-                return ESat.TRUE;
-            case lUndef:
-            default:
-                return ESat.UNDEFINED;
-        }
+        return switch (valueVar(svar)) {
+            case lFalse -> ESat.FALSE;
+            case lTrue -> ESat.TRUE;
+            default -> ESat.UNDEFINED;
+        };
     }
 
     /**
@@ -209,6 +200,7 @@ public class SatDecorator extends MiniSat {
                     Literalizer ltz = myLits.get(i);
                     if (ltz.canReact()) {
                         int lit = ltz.toLit();
+                        if (valueLit(lit) == lTrue) continue;
                         if (propagateOneLiteral(lit)) {
                             sat_trail_.set(trailMarker());
                             for (int j = 0; j < touched_variables_.size(); ++j) {
@@ -267,7 +259,7 @@ public class SatDecorator extends MiniSat {
             actionOnNew.accept(bvar);
         }
         Optional<Literalizer> opt = tmp.stream().filter(l -> l.equals(ltz)).findFirst();
-        if (!opt.isPresent()) {
+        if (opt.isEmpty()) {
             int var = newVariable();
             ltz.svar(var);
             lits.put(var, ltz);
@@ -306,5 +298,9 @@ public class SatDecorator extends MiniSat {
             return false;
         }
         return true;
+    }
+
+    public ArrayList<Clause> getLearnts(){
+        return this.learnts;
     }
 }
