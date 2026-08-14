@@ -8,6 +8,7 @@ package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.SettingsBuilder;
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -447,5 +448,16 @@ public class SolverTest {
         solver.findAllSolutions();
         Assert.assertEquals(solver.getSolutionCount(), 2);
         Assert.assertEquals(solver.getFailCount(), 0);
+    }
+
+    @Test
+    public void testSolveTwice(){
+        Model m = new Model();
+        IntVar x = m.intVar("x", 1, 10);
+        Solution sol1 = m.getSolver().findOptimalSolution(x, false);
+        Assert.assertNotNull(sol1);
+        Assert.assertEquals(sol1.getIntVal(x), 1);
+        Solution sol2 = m.getSolver().findOptimalSolution(x, false);
+        Assert.assertNull(sol2);
     }
 }
