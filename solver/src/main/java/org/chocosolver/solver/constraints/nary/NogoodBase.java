@@ -505,7 +505,6 @@ public class NogoodBase extends Propagator<Variable> implements IMonitorRestart 
                 solver.cancelTrail();
             }
         }
-        System.out.println("minimize");
         return kept.toArray(new Dec[0]);
     }
 
