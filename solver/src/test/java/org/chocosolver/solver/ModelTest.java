@@ -19,6 +19,7 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.ProblemMaker;
 import org.chocosolver.util.criteria.Criterion;
 import org.chocosolver.util.tools.ArrayUtils;
+import org.kohsuke.args4j.CmdLineException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -774,7 +775,7 @@ public class ModelTest {
     }
 
     @Test(groups = "1s")
-    public void testSettingsBuilderPriority1() throws ContradictionException {
+    public void testSettingsBuilderPriority1() throws ContradictionException, CmdLineException {
         SettingsBuilder sb = SettingsBuilder.init();
         Assert.assertEquals(sb.getNbMaxLearntClauses(), 100000);
         sb.setNbMaxLearntClauses(10);

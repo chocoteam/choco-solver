@@ -61,7 +61,8 @@ public class Flatzinc extends RegParser {
         ALL
     }
 
-    @Option(name = "-stasol", usage = "Output statistics for solving (default: false).")
+    @Option(name = "-stasol", usage = "Output statistics for solving (default: false).",
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class)
     protected boolean oss = false;
 
     @Option(name = "-ocs", usage = "Opens the complementary search to all variables of the problem\n" +
