@@ -55,7 +55,8 @@ public abstract class RegParser extends SettingsBuilder implements IParser {
             4: MPS (.mps)""")
     private int pa = 0;
 
-    @Option(name = "-ansi", usage = "Enable ANSI colour codes (default: false).")
+    @Option(name = "-ansi", usage = "Enable ANSI colour codes (default: false).",
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class)
     protected boolean ansi = false;
 
     @Option(name = "-lvl",
@@ -76,11 +77,13 @@ public abstract class RegParser extends SettingsBuilder implements IParser {
     protected SearchParams.LimConf limits = new SearchParams.LimConf(-1, -1, -1);
 
     @Option(name = "-csv", aliases = {
-            "--print-csv"}, usage = "Print statistics on exit (default: false).")
+            "--print-csv"}, usage = "Print statistics on exit (default: false).",
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class)
     protected boolean csv = false;
 
     @Option(name = "-f", aliases = {
-            "--free-search"}, usage = "Ignore search strategy.")
+            "--free-search"}, usage = "Ignore search strategy.",
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class)
     protected boolean free = false;
 
     @Option(name = "-varh", aliases = {"--varHeuristic"},
@@ -110,7 +113,8 @@ public abstract class RegParser extends SettingsBuilder implements IParser {
     @Option(name = "-best",
             depends = {"-f"},
             forbids = {"-valsel"},
-            usage = "Tell use BIVS as a meta value selector.")
+            usage = "Tell use BIVS as a meta value selector.",
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class)
     protected boolean best = false;
 
     @Option(name = "-bestRate",
@@ -123,7 +127,8 @@ public abstract class RegParser extends SettingsBuilder implements IParser {
     @Option(name = "-last",
             depends = {"-f"},
             forbids = {"-valsel"},
-            usage = "Tell the solver to use progress (or phase) saving.")
+            usage = "Tell the solver to use progress (or phase) saving.",
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class)
     protected boolean last = false;
 
     @Option(name = "-valsel",
@@ -151,10 +156,12 @@ public abstract class RegParser extends SettingsBuilder implements IParser {
     @Option(name = "-cos",
             depends = {"-f"},
             forbids = {"-lc"},
-            usage = "Tell the solver to use conflict ordering search.")
+            usage = "Tell the solver to use conflict ordering search.",
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class)
     protected boolean cos = false;
 
-    @Option(name = "-a", aliases = {"--all"}, usage = "Search for all solutions (default: false).")
+    @Option(name = "-a", aliases = {"--all"}, usage = "Search for all solutions (default: false).",
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class)
     public boolean all = false;
 
     @Option(name = "-p", aliases = {
@@ -167,7 +174,8 @@ public abstract class RegParser extends SettingsBuilder implements IParser {
     @Option(name = "--cp-profiler", usage = "Connect to CP-Profiler. Two comma-separated values are expected: the execution id and the port.")
     public String cpProfiler = null;
 
-    @Option(name = "--disable-shutdown-hook", usage = "Disable the shutdown hook.")
+    @Option(name = "--disable-shutdown-hook", usage = "Disable the shutdown hook.",
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class)
     protected boolean disableShutdownHook = false;
 
     /**

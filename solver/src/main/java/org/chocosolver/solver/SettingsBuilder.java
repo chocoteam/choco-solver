@@ -13,6 +13,7 @@ import org.chocosolver.solver.constraints.real.Ibex;
 import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.util.ESat;
+import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.MapOptionHandler;
@@ -46,6 +47,7 @@ public class SettingsBuilder {
     public static final String CLONE_VARIABLE_ARRAY_IN_PROPAGATOR = "cloneVariableArrayInPropagator";
     @Option(name = "--cloneVariableArrayInPropagator",
             aliases = {"--prop.cloneVarArray", "-cvap"},
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class,
             usage = "if true, a clone of the input variable array is made in any propagator constructors (default is true). " +
                     "This prevents, for instance, wrong behavior when permutations occurred on the input array (e.g., sorting variables). " +
                     "Setting this to false may limit the memory consumption during modelling but may cause wrong behavior in some cases.")
@@ -54,6 +56,7 @@ public class SettingsBuilder {
     public static final String ENABLE_VIEWS = "enableViews";
     @Option(name = "--enableViews",
             aliases = {"--model.enableViews", "-ev"},
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class,
             usage = "if true, views are enabled. Creates new variables with channeling constraints otherwise (default is true).")
     private boolean enableViews = true;
 
@@ -72,6 +75,7 @@ public class SettingsBuilder {
     public static final String ENABLE_TABLE_SUBSTITUTION = "enableTableSubstitution";
     @Option(name = "--enableTableSubstitution",
             aliases = {"--model.enableTableSubstitution", "-ets"},
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class,
             usage = "if true, some intension constraints can be replaced by extension constraints (default is true).")
     private boolean enableTableSubstitution = false;
 
@@ -80,7 +84,7 @@ public class SettingsBuilder {
             aliases = {"--model.maxTupleSizeForSubstitution", "-mtss"},
             usage = "maximum domain size threshold to replace intension constraints by extension constraints (default is 10000). " +
                     "Only checked when enableTableSubstitution is true.",
-            depends = "model.enableTableSubstitution")
+            depends = "--model.enableTableSubstitution")
     private int maxTupleSizeForSubstitution = 10_000;
 
     public static final String MAX_SIZE_IN_MB_TO_USE_COMPACT_TABLE = "maxSizeInMBToUseCompactTable";
@@ -92,6 +96,7 @@ public class SettingsBuilder {
     public static final String SORT_PROPAGATOR_ACTIVATION_WRT_PRIORITY = "sortPropagatorActivationWRTPriority";
     @Option(name = "--sortPropagatorActivationWRTPriority",
             aliases = {"--prop.sortPropagatorActivationWRTPriority", "-pawrp"},
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class,
             usage = "if true, propagators are sorted wrt their priority on initial activation. " +
                     "Otherwise, they are activated in the order they have been declared in the model (default is true).")
     private boolean sortPropagatorActivationWRTPriority = true;
@@ -102,12 +107,14 @@ public class SettingsBuilder {
     public static final String WARN_USER = "warnUser";
     @Option(name = "--warnUser",
             aliases = {"--model.warnUser", "-wu"},
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class,
             usage = "if true, warnings detected during modeling/solving are output (default is false).")
     private boolean warnUser = false;
 
     public static final String ENABLE_DECOMPOSITION_OF_BOOLEAN_SUM = "enableDecompositionOfBooleanSum";
     @Option(name = "--enableDecompositionOfBooleanSum",
             aliases = {"--model.enableDecompositionOfBooleanSum", "-edobs"},
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class,
             usage = "if true, boolean sum should be decomposed into an equality constraint and an arithmetic constraint, " +
                     "if false, a single constraint should be used instead (default is false).")
     private boolean enableDecompositionOfBooleanSum = false;
@@ -121,6 +128,7 @@ public class SettingsBuilder {
     public static final String ENABLE_SAT = "enableSAT";
     @Option(name = "--enableSAT",
             aliases = {"--model.enableSAT", "-esat"},
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class,
             usage = "when true, an underlying SAT solver is used to manage clauses declared through ISatFactory, " +
                     "when false, clauses are managed with CSP constraints only (default is false).")
     private boolean enableSAT = false;
@@ -128,6 +136,7 @@ public class SettingsBuilder {
     public static final String SWAP_ON_PASSIVATE = "swapOnPassivate";
     @Option(name = "--swapOnPassivate",
             aliases = {"--prop.swapOnPassivate", "-sop"},
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class,
             usage = "when true, on propagator passivation, the propagator is swapped from active to passive in its variables' propagators list. " +
                     "when false, on propagator passivation, only the propagator's state is set to PASSIVE (default is true).")
     private boolean swapOnPassivate = true;
@@ -135,6 +144,7 @@ public class SettingsBuilder {
     public static final String CHECK_DECLARED_CONSTRAINTS = "checkDeclaredConstraints";
     @Option(name = "--checkDeclaredConstraints",
             aliases = {"--model.checkDeclaredConstraints", "-cdc"},
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class,
             usage = "when true, check if all declared constraints are not free anymore, " +
                     "that is either posted or reified, before running the resolution. " +
                     "when false, skip the control (default is true).")
@@ -143,21 +153,24 @@ public class SettingsBuilder {
     public static final String CHECK_DECLARED_VIEWS = "checkDeclaredViews";
     @Option(name = "--checkDeclaredViews",
             aliases = {"--model.checkDeclaredViews", "-cdv"},
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class,
             usage = "when true, check if a view already semantically exists before creating it (default is true).")
     private boolean checkDeclaredViews = true;
 
     public static final String CHECK_DECLARED_MONITORS = "checkDeclaredMonitors";
     @Option(name = "--checkDeclaredMonitors",
             aliases = {"--model.checkDeclaredMonitors", "-cdm"},
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class,
             usage = "when true, check if a monitor already semantically exists before creating it (default is true).")
     private boolean checkDeclaredMonitors = true;
 
     public static final String PRINT_ALL_UNDECLARED_CONSTRAINTS = "printAllUndeclaredConstraints";
     @Option(name = "--printAllUndeclaredConstraints",
             aliases = {"--model.printAllUndeclaredConstraints", "-paudc"},
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class,
             usage = "when true, list all undeclared constraint, when false (default value) otherwise. " +
                     "Only active when checkDeclaredConstraints is on (default is false).",
-            depends = "checkDeclaredConstraints")
+            depends = "--checkDeclaredConstraints")
     private boolean printAllUndeclaredConstraints = false;
 
     public static final String PROPAGATION_ENGINE_TYPE = "propagationEngineType";
@@ -193,6 +206,7 @@ public class SettingsBuilder {
     public static final String INT_VAR_LAZY_LIT_WITH_WEAK_BOUNDS = "intVarLazyLitWithWeakBounds";
     @Option(name = "--intVarLazyLitWithWeakBounds",
             aliases = {"--sat.intVarLazyLitWithWeakBounds", "-ivllwwb"},
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class,
             usage = "when true, the IntVarLazyLit propagator uses weak bounds: when a bound is modified, the channeling is done only with the previous value. " +
                     "It provides smaller reasons, which are faster to compute but weaker in terms of explanation generation. " +
                     "when false, the IntVarLazyLit propagator uses strong bounds: when a bound is modified, the channeling is done with all known values between the previous and the new bound. " +
@@ -211,6 +225,7 @@ public class SettingsBuilder {
     public static final String IBEX_RESTORE_ROUNDING = "ibexRestoreRounding";
     @Option(name = "--ibexRestoreRounding",
             aliases = {"--ibex.restoreRounding", "-irr"},
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class,
             usage = "when true, defines that the rounding mode of the current thread is restored after each call to ibex. " +
                     "This is useful to avoid side effects on other code using different rounding modes. " +
                     "However, it can degrade the performance of ibex. (default is true.")
@@ -235,6 +250,7 @@ public class SettingsBuilder {
     public static final String SORT_LITS_ON_SOLUTION = "sortLitsOnSolution";
     @Option(name = "--sortLitsOnSolution",
             aliases = {"--model.lcg.sortlits", "-slos"},
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class,
             usage = "when true, the literals of the clause generated on a solution are sorted according to their level in the search tree, from the deepest to the shallowest (default is true). " +
                     "This can improve the performance of the SAT solver when dealing with many solutions.")
     private boolean sortLitsOnSolution = true;
@@ -250,6 +266,7 @@ public class SettingsBuilder {
 
     public static final String LCG_EXTRACT_FROM_VARIABLES_ON_SOLUTION = "lcgExtractFromVariablesOnSolution";
     @Option(name = "--lcgExtractFromVariablesOnSolution",
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class,
             aliases = {"--model.lcg.extractFromVariables", "-lcgefvos"},
             usage = "when true, the clause generated on a solution is built from the current variable assignments. " +
                     "when false (default), the clause is built from the decisions taken in the search tree.")
@@ -475,14 +492,9 @@ public class SettingsBuilder {
      * @return the current instance of `SettingsBuilder` with fields set according to the provided command line arguments
      * @see org.kohsuke.args4j.CmdLineParser
      */
-    public SettingsBuilder fromArgs(String[] args) {
+    public SettingsBuilder fromArgs(String[] args) throws CmdLineException {
         CmdLineParser parser = new CmdLineParser(this);
-        try {
-            parser.parseArgument(args);
-        } catch (org.kohsuke.args4j.CmdLineException e) {
-            System.err.println(e.getMessage());
-            parser.printUsage(System.err);
-        }
+        parser.parseArgument(args);
         return this;
     }
 

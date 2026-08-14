@@ -37,11 +37,13 @@ public class XCSP extends RegParser {
     public XCSPParser[] parsers;
 
     @SuppressWarnings("FieldMayBeFinal")
-    @Option(name = "-cs", usage = "set to true to check solution with org.xcsp.checker.SolutionChecker")
+    @Option(name = "-cs", usage = "set to true to check solution with org.xcsp.checker.SolutionChecker",
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class)
     private boolean cs = false;
 
     @SuppressWarnings("FieldMayBeFinal")
-    @Option(name = "-flt")
+    @Option(name = "-flt",
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class)
     private boolean flatten = false;
 
     /**
@@ -69,7 +71,7 @@ public class XCSP extends RegParser {
     @Override
     public void createSolver() {
         if (level.isLoggable(Level.COMPET)) {
-            System.out.printf("c Choco-solver%s (6.0.1, 260521_13:00)\n", this.isLCG()? " with LCG" : "");
+            System.out.printf("c Choco-solver%s (6.0.1, 260521_13:00)\n", this.isLCG() ? " with LCG" : "");
         }
         super.createSolver();
         String iname = Paths.get(instance).getFileName().toString();

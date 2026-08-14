@@ -123,7 +123,7 @@ public class RegParserTest {
         CmdLineParser p = new CmdLineParser(parser);
         p.parseArgument("/file");
         Assert.assertFalse(parser.csv);
-        p.parseArgument("-csv", "/file");
+        p.parseArgument("-csv","yes", "/file");
         Assert.assertTrue(parser.csv);
     }
 
@@ -216,7 +216,7 @@ public class RegParserTest {
         CmdLineParser p = new CmdLineParser(parser);
         p.parseArgument("/file");
         Assert.assertFalse(parser.free);
-        p.parseArgument("-f", "/file");
+        p.parseArgument("-f", "true", "/file");
         Assert.assertTrue(parser.free);
     }
 
@@ -251,7 +251,7 @@ public class RegParserTest {
     @Test(groups = "1s")
     public void testCos2() throws CmdLineException {
         CmdLineParser p = new CmdLineParser(parser);
-        p.parseArgument("-f", "-cos", "/file");
+        p.parseArgument("-f","true", "-cos", "true", "/file");
         Assert.assertTrue(parser.cos);
     }
 
