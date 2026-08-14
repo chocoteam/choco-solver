@@ -48,8 +48,8 @@ public class SettingsBuilderTest {
         assertFalse(builder.isLCG(), "lcg should be false by default");
         assertTrue(builder.sortLitsOnSolution(), "sortLitsOnSolution should be true by default");
         assertFalse(builder.lcgExtractFromVariablesOnSolution(), "lcgExtractFromVariablesOnSolution should be false by default");
-//        assertTrue(builder.nogoodFromRestartWithSAT(), "nogoodFromRestartWithSAT should be true by default");
-//        assertFalse(builder.nogoodFromRestartMinimize(), "nogoodFromRestartMinimize should be false by default");
+        assertTrue(builder.nogoodFromRestartWithSAT(), "nogoodFromRestartWithSAT should be true by default");
+        assertFalse(builder.nogoodFromRestartMinimize(), "nogoodFromRestartMinimize should be false by default");
 
         // Integer defaults
         assertEquals(builder.getEnumeratedDomainSizeThreshold(), 1 << 16, "enumeratedDomainSizeThreshold should be 65536 by default");
@@ -131,11 +131,11 @@ public class SettingsBuilderTest {
         builder.setLcgExtractFromVariablesOnSolution(true);
         assertTrue(builder.lcgExtractFromVariablesOnSolution(), "lcgExtractFromVariablesOnSolution should be true after setter");
 
-//        builder.setNogoodFromRestartWithSAT(false);
-//        assertFalse(builder.nogoodFromRestartWithSAT(), "nogoodFromRestartWithSAT should be false after setter");
+        builder.setNogoodFromRestartWithSAT(false);
+        assertFalse(builder.nogoodFromRestartWithSAT(), "nogoodFromRestartWithSAT should be false after setter");
 
-//        builder.setNogoodFromRestartMinimize(true);
-//        assertTrue(builder.nogoodFromRestartMinimize(), "nogoodFromRestartMinimize should be true after setter");
+        builder.setNogoodFromRestartMinimize(true);
+        assertTrue(builder.nogoodFromRestartMinimize(), "nogoodFromRestartMinimize should be true after setter");
 
         // Test integer setters
         builder.setEnumeratedDomainSizeThreshold(1000);
@@ -282,8 +282,8 @@ public class SettingsBuilderTest {
         assertTrue(builder.isLCG());
         assertFalse(builder.sortLitsOnSolution());
         assertTrue(builder.lcgExtractFromVariablesOnSolution());
-//        assertFalse(builder.nogoodFromRestartWithSAT());
-//        assertTrue(builder.nogoodFromRestartMinimize());
+        assertFalse(builder.nogoodFromRestartWithSAT());
+        assertTrue(builder.nogoodFromRestartMinimize());
 
         // Verify integer properties
         assertEquals(builder.getEnumeratedDomainSizeThreshold(), 2000);
@@ -336,9 +336,9 @@ public class SettingsBuilderTest {
                 "--ibex.contractionRatio", "0.1",
                 "--ibex.restoreRounding", "true",
                 "-lcg",
-//                "-ngmin", "true",
+                "-ngmin", "true",
                 "--sat.reasonManager", "0",
-//                "--nogood.withSAT", "false",
+                "--nogood.withSAT", "false",
                 "--model.lcg.sortlits", "false",
                 "-ccmin", "2",
                 "--model.lcg.extractFromVariables", "true",
@@ -365,8 +365,8 @@ public class SettingsBuilderTest {
         assertTrue(builder.isLCG());
         assertFalse(builder.sortLitsOnSolution());
         assertTrue(builder.lcgExtractFromVariablesOnSolution());
-//        assertFalse(builder.nogoodFromRestartWithSAT());
-//        assertTrue(builder.nogoodFromRestartMinimize());
+        assertFalse(builder.nogoodFromRestartWithSAT());
+        assertTrue(builder.nogoodFromRestartMinimize());
 
         // Verify integer properties
         assertEquals(builder.getEnumeratedDomainSizeThreshold(), 3000);
@@ -423,8 +423,8 @@ public class SettingsBuilderTest {
                 .setSortLitsOnSolution(false)
                 .setSatCCMinMode(1)
                 .setLcgExtractFromVariablesOnSolution(true)
-//                .setNogoodFromRestartWithSAT(false)
-//                .setNogoodFromRestartMinimize(true)
+                .setNogoodFromRestartWithSAT(false)
+                .setNogoodFromRestartMinimize(true)
                 .set("test.key", "test.value");
 
         Settings settings = builder.build();
@@ -459,8 +459,8 @@ public class SettingsBuilderTest {
         assertFalse(settings.sortLitsOnSolution());
         assertEquals(settings.getSatCCMinMode(), 1);
         assertTrue(settings.lcgExtractFromVariablesOnSolution());
-//        assertFalse(settings.nogoodFromRestartWithSAT());
-//        assertTrue(settings.nogoodFromRestartMinimize());
+        assertFalse(settings.nogoodFromRestartWithSAT());
+        assertTrue(settings.nogoodFromRestartMinimize());
         assertEquals(settings.get("test.key").orElse(null), "test.value");
     }
 
@@ -576,8 +576,8 @@ public class SettingsBuilderTest {
                 "-slos", "false",
                 "-ccmin", "1",
                 "-lcgefvos", "true",
-//                "-ngsat", "false",
-//                "-ngmin", "true"
+                "-ngsat", "false",
+                "-ngmin", "true"
         };
 
         SettingsBuilder builder = SettingsBuilder.init().fromArgs(args);
@@ -612,7 +612,7 @@ public class SettingsBuilderTest {
         assertFalse(builder.sortLitsOnSolution());
         assertEquals(builder.getSatCCMinMode(), 1);
         assertTrue(builder.lcgExtractFromVariablesOnSolution());
-//        assertFalse(builder.nogoodFromRestartWithSAT());
-//        assertTrue(builder.nogoodFromRestartMinimize());
+        assertFalse(builder.nogoodFromRestartWithSAT());
+        assertTrue(builder.nogoodFromRestartMinimize());
     }
 }
