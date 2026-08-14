@@ -33,7 +33,6 @@ import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.*;
 import java.util.function.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -188,7 +187,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
     default Stream<Solution> streamSolutions(Criterion... stop) {
         ref().addStopCriterion(stop);
         /*CPRU cannot infer type arguments for java.util.Spliterator<T>*/
-        Spliterator<Solution> it = new Spliterator<Solution>() {
+        Spliterator<Solution> it = new Spliterator<>() {
 
             @Override
             public boolean tryAdvance(Consumer<? super Solution> action) {
@@ -271,7 +270,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
             s.record();
         }
         ref().removeStopCriterion(stop);
-        return ref().isFeasible() == ESat.TRUE ? s : null;
+        return ref().isFeasible() == ESat.TRUE && s.exists() ? s : null;
     }
 
     /**
@@ -412,7 +411,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
             if (defaultS)
                 Search.defaultSearch(ref().getModel());// best bound (in default) is only for optim
             /*CPRU cannot infer type arguments for java.util.Spliterator<T>*/
-            Spliterator<Solution> it = new Spliterator<Solution>() {
+            Spliterator<Solution> it = new Spliterator<>() {
 
                 @Override
                 public boolean tryAdvance(Consumer<? super Solution> action) {
@@ -736,12 +735,12 @@ public interface IResolutionHelper extends ISelf<Solver> {
         final List<Constraint> added = new LinkedList<>();
         final HashSet<IntVar> selectedVariables = new HashSet<>();
         /*CPRU cannot infer type arguments for java.util.Spliterator<T>*/
-        Spliterator<Solution> it = new Spliterator<Solution>() {
+        Spliterator<Solution> it = new Spliterator<>() {
             @Override
             public boolean tryAdvance(Consumer<? super Solution> action) {
                 solutions.clear(); // to force entering the loop in general case
                 added.clear();
-                while (solutions.size() == 0 || solutions.size() == pivot) {
+                while (solutions.isEmpty() || solutions.size() == pivot) {
                     solver.reset();
                     solver.pushTrail(); // required to make sure initial propagation can be undone
                     try {
@@ -756,9 +755,9 @@ public interface IResolutionHelper extends ISelf<Solver> {
                     // Get all uninstantiated variables
                     List<IntVar> uninstantiatedVars = vars.stream()
                             .filter(v -> !v.isInstantiated())
-                            .collect(Collectors.toList());
+                            .toList();
                     // if there are no more uninstantiated variables, then do not return anything
-                    if (uninstantiatedVars.size() == 0)
+                    if (uninstantiatedVars.isEmpty())
                         continue;
                     // Pick randomly at most 'nbVariablesInTable' variables
                     selectedVariables.clear();
@@ -782,7 +781,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
                         }
                         return false;
                     }
-                    if (solutions.size() == 0) {
+                    if (solutions.isEmpty()) {
                         model.unpost(currentConstraint);
                     } else {
                         added.add(currentConstraint);
