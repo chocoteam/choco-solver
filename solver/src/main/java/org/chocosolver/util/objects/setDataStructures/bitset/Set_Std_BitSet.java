@@ -29,7 +29,6 @@ public class Set_Std_BitSet extends AbstractSet implements ISet.WithOffset {
 	private final IStateInt card;	// enables to get the cardinality in O(1)
 	private final int offset;		// allow using negative numbers
 	private final S64BitSet values;
-	private final ISetIterator iter = newIterator();
 
 	//***********************************************************************************
 	// CONSTRUCTOR
@@ -120,8 +119,7 @@ public class Set_Std_BitSet extends AbstractSet implements ISet.WithOffset {
 
 	@Override
 	public ISetIterator iterator(){
-		iter.reset();
-		return iter;
+		return newIterator();
 	}
 
 	@Override

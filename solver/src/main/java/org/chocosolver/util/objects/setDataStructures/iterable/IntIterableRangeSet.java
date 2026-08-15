@@ -55,11 +55,6 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
     protected int CARDINALITY;
 
     /**
-     * Create an ISet iterator
-     */
-    private ISetIterator iter;
-
-    /**
      * Every public method must preserve these invariants.
      */
     private void checkInvariants() {
@@ -772,11 +767,7 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
 
     @Override
     public ISetIterator iterator() {
-        if (iter == null) {
-            iter = newIterator();
-        }
-        iter.reset();
-        return iter;
+        return newIterator();
     }
 
     /**

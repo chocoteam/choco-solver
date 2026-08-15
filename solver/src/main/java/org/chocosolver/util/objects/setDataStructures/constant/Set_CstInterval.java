@@ -24,7 +24,6 @@ public class Set_CstInterval implements ISet {
 
 	private final int lb;
     private final int ub;
-	private final ISetIterator iter = newIterator();
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -115,8 +114,7 @@ public class Set_CstInterval implements ISet {
 
 	@Override
 	public ISetIterator iterator(){
-		iter.reset();
-		return iter;
+		return newIterator();
 	}
 
 	@Override
