@@ -428,7 +428,7 @@ public interface IntVar extends ICause, Variable, ArExpression {
      * @throws ContradictionException if the domain become empty due to this action
      */
     default boolean updateLowerBound(long value, ICause cause) throws ContradictionException {
-        return updateUpperBound(value, cause, cause.defaultReason(this));
+        return updateLowerBound(value, cause, cause.defaultReason(this));
     }
 
     /**
