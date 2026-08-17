@@ -51,7 +51,7 @@
         <maven.source.plugin.version>3.4.0</maven.source.plugin.version>
         <maven.surefire.plugin.version>3.5.5</maven.surefire.plugin.version>
         <maven.surefire.report.plugin.version>3.5.5</maven.surefire.report.plugin.version>
-        <central.publishing.maven.plugin.version>0.10.0</central.publishing.maven.plugin.version>
+        <central.publishing.maven.plugin.version>0.11.0</central.publishing.maven.plugin.version>
         <com.mycila.license.maven.plugin.version>5.0.0</com.mycila.license.maven.plugin.version>
         <jacoco.maven.plugin.version>0.8.14</jacoco.maven.plugin.version>
         <org.codehaus.mojo.license.maven.plugin.version>2.7.1</org.codehaus.mojo.license.maven.plugin.version>
