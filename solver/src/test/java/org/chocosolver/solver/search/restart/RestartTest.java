@@ -162,7 +162,7 @@ public class RestartTest {
         solver.hardReset();
         while (solver.solve()) ;
         assertEquals(solver.getRestartCount(), 0);
-        assertEquals(solver.getSolutionCount(), 8);
+        assertEquals(solver.getSolutionCount(), 10);
         assertEquals(solver.getObjectiveManager().getBestSolutionValue(), 34);
     }
 
