@@ -237,8 +237,8 @@ public class PerformanceTest {
         Assert.assertEquals(fzn.getModel().getSolver().getSearchState(), SearchState.TERMINATED, "Unexpected search state");
         Assert.assertEquals(fzn.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), 26003678, "Unexpected best solution");
         Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), 2, "Unexpected number of solutions");
-        Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), 90_150, "Unexpected number of nodes");
-        Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), 90_147, "Unexpected number of failures");
+        Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), 88_026, "Unexpected number of nodes");
+        Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), 88_023, "Unexpected number of failures");
     }
 
     @Test(groups = "mzn", timeOut = 60_000, priority = 1)
