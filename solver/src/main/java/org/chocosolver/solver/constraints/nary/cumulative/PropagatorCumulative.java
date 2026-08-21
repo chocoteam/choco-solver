@@ -369,7 +369,7 @@ public class PropagatorCumulative extends Propagator<IntVar> {
             final int j,
             final int begin,
             final int end) {
-        BitSet indexesTask = profile.fillList(j);
+        BitSet indexesTask = profile.fillList(j, activeTasks);
         for (int i = indexesTask.nextSetBit(0); i >= 0; i = indexesTask.nextSetBit(i + 1)) {
             literals.add(getNegGeqLit(tasks[i].getEnd(), end));
             literals.add(getNegLeqLit(tasks[i].getStart(), begin));
