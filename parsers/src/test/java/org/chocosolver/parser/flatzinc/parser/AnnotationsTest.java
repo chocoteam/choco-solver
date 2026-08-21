@@ -21,7 +21,7 @@ import java.util.List;
  * @author Charles Prud'homme
  * @since 18/10/12
  */
-public class T_annotations extends GrammarTest {
+public class AnnotationsTest extends GrammarTest {
 
     @Test(groups = "1s")
     public void test0() throws IOException, RecognitionException {
