@@ -306,6 +306,47 @@ public class MiniSat implements SatFactory {
     }
 
     /**
+     * Moves the literal with the highest decision level to position 1 in the clause.
+     * This ensures that the second watched literal (at position 1) is the one with the highest
+     * decision level, which can improve propagation efficiency.
+     * The literal at position 0 (the asserting literal) is left unchanged.
+     * 
+     * The method performs an early exit if a literal at the current decision level is found,
+     * as no literal can have a higher level than the current one.
+     *
+     * @param cr the clause to reorganize
+     */
+    private void moveHighestDecisionLitToPos1(ArrayClause cr) {
+        if (cr.size() <= 2) {
+            return; // Nothing to do for binary clauses
+        }
+        
+        int currentLevel = trailMarker();
+        int highestPos = 1;
+        int highestLevel = level(var(cr._g(1)));
+        
+        // Find the literal with the highest decision level (excluding position 0)
+        for (int i = 2; i < cr.size(); i++) {
+            int litLevel = level(var(cr._g(i)));
+            if (litLevel > highestLevel) {
+                highestLevel = litLevel;
+                highestPos = i;
+                // Early exit: if we found a literal at the current level, no need to continue
+                if (highestLevel == currentLevel) {
+                    break;
+                }
+            }
+        }
+        
+        // If a literal with higher level was found, swap it with position 1
+        if (highestPos != 1) {
+            int temp = cr._g(1);
+            cr._s(1, cr._g(highestPos));
+            cr._s(highestPos, temp);
+        }
+    }
+
+    /**
      * Add a learnt clause to the solver.
      * If the param unforgettable is true, the clause will not be removed during {@link #doReduceDB()}.
      * This is useful for clauses that prohibit certain parts of the search space (e.g. solution clauses).
@@ -317,8 +358,8 @@ public class MiniSat implements SatFactory {
         if (learnt_clause.size() == 1) {
             uncheckedEnqueue(learnt_clause.get(0));
         } else {
-            Clause cr = new ArrayClause(learnt_clause, true);
             ArrayClause cr = new ArrayClause(learnt_clause, true);
+            moveHighestDecisionLitToPos1(cr);
             learnts.add(cr);
             if (unforgettable) { // in the case of a solution, for instance.
                 if (learnts.size() > 1) {
