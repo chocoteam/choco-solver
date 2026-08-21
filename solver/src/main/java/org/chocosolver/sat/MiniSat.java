@@ -99,7 +99,7 @@ public class MiniSat implements SatFactory {
     static final VarData VD_Undef = new VarData(R_Undef, -1, -1);
     public Clause confl = C_Undef;
 
-    public static final Clause C_Fail = new ArrayClause(new int[]{0, 0});
+    public static final ArrayClause C_Fail = new ArrayClause(new int[]{0, 0});
     static final ChannelInfo CI_Null = new ChannelInfo(null, 0, 0, 0);
 
     // If false, the constraints are already unsatisfiable. No part of
@@ -254,7 +254,7 @@ public class MiniSat implements SatFactory {
                 propagate();
                 return (ok_ = (confl == C_Undef));
             default:
-                Clause cr = new ArrayClause(ps);
+                ArrayClause cr = new ArrayClause(ps);
                 clauses.add(cr);
                 attachClause(cr);
                 break;
@@ -318,6 +318,7 @@ public class MiniSat implements SatFactory {
             uncheckedEnqueue(learnt_clause.get(0));
         } else {
             Clause cr = new ArrayClause(learnt_clause, true);
+            ArrayClause cr = new ArrayClause(learnt_clause, true);
             learnts.add(cr);
             if (unforgettable) { // in the case of a solution, for instance.
                 if (learnts.size() > 1) {
@@ -490,7 +491,7 @@ public class MiniSat implements SatFactory {
     // Enqueue a literal. Assumes value of literal is undefined.
     public void uncheckedEnqueue(int l, Clause from) {
         assert valueLit(l) == lUndef : "l: " + printLit(l) + " from: " + from;
-        assert isAssertingClause(this, from.getConflict()) : "the reason " + showReason(from) + " is not valid because it is not unit";
+        assert isAssertingClause(this, from.getConflict()) : "the reason " + showReason(from) + " is not asserting under propagation";
         int v = var(l);
         if (assignment_.getQuick(v) == lUndef) {
             onLiteralPushed(l);
@@ -527,9 +528,9 @@ public class MiniSat implements SatFactory {
     }
 
     public void cEnqueue(int l, Reason r) {
-        assert valueLit(l) != lTrue;
+        assert valueLit(l) != lTrue : l + " not true, reason is " + r;
         assert r != null : "reason is null for " + printLit(l);
-        assert isAssertingClause(this, r.getConflict()) : "the reason " + showReason(r) + " is not valid because it is not unit";
+        assert isAssertingClause(this, r.getConflict()) : "the reason " + showReason(r) + " is not asserting under propagation";
         int v = var(l);
         if (valueLit(l) == lFalse) {
             if (r == R_Undef) {
@@ -560,7 +561,7 @@ public class MiniSat implements SatFactory {
     }
 
     // Attach a clause to watcher lists.
-    void attachClause(Clause cr) {
+    void attachClause(ArrayClause cr) {
         assert cr.size() > 1;
         MinimaList<Watcher> l0 = watches_.get(neg(cr._g(0)));
         if (l0 == null) {
@@ -625,7 +626,7 @@ public class MiniSat implements SatFactory {
             }
 
             // Make sure the false literal is data[1]:
-            Clause cr = w.clause;
+            ArrayClause cr = w.clause;
             final int false_lit = neg(p);
             if (cr._g(0) == false_lit) {
                 cr._s(0, cr._g(1));
@@ -645,7 +646,7 @@ public class MiniSat implements SatFactory {
                 continue;
             }
 
-            boolean cont = newWatch(cr, false_lit, w);
+            boolean cont = newWatchCircular(cr, false_lit, w);
 
             // Did not find watch -- clause is unit under assignment:
             if (!cont) {
@@ -672,21 +673,73 @@ public class MiniSat implements SatFactory {
         }
     }
 
-    private boolean newWatch(Clause cr, int false_lit, Watcher w) {
+    private void changeWatchedLiteral(ArrayClause cr, int false_lit, Watcher w, int k) {
+        // Swap: place the new literal in position 1
+        cr._s(1, cr._g(k));
+        cr._s(k, false_lit);
+        // Attach the watcher to the new position
+        MinimaList<Watcher> lw = watches_.get(neg(cr._g(1)));
+        if (lw == null) {
+            lw = new MinimaList<>();
+            watches_.put(neg(cr._g(1)), lw);
+        }
+        lw.add(w);
+    }
+
+    /**
+     * Implements the circular approach for finding a new watched literal in a clause.
+     * This method is based on the optimal implementation of watched literals as described in:
+     * <p>
+     * <i>Optimal Implementation of Watched Literals and More General Techniques</i>
+     * by Ian P. Gent, Journal of Artificial Intelligence Research (JAIR), Volume 48, 2013.
+     * </p>
+     * <p>
+     * The circular approach maintains a pointer ({@code lastScannedLit}) to the last scanned position
+     * in the clause. When searching for a new acceptable literal (one that is not false), it starts
+     * from the position after the last scanned one, and wraps around to the beginning (position 2)
+     * when reaching the end of the clause. The search stops when it returns to the starting position,
+     * ensuring that each literal is checked at most twice per node in the search tree.
+     * </p>
+     * <p>
+     * This approach is proven to be big-O optimal when amortized across the entire search tree,
+     * with a worst-case constant factor of only 2. In contrast to the state restoration method,
+     * this approach is backtrack-stable: it does not require restoring the search position during
+     * backtracking, relying instead on the monotonicity property of acceptability (if a literal
+     * is unacceptable at a node, it remains unacceptable at all descendant nodes).
+     * </p>
+     * <p>
+     * Empirical results from the paper show a 29% speedup in unit propagation when using this
+     * circular approach in MiniSat, though this does not translate to a statistically significant
+     * improvement in overall solver runtime.
+     * </p>
+     *
+     * @param cr the clause in which to find a new watched literal
+     * @param false_lit the literal that has become false (the negated watched literal)
+     * @param w the watcher associated with this clause
+     * @return {@code true} if a new acceptable literal was found and set as the new watched literal,
+     *         {@code false} if no acceptable literal exists in the clause
+     * @see <a href="https://doi.org/10.1613/jair.10772">JAIR Paper DOI</a>
+     */
+    private boolean newWatchCircular(ArrayClause cr, int false_lit, Watcher w) {
+        int last = cr.getLastScannedLit();
+        int lastCache = last;
+        int n = cr.size();
         // Look for new watch:
-        for (int k = 2; k < cr.size(); k++) {
-            if (valueLit(cr._g(k)) != lFalse) {
-                cr._s(1, cr._g(k));
-                cr._s(k, false_lit);
-                MinimaList<Watcher> lw = watches_.get(neg(cr._g(1)));
-                if (lw == null) {
-                    lw = new MinimaList<>();
-                    watches_.put(neg(cr._g(1)), lw);
-                }
-                lw.add(w);
+        do {
+            last++;
+            // If we return to the starting position, there are no valid literals
+            if (last == n) {
+                // By convention, the false literal is at 1 before calling this method
+                last = 1;
+            }
+            // Checks whether the literal at position k is valid
+            if (valueLit(cr._g(last)) != lFalse) {
+                changeWatchedLiteral(cr, false_lit, w, last);
+                // Updates the latest search position
+                cr.setLastScannedLit(last);
                 return true;
             }
-        }
+        } while (lastCache != last);
         return false;
     }
 
@@ -1084,8 +1137,6 @@ public class MiniSat implements SatFactory {
 
     public void doReduceDB() {
         int i, j;
-        double extra_lim = cla_inc / learnts.size();    // Remove any clause below this activity
-
         learnts.subList(learnt_first_removable, learnts.size())  // only removable clauses
                 .sort(comp);
         // Don't delete binary or locked clauses or unforgettable clauses.
@@ -1268,10 +1319,10 @@ public class MiniSat implements SatFactory {
      */
     private static final class Watcher {
 
-        final Clause clause;
-        int blocker;
+        private final ArrayClause clause;
+        private int blocker;
 
-        Watcher(final Clause cr, int l) {
+        Watcher(final ArrayClause cr, int l) {
             this.clause = cr;
             this.blocker = l;
         }
