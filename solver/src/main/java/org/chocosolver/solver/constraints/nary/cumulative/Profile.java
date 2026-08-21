@@ -32,6 +32,10 @@ public class Profile {
     private int min;
     private int max;
 
+    private final int[] copyLST;
+    private final int[] copyECT;
+    private final BitSet computed = new BitSet();
+
     /**
      * Instantiates a new Profile.
      *
@@ -48,6 +52,8 @@ public class Profile {
         eventPointSeries = new EventPointSeries(nbTasks);
         list = new BitSet(nbTasks);
         time = new int[31];
+        this.copyLST = new int[nbTasks];
+        this.copyECT = new int[nbTasks];
     }
 
     /**
@@ -112,6 +118,8 @@ public class Profile {
         min = Integer.MAX_VALUE;
         max = Integer.MIN_VALUE;
         for (int i = activeTasks.nextSetBit(0); i != -1; i = activeTasks.nextSetBit(i + 1)) {
+            copyLST[i] = tasks[i].getLst();
+            copyECT[i] = tasks[i].getEct();
             min = Math.min(min, tasks[i].getEst());
             max = Math.max(max, tasks[i].getLct());
         }
@@ -119,6 +127,7 @@ public class Profile {
                 && max - min < activeTasks.cardinality() * activeTasks.cardinality()) {
             buildProfileNaive(tasks, tasksHeights, activeTasks);
         } else {
+            computed.clear();
             buildProfileSweep(tasks, tasksHeights, activeTasks);
         }
         timePoints[idx] = Integer.MAX_VALUE;
@@ -144,23 +153,14 @@ public class Profile {
                 while (!eventPointSeries.isEmpty() && eventPointSeries.getTimeFirstEvent() == timePoints[idx]) {
                     Event event = eventPointSeries.removeFirstEvent();
                     if (event.getType() == Event.SCP) {
-                        if (lcg) {
-                            list.set(event.getIndexTask());
-                        }
                         h += tasksHeights[event.getIndexTask()].getLB();
                     } else {
-                        if (lcg) {
-                            list.clear(event.getIndexTask());
-                        }
                         h -= tasksHeights[event.getIndexTask()].getLB();
                     }
                 }
                 if (lcg || h != heights[idx - 1]) {
                     heights[idx] = h;
-                    if (lcg) {
-                        indexesTask[idx].clear();
-                        if (!list.isEmpty()) indexesTask[idx].or(list);
-                    }
+                    indexesTask[idx].clear();
                     idx++;
                 }
                 assert h >= 0;
@@ -224,7 +224,15 @@ public class Profile {
      *
      * @return the list of indexes of tasks contributing to the rectangle k
      */
-    public BitSet fillList(int k) {
+    public BitSet fillList(int k, final IStateBitSet activeTasks) {
+        if (!computed.get(k)) {
+            for (int i = activeTasks.nextSetBit(0); i != -1; i = activeTasks.nextSetBit(i + 1)) {
+                if (copyLST[i] <= getStartRectangle(k) && getEndRectangle(k) <= copyECT[i]) {
+                    indexesTask[k].set(i);
+                }
+            }
+            computed.set(k);
+        }
         return indexesTask[k];
     }
 
