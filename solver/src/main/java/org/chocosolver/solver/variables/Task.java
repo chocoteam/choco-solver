@@ -6,10 +6,9 @@
  */
 package org.chocosolver.solver.variables;
 
-import org.chocosolver.solver.ICause;
 import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -123,8 +122,6 @@ public class Task extends Propagator<IntVar> {
         if (shouldPassivate(s, d, e)) {
             setActive();
             setPassive();
-        } else {
-            this.getModel().post(new Constraint("Task relation", this));
         }
     }
 
