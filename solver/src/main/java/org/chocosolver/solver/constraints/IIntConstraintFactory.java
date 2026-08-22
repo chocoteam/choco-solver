@@ -499,12 +499,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 int b = Math.max(xl, xu);
                 IntVar t1 = ref().intVar(ref().generateName("T1_"), -b, b, true);
                 IntVar t2 = ref().intVar(ref().generateName("T2_"), -b, b, true);
-                return Constraint.merge(
-                    X.getName() + " MOD " + y + " = " + Z.getName(),
-                    div(X, ref().intVar(y), t1),
-                    times(t1, y, t2),
-                    sum(new IntVar[]{Z, t2}, "=", X)
-                );
+                div(X, ref().intVar(y), t1).post();
+                times(t1, y, t2).post();
+                return sum(new IntVar[]{Z, t2}, "=", X);
             }
             return new Constraint(X.getName() + " MOD " + y + " = " + Z.getName(), new PropModXY(X, y, Z));
         }
@@ -898,20 +895,17 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             Model model = X.getModel();
             IntVar t1 = model.intVar(model.generateName("T1_"), -b, b, true);
             IntVar t2 = model.intVar(model.generateName("T2_"), -b, b, true);
+            div(X, Y, t1).post();
+            times(t1, Y, t2).post();
             // compute real modulo
             int maxMod = Math.max(abs(Y.getLB()), abs(Y.getUB())) - 1;
             IntVar modulo = model.intVar(model.generateName("mod_"), -maxMod, maxMod);
+            arithm(X, "-", t2, "=", modulo).post();
             // The modulo has the same sign as X (except when modulo = 0)
             ref().ifThen(arithm(X, ">=", 0), arithm(modulo, ">=", 0));
             ref().ifThen(arithm(X, "<", 0), arithm(modulo, "<=", 0));
             // returns equality constraint
-            return Constraint.merge(
-                X.getName() + " MOD " + Y.getName() + " = " + Z.getName(),
-                div(X, Y, t1),
-                times(t1, Y, t2),
-                arithm(X, "-", t2, "=", modulo),
-                arithm(Z, "=", modulo)
-            );
+            return arithm(Z, "=", modulo);
         } else {
             return new Constraint(X.getName() + " MOD " + Y.getName() + " = " + Z.getName(), new PropModXYZ(X, Y, Z));
         }
@@ -1227,14 +1221,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         if (bools == null || bools.length == 0) {
             throw new IllegalArgumentException("The array of variables cannot be null or empty");
         }
-        if (bools.length == 1) return ref().arithm(bools[0], "=", 1);
-        Model s = bools[0].getModel();
-        IntVar sum = s.intVar(0, bools.length, true);
-        return Constraint.merge(
-                "AND",
-                s.sum(bools, "=", sum),
-                s.arithm(sum, "=", bools.length)
-        );
+        if (bools.length == 1) {
+            return ref().arithm(bools[0], "=", 1);
+        }
+        return ref().sum(bools, "=", bools.length);
     }
 
     /**
@@ -1408,10 +1398,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             return new Constraint(ConstraintsName.BOOLCHANNELING, new PropEnumDomainChanneling(bVars, var, offset));
         } else {
             IntVar enumV = var.getModel().intVar(var.getName() + "_enumImage", var.getLB(), var.getUB(), false);
-            return Constraint.merge(
-                ConstraintsName.BOOLCHANNELING,
-                new Constraint(ConstraintsName.BOOLCHANNELING, new PropEnumDomainChanneling(bVars, enumV, offset)),
-                enumV.eq(var).decompose()
+            enumV.eq(var).post();
+            return new Constraint(ConstraintsName.BOOLCHANNELING,
+                    new PropEnumDomainChanneling(bVars, enumV, offset)
             );
         }
     }
@@ -1617,12 +1606,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             return new Constraint(ConstraintsName.COUNT, new PropCountVar(vars, value, limit));
         } else {
             Model model = value.getModel();
-            IntVar evalue = model.intVar(model.generateName("COUNT_"), value.getLB(), value.getUB(), false);
-            return Constraint.merge(
-                ConstraintsName.COUNT,
-                new Constraint(ConstraintsName.COUNT, new PropCountVar(vars, evalue, limit)),
-                arithm(evalue, "=", value)
-            );
+            IntVar Evalue = model.intVar(model.generateName("COUNT_"), value.getLB(), value.getUB(), false);
+            Evalue.eq(value).post();
+            return new Constraint(ConstraintsName.COUNT,
+                    new PropCountVar(vars, Evalue, limit));
         }
     }
 
@@ -2387,13 +2374,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @return a constraint that is satisfied if at least one boolean variables in <i>bools</i> is true
      */
     default Constraint or(BoolVar... bools) {
-        Model s = bools[0].getModel();
-        IntVar sum = s.intVar(0, bools.length, true);
-        return Constraint.merge(
-            "OR",
-            s.sum(bools, "=", sum),
-            s.arithm(sum, ">=", 1)
-        );
+        return ref().sum(bools, ">=", 1);
     }
 
     /**
