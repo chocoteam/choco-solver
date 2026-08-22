@@ -867,6 +867,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         if(isLCG()) {
             mSat.topLevelCleanUp();
         }
+        searchMonitors.duringRestart();
         try {
             objectivemanager.postDynamicCut();
             mMeasures.incFixpointCount();

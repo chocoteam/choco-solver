@@ -428,14 +428,41 @@ public interface IntVar extends ICause, Variable, ArExpression {
      * @throws ContradictionException if the domain become empty due to this action
      */
     default boolean updateLowerBound(long value, ICause cause) throws ContradictionException {
+        return updateLowerBound(value, cause, cause.defaultReason(this));
+    }
+
+    /**
+     * Updates the lower bound of the domain of <code>this</code> to <code>value</code>.
+     * The instruction comes from <code>propagator</code>.
+     * <p>
+     * This method deals with <code>value</code> as <b>long</b>.
+     * If such a long can be safely cast to an int, this falls back to regular case (int).
+     * Otherwise, it can either trivially do nothing or fail.
+     * </p>
+     * <ul>
+     * <li>If <code>value</code> is smaller than the lower bound of the domain, nothing is done and the return value is <code>false</code>,</li>
+     * <li>if updating the lower bound to <code>value</code> leads to a dead-end (domain wipe-out),
+     * a <code>ContradictionException</code> is thrown,</li>
+     * <li>otherwise, if updating the lower bound to <code>value</code> can be done safely,
+     * the event type is created (the original event can be promoted) and observers are notified
+     * and the return value is <code>true</code></li>
+     * </ul>
+     *
+     * @param value new lower bound (included)
+     * @param cause updating releaser
+     * @param reason the reason why the lower bound is updated
+     * @return true if the lower bound has been updated, false otherwise
+     * @throws ContradictionException if the domain become empty due to this action
+     */
+    default boolean updateLowerBound(long value, ICause cause, Reason reason) throws ContradictionException {
         if ((int) value != value) { // cannot be cast to an int
             if (value < getLB()) {
                 return false;
             } else { // then value >> getLB, this fails
-                return updateLowerBound(getUB() + 1, cause);
+                return updateLowerBound(getUB() + 1, cause, reason);
             }
         } else {
-            return updateLowerBound((int) value, cause);
+            return updateLowerBound((int) value, cause, reason);
         }
     }
 
@@ -503,14 +530,41 @@ public interface IntVar extends ICause, Variable, ArExpression {
      * @throws ContradictionException if the domain become empty due to this action
      */
     default boolean updateUpperBound(long value, ICause cause) throws ContradictionException {
+        return updateUpperBound(value, cause, cause.defaultReason(this));
+    }
+
+    /**
+     * Updates the upper bound of the domain of <code>this</code> to <code>value</code>.
+     * The instruction comes from <code>propagator</code>.
+     * <p>
+     * This method deals with <code>value</code> as <b>long</b>.
+     * If such a long can be safely cast to an int, this falls back to regular case (int).
+     * Otherwise, it can either trivially do nothing or fail.
+     * </p>
+     * <ul>
+     * <li>If <code>value</code> is greater than the upper bound of the domain, nothing is done and the return value is <code>false</code>,</li>
+     * <li>if updating the upper bound to <code>value</code> leads to a dead-end (domain wipe-out),
+     * a <code>ContradictionException</code> is thrown,</li>
+     * <li>otherwise, if updating the upper bound to <code>value</code> can be done safely,
+     * the event type is created (the original event can be promoted) and observers are notified
+     * and the return value is <code>true</code></li>
+     * </ul>
+     *
+     * @param value new upper bound (included)
+     * @param cause update releaser
+     * @param reason the reason why the upper bound is updated
+     * @return true if the upper bound has been updated, false otherwise
+     * @throws ContradictionException if the domain become empty due to this action
+     */
+    default boolean updateUpperBound(long value, ICause cause, Reason reason) throws ContradictionException {
         if ((int) value != value) { // cannot be cast to an int
             if (value > getUB()) {
                 return false;
             } else { // then value << getUB, this fails
-                return updateUpperBound(getLB() - 1, cause);
+                return updateUpperBound(getLB() - 1, cause, reason);
             }
         } else {
-            return updateUpperBound((int) value, cause);
+            return updateUpperBound((int) value, cause, reason);
         }
     }
 

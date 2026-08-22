@@ -94,6 +94,10 @@ public class Settings {
 
     private final boolean lcgExtractFromVariablesOnSolution;
 
+    private final boolean nogoodFromRestartWithSAT;
+
+    private final boolean nogoodFromRestartMinimize;
+
     private final Supplier<IEnvironment> environmentSupplier;
 
     protected Settings(SettingsBuilder builder) {
@@ -128,6 +132,8 @@ public class Settings {
         this.sortLitsOnSolution = builder.sortLitsOnSolution();
         this.satCCMinMode = builder.getSatCCMinMode();
         this.lcgExtractFromVariablesOnSolution = builder.lcgExtractFromVariablesOnSolution();
+        this.nogoodFromRestartWithSAT = builder.nogoodFromRestartWithSAT();
+        this.nogoodFromRestartMinimize = builder.nogoodFromRestartMinimize();
         this.environmentSupplier = builder.getEnvironmentSupplier();
         this.additionalSettings = new HashMap<>(builder.getAdditionalSettings());
     }
@@ -339,6 +345,22 @@ public class Settings {
      */
     public boolean lcgExtractFromVariablesOnSolution() {
         return this.lcgExtractFromVariablesOnSolution;
+    }
+
+    /**
+     * @return <i>true</i> if nogoods from restarts are managed by the SAT solver,
+     * <i>false</i> if they are managed by the dedicated {@link org.chocosolver.solver.constraints.nary.NogoodBase} propagator (default is true).
+     */
+    public boolean nogoodFromRestartWithSAT() {
+        return this.nogoodFromRestartWithSAT;
+    }
+
+    /**
+     * @return <i>true</i> if nogood minimization is enabled when using the NogoodBase propagator (i.e., when
+     * {@link #nogoodFromRestartWithSAT()} is false). Ignored when nogoods are managed by the SAT solver (default is false).
+     */
+    public boolean nogoodFromRestartMinimize() {
+        return this.nogoodFromRestartMinimize;
     }
 
     /**

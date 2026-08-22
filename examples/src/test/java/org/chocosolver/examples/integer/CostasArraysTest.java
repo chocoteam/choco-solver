@@ -33,7 +33,7 @@ public class CostasArraysTest {
 		CostasArrays ca = new CostasArrays();
 		ca.execute();
 		Assert.assertEquals(ca.getModel().getSolver().getSolutionCount(), 1);
-		Assert.assertEquals(ca.getModel().getSolver().getNodeCount(), 8_987);
+		Assert.assertEquals(ca.getModel().getSolver().getNodeCount(), 27_522);
 	}
 
 	@Test(groups = "10s", timeOut = 60000)

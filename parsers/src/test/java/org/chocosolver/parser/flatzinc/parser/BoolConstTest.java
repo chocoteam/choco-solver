@@ -18,7 +18,7 @@ import java.io.IOException;
  * @author Charles Prud'homme
  * @since 18/10/12
  */
-public class T_bool_const extends GrammarTest {
+public class BoolConstTest extends GrammarTest {
 
 
     @Test(groups = "1s")
