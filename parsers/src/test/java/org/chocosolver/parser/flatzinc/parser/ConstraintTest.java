@@ -38,7 +38,7 @@ public class ConstraintTest extends GrammarTest {
     @Test(groups = "1s")
     public void test0() throws IOException {
         map.register("x", mSolver.intVar("x", 0, 2, true));
-        Flatzinc4Parser fp = parser("constraint int_le(1,x); % 0<= x\n", mSolver, map);
+        Flatzinc4Parser fp = parser("constraint int_le(0,x); % 0<= x\n", mSolver, map);
         fp.constraint();
         Assert.assertEquals(mSolver.getCstrs().length, 1);
         Constraint c = mSolver.getCstrs()[0];
