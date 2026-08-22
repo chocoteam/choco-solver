@@ -35,6 +35,66 @@ public class KnapsackTest {
             {38, 52, 30, 42, 170, 9, 7, 20, 0, 3, 21, 4, 1, 2, 14, 310, 8, 4, 6, 1, 18, 15, 38, 10, 4, 8, 6, 0, 0, 3, 0, 10, 6, 1, 3, 0, 3, 5, 4, 0, 30, 12, 16, 18, 3, 16, 22, 30, 4, 0}
     };
 
+    @Test(groups = "1s", timeOut = 60000)
+    public void test() {
+        Model model = new Model();
+
+        IntVar[] occurrences = model.intVarArray("item", 3, 0, 1);
+        IntVar weight = model.intVar("weight", 0, 2);
+        IntVar profit = model.intVar("profit", 0, 6);
+
+        model.knapsack(occurrences, weight, profit, new int[]{1, 1, 3}, new int[]{1, 2, 3}).post();
+        model.arithm(profit, ">=", 2).post();
+
+        Solver solver = model.getSolver();
+
+        while (solver.solve()) {
+        }
+        Assert.assertEquals(solver.getSolutionCount(), 2);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void test2() {
+        Model model = new Model();
+        IntVar[] occurrences = model.intVarArray("item", 3, 0, 1);
+        IntVar weight = model.intVar("weight", 0, 2);
+        IntVar profit = model.intVar("profit", 0, 6);
+
+        model.knapsack(occurrences, weight, profit, new int[]{1, 1, 3}, new int[]{1, 2, 3}).post();
+        model.arithm(profit, ">=", 2).post();
+
+        Solver solver = model.getSolver();
+        model.setObjective(Model.MAXIMIZE, profit);
+
+        int best = Integer.MIN_VALUE;
+        while (solver.solve()) {
+            best = profit.getValue();
+        }
+        Assert.assertEquals(best, 3);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void test3() {
+        Model model = new Model();
+
+        IntVar[] occurrences = model.intVarArray("item", 3, 0, 1);
+        IntVar weight = model.intVar("weight", 0, 17);
+        IntVar profit = model.intVar("profit", 0, 29);
+
+        model.knapsack(occurrences, weight, profit, new int[]{16, 1, 25}, new int[]{6, 3, 20}).post();
+        model.arithm(profit, ">=", 9).post();
+
+        Solver solver = model.getSolver();
+        boolean solutionFound = false;
+        while (solver.solve()) {
+            solutionFound = true;
+        }
+
+        if (!solutionFound) {
+            Assert.fail();
+        }
+    }
+
     @Test(groups = "10s", timeOut = 60000)
     public void knapsackTest() {
         Model m = new Model();

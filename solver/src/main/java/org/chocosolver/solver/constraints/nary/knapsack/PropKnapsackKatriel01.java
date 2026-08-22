@@ -25,9 +25,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * Propagator for the 0/1-Knapsack constraint
- * based on Dantzig-Wolfe relaxation trying
- * to find forbidden and mandatory items
+ * Propagator for the 0/1-Knapsack constraint based on Dantzig-Wolfe relaxation trying to find forbidden and mandatory
+ * items
+ *
+ * TODO : needs to be debugged
  *
  * @author Nicolas PIERRE
  */
