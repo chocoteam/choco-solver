@@ -112,10 +112,10 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
     private final IntVar capacity;
     
     /**
-     * The power (profit) variable of the knapsack (total profit to maximize).
+     * The total profit variable of the knapsack (profit to maximize).
      * The lower bound of this variable represents the minimum required profit.
      */
-    private final IntVar power;
+    private final IntVar totalProfit;
     
     /**
      * State of each item: {@link #NOT_DEFINED}, {@link #ADDED}, or {@link #REMOVED}.
@@ -152,13 +152,13 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
      * Total weight of items currently included in the solution.
      * This is updated when items are added to the solution via {@link #addItemToSolution}.
      */
-    private int usedCapacity;
+    private int totalWeight;
     
     /**
      * Total profit of items currently included in the solution.
      * This is updated when items are added to the solution via {@link #addItemToSolution}.
      */
-    private int powerCreated;
+    private int accumulatedProfit;
     
     /**
      * Flag indicating whether the critical item information needs to be recomputed.
@@ -190,30 +190,30 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
      *
      * @param itemOccurence array of boolean variables indicating whether each item is included (1) or not (0)
      * @param capacity      the integer variable representing the knapsack capacity (maximum weight)
-     * @param power         the integer variable representing the knapsack power (total profit)
+     * @param totalProfit   the integer variable representing the knapsack total profit
      * @param weight        array of item weights
-     * @param energy        array of item profits
+     * @param profit        array of item profits
      */
-    public PropKnapsackKatriel01(BoolVar[] itemOccurence, IntVar capacity, IntVar power,
-                                 int[] weight, int[] energy) {
-        super(ArrayUtils.append(itemOccurence, new IntVar[]{capacity, power}), PropagatorPriority.QUADRATIC, true);
+    public PropKnapsackKatriel01(BoolVar[] itemOccurence, IntVar capacity, IntVar totalProfit,
+                                 int[] weight, int[] profit) {
+        super(ArrayUtils.append(itemOccurence, new IntVar[]{capacity, totalProfit}), PropagatorPriority.QUADRATIC, true);
         this.n = itemOccurence.length;
         this.itemState = new int[n];
         this.reverseOrder = new int[n];
         this.capacity = capacity;
-        this.power = power;
-        this.usedCapacity = 0;
-        this.powerCreated = 0;
+        this.totalProfit = totalProfit;
+        this.totalWeight = 0;
+        this.accumulatedProfit = 0;
         Arrays.fill(this.itemState, 0);
         // we find the decreasing order of efficiency
         this.order = ArrayUtils.array(0, n - 1);
         ArraySort<Integer> sorter = new ArraySort<>(n, false, true);
         sorter.sort(order, n, (i1, i2) -> {
             // Compares efficiencies decreasingly
-            long comparaison = (long) energy[i2] * weight[i1] - (long) energy[i1] * weight[i2];
+            long comparaison = (long) profit[i2] * weight[i1] - (long) profit[i1] * weight[i2];
             if (comparaison == 0) {
                 if (weight[i1] * weight[i2] == 0) {
-                    comparaison = (long) energy[i2] - energy[i1];
+                    comparaison = (long) profit[i2] - profit[i1];
                 } else {
                     // breaking ties in favor of larger weights
                     comparaison = (long) weight[i2] - weight[i1];
@@ -224,7 +224,7 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
         ArrayList<KPItem> orderedItems = new ArrayList<>();
         orderedItems.ensureCapacity(n);
         for (int i = 0; i < n; ++i) {
-            orderedItems.add(new KPItem(energy[order[i]], weight[order[i]]));
+            orderedItems.add(new KPItem(profit[order[i]], weight[order[i]]));
             reverseOrder[order[i]] = i;
         }
         this.findingTree = new ItemFindingSearchTree(orderedItems);
@@ -245,7 +245,7 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
             // updates on the max weight
             return IntEventType.upperBoundAndInst();
         } else /* vIdx == n + 1 */ {
-            // updates on the energy variable
+            // updates on the total profit variable
             return IntEventType.lowerBoundAndInst();
         }
     }
@@ -255,12 +255,12 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
         // Recompute critical item information if needed (after backtrack, restart, or capacity change)
         if (mustRecomputeCriticalInfos()) {
             // compute the Dantzig solution and set members variables
-            this.criticalItemInfos = this.computingTree.findCriticalItem(this.capacity.getUB() - usedCapacity);
+            this.criticalItemInfos = this.computingTree.findCriticalItem(this.capacity.getUB() - totalWeight);
             mustRecomputeCriticalInfos = false;
         }
-        // if power LB is not reachable so we can't filter
+        // if total profit LB is not reachable so we can't filter
         // (every item would be mandatory and forbidden)
-        if (criticalItemInfos.profit + powerCreated >= power.getLB()) {
+        if (criticalItemInfos.profit() + accumulatedProfit >= totalProfit.getLB()) {
             TIntList mandatoryList = findMandatoryItems();
             TIntList forbiddenList = findForbiddenItems();
             // Process mandatory items: add them to the solution
@@ -351,8 +351,8 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
             computingTree.removeLeaf(sortedGlobalIndex);
             findingTree.removeLeaf(sortedGlobalIndex);
             // we update intern values
-            this.usedCapacity += computingTree.getLeaf(sortedGlobalIndex).getActivatedWeight();
-            this.powerCreated += computingTree.getLeaf(sortedGlobalIndex).getActivatedProfit();
+            this.totalWeight += computingTree.getLeaf(sortedGlobalIndex).getActivatedWeight();
+            this.accumulatedProfit += computingTree.getLeaf(sortedGlobalIndex).getActivatedProfit();
             getEnvironment().save(() -> activateItemToProblem(i, ADDED));
             if (removeVarValue) {
                 vars[i].removeValue(0, this);
@@ -393,8 +393,8 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
             findingTree.activateLeaf(sortedGlobalIndex);
             if (this.itemState[i] == ADDED) {
                 // we update intern values as the item was added to every solutions
-                this.usedCapacity -= computingTree.getLeaf(sortedGlobalIndex).getActivatedWeight();
-                this.powerCreated -= computingTree.getLeaf(sortedGlobalIndex).getActivatedProfit();
+                this.totalWeight -= computingTree.getLeaf(sortedGlobalIndex).getActivatedWeight();
+                this.accumulatedProfit -= computingTree.getLeaf(sortedGlobalIndex).getActivatedProfit();
             }
             this.itemState[i] = NOT_DEFINED;
         } else if (this.itemState[i] != NOT_DEFINED) {
@@ -418,34 +418,34 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
     private TIntList findMandatoryItems() {
 
         TIntList mandatoryList = new TIntArrayList();
-        double allowedProfitLoss = criticalItemInfos.profit + powerCreated - power.getLB();
+        double allowedProfitLoss = criticalItemInfos.profit() + accumulatedProfit - totalProfit.getLB();
         // finding first active item
         int index = computingTree.leafToGlobalIndex(0);
         if (index != -1) {
             if (!computingTree.getLeaf(index).isActive()) {
-                index = findingTree.findNextRightItem(index, criticalItemInfos.index, 0);
+                index = findingTree.findNextRightItem(index, criticalItemInfos.index(), 0);
             }
             // not a trivial KP
             int maxWeight = 0;
-            double criticalItemWeightNotInDantzig = 0;
-            if (computingTree.isLeaf(criticalItemInfos.index)) {
-                criticalItemWeightNotInDantzig = computingTree.getNodeWeight(criticalItemInfos.index)
-                        - (criticalItemInfos.weight - criticalItemInfos.weightWithoutCriticalItem);
+            double criticalItemRemainingWeight = 0;
+            if (computingTree.isLeaf(criticalItemInfos.index())) {
+                criticalItemRemainingWeight = computingTree.getNodeWeight(criticalItemInfos.index())
+                        - (criticalItemInfos.weight() - criticalItemInfos.weightWithoutCriticalItem());
             }
-            SearchInfos infos = new SearchInfos(false, criticalItemInfos.index,
-                    0, 0, criticalItemWeightNotInDantzig);
+            SearchInfos infos = new SearchInfos(false, criticalItemInfos.index(),
+                    0, 0, criticalItemRemainingWeight);
 
             while (index != -1) {
-                infos = computingTree.computeLimitWeightMandatory(criticalItemInfos, index, infos.endItem,
-                        infos.profitAccumulated, infos.weightAccumulated, allowedProfitLoss,
-                        infos.remainingWeightEndItem);
-                if (infos.decision) {
+                infos = computingTree.computeLimitWeightMandatory(criticalItemInfos, index, infos.lastItemIndex(),
+                        infos.accumulatedProfit(), infos.accumulatedWeight(), allowedProfitLoss,
+                        infos.remainingWeight());
+                if (infos.decision()) {
                     mandatoryList.add(order[computingTree.globalToLeaf(index)]);
                 } else {
                     maxWeight = Math.max(maxWeight, computingTree.getNodeWeight(index));
-                    maxWeight = Math.max(maxWeight, (int) infos.weightAccumulated);
+                    maxWeight = Math.max(maxWeight, (int) infos.accumulatedWeight());
                 }
-                index = findingTree.findNextRightItem(index, criticalItemInfos.index, maxWeight);
+                index = findingTree.findNextRightItem(index, criticalItemInfos.index(), maxWeight);
             }
         }
         return mandatoryList;
@@ -467,25 +467,25 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
     private TIntList findForbiddenItems() {
 
         TIntList forbiddenList = new TIntArrayList();
-        double allowedProfitLoss = criticalItemInfos.profit + powerCreated - power.getLB();
+        double allowedProfitLoss = criticalItemInfos.profit() + accumulatedProfit - totalProfit.getLB();
         // finding first active item
-        int index = criticalItemInfos.index;
-        if (index != -1 && criticalItemInfos.index != computingTree.getNumberNodes()) {
+        int index = criticalItemInfos.index();
+        if (index != -1 && criticalItemInfos.index() != computingTree.getNumberNodes()) {
             int maxWeight = 0;
-            double criticalItemWeightInDantzig = criticalItemInfos.weight - criticalItemInfos.weightWithoutCriticalItem;
+            double criticalItemIncludedWeight = criticalItemInfos.weight() - criticalItemInfos.weightWithoutCriticalItem();
             if (!computingTree.getLeaf(index).isActive()) {
                 index = findingTree.findNextRightItem(index, computingTree.getNumberNodes() - 1, maxWeight);
             }
-            SearchInfos infos = new SearchInfos(false, criticalItemInfos.index,
-                    0, 0, criticalItemWeightInDantzig);
+            SearchInfos infos = new SearchInfos(false, criticalItemInfos.index(),
+                    0, 0, criticalItemIncludedWeight);
             while (index != -1) {
-                infos = computingTree.computeLimitWeightForbidden(criticalItemInfos, index, infos.endItem,
-                        infos.profitAccumulated, infos.weightAccumulated, allowedProfitLoss,
-                        infos.remainingWeightEndItem);
-                if (infos.decision) {
+                infos = computingTree.computeLimitWeightForbidden(criticalItemInfos, index, infos.lastItemIndex(),
+                        infos.accumulatedProfit(), infos.accumulatedWeight(), allowedProfitLoss,
+                        infos.remainingWeight());
+                if (infos.decision()) {
                     forbiddenList.add(order[computingTree.globalToLeaf(index)]);
                 } else {
-                    maxWeight = Math.max(maxWeight, (int) infos.weightAccumulated);
+                    maxWeight = Math.max(maxWeight, (int) infos.accumulatedWeight());
                     maxWeight = Math.max(maxWeight, computingTree.getNodeWeight(index));
                 }
                 index = findingTree.findNextRightItem(index, computingTree.getNumberNodes() - 1, maxWeight);
