@@ -25,41 +25,175 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * Propagator for the 0/1-Knapsack constraint
- * based on Dantzig-Wolfe relaxation trying
- * to find forbidden and mandatory items
+ * Propagator for the 0/1-Knapsack constraint using cost-based filtering.
+ * <p>
+ * This propagator implements the algorithm described in:
+ * <ul>
+ *   <li>Fahle, T., & Sellmann, M. (2002). Cost Based Filtering for the Constrained Knapsack Problem.
+ *       Annals of Operations Research, 115, 73-93.</li>
+ *   <li>Katriel, I., Sellmann, M., Upfal, E., & Van Hentenryck, P. (2007).
+ *       Propagating Knapsack Constraints in Sublinear Time. AAAI 2007, 231-236.</li>
+ * </ul>
+ * <p>
+ * The algorithm performs cost-based filtering by:
+ * <ol>
+ *   <li>Sorting items by decreasing efficiency (profit/weight ratio), breaking ties in favor of larger weights.</li>
+ *   <li>Computing the Dantzig relaxation to find the critical item (first item that would exceed capacity).</li>
+ *   <li>Using two specialized search trees:
+ *       <ul>
+ *         <li>{@code ItemFindingSearchTree}: To efficiently find the next item to check, based on weight.</li>
+ *         <li>{@code ComputingLossWeightTree}: To compute the maximum weight that can be replaced
+ *             without violating the profit bound.</li>
+ *       </ul>
+ *   </li>
+ *   <li>Identifying mandatory items (items that must be included in any solution) and
+ *       forbidden items (items that cannot be included in any solution).</li>
+ * </ol>
+ * <p>
+ * The propagator maintains the following invariant:
+ * For a given lower bound B on the objective (profit), an item x_i is:
+ * <ul>
+ *   <li><b>Mandatory</b> if the fractional optimum of (X \ {x_i}, C) &lt; B.</li>
+ *   <li><b>Forbidden</b> if the fractional optimum of (X \ {x_i}, C - w_i) + p_i &lt; B.</li>
+ * </ul>
+ * <p>
+ * This implementation uses an incremental approach with amortized linear time complexity
+ * per call after an O(n log n) preprocessing step.
  *
  * @author Nicolas PIERRE
+ * @author Charles Prud'homme
  */
 public class PropKnapsackKatriel01 extends Propagator<IntVar> {
+    
+    /**
+     * State constant indicating that an item has been added to the solution.
+     * An item in this state is included in every valid solution and its value 0
+     * has been removed from the variable domain.
+     */
     static final int ADDED = 1;
+    
+    /**
+     * State constant indicating that an item has been removed from the problem.
+     * An item in this state cannot be included in any valid solution and its value 1
+     * has been removed from the variable domain.
+     */
     static final int REMOVED = -1;
+    
+    /**
+     * State constant indicating that an item's status is not yet determined.
+     * Items in this state may or may not be included in the optimal solution.
+     */
     static final int NOT_DEFINED = 0;
     // ***********************************************************************************
     // VARIABLES
     // ***********************************************************************************
 
+    /**
+     * Array mapping original item indices to their position in the efficiency-sorted order.
+     * Items are sorted by decreasing efficiency (profit/weight), with ties broken in favor of larger weights.
+     */
     private final int[] order;
+    
+    /**
+     * Array mapping efficiency-sorted indices back to original item indices.
+     * This is the inverse of {@link #order}.
+     */
     private final int[] reverseOrder;
+    
+    /**
+     * Number of items in the knapsack problem.
+     */
     private final int n;
+    
+    /**
+     * The capacity variable of the knapsack (maximum allowed weight).
+     * The upper bound of this variable represents the available capacity.
+     */
     private final IntVar capacity;
+    
+    /**
+     * The power (profit) variable of the knapsack (total profit to maximize).
+     * The lower bound of this variable represents the minimum required profit.
+     */
     private final IntVar power;
+    
+    /**
+     * State of each item: {@link #NOT_DEFINED}, {@link #ADDED}, or {@link #REMOVED}.
+     * This array tracks which items have been forced into or out of the solution.
+     */
     private final int[] itemState;
+    
+    /**
+     * Search tree for efficiently finding the next item to check based on weight.
+     * Used to implement the monotonicity property: when processing items in weight order,
+     * the critical item position increases monotonically.
+     */
     private final ItemFindingSearchTree findingTree;
+    
+    /**
+     * Search tree for computing the maximum weight that can be replaced without violating
+     * the profit bound. Contains all items sorted by efficiency and stores cumulative weight
+     * and profit sums in internal nodes.
+     */
     private final ComputingLossWeightTree computingTree;
+    
+    /**
+     * Information about the critical item from the Dantzig relaxation:
+     * index (position in the tree), profit (relaxed solution profit),
+     * weight (total weight used), and weightWithoutCriticalItem (weight without the critical item).
+     */
     private Info criticalItemInfos;
-    // variables to keep track of the change from the original constraint expression
+    
+    // ***********************************************************************************
+    // STATE VARIABLES
+    // ***********************************************************************************
+
+    /**
+     * Total weight of items currently included in the solution.
+     * This is updated when items are added to the solution via {@link #addItemToSolution}.
+     */
     private int usedCapacity;
+    
+    /**
+     * Total profit of items currently included in the solution.
+     * This is updated when items are added to the solution via {@link #addItemToSolution}.
+     */
     private int powerCreated;
+    
+    /**
+     * Flag indicating whether the critical item information needs to be recomputed.
+     * This is set to true when the world changes (backtrack/restart) or when items are added/removed.
+     */
     private boolean mustRecomputeCriticalInfos;
+    
+    /**
+     * Last known world index, used to detect backtracks.
+     */
     private int lastWorld = -1;
+    
+    /**
+     * Last known backtrack count, used to detect backtracks.
+     */
     private long lastNbOfBacktracks = -1;
+    
+    /**
+     * Last known restart count, used to detect restarts.
+     */
     private long lastNbOfRestarts = -1;
 
     // ***********************************************************************************
     // CONSTRUCTORS
     // ***********************************************************************************
 
+    /**
+     * Constructs a knapsack propagator using the Katriel et al. algorithm.
+     *
+     * @param itemOccurence array of boolean variables indicating whether each item is included (1) or not (0)
+     * @param capacity      the integer variable representing the knapsack capacity (maximum weight)
+     * @param power         the integer variable representing the knapsack power (total profit)
+     * @param weight        array of item weights
+     * @param energy        array of item profits
+     */
     public PropKnapsackKatriel01(BoolVar[] itemOccurence, IntVar capacity, IntVar power,
                                  int[] weight, int[] energy) {
         super(ArrayUtils.append(itemOccurence, new IntVar[]{capacity, power}), PropagatorPriority.QUADRATIC, true);
@@ -118,6 +252,7 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+        // Recompute critical item information if needed (after backtrack, restart, or capacity change)
         if (mustRecomputeCriticalInfos()) {
             // compute the Dantzig solution and set members variables
             this.criticalItemInfos = this.computingTree.findCriticalItem(this.capacity.getUB() - usedCapacity);
@@ -128,12 +263,14 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
         if (criticalItemInfos.profit + powerCreated >= power.getLB()) {
             TIntList mandatoryList = findMandatoryItems();
             TIntList forbiddenList = findForbiddenItems();
+            // Process mandatory items: add them to the solution
             for (int i = 0; i < mandatoryList.size(); i++) {
                 int unorderedLeafIdx = mandatoryList.get(i);
                 addItemToSolution(unorderedLeafIdx, true);
                 // case 3.  from mustRecomputeCriticalInfos()
                 mustRecomputeCriticalInfos = true;
             }
+            // Process forbidden items: remove them from the problem
             for (int i = 0; i < forbiddenList.size(); i++) {
                 int unorderedLeafIdx = forbiddenList.get(i);
                 removeItemFromProblem(unorderedLeafIdx, true);
@@ -161,16 +298,26 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
     }
 
     /**
-     * we recompute the Dantzig solution if :
-     * - a backtrack occured
-     * - capacity UB changed
-     * - an item has been determined
+     * Checks if the critical item information needs to be recomputed.
+     * This happens when:
+     * <ul>
+     *   <li>A backtrack has occurred</li>
+     *   <li>A restart has occurred</li>
+     *   <li>The capacity upper bound has changed</li>
+     *   <li>An item has been added to or removed from the solution</li>
+     * </ul>
+     *
+     * @return true if critical item information must be recomputed, false otherwise
      */
     private boolean mustRecomputeCriticalInfos() {
         checkWorld();
         return mustRecomputeCriticalInfos;
     }
 
+    /**
+     * Checks if the solver's world has changed (due to backtrack or restart).
+     * If a change is detected, sets the flag to recompute critical item information.
+     */
     private void checkWorld() {
         int currentworld = model.getEnvironment().getWorldIndex();
         long currentbt = model.getSolver().getBackTrackCount();
@@ -256,10 +403,17 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
     }
 
     /**
-     * exploits {@code computeLimitWeightMandatory} to find all mandatory items in a
-     * linear scan
+     * Finds all mandatory items by scanning items to the left of the critical item.
+     * <p>
+     * An item x_i (i &lt; s, where s is the critical item) is mandatory if removing it
+     * would make it impossible to reach the lower bound on profit.
+     * This is determined by checking if the fractional optimum of (X \ {x_i}, C) &lt; B,
+     * where B is the current lower bound on profit.
+     * <p>
+     * The method uses the monotonicity property: when processing items in weight order,
+     * the critical item position increases monotonically, allowing a linear scan.
      *
-     * @return indexes (given by the constructor) of mandatory items
+     * @return list of indices (from the constructor's item list) of mandatory items
      */
     private TIntList findMandatoryItems() {
 
@@ -298,10 +452,17 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
     }
 
     /**
-     * exploits {@code computeLimitWeightForbidden} to find all forbidden items in a
-     * linear scan
+     * Finds all forbidden items by scanning items to the right of the critical item.
+     * <p>
+     * An item x_i (i &gt; s, where s is the critical item) is forbidden if including it
+     * would make it impossible to reach the lower bound on profit.
+     * This is determined by checking if the fractional optimum of (X \ {x_i}, C - w_i) + p_i &lt; B,
+     * where B is the current lower bound on profit.
+     * <p>
+     * The method uses the monotonicity property: when processing items in weight order,
+     * the critical item position decreases monotonically, allowing a linear scan.
      *
-     * @return indexes (given by the constructor) of forbidden items
+     * @return list of indices (from the constructor's item list) of forbidden items
      */
     private TIntList findForbiddenItems() {
 
@@ -333,6 +494,12 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
         return forbiddenList;
     }
 
+    /**
+     * Returns the environment associated with this propagator's model.
+     * The environment is used for saving restoration callbacks during backtracking.
+     *
+     * @return the environment of the model
+     */
     private IEnvironment getEnvironment() {
         return this.getModel().getEnvironment();
     }
