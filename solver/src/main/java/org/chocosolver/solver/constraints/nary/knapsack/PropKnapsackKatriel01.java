@@ -27,6 +27,14 @@ import java.util.Arrays;
 /**
  * Propagator for the 0/1-Knapsack constraint using cost-based filtering.
  * <p>
+ * <b>Note:</b> This propagator requires that linear constraints maintaining the consistency between
+ * item occurrences, total weight, and total profit are also posted. Specifically, the following must hold:
+ * <ul>
+ *   <li>sum(weight[i] * itemOccurrence[i]) = totalWeight</li>
+ *   <li>sum(profit[i] * itemOccurrence[i]) = totalProfit</li>
+ * </ul>
+ * Without these constraints, the propagator may produce incorrect filtering results.
+ * <p>
  * This propagator implements the algorithm described in:
  * <ul>
  *   <li>Fahle, T., & Sellmann, M. (2002). Cost Based Filtering for the Constrained Knapsack Problem.
@@ -64,21 +72,21 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  */
 public class PropKnapsackKatriel01 extends Propagator<IntVar> {
-    
+
     /**
      * State constant indicating that an item has been added to the solution.
      * An item in this state is included in every valid solution and its value 0
      * has been removed from the variable domain.
      */
     static final int ADDED = 1;
-    
+
     /**
      * State constant indicating that an item has been removed from the problem.
      * An item in this state cannot be included in any valid solution and its value 1
      * has been removed from the variable domain.
      */
     static final int REMOVED = -1;
-    
+
     /**
      * State constant indicating that an item's status is not yet determined.
      * Items in this state may or may not be included in the optimal solution.
@@ -93,57 +101,57 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
      * Items are sorted by decreasing efficiency (profit/weight), with ties broken in favor of larger weights.
      */
     private final int[] order;
-    
+
     /**
      * Array mapping efficiency-sorted indices back to original item indices.
      * This is the inverse of {@link #order}.
      */
     private final int[] reverseOrder;
-    
+
     /**
      * Number of items in the knapsack problem.
      */
     private final int n;
-    
+
     /**
      * The capacity variable of the knapsack (maximum allowed weight).
      * The upper bound of this variable represents the available capacity.
      */
     private final IntVar capacity;
-    
+
     /**
      * The total profit variable of the knapsack (profit to maximize).
      * The lower bound of this variable represents the minimum required profit.
      */
     private final IntVar totalProfit;
-    
+
     /**
      * State of each item: {@link #NOT_DEFINED}, {@link #ADDED}, or {@link #REMOVED}.
      * This array tracks which items have been forced into or out of the solution.
      */
     private final int[] itemState;
-    
+
     /**
      * Search tree for efficiently finding the next item to check based on weight.
      * Used to implement the monotonicity property: when processing items in weight order,
      * the critical item position increases monotonically.
      */
     private final ItemFindingSearchTree findingTree;
-    
+
     /**
      * Search tree for computing the maximum weight that can be replaced without violating
      * the profit bound. Contains all items sorted by efficiency and stores cumulative weight
      * and profit sums in internal nodes.
      */
     private final ComputingLossWeightTree computingTree;
-    
+
     /**
      * Information about the critical item from the Dantzig relaxation:
      * index (position in the tree), profit (relaxed solution profit),
      * weight (total weight used), and weightWithoutCriticalItem (weight without the critical item).
      */
     private Info criticalItemInfos;
-    
+
     // ***********************************************************************************
     // STATE VARIABLES
     // ***********************************************************************************
@@ -153,29 +161,29 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
      * This is updated when items are added to the solution via {@link #addItemToSolution}.
      */
     private int totalWeight;
-    
+
     /**
      * Total profit of items currently included in the solution.
      * This is updated when items are added to the solution via {@link #addItemToSolution}.
      */
     private int accumulatedProfit;
-    
+
     /**
      * Flag indicating whether the critical item information needs to be recomputed.
      * This is set to true when the world changes (backtrack/restart) or when items are added/removed.
      */
     private boolean mustRecomputeCriticalInfos;
-    
+
     /**
      * Last known world index, used to detect backtracks.
      */
     private int lastWorld = -1;
-    
+
     /**
      * Last known backtrack count, used to detect backtracks.
      */
     private long lastNbOfBacktracks = -1;
-    
+
     /**
      * Last known restart count, used to detect restarts.
      */
@@ -252,6 +260,21 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+        if (PropagatorEventType.isFullPropagation(evtmask)) {
+        // Synchronize trees with current variable states BEFORE computing critical item.
+        // This is critical because other propagators may have instantiated variables between
+        // propagator construction and first propagation call. If trees are not synchronized,
+        // findCriticalItem would compute based on stale data, leading to incorrect filtering.
+            for (int i = 0; i < n; i++) {
+                if (this.vars[i].isInstantiatedTo(0) && this.itemState[i] == NOT_DEFINED) {
+                    this.removeItemFromProblem(i, false);
+                    mustRecomputeCriticalInfos = true;
+                } else if (this.vars[i].isInstantiatedTo(1) && this.itemState[i] == NOT_DEFINED) {
+                    this.addItemToSolution(i, false);
+                    mustRecomputeCriticalInfos = true;
+                }
+            }
+        }
         // Recompute critical item information if needed (after backtrack, restart, or capacity change)
         if (mustRecomputeCriticalInfos()) {
             // compute the Dantzig solution and set members variables
