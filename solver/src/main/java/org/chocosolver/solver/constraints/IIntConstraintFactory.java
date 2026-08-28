@@ -44,6 +44,7 @@ import org.chocosolver.solver.constraints.nary.count.PropCount_AC;
 import org.chocosolver.solver.constraints.nary.element.PropElementV_fast;
 import org.chocosolver.solver.constraints.nary.globalcardinality.GlobalCardinality;
 import org.chocosolver.solver.constraints.nary.knapsack.PropKnapsack;
+import org.chocosolver.solver.constraints.nary.knapsack.PropKnapsackKatriel01;
 import org.chocosolver.solver.constraints.nary.lex.PropIncreasing;
 import org.chocosolver.solver.constraints.nary.lex.PropLex;
 import org.chocosolver.solver.constraints.nary.lex.PropLexChain;
@@ -1999,8 +2000,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                  scalar2.propagators,
                  new Propagator[]{
                         new PropKnapsack(occurrences, weightSum, energySum, weight, energy),
-//                      new PropKnapsackKatriel01(bs.toArray(new BoolVar[0]), weightSum, energySum,
-//                                ws.stream().mapToInt(k -> k).toArray(), es.stream().mapToInt(k -> k).toArray())
+                        new PropKnapsackKatriel01(bs.toArray(new BoolVar[0]), weightSum, energySum,
+                                                  ws.stream().mapToInt(k -> k).toArray(), es.stream().mapToInt(k -> k).toArray())
                 }
             )
         );
