@@ -31,6 +31,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import static java.lang.Math.ceil;
+
 /**
  * @author Jean-Guillaume FAGES (cosling)
  * @since 05/04/2017.
@@ -616,5 +618,47 @@ public class KnapsackTest {
             Assert.assertEquals(bestWith, bestWithout,
                     errorMsg + "Best profit mismatch: with=" + bestWith + ", without=" + bestWithout);
         }
+    }
+
+    @Test(groups = "10s", timeOut = 600000, dataProvider = "random", dataProviderClass = Providers.class)
+    @Providers.Arguments(values = {"1", "20", "1"})
+    public void testIssue1231Example5(int seed) {
+        int[] capacities = {99, 1101};
+        int[] volumes = {54, 12, 47, 33, 30, 65, 56, 57, 91, 88, 77, 99, 29, 23, 39, 86, 12, 85, 22, 64};
+        int[] energies = {38, 57, 69, 90, 79, 89, 28, 70, 38, 71, 46, 41, 49, 43, 36, 68, 92, 33, 84, 90};
+
+        Model model = new Model();
+        int nos = 20;
+        // occurrence of each item
+        IntVar[] objects = new IntVar[nos];
+        for (int i = 0; i < nos; i++) {
+            objects[i] = model.intVar("o_" + (i + 1), 0, (int) ceil(capacities[1]*1. / volumes[i]), true);
+        }
+        final IntVar profit = model.intVar("power", 0, 8415, true);
+        IntVar capacity = model.intVar("weight", capacities[0], capacities[1], true);
+        model.scalar(objects, volumes, "=", capacity).post();
+        model.scalar(objects, energies, "=", profit).post();
+        model.knapsack(objects, capacity, profit, volumes, energies).post();
+
+        model.arithm(profit, ">=", 5293).post();
+        // 19:0, 8:0, 1:88, 13:0, 16:3, 14:0, 4:0, 12:0, 18:0,
+        model.arithm(objects[19], "=", 0).post();
+        model.arithm(objects[8], "=", 0).post();
+        model.arithm(objects[1], "=", 88).post();
+        Solver solver = model.getSolver();
+
+        try{
+            solver.propagate();
+            Assert.fail();
+        }catch (ContradictionException cex){
+        }
+
+        solver.setSearch(new FullyRandom(model.retrieveIntVars(true), seed));
+        solver.findAllSolutions();
+
+        // Both solutions should be found
+        Assert.assertEquals(solver.getSolutionCount(), 0,
+                "Expected 0 solution, but found: " + solver.getSolutionCount());
+
     }
 }

@@ -199,11 +199,11 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
      * @param itemOccurence array of boolean variables indicating whether each item is included (1) or not (0)
      * @param capacity      the integer variable representing the knapsack capacity (maximum weight)
      * @param totalProfit   the integer variable representing the knapsack total profit
-     * @param weight        array of item weights
-     * @param profit        array of item profits
+     * @param weights       array of item weights
+     * @param profits       array of item profits
      */
     public PropKnapsackKatriel01(BoolVar[] itemOccurence, IntVar capacity, IntVar totalProfit,
-                                 int[] weight, int[] profit) {
+                                 int[] weights, int[] profits) {
         super(ArrayUtils.append(itemOccurence, new IntVar[]{capacity, totalProfit}), PropagatorPriority.QUADRATIC, true);
         this.n = itemOccurence.length;
         this.itemState = new int[n];
@@ -218,13 +218,13 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
         ArraySort<Integer> sorter = new ArraySort<>(n, false, true);
         sorter.sort(order, n, (i1, i2) -> {
             // Compares efficiencies decreasingly
-            long comparaison = (long) profit[i2] * weight[i1] - (long) profit[i1] * weight[i2];
+            long comparaison = (long) profits[i2] * weights[i1] - (long) profits[i1] * weights[i2];
             if (comparaison == 0) {
-                if (weight[i1] * weight[i2] == 0) {
-                    comparaison = (long) profit[i2] - profit[i1];
+                if (weights[i1] * weights[i2] == 0) {
+                    comparaison = (long) profits[i2] - profits[i1];
                 } else {
                     // breaking ties in favor of larger weights
-                    comparaison = (long) weight[i2] - weight[i1];
+                    comparaison = (long) weights[i2] - weights[i1];
                 }
             }
             return Long.signum(comparaison);
@@ -232,7 +232,7 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
         ArrayList<KPItem> orderedItems = new ArrayList<>();
         orderedItems.ensureCapacity(n);
         for (int i = 0; i < n; ++i) {
-            orderedItems.add(new KPItem(profit[order[i]], weight[order[i]]));
+            orderedItems.add(new KPItem(profits[order[i]], weights[order[i]]));
             reverseOrder[order[i]] = i;
         }
         this.findingTree = new ItemFindingSearchTree(orderedItems);
@@ -275,6 +275,7 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
                 }
             }
         }
+        assert checkItemTreeConsistency();
         // Recompute critical item information if needed (after backtrack, restart, or capacity change)
         if (mustRecomputeCriticalInfos()) {
             // compute the Dantzig solution and set members variables
@@ -316,7 +317,7 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
         }
         // case 2. from mustRecomputeCriticalInfos()
         mustRecomputeCriticalInfos |= varIdx < n + 1;
-        forcePropagate(PropagatorEventType.FULL_PROPAGATION);
+        forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
 
     }
 
@@ -525,5 +526,101 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
      */
     private IEnvironment getEnvironment() {
         return this.getModel().getEnvironment();
+    }
+
+    /**
+     * Checks consistency between item occurrence variables (index &lt; n), their internal state,
+     * and their presence/absence in the finger trees.
+     * <p>
+     * This method verifies that:
+     * <ul>
+     *   <li>If {@code vars[i]} is instantiated to 0, then:
+     *       <ul>
+     *         <li>{@code itemState[i]} is {@link #REMOVED}</li>
+     *         <li>The corresponding leaves are NOT active in both {@code computingTree} and {@code findingTree}</li>
+     *       </ul>
+     *   </li>
+     *   <li>If {@code vars[i]} is instantiated to 1, then:
+     *       <ul>
+     *         <li>{@code itemState[i]} is {@link #ADDED}</li>
+     *         <li>The corresponding leaves are NOT active in both {@code computingTree} and {@code findingTree}</li>
+     *       </ul>
+     *   </li>
+     *   <li>If {@code vars[i]} is not instantiated (contains both 0 and 1), then:
+     *       <ul>
+     *         <li>{@code itemState[i]} is {@link #NOT_DEFINED}</li>
+     *         <li>The corresponding leaves ARE active in both {@code computingTree} and {@code findingTree}</li>
+     *       </ul>
+     *   </li>
+     *   <li>Both finger trees are synchronized with respect to leaf activation states</li>
+     *   <li>{@code totalWeight} equals the sum of weights of all items with state {@link #ADDED}</li>
+     *   <li>{@code accumulatedProfit} equals the sum of profits of all items with state {@link #ADDED}</li>
+     * </ul>
+     * <p>
+     * This is useful for debugging and ensuring the propagator's internal state is consistent
+     * with the variable domains and tree structures.
+     *
+     * @return true if all consistency checks pass, false otherwise
+     */
+    public boolean checkItemTreeConsistency() {
+        int expectedTotalWeight = 0;
+        int expectedAccumulatedProfit = 0;
+
+        for (int i = 0; i < n; i++) {
+            int sortedIndex = reverseOrder[i];
+            int computingGlobalIndex = computingTree.leafToGlobalIndex(sortedIndex);
+            int findingGlobalIndex = findingTree.leafToGlobalIndex(sortedIndex);
+
+            if (computingGlobalIndex == -1 || findingGlobalIndex == -1) {
+                return false;
+            }
+
+            boolean computingActive = computingTree.getLeaf(computingGlobalIndex).isActive();
+            boolean findingActive = findingTree.getLeaf(findingGlobalIndex).isActive();
+
+            // Both trees must agree on activation state
+            if (computingActive != findingActive) {
+                return false;
+            }
+
+            if (vars[i].isInstantiatedTo(0)) {
+                // Variable fixed to 0
+                if (itemState[i] != REMOVED) {
+                    return false;
+                }
+                if (computingActive) {
+                    return false;
+                }
+            } else if (vars[i].isInstantiatedTo(1)) {
+                // Variable fixed to 1
+                if (itemState[i] != ADDED) {
+                    return false;
+                }
+                if (computingActive) {
+                    return false;
+                }
+                // Accumulate weight and profit for ADDED items
+                expectedTotalWeight += computingTree.getLeaf(computingGlobalIndex).getActivatedWeight();
+                expectedAccumulatedProfit += computingTree.getLeaf(computingGlobalIndex).getActivatedProfit();
+            } else {
+                // Variable is free (contains both 0 and 1)
+                if (itemState[i] != NOT_DEFINED) {
+                    return false;
+                }
+                if (!computingActive) {
+                    return false;
+                }
+            }
+        }
+
+        // Verify totalWeight and accumulatedProfit match the sum of ADDED items
+        if (totalWeight != expectedTotalWeight) {
+            return false;
+        }
+        if (accumulatedProfit != expectedAccumulatedProfit) {
+            return false;
+        }
+
+        return true;
     }
 }
