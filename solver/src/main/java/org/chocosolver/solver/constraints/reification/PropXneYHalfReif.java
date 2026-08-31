@@ -51,13 +51,17 @@ public class PropXneYHalfReif extends Propagator<IntVar> {
         } else if (b.isInstantiatedTo(1)) {
             // if b is true, then x and y must be different
             if (x.isInstantiated()) {
-                y.removeValue(x.getValue(), this,
-                        lcg() ? this.r(x.getValLit(), b.getValLit()) : Reason.undef());
-                setPassive();
+                if(y.removeValue(x.getValue(), this,
+                        lcg() ? this.r(x.getValLit(), b.getValLit()) : Reason.undef())
+                || !y.contains(x.getValue())){
+                    setPassive();
+                }
             }else if (y.isInstantiated()) {
-                x.removeValue(y.getValue(), this,
-                        lcg() ? this.r(y.getValLit(), b.getValLit()) : Reason.undef());
-                setPassive();
+                if(x.removeValue(y.getValue(), this,
+                        lcg() ? this.r(y.getValLit(), b.getValLit()) : Reason.undef())
+                || !x.contains(y.getValue())){
+                    setPassive();
+                }
             }
         } else if (x.isInstantiated() && y.isInstantiated() && x.getValue() == y.getValue()) {
             // if x and y are instantiated and equal, then b must be false
