@@ -505,4 +505,310 @@ public class ReifiedTest {
         }
         solver2.printShortStatistics();
     }
+
+    // ========================================================================
+    // Tests for issue #1240: Unsound reified variable disequality on bounded domains
+    // ========================================================================
+
+    /**
+     * MWE from issue #1240: reifyXeqY with bounded domains and b=0 should not accept x==y
+     * Expected: 2 solutions (y=-1 and y=1)
+     * Bug: 3 solutions including invalid x=0, y=0, equal=0
+     */
+    @Test(groups = "1s", timeOut = 60000)
+    public void testIssue1240_reifyXeqY() {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 1, true);
+        IntVar y = model.intVar("y", -1, 1, true);
+        BoolVar equal = model.boolVar("equal");
+
+        model.reifyXeqY(x, y, equal);
+        model.arithm(x, "=", 0).post();
+        model.arithm(equal, "=", 0).post();
+        System.out.println(model);
+        while (model.getSolver().solve()) {
+            // With x=0 and equal=0, y must not be 0
+            assertEquals(x.getValue(), 0, "x should be 0");
+            assertEquals(equal.getValue(), 0, "equal should be 0");
+            assert x.getValue() != y.getValue() : 
+                String.format("Invalid solution: x=%d, y=%d, equal=%d", 
+                    x.getValue(), y.getValue(), equal.getValue());
+        }
+        assertEquals(model.getSolver().getSolutionCount(), 2, "Expected 2 solutions, got " + model.getSolver().getSolutionCount());
+    }
+
+    /**
+     * Variant using reifyXneY with bounded domains and b=1
+     * Expected: 2 solutions (y=-1 and y=1)
+     * Bug: 3 solutions including invalid x=0, y=0, notEqual=1
+     */
+    @Test(groups = "1s", timeOut = 60000)
+    public void testIssue1240_reifyXneY() {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 1, true);
+        IntVar y = model.intVar("y", -1, 1, true);
+        BoolVar notEqual = model.boolVar("notEqual");
+
+        model.reifyXneY(x, y, notEqual);
+        model.arithm(x, "=", 0).post();
+        model.arithm(notEqual, "=", 1).post();
+
+        while (model.getSolver().solve()) {
+            // With x=0 and notEqual=1, y must not be 0
+            assertEquals(x.getValue(), 0, "x should be 0");
+            assertEquals(notEqual.getValue(), 1, "notEqual should be 1");
+            assert x.getValue() != y.getValue() : 
+                String.format("Invalid solution: x=%d, y=%d, notEqual=%d", 
+                    x.getValue(), y.getValue(), notEqual.getValue());
+        }
+        assertEquals(model.getSolver().getSolutionCount(), 2, "Expected 2 solutions, got " + model.getSolver().getSolutionCount());
+    }
+
+    /**
+     * Variant using reifyXeqYC with offset c=0
+     * reifyXeqYC(x, y, c, b) means: b = (x == y + c)
+     * With x=0, c=0, b=0: 0 != y+0, so y != 0
+     * y in [-1,1], so solutions are y=-1 and y=1
+     */
+    @Test(groups = "1s", timeOut = 60000)
+    public void testIssue1240_reifyXeqYC() {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 1, true);
+        IntVar y = model.intVar("y", -1, 1, true);
+        BoolVar equal = model.boolVar("equal");
+
+        model.reifyXeqYC(x, y, 0, equal);
+        model.arithm(x, "=", 0).post();
+        model.arithm(equal, "=", 0).post();
+
+        while (model.getSolver().solve()) {
+            // With x=0, c=0, equal=0: x != y+0 => 0 != y
+            assert x.getValue() != y.getValue() : 
+                String.format("Invalid solution: x=%d, y=%d, equal=%d", 
+                    x.getValue(), y.getValue(), equal.getValue());
+        }
+        assertEquals(model.getSolver().getSolutionCount(), 2, "Expected 2 solutions, got " + model.getSolver().getSolutionCount());
+    }
+
+    /**
+     * Variant using reifyXneYC with offset c=0
+     * This should reproduce the issue with the interior value problem
+     */
+    @Test(groups = "1s", timeOut = 60000)
+    public void testIssue1240_reifyXneYC() {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 1, true);
+        IntVar y = model.intVar("y", -1, 1, true);
+        BoolVar notEqual = model.boolVar("notEqual");
+
+        model.reifyXneYC(x, y, 0, notEqual);
+        model.arithm(x, "=", 0).post();
+        model.arithm(notEqual, "=", 1).post();
+
+        while (model.getSolver().solve()) {
+            // With x=0, c=0, notEqual=1: x != y+0 => 0 != y
+            assert x.getValue() != y.getValue() : 
+                String.format("Invalid solution: x=%d, y=%d, notEqual=%d", 
+                    x.getValue(), y.getValue(), notEqual.getValue());
+        }
+        assertEquals(model.getSolver().getSolutionCount(), 2, "Expected 2 solutions, got " + model.getSolver().getSolutionCount());
+    }
+
+    /**
+     * Variant using reifXrelYC with "="
+     */
+    @Test(groups = "1s", timeOut = 60000)
+    public void testIssue1240_reifXrelYC_eq() {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 1, true);
+        IntVar y = model.intVar("y", -1, 1, true);
+        BoolVar equal = model.boolVar("equal");
+
+        model.reifXrelYC(x, "=", y, 0, equal);
+        model.arithm(x, "=", 0).post();
+        model.arithm(equal, "=", 0).post();
+
+        while (model.getSolver().solve()) {
+            assert x.getValue() != y.getValue() : 
+                String.format("Invalid solution: x=%d, y=%d, equal=%d", 
+                    x.getValue(), y.getValue(), equal.getValue());
+        }
+        assertEquals(model.getSolver().getSolutionCount(), 2, "Expected 2 solutions, got " + model.getSolver().getSolutionCount());
+    }
+
+    /**
+     * Variant using reifXrelYC with "!="
+     */
+    @Test(groups = "1s", timeOut = 60000)
+    public void testIssue1240_reifXrelYC_ne() {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 1, true);
+        IntVar y = model.intVar("y", -1, 1, true);
+        BoolVar notEqual = model.boolVar("notEqual");
+
+        model.reifXrelYC(x, "!=", y, 0, notEqual);
+        model.arithm(x, "=", 0).post();
+        model.arithm(notEqual, "=", 1).post();
+
+        while (model.getSolver().solve()) {
+            assert x.getValue() != y.getValue() : 
+                String.format("Invalid solution: x=%d, y=%d, notEqual=%d", 
+                    x.getValue(), y.getValue(), notEqual.getValue());
+        }
+        assertEquals(model.getSolver().getSolutionCount(), 2, "Expected 2 solutions, got " + model.getSolver().getSolutionCount());
+    }
+
+    /**
+     * Variant using impXrelYC with "!="
+     */
+    @Test(groups = "1s", timeOut = 60000)
+    public void testIssue1240_impXrelYC() {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 1, true);
+        IntVar y = model.intVar("y", -1, 1, true);
+        BoolVar b = model.boolVar("b", true);
+
+        model.impXrelYC(x, "!=", y, 0, b);
+        model.arithm(x, "=", 0).post();
+
+        while (model.getSolver().solve()) {
+            // With b=true (instantiated), we should have x != y
+            assert x.getValue() != y.getValue() : 
+                String.format("Invalid solution: x=%d, y=%d, b=%d", 
+                    x.getValue(), y.getValue(), b.getValue());
+        }
+        assertEquals(model.getSolver().getSolutionCount(), 2, "Expected 2 solutions, got " + model.getSolver().getSolutionCount());
+    }
+
+    /**
+     * Variant using x.eq(y).boolVar() forced to false
+     */
+    @Test(groups = "1s", timeOut = 60000)
+    public void testIssue1240_eqBoolVar() {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 1, true);
+        IntVar y = model.intVar("y", -1, 1, true);
+        BoolVar equal = x.eq(y).boolVar();
+
+        model.arithm(x, "=", 0).post();
+        model.arithm(equal, "=", 0).post();
+
+        while (model.getSolver().solve()) {
+            assert x.getValue() != y.getValue() : 
+                String.format("Invalid solution: x=%d, y=%d, equal=%d", 
+                    x.getValue(), y.getValue(), equal.getValue());
+        }
+        assertEquals(model.getSolver().getSolutionCount(), 2, "Expected 2 solutions, got " + model.getSolver().getSolutionCount());
+    }
+
+    /**
+     * Variant using x.ne(y).boolVar() forced to true
+     */
+    @Test(groups = "1s", timeOut = 60000)
+    public void testIssue1240_neBoolVar() {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 1, true);
+        IntVar y = model.intVar("y", -1, 1, true);
+        BoolVar notEqual = x.ne(y).boolVar();
+
+        model.arithm(x, "=", 0).post();
+        model.arithm(notEqual, "=", 1).post();
+
+        while (model.getSolver().solve()) {
+            assert x.getValue() != y.getValue() : 
+                String.format("Invalid solution: x=%d, y=%d, notEqual=%d", 
+                    x.getValue(), y.getValue(), notEqual.getValue());
+        }
+        assertEquals(model.getSolver().getSolutionCount(), 2, "Expected 2 solutions, got " + model.getSolver().getSolutionCount());
+    }
+
+    /**
+     * Variant using x.in(y).boolVar() with single IntVar operand, forced to false
+     */
+    @Test(groups = "1s", timeOut = 60000)
+    public void testIssue1240_inBoolVar() {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 1, true);
+        IntVar y = model.intVar("y", -1, 1, true);
+        BoolVar in = x.in(y).boolVar();
+
+        model.arithm(x, "=", 0).post();
+        model.arithm(in, "=", 0).post();
+
+        while (model.getSolver().solve()) {
+            // in=0 means x not in y, so x != y
+            assert x.getValue() != y.getValue() : 
+                String.format("Invalid solution: x=%d, y=%d, in=%d", 
+                    x.getValue(), y.getValue(), in.getValue());
+        }
+        assertEquals(model.getSolver().getSolutionCount(), 2, "Expected 2 solutions, got " + model.getSolver().getSolutionCount());
+    }
+
+    /**
+     * Variant using x.notin(y).boolVar() with single IntVar operand, forced to true
+     */
+    @Test(groups = "1s", timeOut = 60000)
+    public void testIssue1240_notinBoolVar() {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 1, true);
+        IntVar y = model.intVar("y", -1, 1, true);
+        BoolVar notin = x.notin(y).boolVar();
+
+        model.arithm(x, "=", 0).post();
+        model.arithm(notin, "=", 1).post();
+
+        while (model.getSolver().solve()) {
+            // notin=1 means x not in y, so x != y
+            assert x.getValue() != y.getValue() : 
+                String.format("Invalid solution: x=%d, y=%d, notin=%d", 
+                    x.getValue(), y.getValue(), notin.getValue());
+        }
+        assertEquals(model.getSolver().getSolutionCount(), 2, "Expected 2 solutions, got " + model.getSolver().getSolutionCount());
+    }
+
+    /**
+     * Test with different domain configurations to ensure the issue is caught
+     */
+    @Test(groups = "1s", timeOut = 60000)
+    public void testIssue1240_variousDomains() {
+        // Test with x in [1,2], y in [0,2], equal=0
+        Model model = new Model();
+        IntVar x = model.intVar("x", 1, 2, true);
+        IntVar y = model.intVar("y", 0, 2, true);
+        BoolVar equal = model.boolVar("equal");
+
+        model.reifyXeqY(x, y, equal);
+        model.arithm(x, "=", 1).post();
+        model.arithm(equal, "=", 0).post();
+
+        while (model.getSolver().solve()) {
+            assert x.getValue() != y.getValue() : 
+                String.format("Invalid solution: x=%d, y=%d, equal=%d", 
+                    x.getValue(), y.getValue(), equal.getValue());
+        }
+        assertEquals(model.getSolver().getSolutionCount(), 2, "Expected 2 solutions, got " + model.getSolver().getSolutionCount());
+    }
+
+    /**
+     * Test with a different interior value configuration
+     */
+    @Test(groups = "1s", timeOut = 60000)
+    public void testIssue1240_anotherInteriorValue() {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 5, 10, true);
+        IntVar y = model.intVar("y", 0, 10, true);
+        BoolVar equal = model.boolVar("equal");
+
+        model.reifyXeqY(x, y, equal);
+        model.arithm(x, "=", 5).post();
+        model.arithm(equal, "=", 0).post();
+
+        while (model.getSolver().solve()) {
+            assert x.getValue() != y.getValue() : 
+                String.format("Invalid solution: x=%d, y=%d, equal=%d", 
+                    x.getValue(), y.getValue(), equal.getValue());
+        }
+        // y can be 0,1,2,3,4,6,7,8,9,10 = 10 values
+        assertEquals(model.getSolver().getSolutionCount(), 10, "Expected 10 solutions, got " + model.getSolver().getSolutionCount());
+    }
 }
