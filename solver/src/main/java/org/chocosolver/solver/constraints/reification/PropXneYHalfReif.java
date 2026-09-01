@@ -17,8 +17,20 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
 /**
- * A propagator dedicated to express b &rArr; x != y
- * <br/>
+ * A propagator dedicated to express b &rArr; x != y.
+ * <p>
+ *     This propagator ensures that if b is true, then x and y must be different.
+ *     When b is false, no filtering is required.
+ * </p>
+ * <p>
+ *     <b>Important note on bounded domains:</b>
+ *     When x (or y) is instantiated and y (or x) has a bounded domain, attempting to remove
+ *     a value that is interior to the domain (not on a bound) will not change the domain
+ *     representation. However, the propagator must not passivate unconditionally after
+ *     calling {@code removeValue}, as this would fail to check the constraint when search
+ *     later narrows the domain to that value. The propagator checks whether the value was
+ *     actually removed or is no longer in the domain before passivating.
+ * </p>
  *
  * @author Charles Prud'homme
  * @since 08/02/2024
