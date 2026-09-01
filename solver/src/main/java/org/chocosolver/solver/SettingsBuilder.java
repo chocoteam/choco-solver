@@ -44,6 +44,10 @@ public class SettingsBuilder {
     public static final String MODEL_CHECKER = "modelChecker";
     private Predicate<Solver> modelChecker = s -> !ESat.FALSE.equals(s.isSatisfied());
 
+    public static final String SEED = "seed";
+    @Option(name = "-seed", usage = "Set the seed for random number generator. ")
+    private long seed = 1_000_000_007L;
+
     public static final String CLONE_VARIABLE_ARRAY_IN_PROPAGATOR = "cloneVariableArrayInPropagator";
     @Option(name = "--cloneVariableArrayInPropagator",
             aliases = {"--prop.cloneVarArray", "-cvap"},
@@ -377,6 +381,9 @@ public class SettingsBuilder {
                 case DEFAULT_SEARCH:
                     // not supported
                     break;
+                case SEED:
+                    this.setSeed(Long.parseLong(value));
+                    break;
                 case CLONE_VARIABLE_ARRAY_IN_PROPAGATOR:
                     this.setCloneVariableArrayInPropagator(Boolean.parseBoolean(value));
                     break;
@@ -507,6 +514,24 @@ public class SettingsBuilder {
      */
     public Settings build() {
         return new Settings(this);
+    }
+
+    /**
+     * Set the seed used by the random number generator.
+     *
+     * @param seed the seed value
+     * @return the current instance
+     */
+    public SettingsBuilder setSeed(long seed) {
+        this.seed = seed;
+        return this;
+    }
+
+    /**
+     * @return the seed value.
+     */
+    public long getSeed() {
+        return seed;
     }
 
     /**

@@ -58,7 +58,7 @@ public class IntSearch {
             case max_regret:
                 return new MaxRegret();
             case dom_w_deg:
-                return new DomOverWDeg<>(variables, variables[0].getModel().getSeed());
+                return new DomOverWDeg<>(variables, variables[0].getModel().getSettings().getSeed());
             default:
                 System.err.println("% No implementation for " + varChoice.name() + ". Set default.");
                 return null;
@@ -84,7 +84,7 @@ public class IntSearch {
                 valSelector = new IntDomainMedian();
                 break;
             case indomain_random:
-                valSelector = new IntDomainRandom(model.getSeed());
+                valSelector = new IntDomainRandom(model.getSettings().getSeed());
                 break;
             case indomain_split:
             case indomain_interval:

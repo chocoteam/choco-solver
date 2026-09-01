@@ -54,7 +54,7 @@ public class PropElementV_fast extends Propagator<IntVar> {
         this.var = vars[0];
         this.index = vars[1];
         this.fast = true;
-        rd = new Random(vars[0].getModel().getSeed());
+        rd = new Random(vars[0].getModel().getSettings().getSeed());
         calls = success = 1;
     }
 
