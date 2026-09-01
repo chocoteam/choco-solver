@@ -17,8 +17,17 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
 /**
- * A propagator dedicated to express b &rArr; x == y
- * <br/>
+ * A propagator dedicated to express b &rArr; x == y.
+ * <p>
+ *     This propagator ensures that if b is true, then x and y must be equal.
+ *     When b is false, no filtering is required.
+ * </p>
+ * <p>
+ *     This propagator handles both enumerated and bounded domains. For bounded domains,
+ *     it performs bounds consistency by synchronizing the lower and upper bounds of x and y.
+ *     If both variables have enumerated domains and their combined size is below a threshold,
+ *     it also removes values from one variable that are not in the other's domain.
+ * </p>
  *
  * @author Charles Prud'homme
  * @since 08/02/2024
