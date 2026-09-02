@@ -21,6 +21,11 @@ import org.chocosolver.solver.variables.events.IntEventType;
  * <p>
  * The propagator is created with <code>react = false</code>, meaning it is not initially active
  * in the propagation engine. It only reacts to bound and instantiation events.
+ * <p>
+ * Note: This propagator does not propagate holes that could be made from Y to absY.
+ * For example, if <code>absY = [0,3]</code> and <code>Y = {-3, -2, 2, 3}</code>,
+ * the hole <code>{-1, 0, 1}</code> in <code>Y</code> (which would imply <code>0,1</code> are missing in <code>absY</code>)
+ * is not propagated.
  *
  * @author Charles Prud'homme
  * @since 04/07/2025
