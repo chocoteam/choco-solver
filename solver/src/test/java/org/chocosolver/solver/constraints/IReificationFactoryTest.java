@@ -7,6 +7,7 @@
 package org.chocosolver.solver.constraints;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
@@ -210,6 +211,38 @@ public class IReificationFactoryTest {
     }
 
     @Test(groups = "1s")
+    public void testReifyXinS2() {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 2, true); // bounded domain
+        BoolVar b = model.boolVar("b");
+        var set = new IntIterableRangeSet(new int[]{0, 2});
+        model.reifyXinS(x, set, b);
+        model.arithm(b, "=", 1).post();
+        model.getSolver().setSearch(Search.inputOrderLBSearch(x));
+        while (model.getSolver().solve()) {
+            System.out.printf("x=%d, b=%d%n",
+                    x.getValue(), b.getValue());
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 2);
+    }
+
+    @Test(groups = "1s")
+    public void testReifyXinS3() {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 3, 8, true); // bounded domain
+        BoolVar b = model.boolVar("b");
+        var set = new IntIterableRangeSet(new int[]{1,2, 4,5,6, 9,10});
+        model.reifyXinS(x, set, b);
+        model.arithm(b, "=", 1).post();
+        model.getSolver().setSearch(Search.inputOrderLBSearch(x));
+        while (model.getSolver().solve()) {
+            System.out.printf("x=%d, b=%d%n",
+                    x.getValue(), b.getValue());
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 3);
+    }
+
+    @Test(groups = "1s")
     public void testReifyXnotinS() {
         Model m = new Model();
         IntVar X = m.intVar(0, 5);
@@ -219,6 +252,23 @@ public class IReificationFactoryTest {
         while (m.getSolver().solve()) {
             Assert.assertTrue(B.isInstantiatedTo(0) | !S.contains(X.getValue()));
         }
+    }
+
+    @Test(groups = "1s")
+    public void testReifyXnotinS2() {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 2, true); // bounded domain
+        BoolVar b = model.boolVar("b");
+        var set = new IntIterableRangeSet(new int[]{1});
+
+        model.reifyXnotinS(x, set, b);
+        model.arithm(b, "=", 1).post();
+        model.getSolver().setSearch(Search.inputOrderLBSearch(x));
+        while (model.getSolver().solve()) {
+            System.out.printf("x=%d, b=%d%n",
+                    x.getValue(), b.getValue());
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 2);
     }
 
     @Test(groups = "1s")
