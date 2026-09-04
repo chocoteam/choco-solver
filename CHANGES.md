@@ -9,6 +9,8 @@ NEXT MILESTONE
 
 ### Major features:
 - Reduced integer overflows on large sum domain definition
+- Fix declaring constraint for absolute constraint when the abs variable is already instantiated to 0
+- No more constraints are posted within factories (instead when LCG is activated)
 
 ### Deprecated API (to be removed in next release):
 
@@ -18,6 +20,7 @@ See [milestone 6.0.2](https://github.com/chocoteam/choco-solver/milestone/xx)
 #### Contributors to this release:
 - Charles Prud'homme <charles.prudhomme@imt-atlantique.fr>
 - Jean-Guillaume Fages <jg.fages@cosling.com>
+- Arthur Godet <arth.godet@gmail.com>
 
 
 **Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v6.0.1...v6.0.2

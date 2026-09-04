@@ -6,8 +6,8 @@
  */
 package org.chocosolver.solver.variables;
 
-import org.chocosolver.solver.ICause;
 import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Explained;
@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 
 /**
  * Container representing a task:
- * It ensures that: start + duration = end
+ * It ensures, when posted, that: start + duration = end
  *
  * @author Arthur Godet
  * @since 25/11/2023
@@ -123,9 +123,11 @@ public class Task extends Propagator<IntVar> {
         if (shouldPassivate(s, d, e)) {
             setActive();
             setPassive();
-        } else {
-            this.getModel().post(new Constraint("Task relation", this));
         }
+    }
+
+    public void post() {
+        this.getModel().post(new Constraint("Task relation", this));
     }
 
     private Task(IntVar[] vars) {
