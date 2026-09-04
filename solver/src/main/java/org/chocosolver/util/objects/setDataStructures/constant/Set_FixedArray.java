@@ -26,7 +26,6 @@ public class Set_FixedArray implements ISet {
 
 	protected final int size;
 	protected final int[] values;
-	protected ISetIterator iter = newIterator();
 
 	//***********************************************************************************
 	// CONSTRUCTOR
@@ -102,14 +101,13 @@ public class Set_FixedArray implements ISet {
 
 	@Override
 	public ISetIterator iterator(){
-		iter.reset();
-		return iter;
+		return newIterator();
 	}
 
 	@Override
 	public ISetIterator newIterator(){
 		return new ISetIterator() {
-			private int idx;
+			private int idx = 0;
 			@Override
 			public void reset() {
 				idx = 0;
