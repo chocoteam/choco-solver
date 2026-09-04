@@ -251,6 +251,12 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 
     /**
      * Creates an absolute value constraint: var1 = |var2|
+     * <p>
+     * When LCG (Lazy Clause Generation) is enabled, this uses {@link PropAbsoluteLight} which
+     * performs bounds-based filtering only and does not propagate holes from var2 to var1.
+     * For example, if <code>var1 = [0,3]</code> and <code>var2 = [-3, -2, 2, 3]</code>,
+     * the hole <code>-1</code> in <code>var2</code> (which would imply <code>1</code> is missing in <code>var1</code>)
+     * is not propagated when using {@link PropAbsoluteLight}.
      */
     default Constraint absolute(IntVar var1, IntVar var2) {
         assert var1.getModel() == var2.getModel();
