@@ -356,11 +356,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                     } else {
                         int[] bounds = VariableUtils.boundsForMultiplication(var1, var2);
                         IntVar var4 = ref().intVar(bounds[0], bounds[1]);
-                        return Constraint.merge(
-                            ConstraintsName.ARITHM,
-                            ref().times(var1, var2, var4),
-                            arithm(var4, op2, cste)
-                        );
+                        ref().times(var1, var2, var4).post();
+                        return arithm(var4, op2, cste);
                     }
                 case "/":
                     // v1 / v2 OP cste
@@ -383,11 +380,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                             } else {
                                 int[] bounds = VariableUtils.boundsForMultiplication(var2, ref().intVar(cste));
                                 IntVar var4 = ref().intVar(bounds[0], bounds[1]);
-                                return Constraint.merge(
-                                    ConstraintsName.ARITHM,
-                                    ref().times(var2, cste, var4),
-                                    arithm(var1, op1, var4)
-                                );
+                                ref().times(var2, cste, var4).post();
+                                return arithm(var1, op1, var4);
                             }
                         case "/":
                             // v1 OP v2 / cste
@@ -729,11 +723,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                     // v1 * v2 OP v3
                     int[] bounds = VariableUtils.boundsForMultiplication(var1, var2);
                     IntVar var4 = ref().intVar(bounds[0], bounds[1]);
-                    return Constraint.merge(
-                        ConstraintsName.ARITHM,
-                        ref().times(var1, var2, var4),
-                        arithm(var4, op2, var3)
-                    );
+                    ref().times(var1, var2, var4).post();
+                    return arithm(var4, op2, var3);
                 }
             case "/":
                 // v1 / v2 = v3
@@ -759,11 +750,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                             // v1 OP v2 * v3
                             int[] bounds = VariableUtils.boundsForMultiplication(var2, var3);
                             IntVar var4 = ref().intVar(bounds[0], bounds[1]);
-                            return Constraint.merge(
-                                ConstraintsName.ARITHM,
-                                ref().times(var2, var3, var4),
-                                arithm(var1, op1, var4)
-                            );
+                            ref().times(var2, var3, var4).post();
+                            return arithm(var1, op1, var4);
                         }
                     case "/":
                         // v1 = v2 / v3
@@ -1231,7 +1219,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         if (bools.length == 1) {
             return ref().arithm(bools[0], "=", 1);
         }
-        return ref().sum(bools, "=", bools.length);
+        Model s = bools[0].getModel();
+        IntVar sum = s.intVar(0, bools.length, true);
+        s.sum(bools, "=", sum).post();
+        return s.arithm(sum, "=", bools.length);
     }
 
     /**
@@ -2381,7 +2372,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @return a constraint that is satisfied if at least one boolean variables in <i>bools</i> is true
      */
     default Constraint or(BoolVar... bools) {
-        return ref().sum(bools, ">=", 1);
+        Model s = bools[0].getModel();
+        IntVar sum = s.intVar(0, bools.length, true);
+        s.sum(bools, "=", sum).post();
+        return s.arithm(sum, ">=", 1);
     }
 
     /**
