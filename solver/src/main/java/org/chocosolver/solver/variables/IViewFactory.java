@@ -133,12 +133,10 @@ public interface IViewFactory extends ISelf<Model> {
                 // value the composed expression can take is well within range.
                 long av = (view.p ? 1L : -1L) * view.a * a;
                 long bv = (long) a * view.b + b;
-                if (fitsInt(av) && fitsInt(bv)) {
-                    if (av == 1 && bv == 0) {
-                        return view.getVariable();
-                    } else {
-                        return intView((int) av, view.getVariable(), (int) bv);
-                    }
+                if (av == 1 && bv == 0) {
+                    return view.getVariable();
+                } else if (fitsInt(av) && fitsInt(bv)) {
+                    return intView((int) av, view.getVariable(), (int) bv);
                 }
                 // Flattening would overflow, so stack a view on the view: its
                 // own coefficients are small enough to be applied one at a time.
