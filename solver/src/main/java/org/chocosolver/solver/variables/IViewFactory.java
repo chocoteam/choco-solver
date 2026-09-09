@@ -32,6 +32,7 @@ import static java.lang.Math.max;
  * A kind of factory relying on interface default implementation to allow (multiple) inheritance
  *
  * @author Jean-Guillaume FAGES
+ * @author Aditya Nikam <adityanikam9502@gmail.com>
  */
 public interface IViewFactory extends ISelf<Model> {
 
@@ -128,16 +129,19 @@ public interface IViewFactory extends ISelf<Model> {
             }
             if (var instanceof IntAffineView) {
                 IntAffineView<?> view = (IntAffineView<?>) var;
-                int av = (view.p ? 1 : -1) * view.a * a;
-                int bv = a * view.b + b;
+                // Compose in long: flattening can overflow int even when every
+                // value the composed expression can take is well within range.
+                long av = (view.p ? 1L : -1L) * view.a * a;
+                long bv = (long) a * view.b + b;
                 if (av == 1 && bv == 0) {
                     return view.getVariable();
-                } else {
-                    return intView(av, view.getVariable(), bv);
+                } else if (fitsInt(av) && fitsInt(bv)) {
+                    return intView((int) av, view.getVariable(), (int) bv);
                 }
-            } else {
-                return new IntAffineView<>(var, a, b);
+                // Flattening would overflow, so stack a view on the view: its
+                // own coefficients are small enough to be applied one at a time.
             }
+            return new IntAffineView<>(var, a, b);
         } else {
             int lb, ub;
             if (a > 0) {
@@ -165,6 +169,14 @@ public interface IViewFactory extends ISelf<Model> {
             }
             return ov;
         }
+    }
+
+    /**
+     * @param value a value computed in long arithmetic
+     * @return {@code true} if <i>value</i> can be stored in an int without loss
+     */
+    private static boolean fitsInt(long value) {
+        return value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE;
     }
 
     /**
