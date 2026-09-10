@@ -1428,25 +1428,30 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     /**
-     * Creates an channeling constraint between an integer variable and a set of boolean variables.
+     * Creates a channeling constraint between an integer variable and a set of boolean variables.
      * Maps the boolean assignments variables bVars with the standard assignment variable var. <br>
      * var = i <-> bVars[i-offset] = 1
+     * <p>
+     * Supports both enumerated domains (arc consistency) and bounded domains
+     * (bound consistency via bound-tightening in {@link PropEnumDomainChanneling}).
+     * With LCG, explanations require equality literals, which bounded domains do not provide:
+     * an enumerated copy of {@code var} is then channeled instead.
+     * </p>
      *
      * @param bVars  array of boolean variables
-     * @param var    observed variable. Should presumably have an enumerated domain
+     * @param var    observed variable
      * @param offset 0 by default but typically 1 if used within MiniZinc
      *               (which counts from 1 to n instead of from 0 to n-1)
      */
     default Constraint boolsIntChanneling(BoolVar[] bVars, IntVar var, int offset) {
-        if (var.hasEnumeratedDomain()) {
-            return new Constraint(ConstraintsName.BOOLCHANNELING, new PropEnumDomainChanneling(bVars, var, offset));
-        } else {
-            IntVar enumV = var.getModel().intVar(var.getName() + "_enumImage", var.getLB(), var.getUB(), false);
-            enumV.eq(var).post();
-            return new Constraint(ConstraintsName.BOOLCHANNELING,
-                    new PropEnumDomainChanneling(bVars, enumV, offset)
-            );
+        if (ref().getSolver().isLCG() && !var.hasEnumeratedDomain()) {
+            IntVar enumV = ref().intVar(ref().generateName("CHANNELING_"), var.getLB(), var.getUB(), false);
+            // Posting the copy is safe: its definition is functional and total (same bounds as var),
+            // so it does not restrict var when the returned constraint is reified.
+            ref().arithm(enumV, "=", var).post();
+            return new Constraint(ConstraintsName.BOOLCHANNELING, new PropEnumDomainChanneling(bVars, enumV, offset));
         }
+        return new Constraint(ConstraintsName.BOOLCHANNELING, new PropEnumDomainChanneling(bVars, var, offset));
     }
 
     /**
@@ -1624,9 +1629,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 
     /**
      * Creates a count constraint.
-     * Let N be the number of variables of the vars collection assigned to the value `value`;
+     * Let N be the number of variables of the vars collection assigned to the value {@code value};
      * Enforce condition N = limit to hold.
      * <p>
+     * Every value of {@code value} is supported when its domain is enumerated (arc consistency);
+     * only its bounds are guaranteed to be supported when its domain is bounded (bound consistency),
+     * since interior values of a bounded domain cannot be removed.
+     * </p>
      *
      * @param value a variable
      * @param vars  a vector of variables
@@ -1646,15 +1655,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             }
             return ref().sum(bs, "=", limit);
         }
-        if (value.hasEnumeratedDomain()) {
-            return new Constraint(ConstraintsName.COUNT, new PropCountVar(vars, value, limit));
-        } else {
-            Model model = value.getModel();
-            IntVar Evalue = model.intVar(model.generateName("COUNT_"), value.getLB(), value.getUB(), false);
-            Evalue.eq(value).post();
-            return new Constraint(ConstraintsName.COUNT,
-                    new PropCountVar(vars, Evalue, limit));
-        }
+        return new Constraint(ConstraintsName.COUNT, new PropCountVar(vars, value, limit));
     }
 
     /**
