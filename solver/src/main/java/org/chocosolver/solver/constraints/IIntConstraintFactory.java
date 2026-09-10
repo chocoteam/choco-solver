@@ -337,14 +337,46 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     /**
-     * Creates an arithmetic constraint : var1 op var2,
-     * where op in {"=", "!=", ">","<",">=","<="} or {"+", "-", "*", "/"}
+     * Adjusts the given bounds {@code [lb, ub]} to absorb a relational operator against a constant.
+     * <p>
+     * For inequality operators (LT, LE, GT, GE), the operator is encoded directly
+     * into the bounds of the result variable, eliminating the need for an additional
+     * arithmetic constraint. For other operators (EQ, NQ), returns {@code null}
+     * to indicate that the operator cannot be absorbed into the bounds.
+     * </p>
+     *
+     * @param lb   lower bound of the result variable
+     * @param ub   upper bound of the result variable
+     * @param op   the relational operator to absorb
+     * @param cste the constant on the right-hand side of the operator
+     * @return adjusted bounds as {@code {newLb, newUb}}, or {@code null} if the operator
+     *         cannot be absorbed (EQ, NQ)
+     */
+    private static int[] adjustBoundsForOperator(int lb, int ub, Operator op, int cste) {
+        return switch (op) {
+            case LT -> new int[]{lb, Math.min(ub, cste - 1)};
+            case LE -> new int[]{lb, Math.min(ub, cste)};
+            case GT -> new int[]{Math.max(lb, cste + 1), ub};
+            case GE -> new int[]{Math.max(lb, cste), ub};
+            default -> null;
+        };
+    }
+
+    /**
+     * Creates an arithmetic constraint : var1 op1 var2 op2 cste,
+     * where op1 in {"+", "-", "*", "/"} and op2 in {"=", "!=", ">","<",">=","<="}
+     * or op1 in {"=", "!=", ">","<",">=","<="} and op2 in {"+", "-", "*", "/"}
+     * <p>
+     * For {@code var1 op1 var2 op2 cste} with op1 in {"*", "/"} and op2 in {"<", "<=", ">", ">="},
+     * the relational operator is absorbed into the domain of an intermediate variable,
+     * avoiding an additional arithmetic constraint.
+     * </p>
      *
      * @param var1 first variable
      * @param op1  an operator
      * @param var2 second variable
      * @param op2  another operator
-     * @param cste an operator
+     * @param cste a constant
      */
     @SuppressWarnings("Duplicates")
     default Constraint arithm(IntVar var1, String op1, IntVar var2, String op2, int cste) {
@@ -355,9 +387,20 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                         return times(var1, var2, cste);
                     } else {
                         int[] bounds = VariableUtils.boundsForMultiplication(var1, var2);
-                        IntVar var4 = ref().intVar(bounds[0], bounds[1]);
-                        ref().times(var1, var2, var4).post();
-                        return arithm(var4, op2, cste);
+                        int[] adjusted = adjustBoundsForOperator(bounds[0], bounds[1], Operator.get(op2), cste);
+                        if (adjusted != null) {
+                            if (adjusted[0] > adjusted[1]) {
+                                return ref().falseConstraint();
+                            }
+                            return times(var1, var2, ref().intVar(adjusted[0], adjusted[1]));
+                        } else {
+                            IntVar var4 = ref().intVar(bounds[0], bounds[1]);
+                            return Constraint.merge(
+                                ConstraintsName.ARITHM,
+                                ref().times(var1, var2, var4),
+                                arithm(var4, op2, cste)
+                            );
+                        }
                     }
                 case "/":
                     // v1 / v2 OP cste
@@ -365,12 +408,18 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                         return div(var1, var2, ref().intVar(cste));
                     } else {
                         int[] bounds = VariableUtils.boundsForDivision(var1, var2);
-                        IntVar var4 = ref().intVar(bounds[0], bounds[1]);
-                        return Constraint.merge(
-                            ConstraintsName.ARITHM,
-                            ref().div(var1, var2, var4),
-                            arithm(var4, op2, cste)
-                        );
+                        int[] adjusted = adjustBoundsForOperator(bounds[0], bounds[1], Operator.get(op2), cste);
+                        if (adjusted != null) {
+                            if (adjusted[0] > adjusted[1]) return ref().falseConstraint();
+                            return div(var1, var2, ref().intVar(adjusted[0], adjusted[1]));
+                        } else {
+                            IntVar var4 = ref().intVar(bounds[0], bounds[1]);
+                            return Constraint.merge(
+                                ConstraintsName.ARITHM,
+                                ref().div(var1, var2, var4),
+                                arithm(var4, op2, cste)
+                            );
+                        }
                     }
                 default:
                     switch (op2) {
@@ -378,10 +427,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                             if (Operator.EQ.name().equals(op1)) {
                                 return times(var2, cste, var1);
                             } else {
-                                int[] bounds = VariableUtils.boundsForMultiplication(var2, ref().intVar(cste));
-                                IntVar var4 = ref().intVar(bounds[0], bounds[1]);
-                                ref().times(var2, cste, var4).post();
-                                return arithm(var1, op1, var4);
+                                return arithm(var1, op1, ref().intView(cste, var2, 0));
                             }
                         case "/":
                             // v1 OP v2 / cste
