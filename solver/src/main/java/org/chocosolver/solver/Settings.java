@@ -32,6 +32,8 @@ public class Settings {
 
     private final Predicate<Solver> modelChecker;
 
+    private final long seed;
+
     private final boolean cloneVariableArrayInPropagator;
 
     private final boolean enableViews;
@@ -102,6 +104,7 @@ public class Settings {
 
     protected Settings(SettingsBuilder builder) {
         this.modelChecker = builder.getModelChecker();
+        this.seed = builder.getSeed();
         this.cloneVariableArrayInPropagator = builder.cloneVariableArrayInPropagator();
         this.enableViews = builder.enableViews();
         this.enumeratedDomainSizeThreshold = builder.getEnumeratedDomainSizeThreshold();
@@ -136,6 +139,13 @@ public class Settings {
         this.nogoodFromRestartMinimize = builder.nogoodFromRestartMinimize();
         this.environmentSupplier = builder.getEnvironmentSupplier();
         this.additionalSettings = new HashMap<>(builder.getAdditionalSettings());
+    }
+
+    /**
+     * @return the seed value.
+     */
+    public long getSeed() {
+        return seed;
     }
 
     /**
