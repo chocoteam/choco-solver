@@ -8,6 +8,7 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.expression.discrete.set.ArSetExpression;
 import org.chocosolver.solver.variables.delta.ISetDelta;
 import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 import org.chocosolver.util.objects.setDataStructures.ISet;
@@ -22,10 +23,10 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
  * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 15 nov. 2012 Major update 2016
  */
-public interface SetVar extends Variable {
+public interface SetVar extends Variable, ArSetExpression {
 
 	/**
-	 * Get SetVar Lower Bound : the set of integers that must belong to every solution (i.e. a subset of all solutions)
+	 * Get SetVar Lower Bound: the set of integers that must belong to every solution (i.e. a subset of all solutions)
 	 * To iterate over this set, use the following loop:
 	 * <p>
 	 * ISet lbSet = getLB();
@@ -143,5 +144,10 @@ public interface SetVar extends Variable {
 			dom = 1 << range;
 		}
 		return dom;
+	}
+
+	@Override
+	default SetVar setVar() {
+		return this;
 	}
 }
