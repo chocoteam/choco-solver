@@ -49,8 +49,42 @@ public class GlobalCardinality extends Constraint {
         AC
     }
 
+    /**
+     * System property used to override the default {@link Consistency} level, e.g.
+     * {@code -Dchoco.gcc.consistency=AC}. See {@link #defaultConsistency()}.
+     */
+    public static final String CONSISTENCY_PROPERTY = "choco.gcc.consistency";
+
+    /**
+     * Returns the {@link Consistency} level used when none is explicitly specified, e.g. by
+     * {@link #GlobalCardinality(IntVar[], int[], IntVar[])} or by
+     * {@link org.chocosolver.solver.constraints.IIntConstraintFactory#globalCardinality(IntVar[], int[], IntVar[], boolean)}.
+     * <p>
+     * Defaults to {@link Consistency#BC}, which matches or beats {@link Consistency#AC} on
+     * solution quality while being cheaper to propagate, and both markedly outperform
+     * {@link Consistency#DEFAULT} on tightly-constrained instances.
+     * <p>
+     * Can be overridden via the {@value #CONSISTENCY_PROPERTY} system property (e.g. to
+     * benchmark alternative filtering levels without changing calling code).
+     *
+     * @return the default consistency level
+     * @throws IllegalArgumentException if the {@value #CONSISTENCY_PROPERTY} property is set to
+     *                                   a value that is not a valid {@link Consistency} name
+     */
+    public static Consistency defaultConsistency() {
+        return Consistency.valueOf(System.getProperty(CONSISTENCY_PROPERTY, Consistency.BC.name()));
+    }
+
+    /**
+     * Creates a global cardinality constraint using the {@linkplain #defaultConsistency() default
+     * consistency level}.
+     *
+     * @param vars   collection of variables
+     * @param values collection of constrained values
+     * @param cards  collection of cardinality variables
+     */
     public GlobalCardinality(IntVar[] vars, int[] values, IntVar[] cards) {
-        this(vars, values, cards, Consistency.DEFAULT.name());
+        this(vars, values, cards, defaultConsistency().name());
     }
 
     public GlobalCardinality(IntVar[] vars, int[] values, IntVar[] cards, String consistency) {

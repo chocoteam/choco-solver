@@ -1779,8 +1779,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * Creates a global cardinality constraint (GCC):
      * Each value values[i] should be taken by exactly occurrences[i] variables of vars.
      * <br/>
-     * Uses the {@code "DEFAULT"} consistency level (see
-     * {@link #globalCardinality(IntVar[], int[], IntVar[], boolean, String)}).
+     * Uses {@link GlobalCardinality#defaultConsistency()} (see
+     * {@link #globalCardinality(IntVar[], int[], IntVar[], boolean, String)}) — {@code "BC"}
+     * unless overridden via the {@value GlobalCardinality#CONSISTENCY_PROPERTY} system property.
      *
      * @param vars        collection of variables
      * @param values      collection of constrained values
@@ -1788,7 +1789,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param closed      restricts domains of vars to values if set to true
      */
     default Constraint globalCardinality(IntVar[] vars, int[] values, IntVar[] occurrences, boolean closed) {
-        return globalCardinality(vars, values, occurrences, closed, "DEFAULT");
+        return globalCardinality(vars, values, occurrences, closed,
+                GlobalCardinality.defaultConsistency().name());
     }
 
     /**
