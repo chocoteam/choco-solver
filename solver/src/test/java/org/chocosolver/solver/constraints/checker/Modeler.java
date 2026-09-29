@@ -204,6 +204,69 @@ public interface Modeler {
         }
     };
 
+    // GCC's AC/BC propagator only filters the decision variables to the given consistency level
+    // (cardinality variables are left to PropFastGCC's weaker bound reasoning -- see
+    // PropGccAC's javadoc), so only the decision variables are exposed/mapped for testing here.
+    // `values` = [0, n-1] is fixed by the (structural, call-invariant) nbVar parameter, never
+    // derived from the incoming domains' actual content: the checker re-invokes model() with a
+    // single variable narrowed to one value at a time, and `values` must stay the SAME restricted
+    // set across every one of those calls for the check to mean anything. Tests are run with
+    // lowerB=0 so generated domains fall inside/around this range; any value >= n acts as a
+    // genuine escape value (forbidden when closed, free/untracked otherwise).
+    Modeler modelGCC_AC = new Modeler() {
+        @Override
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("GCC_AC_" + n);
+            boolean closed = (Boolean) parameters;
+            IntVar[] vars = new IntVar[n];
+            for (int i = 0; i < n; i++) {
+                vars[i] = s.intVar("v_" + i, domains[i]);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+            int[] values = new int[n];
+            IntVar[] cards = new IntVar[n];
+            for (int i = 0; i < n; i++) {
+                values[i] = i;
+                cards[i] = s.intVar("c_" + i, 0, n, true);
+            }
+            s.globalCardinality(vars, values, cards, closed, "AC").post();
+            s.getSolver().setSearch(randomSearch(vars, 0));
+            return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelGCC_AC";
+        }
+    };
+
+    Modeler modelGCC_BC = new Modeler() {
+        @Override
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("GCC_BC_" + n);
+            boolean closed = (Boolean) parameters;
+            IntVar[] vars = new IntVar[n];
+            for (int i = 0; i < n; i++) {
+                vars[i] = s.intVar("v_" + i, domains[i][0], domains[i][domains[i].length - 1], true);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+            int[] values = new int[n];
+            IntVar[] cards = new IntVar[n];
+            for (int i = 0; i < n; i++) {
+                values[i] = i;
+                cards[i] = s.intVar("c_" + i, 0, n, true);
+            }
+            s.globalCardinality(vars, values, cards, closed, "BC").post();
+            s.getSolver().setSearch(randomSearch(vars, 0));
+            return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelGCC_BC";
+        }
+    };
+
     Modeler modelTimes = new Modeler() {
         @Override
         public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
