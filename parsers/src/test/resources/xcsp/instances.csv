@@ -74,9 +74,9 @@ basics;Ramsey-12.xml.lzma;54;2;57445;33115
 basics;Rcpsp-j30-01-01_c18.xml.lzma;7;43;199;162
 basics;Rlfap-graph-04-opt_c18.xml.lzma;10;394;2651;1656
 basics;RoomMate-sr0050-int.xml.lzma;1;_;2;0
-basics;SocialGolfers-4-3-4-cp.xml.lzma;1;_;249;177
+basics;SocialGolfers-4-3-4-cp.xml.lzma;1;_;227;161
 #basics;Sonet-s2ring02.xml.lzma;9;14;815744;621835
-basics;SportsScheduling-08.xml.lzma;1;_;210;168
+basics;SportsScheduling-08.xml.lzma;1;_;181;150
 basics;SteelMillSlab-m1-simple_c18.xml.lzma;4;0;221;180
 basics;SteelMillSlab-m2-simple_c18.xml.lzma;2;0;228;196
 basics;SteelMillSlab-m2s-mini-simple_c18.xml.lzma;1;0;127;50
@@ -99,6 +99,6 @@ basics;testObjective1.xml.lzma;2;11;8;5
 basics;testPrimitive.xml.lzma;1;_;3;1
 #basics;TestSchedulingM18-t30m10r3-15.xml.lzma;93;4149;3450;2650
 basics;Tpp-3-3-20-1.xml.lzma;9;126;273;217
-basics;TravelingTournament-a3-galaxy04_c18.xml.lzma;6;416;3765;3425
+basics;TravelingTournament-a3-galaxy04_c18.xml.lzma;6;416;3693;3378
 basics;Warehouse-opl.xml.lzma;19;383;130;90
 basics;Zebra.xml.lzma;1;_;9;2
