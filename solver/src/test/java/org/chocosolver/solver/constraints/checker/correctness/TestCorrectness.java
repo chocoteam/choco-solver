@@ -99,6 +99,8 @@ public class TestCorrectness {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < (1 << 5) + 1; n *= 2) {
                 CorrectnessChecker.checkCorrectness(Modeler.modelGCC, n, 0, n, seed, true);
+                CorrectnessChecker.checkCorrectness(Modeler.modelGCC_BC, n, 0, n, seed, true);
+                CorrectnessChecker.checkCorrectness(Modeler.modelGCC_AC, n, 0, n, seed, true);
                 CorrectnessChecker.checkCorrectness(Modeler.modelGCC_alldiff, n, -n / 2, 2 * n, seed, false);
             }
         }
