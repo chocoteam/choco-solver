@@ -1779,7 +1779,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * Creates a global cardinality constraint (GCC):
      * Each value values[i] should be taken by exactly occurrences[i] variables of vars.
      * <br/>
-     * This constraint does not ensure any well-defined level of consistency, yet.
+     * Uses the {@code "DEFAULT"} consistency level (see
+     * {@link #globalCardinality(IntVar[], int[], IntVar[], boolean, String)}).
      *
      * @param vars        collection of variables
      * @param values      collection of constrained values
@@ -1787,6 +1788,40 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param closed      restricts domains of vars to values if set to true
      */
     default Constraint globalCardinality(IntVar[] vars, int[] values, IntVar[] occurrences, boolean closed) {
+        return globalCardinality(vars, values, occurrences, closed, "DEFAULT");
+    }
+
+    /**
+     * Creates a global cardinality constraint (GCC):
+     * Each value values[i] should be taken by exactly occurrences[i] variables of vars.
+     *
+     * @param vars        collection of variables
+     * @param values      collection of constrained values
+     * @param occurrences collection of cardinality variables
+     * @param closed      restricts domains of vars to values if set to true
+     * @param consistency consistency level, among {"DEFAULT", "BC", "AC"}
+     *                    <p>
+     *                    <b>DEFAULT</b>:
+     *                    <br/>
+     *                    Fast filtering, without any well-defined level of consistency.
+     *                    <p>
+     *                    <b>BC</b>:
+     *                    <br/>
+     *                    Bound-consistency, based on:
+     *                    C.-G. Quimper, P. van Beek, A. Lopez-Ortiz, A. Golynski, and S.B. Sadjad.
+     *                    "An efficient bounds consistency algorithm for the global cardinality
+     *                    constraint." CP-2003.
+     *                    Posted in addition to the {@code "DEFAULT"} filtering.
+     *                    <p>
+     *                    <b>AC</b>:
+     *                    <br/>
+     *                    Arc-consistency, based on:
+     *                    J.-C. Regin. "Generalized Arc Consistency for Global Cardinality
+     *                    Constraint." AAAI-96.
+     *                    Posted in addition to the {@code "DEFAULT"} filtering.
+     */
+    default Constraint globalCardinality(IntVar[] vars, int[] values, IntVar[] occurrences,
+                                          boolean closed, String consistency) {
         if (ref().getSolver().isLCG()) {
             if (ref().getSettings().warnUser()) {
                 ref().getSolver().log().white().println("Warning: globalCardinality constraint is decomposed (due to LCG).");
@@ -1827,10 +1862,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                     v2[i] = toAdd.get(i - values.length);
                     cards[i] = vars[0].getModel().intVar(0);
                 }
-                return new GlobalCardinality(vars, v2, cards);
+                return new GlobalCardinality(vars, v2, cards, consistency);
             }
         }
-        return new GlobalCardinality(vars, values, occurrences);
+        return new GlobalCardinality(vars, values, occurrences, consistency);
     }
 
     /**

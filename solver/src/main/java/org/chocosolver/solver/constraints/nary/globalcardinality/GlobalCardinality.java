@@ -25,11 +25,40 @@ import java.util.List;
  */
 public class GlobalCardinality extends Constraint {
 
-    public GlobalCardinality(IntVar[] vars, int[] values, IntVar[] cards) {
-    	super(ConstraintsName.GCC, createProp(vars, values, cards));
+    /**
+     * Consistency level enforced by the propagator(s) posted for a {@link GlobalCardinality}
+     * constraint.
+     */
+    public enum Consistency {
+        /**
+         * Fast filtering (see {@link PropFastGCC}), without any well-defined consistency level
+         * guarantee.
+         */
+        DEFAULT,
+        /**
+         * Bound-consistency (see {@link PropGccBC}), following:
+         * C.-G. Quimper, P. van Beek, A. Lopez-Ortiz, A. Golynski, and S.B. Sadjad.
+         * "An efficient bounds consistency algorithm for the global cardinality constraint."
+         * CP-2003.
+         */
+        BC,
+        /**
+         * Arc-consistency (see {@link PropGccAC}), following:
+         * J.-C. Regin. "Generalized Arc Consistency for Global Cardinality Constraint." AAAI-96.
+         */
+        AC
     }
 
-	private static Propagator<IntVar> createProp(IntVar[] vars, int[] values, IntVar[] cards) {
+    public GlobalCardinality(IntVar[] vars, int[] values, IntVar[] cards) {
+        this(vars, values, cards, Consistency.DEFAULT.name());
+    }
+
+    public GlobalCardinality(IntVar[] vars, int[] values, IntVar[] cards, String consistency) {
+    	super(ConstraintsName.GCC, createProp(vars, values, cards, Consistency.valueOf(consistency)));
+    }
+
+	private static Propagator<IntVar>[] createProp(IntVar[] vars, int[] values, IntVar[] cards,
+                                                     Consistency consistency) {
 		assert values.length == cards.length;
 		TIntIntHashMap map = new TIntIntHashMap();
 		int idx = 0;
@@ -41,7 +70,18 @@ public class GlobalCardinality extends Constraint {
 				throw new UnsupportedOperationException("ERROR: multiple occurrences of value: " + v);
 			}
 		}
-		return new PropFastGCC(vars, values, map, cards);
+		PropFastGCC fast = new PropFastGCC(vars, values, map, cards);
+		switch (consistency) {
+			case BC:
+				//noinspection unchecked
+				return new Propagator[]{fast, new PropGccBC(vars, values, cards)};
+			case AC:
+				//noinspection unchecked
+				return new Propagator[]{fast, new PropGccAC(vars, values, cards)};
+			default:
+				//noinspection unchecked
+				return new Propagator[]{fast};
+		}
 	}
 
     public static Constraint reformulate(IntVar[] vars, IntVar[] card, Model model) {
