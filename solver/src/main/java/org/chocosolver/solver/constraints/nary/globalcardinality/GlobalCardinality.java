@@ -36,14 +36,14 @@ public class GlobalCardinality extends Constraint {
          */
         DEFAULT,
         /**
-         * Bound-consistency (see {@link PropGccBC}), following:
+         * Bound-consistency (see {@link PropGcc}), following:
          * C.-G. Quimper, P. van Beek, A. Lopez-Ortiz, A. Golynski, and S.B. Sadjad.
          * "An efficient bounds consistency algorithm for the global cardinality constraint."
          * CP-2003.
          */
         BC,
         /**
-         * Arc-consistency (see {@link PropGccAC}), following:
+         * Arc-consistency (see {@link PropGcc}), following:
          * J.-C. Regin. "Generalized Arc Consistency for Global Cardinality Constraint." AAAI-96.
          */
         AC
@@ -107,11 +107,9 @@ public class GlobalCardinality extends Constraint {
 		PropFastGCC fast = new PropFastGCC(vars, values, map, cards);
 		switch (consistency) {
 			case BC:
-				//noinspection unchecked
-				return new Propagator[]{fast, new PropGccBC(vars, values, cards)};
 			case AC:
 				//noinspection unchecked
-				return new Propagator[]{fast, new PropGccAC(vars, values, cards)};
+				return new Propagator[]{fast, new PropGcc(vars, values, cards, consistency)};
 			default:
 				//noinspection unchecked
 				return new Propagator[]{fast};

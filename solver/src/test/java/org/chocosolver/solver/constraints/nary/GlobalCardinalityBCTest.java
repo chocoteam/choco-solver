@@ -25,7 +25,8 @@ import static org.testng.Assert.assertTrue;
 
 /**
  * Tests for the bound-consistency ({@code "BC"}) filtering of the global cardinality constraint,
- * i.e. {@link org.chocosolver.solver.constraints.nary.globalcardinality.PropGccBC}.
+ * i.e. {@link org.chocosolver.solver.constraints.nary.globalcardinality.PropGcc} with
+ * {@link org.chocosolver.solver.constraints.nary.globalcardinality.GlobalCardinality.Consistency#BC}.
  *
  * @author Charles Prud'homme
  */

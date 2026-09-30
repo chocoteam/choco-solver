@@ -26,7 +26,8 @@ import static org.testng.Assert.assertTrue;
 
 /**
  * Tests for the arc-consistency ({@code "AC"}) filtering of the global cardinality constraint,
- * i.e. {@link org.chocosolver.solver.constraints.nary.globalcardinality.PropGccAC}.
+ * i.e. {@link org.chocosolver.solver.constraints.nary.globalcardinality.PropGcc} with
+ * {@link org.chocosolver.solver.constraints.nary.globalcardinality.GlobalCardinality.Consistency#AC}.
  *
  * @author Charles Prud'homme
  */

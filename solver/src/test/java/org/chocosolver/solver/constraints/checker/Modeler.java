@@ -206,7 +206,7 @@ public interface Modeler {
 
     // GCC's AC/BC propagator only filters the decision variables to the given consistency level
     // (cardinality variables are left to PropFastGCC's weaker bound reasoning -- see
-    // PropGccAC's javadoc), so only the decision variables are exposed/mapped for testing here.
+    // PropGcc's javadoc), so only the decision variables are exposed/mapped for testing here.
     // `values` = [0, n-1] is fixed by the (structural, call-invariant) nbVar parameter, never
     // derived from the incoming domains' actual content: the checker re-invokes model() with a
     // single variable narrowed to one value at a time, and `values` must stay the SAME restricted
