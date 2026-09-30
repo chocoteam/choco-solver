@@ -21,7 +21,7 @@ import org.chocosolver.util.tools.MathUtils;
  *
  * @author Charles Prud'homme
  */
-public class AlgoGccBC {
+public class AlgoGccBC implements GccFilter {
 
     private final Propagator<?> aCause;
     private IntVar[] vars;
@@ -51,6 +51,7 @@ public class AlgoGccBC {
         this.aCause = cause;
     }
 
+    @Override
     public void reset(IntVar[] variables) {
         this.vars = variables;
         this.n = vars.length;
@@ -91,6 +92,7 @@ public class AlgoGccBC {
      * @param firstValue first value of the range covered by {@code minOcc}/{@code maxOcc}
      * @return {@code true} iff at least one bound update has been done
      */
+    @Override
     public boolean filter(int[] minOcc, int[] maxOcc, int firstValue) throws ContradictionException {
         int range = minOcc.length;
         PartialSum l = new PartialSum(firstValue, range, minOcc);

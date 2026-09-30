@@ -35,7 +35,7 @@ import java.util.Arrays;
  *
  * @author Charles Prud'homme
  */
-public class AlgoGccAC {
+public class AlgoGccAC implements GccFilter {
 
     private static final int UNMATCHED = -1;
     private static final int FROM_SOURCE = -2;
@@ -74,6 +74,7 @@ public class AlgoGccAC {
         this.aCause = cause;
     }
 
+    @Override
     public void reset(IntVar[] variables) {
         this.vars = variables;
         this.n = vars.length;
@@ -96,6 +97,7 @@ public class AlgoGccAC {
      * @param firstValue first value of the range covered by {@code minOcc}/{@code maxOcc}
      * @return {@code true} iff at least one domain update has been done
      */
+    @Override
     public boolean filter(int[] minOcc, int[] maxOcc, int firstValue) throws ContradictionException {
         this.minOcc = minOcc;
         this.maxOcc = maxOcc;
