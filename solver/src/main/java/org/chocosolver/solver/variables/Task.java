@@ -14,6 +14,7 @@ import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.spec.Recorder;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.solver.variables.view.integer.IntAffineView;
 import org.chocosolver.util.ESat;
@@ -61,7 +62,7 @@ public class Task extends Propagator<IntVar> {
         this(buildVars(model, est, lst, d, ect, lct));
     }
 
-    private static IntVar[] buildVars(Model model, int est, int lst, int d, int ect, int lct) {
+    static IntVar[] buildVars(Model model, int est, int lst, int d, int ect, int lct) {
         IntVar start = model.intVar(Math.max(est, ect - d), Math.min(lst, lct - d));
         IntVar duration = model.intVar(d);
         IntVar end = start.getModel().offset(start, d);
@@ -87,12 +88,15 @@ public class Task extends Propagator<IntVar> {
      * @param d duration value
      */
     public Task(IntVar s, IntVar d) {
-        this(
-                s,
-                d,
-                d.isInstantiated() ? s.getModel().offset(s, d.getValue())
-                        : s.getModel().intVar(s.getLB() + d.getLB(), s.getUB() + d.getUB())
-        );
+        this(s, d, endOf(s, d));
+    }
+
+    /**
+     * @return the end variable of a task of start <i>s</i> and duration <i>d</i>
+     */
+    static IntVar endOf(IntVar s, IntVar d) {
+        return d.isInstantiated() ? s.getModel().offset(s, d.getValue())
+                : s.getModel().intVar(s.getLB() + d.getLB(), s.getUB() + d.getUB());
     }
 
     /**
@@ -123,6 +127,12 @@ public class Task extends Propagator<IntVar> {
         if (shouldPassivate(s, d, e)) {
             setActive();
             setPassive();
+        }
+        if (getClass() == Task.class) {
+            Recorder r = s.getModel().getRecorder();
+            if (r != null) {
+                r.newTask(this, s, d, e, null);
+            }
         }
     }
 
