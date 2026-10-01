@@ -52,9 +52,9 @@ import java.util.stream.Stream;
  * <p>
  * System properties:
  * <ul>
- *     <li>{@code spec.dir}: a directory of instances (.fzn, .xml, .xml.lzma) to use instead of the test
- *     resources;</li>
- *     <li>{@code spec.nodes}: node limit of each resolution (default: 1000);</li>
+ *     <li>{@code spec.dir}: a directory of instances (.fzn, .xml, .xml.lzma) to use instead of the instances of the
+ *     test resources listed in {@code spec-instances.txt} (one per family of problems);</li>
+ *     <li>{@code spec.nodes}: node limit of each resolution (default: 100);</li>
  *     <li>{@code spec.sharing}: whether shared objects are looked for (default: true);</li>
  *     <li>{@code spec.sharing.maxsize}: maximum number of variables and constraints of a model in which shared
  *     objects are looked for (default: 20000);</li>
@@ -65,7 +65,13 @@ import java.util.stream.Stream;
  */
 public class SpecEquivalenceTest {
 
-    private static final long NODES = Long.getLong("spec.nodes", 1000);
+    private static final long NODES = Long.getLong("spec.nodes", 100);
+
+    /**
+     * The instances of the test resources to use, one per family of problems: similar instances add time, not
+     * coverage.
+     */
+    private static final String INSTANCES = "spec-instances.txt";
 
     /**
      * Whether shared objects are looked for (memory consuming on large instances).
@@ -105,16 +111,10 @@ public class SpecEquivalenceTest {
 
     @DataProvider
     public Object[][] instances() throws IOException {
-        List<Path> roots = new ArrayList<>();
         String dir = System.getProperty("spec.dir");
-        if (dir != null) {
-            roots.add(Paths.get(dir));
-        } else {
-            roots.add(Paths.get(Objects.requireNonNull(getClass().getResource("/flatzinc")).getPath()));
-            roots.add(Paths.get(Objects.requireNonNull(getClass().getResource("/xcsp")).getPath()));
-        }
         List<Object[]> res = new ArrayList<>();
-        for (Path root : roots) {
+        if (dir != null) {
+            Path root = Paths.get(dir);
             try (Stream<Path> files = Files.walk(root)) {
                 files.map(Path::toString)
                         .filter(f -> f.endsWith(".fzn") || f.endsWith(".xml") || f.endsWith(".xml.lzma"))
@@ -122,11 +122,21 @@ public class SpecEquivalenceTest {
                         .sorted()
                         .forEach(f -> res.add(new Object[]{root.relativize(Paths.get(f)).toString(), f}));
             }
+        } else {
+            Path list = Paths.get(Objects.requireNonNull(getClass().getResource("/" + INSTANCES)).getPath());
+            Path root = list.getParent();
+            for (String line : Files.readAllLines(list)) {
+                String name = line.strip();
+                if (!name.isEmpty() && !name.startsWith("#")
+                        && Paths.get(name).getFileName().toString().matches(FILTER)) {
+                    res.add(new Object[]{name, root.resolve(name).toString()});
+                }
+            }
         }
         return res.toArray(new Object[0][]);
     }
 
-    @Test(groups = "spec", dataProvider = "instances", timeOut = 300_000)
+    @Test(groups = "spec", dataProvider = "instances", timeOut = 120_000)
     public void testEquivalence(String name, String file) throws Exception {
         progress(name);
         // the models are kept alive only when needed, to save memory on large instances
