@@ -436,7 +436,7 @@ public enum FConstraint {
                             bbs[i] = (BoolVar) bs[i];
                         }
                         bbs[bs.length] = r;
-                        new Constraint("BoolSumLeq0Reif", new PropBoolSumEq0Reif(bbs)).post();
+                        model.custom("BoolSumLeq0Reif", bbs, PropBoolSumEq0Reif::new).post();
                         return;
                     }
                     if (c.isInstantiated()) {
@@ -491,7 +491,7 @@ public enum FConstraint {
                         bbs[i] = (BoolVar) bs[i];
                     }
                     bbs[bs.length] = r;
-                    new Constraint("BoolSumEq0Reif", new PropBoolSumEq0Reif(bbs)).post();
+                    model.custom("BoolSumEq0Reif", bbs, PropBoolSumEq0Reif::new).post();
                     return;
                 }
             }
