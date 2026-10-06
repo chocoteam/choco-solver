@@ -12,7 +12,7 @@ NEXT MILESTONE
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:
-See [milestone 6.0.3](https://github.com/chocoteam/choco-solver/milestone/xx)
+See [milestone 6.0.3](https://github.com/chocoteam/choco-solver/milestone/44)
 
 #### Contributors to this release:
 
