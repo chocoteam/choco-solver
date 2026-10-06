@@ -61,7 +61,8 @@ public class Flatzinc extends RegParser {
         ALL
     }
 
-    @Option(name = "-stasol", usage = "Output statistics for solving (default: false).")
+    @Option(name = "-stasol", usage = "Output statistics for solving (default: false).",
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class)
     protected boolean oss = false;
 
     @Option(name = "-ocs", usage = "Opens the complementary search to all variables of the problem\n" +
@@ -115,7 +116,7 @@ public class Flatzinc extends RegParser {
     @Override
     public void createSolver() {
         if (level.isLoggable(Level.COMPET)) {
-            System.out.printf("%% Choco-solver%s (6.0.1, 260521_13:00)\n", this.isLCG()? " with LCG" : "");
+            System.out.printf("%% Choco-solver%s (6.0.2, 261006_17:18)\n", this.isLCG()? " with LCG" : "");
         }
         super.createSolver();
         datas = new Datas[nb_cores];

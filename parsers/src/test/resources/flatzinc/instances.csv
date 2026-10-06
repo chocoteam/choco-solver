@@ -1,6 +1,6 @@
 #year,name,solutions,best,nodes,fails
-2025,hitori_h5-1.fzn,1,_,3141,3140
-2021,atsp+instance5_0p15.fzn,1,685043,10973,10972
+2025,hitori_h5-1.fzn,1,_,2605,2604
+2021,atsp+instance5_0p15.fzn,1,685043,221,220
 2021,yumi-dynamic+p_10.fzn,0,_,0,1
 2021,feistel.fzn,1,_,174,160
 2021,mapping_mesh2x2_2.fzn,2,970,96,93
@@ -16,11 +16,11 @@
 2020,soccer+xIGData_22_12_22_5.fzn,1,_,4031,3725
 #2020,stable-goods-solution+s-d6.fzn,13,6264,144303,144278
 #2019,amaze3+2012-03-19.fzn,1,_,1920663,1920646
-2019,ccmcp+3_20_0_25_5.fzn,22,1247,111490,111447
-2019,fm3_3.fzn,322,165922,12593,11950
+2019,ccmcp+3_20_0_25_5.fzn,22,1247,111255,111212
+2019,fm3_3.fzn,89,165922,575372,575195
 2019,group+u6g1pref1.fzn,14,120,284,257
 2019,median_string_dp+p2_10_8-0.fzn,4,34,6207,6200
-2019,mknapsack_global+mknap2-1.fzn,1,7772,5808,5807
+2019,mknapsack_global+mknap2-1.fzn,1,7772,5790,5789
 2019,vrp-s4-v2-c3_svrp-v2-c3_det.fzn,8,117,926,911
 2019,zephyrus+12_6_6_3.fzn,1,780,62559,62558
 2018,oocsp_racks+050_r1.fzn,1,_,9,4

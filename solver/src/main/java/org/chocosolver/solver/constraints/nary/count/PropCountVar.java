@@ -15,6 +15,7 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 
 import static java.lang.Integer.MAX_VALUE;
+import static java.lang.Integer.MIN_VALUE;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -22,7 +23,7 @@ import static java.lang.Math.min;
  * Define a COUNT constraint setting size{forall v in lvars | v = occval} = occVar
  * assumes the occVar variable to be the last of the variables of the constraint:
  * vars = [lvars | occVar]
- * Arc Consistent algorithm
+ * Arc Consistent algorithm on occval when its domain is enumerated, Bound Consistent algorithm otherwise
  * with  lvars = list of variables for which the occurrence of occval in their domain is constrained
  * <br/>
  *
@@ -44,7 +45,7 @@ public class PropCountVar extends Propagator<IntVar> {
 
     /**
      * Propagator for Count Constraint for integer variables
-     * Performs Arc Consistency
+     * Performs Arc Consistency on restrictedValue when its domain is enumerated, Bound Consistency otherwise
      *
      * @param decvars          an array of integer variables
      * @param restrictedValue  integer variable
@@ -84,6 +85,9 @@ public class PropCountVar extends Propagator<IntVar> {
         int maxCard = -minCard;
         int cardLB = card.getLB();
         int cardUB = card.getUB();
+        // smallest and largest supported values
+        int first = MAX_VALUE;
+        int last = MIN_VALUE;
         for (int value = val.getLB(); value <= val.getUB(); value = val.nextValue(value)) {
             int min = 0;
             int max = 0;
@@ -101,8 +105,13 @@ public class PropCountVar extends Propagator<IntVar> {
             } else {
                 minCard = min(minCard, min);
                 maxCard = max(maxCard, max);
+                first = min(first, value);
+                last = value;
             }
         }
+        // removing an interior value of a bounded domain is a no-op: bounds must be moved to supported values
+        // (fails if no value is supported)
+        val.updateBounds(first, last, this);
         card.updateBounds(minCard, maxCard, this);
         if (val.isInstantiated() && card.isInstantiated()) {
             int nb = card.getValue();

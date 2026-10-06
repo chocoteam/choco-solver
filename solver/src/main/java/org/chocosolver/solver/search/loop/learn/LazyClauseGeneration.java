@@ -69,7 +69,7 @@ public class LazyClauseGeneration implements Learn {
     private final long reduceBase;
     private final long reduceFactor;
     private int reductions = 0;
-    private boolean extractFromVariablesOnSolution;
+    private final boolean extractFromVariablesOnSolution;
     /**
      * A temporary storage for learnt clauses.
      */
@@ -106,6 +106,10 @@ public class LazyClauseGeneration implements Learn {
     @Override
     public void forget() {
         // required because MoveBinaryDFS add a useless decision level on refutation
+        if (mSat.nLearnts() >= max_learnts || mSolver.getFailCount() > nextReductionCall) {
+            mSat.doReduceDB();
+            nextReductionCall += reduceBase + reduceFactor * (++reductions);
+        }
         if (nbRestarts == mSolver.getRestartCount()) {
             mSolver.cancelTrail();
             mSolver.getDecisionPath().synchronize(true, learnt_clause.size() > 1);
@@ -117,10 +121,6 @@ public class LazyClauseGeneration implements Learn {
             }
         } else {
             nbRestarts = mSolver.getRestartCount();
-        }
-        if (mSat.nLearnts() >= max_learnts || mSolver.getFailCount() > nextReductionCall) {
-            mSat.doReduceDB();
-            nextReductionCall += reduceBase + reduceFactor * (++reductions);
         }
     }
 

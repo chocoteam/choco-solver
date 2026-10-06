@@ -4,10 +4,22 @@ dir="$(dirname "$0")"
 source "${dir}"/commons.sh
 
 DRY_RUN=false
-if [ "$1" == "--dry-run" ]; then
-    DRY_RUN=true
-    echo "=== DRY-RUN MODE — no push, no deploy ==="
-fi
+SKIP_CHANGELOG=false
+for arg in "$@"; do
+    case "$arg" in
+        --dry-run)
+            DRY_RUN=true
+            echo "=== DRY-RUN MODE — no push, no deploy ==="
+            ;;
+        # CHANGES.md is already up to date: no generation, no interactive prompt
+        --skip-changelog)
+            SKIP_CHANGELOG=true
+            ;;
+        *)
+            quit "Unknown option: $arg"
+            ;;
+    esac
+done
 
 function getVersionToRelease() {
     CURRENT_VERSION=$(mvn ${MVN_ARGS} org.apache.maven.plugins:maven-help-plugin:3.5.1:evaluate -Dexpression=project.version -q -DforceStdout)
@@ -28,13 +40,17 @@ VERSION=$(getVersionToRelease)
 [[ -n "$VERSION" ]] || quit "Unable to determine release version"
 echo "Releasing version: ${VERSION}"
 
-# Generate changelog summary from commits since last tag
-echo "** Generating changelog with Claude agent **"
-./scripts/generate_changelog.sh
+if [ "$SKIP_CHANGELOG" = true ]; then
+    echo "** Skipping changelog generation (CHANGES.md assumed up to date) **"
+else
+    # Generate changelog summary from commits since last tag
+    echo "** Generating changelog with Claude agent **"
+    ./scripts/generate_changelog.sh
 
-read -p "Have you updated CHANGES.md with the generated changelog? [y/N] " -n 1 -r
-echo
-[[ $REPLY =~ ^[Yy]$ ]] || quit "Please update CHANGES.md before releasing"
+    read -p "Have you updated CHANGES.md with the generated changelog? [y/N] " -n 1 -r
+    echo
+    [[ $REPLY =~ ^[Yy]$ ]] || quit "Please update CHANGES.md before releasing"
+fi
 
 git checkout -b "release-${VERSION}" develop || quit "unable to check release-${VERSION} out"
 

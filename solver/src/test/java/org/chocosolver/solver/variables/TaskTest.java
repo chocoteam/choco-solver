@@ -363,7 +363,7 @@ public class TaskTest {
         IntVar last = model.intVar("last", 5, 6);
         IntVar IV390 = model.intVar("IV390", 6);
         model.arithm(first, "+", dur, "=", last).post();
-        new Task(first, dur, IV390);
+        new Task(first, dur, IV390).post();
         Solver s = model.getSolver();
         s.setSearch(Search.inputOrderLBSearch(last));  // <- for the issue
         Assert.assertTrue(s.solve());
@@ -377,7 +377,7 @@ public class TaskTest {
         IntVar last = model.intVar("last", 5, 6);
         IntVar IV390 = model.intVar("IV390", 6);
         model.arithm(first, "+", dur, "=", last).post();
-        new Task(first, dur, IV390);
+        new Task(first, dur, IV390).post();
         Solver s = model.getSolver();
         s.setSearch(Search.inputOrderLBSearch(last));  // <- for the issue
         Assert.assertTrue(s.solve());
@@ -391,7 +391,7 @@ public class TaskTest {
         IntVar last = model.offset(model.intVar("last", 5, 6), 2);
         IntVar IV390 = model.offset(model.intVar("IV390", 6), 2);
         model.arithm(first, "+", dur, "=", last).post();
-        new Task(first, dur, IV390);
+        new Task(first, dur, IV390).post();
         Solver s = model.getSolver();
         s.setSearch(Search.inputOrderLBSearch(last));  // <- for the issue
         Assert.assertTrue(s.solve());
@@ -407,7 +407,11 @@ public class TaskTest {
         vars[3] = model.intVar(3, 5);
         model.scalar(vars, coeffs, "<=", 1).post();
         IntVar ee = model.intVar(4, 9);
-        new Task(vars[3], vars[2], ee);
+        Task task = new Task(vars[3], vars[2], ee);
+        model.getSolver().solve();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
+        model.getSolver().reset();
+        task.post();
         model.getSolver().solve();
         Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
     }

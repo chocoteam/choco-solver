@@ -115,19 +115,17 @@ public class NogoodFromRestarts implements IMonitorRestart {
      * @return the literal corresponding to this decision
      */
     private <V extends Variable> int asLit(Decision<V> decision) {
-        if (decision instanceof IntDecision) {
-            IntDecision id = (IntDecision) decision;
+        if (decision instanceof IntDecision id) {
             return asLit(
                 nogoodStealer.getById(id.getDecisionVariable(), png.getModel()), 
                 id.getDecOp(),
                 id.getDecisionValue()
             );
-        } else if (decision instanceof SetDecision) {
-            SetDecision id = (SetDecision) decision;
+        } else if (decision instanceof SetDecision sd) {
             return asLit(
-                nogoodStealer.getById(id.getDecisionVariable(), png.getModel()), 
-                id.getDecOp(),
-                id.getDecisionValue()
+                nogoodStealer.getById(sd.getDecisionVariable(), png.getModel()),
+                sd.getDecOp(),
+                sd.getDecisionValue()
             );
         } else {
             throw new UnsupportedOperationException("Cannot deal with such decision: " + decision);
@@ -148,7 +146,7 @@ public class NogoodFromRestarts implements IMonitorRestart {
             l = MiniSat.makeLiteral(png.makeIntLe(var, val), false);
         } else if (DecisionOperatorFactory.makeIntReverseSplit().equals(op)
                 || op instanceof ObjectiveStrategy.TopDownDecisionOperator) {
-            l = MiniSat.makeLiteral(png.makeIntLe(var, val), true);
+            l = MiniSat.makeLiteral(png.makeIntLe(var, val - 1), true);
         } else {
             throw new UnsupportedOperationException("Cannot deal with such operator: " + op);
         }

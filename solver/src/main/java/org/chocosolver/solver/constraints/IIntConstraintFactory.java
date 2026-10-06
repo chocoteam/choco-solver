@@ -251,6 +251,12 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 
     /**
      * Creates an absolute value constraint: var1 = |var2|
+     * <p>
+     * When LCG (Lazy Clause Generation) is enabled, this uses {@link PropAbsoluteLight} which
+     * performs bounds-based filtering only and does not propagate holes from var2 to var1.
+     * For example, if <code>var1 = [0,3]</code> and <code>var2 = [-3, -2, 2, 3]</code>,
+     * the hole <code>-1</code> in <code>var2</code> (which would imply <code>1</code> is missing in <code>var1</code>)
+     * is not propagated when using {@link PropAbsoluteLight}.
      */
     default Constraint absolute(IntVar var1, IntVar var2) {
         assert var1.getModel() == var2.getModel();
@@ -262,7 +268,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             }
         } else if (var1.isInstantiated()) {
             if (var1.getValue() == 0) {
-                var2.eq(0).post();
+                return arithm(var2, "=", 0);
             } else if (var1.getValue() > 0) {
                 return member(var2, new int[]{-var1.getValue(), var1.getValue()});
             } else {
@@ -270,9 +276,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             }
         }
         return new Constraint(ConstraintsName.ABSOLUTE,
-                ref().getSolver().isLCG() ?
-                        new PropAbsoluteLight(var1, var2) :
-                        new PropAbsolute(var1, var2)
+                              ref().getSolver().isLCG() ? new PropAbsoluteLight(var1, var2)
+                                                        : new PropAbsolute(var1, var2)
         );
     }
 
@@ -332,14 +337,46 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     /**
-     * Creates an arithmetic constraint : var1 op var2,
-     * where op in {"=", "!=", ">","<",">=","<="} or {"+", "-", "*", "/"}
+     * Adjusts the given bounds {@code [lb, ub]} to absorb a relational operator against a constant.
+     * <p>
+     * For inequality operators (LT, LE, GT, GE), the operator is encoded directly
+     * into the bounds of the result variable, eliminating the need for an additional
+     * arithmetic constraint. For other operators (EQ, NQ), returns {@code null}
+     * to indicate that the operator cannot be absorbed into the bounds.
+     * </p>
+     *
+     * @param lb   lower bound of the result variable
+     * @param ub   upper bound of the result variable
+     * @param op   the relational operator to absorb
+     * @param cste the constant on the right-hand side of the operator
+     * @return adjusted bounds as {@code {newLb, newUb}}, or {@code null} if the operator
+     *         cannot be absorbed (EQ, NQ)
+     */
+    private static int[] adjustBoundsForOperator(int lb, int ub, Operator op, int cste) {
+        return switch (op) {
+            case LT -> new int[]{lb, Math.min(ub, cste - 1)};
+            case LE -> new int[]{lb, Math.min(ub, cste)};
+            case GT -> new int[]{Math.max(lb, cste + 1), ub};
+            case GE -> new int[]{Math.max(lb, cste), ub};
+            default -> null;
+        };
+    }
+
+    /**
+     * Creates an arithmetic constraint : var1 op1 var2 op2 cste,
+     * where op1 in {"+", "-", "*", "/"} and op2 in {"=", "!=", ">","<",">=","<="}
+     * or op1 in {"=", "!=", ">","<",">=","<="} and op2 in {"+", "-", "*", "/"}
+     * <p>
+     * For {@code var1 op1 var2 op2 cste} with op1 in {"*", "/"} and op2 in {"<", "<=", ">", ">="},
+     * the relational operator is absorbed into the domain of an intermediate variable,
+     * avoiding an additional arithmetic constraint.
+     * </p>
      *
      * @param var1 first variable
      * @param op1  an operator
      * @param var2 second variable
      * @param op2  another operator
-     * @param cste an operator
+     * @param cste a constant
      */
     @SuppressWarnings("Duplicates")
     default Constraint arithm(IntVar var1, String op1, IntVar var2, String op2, int cste) {
@@ -350,9 +387,20 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                         return times(var1, var2, cste);
                     } else {
                         int[] bounds = VariableUtils.boundsForMultiplication(var1, var2);
-                        IntVar var4 = ref().intVar(bounds[0], bounds[1]);
-                        ref().times(var1, var2, var4).post();
-                        return arithm(var4, op2, cste);
+                        int[] adjusted = adjustBoundsForOperator(bounds[0], bounds[1], Operator.get(op2), cste);
+                        if (adjusted != null) {
+                            if (adjusted[0] > adjusted[1]) {
+                                return ref().falseConstraint();
+                            }
+                            return times(var1, var2, ref().intVar(adjusted[0], adjusted[1]));
+                        } else {
+                            IntVar var4 = ref().intVar(bounds[0], bounds[1]);
+                            return Constraint.merge(
+                                ConstraintsName.ARITHM,
+                                ref().times(var1, var2, var4),
+                                arithm(var4, op2, cste)
+                            );
+                        }
                     }
                 case "/":
                     // v1 / v2 OP cste
@@ -360,9 +408,18 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                         return div(var1, var2, ref().intVar(cste));
                     } else {
                         int[] bounds = VariableUtils.boundsForDivision(var1, var2);
-                        IntVar var4 = ref().intVar(bounds[0], bounds[1]);
-                        ref().div(var1, var2, var4).post();
-                        return arithm(var4, op2, cste);
+                        int[] adjusted = adjustBoundsForOperator(bounds[0], bounds[1], Operator.get(op2), cste);
+                        if (adjusted != null) {
+                            if (adjusted[0] > adjusted[1]) return ref().falseConstraint();
+                            return div(var1, var2, ref().intVar(adjusted[0], adjusted[1]));
+                        } else {
+                            IntVar var4 = ref().intVar(bounds[0], bounds[1]);
+                            return Constraint.merge(
+                                ConstraintsName.ARITHM,
+                                ref().div(var1, var2, var4),
+                                arithm(var4, op2, cste)
+                            );
+                        }
                     }
                 default:
                     switch (op2) {
@@ -370,10 +427,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                             if (Operator.EQ.name().equals(op1)) {
                                 return times(var2, cste, var1);
                             } else {
-                                int[] bounds = VariableUtils.boundsForMultiplication(var2, ref().intVar(cste));
-                                IntVar var4 = ref().intVar(bounds[0], bounds[1]);
-                                ref().times(var2, cste, var4).post();
-                                return arithm(var1, op1, var4);
+                                return arithm(var1, op1, ref().intView(cste, var2, 0));
                             }
                         case "/":
                             // v1 OP v2 / cste
@@ -383,8 +437,11 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                                 // v1 OP v2 / v3
                                 int[] bounds = VariableUtils.boundsForDivision(var2, ref().intVar(cste));
                                 IntVar var4 = ref().intVar(bounds[0], bounds[1]);
-                                ref().div(var2, ref().intVar(cste), var4).post();
-                                return arithm(var1, op1, var4);
+                                return Constraint.merge(
+                                    ConstraintsName.ARITHM,
+                                    ref().div(var2, ref().intVar(cste), var4),
+                                    arithm(var1, op1, var4)
+                                );
                             }
                         default:
                             throw new SolverException("Unknown operators for arithm constraint");
@@ -493,7 +550,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 times(t1, y, t2).post();
                 return sum(new IntVar[]{Z, t2}, "=", X);
             }
-            return new Constraint((X.getName() + " MOD " + y + " = " + Z.getName()), new PropModXY(X, y, Z));
+            return new Constraint(X.getName() + " MOD " + y + " = " + Z.getName(), new PropModXY(X, y, Z));
         }
     }
 
@@ -723,8 +780,11 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                     // v1 / v2 OP v3
                     int[] bounds = VariableUtils.boundsForDivision(var1, var2);
                     IntVar var4 = ref().intVar(bounds[0], bounds[1]);
-                    ref().div(var1, var2, var4).post();
-                    return arithm(var4, op2, var3);
+                    return Constraint.merge(
+                        ConstraintsName.ARITHM,
+                        ref().div(var1, var2, var4),
+                        arithm(var4, op2, var3)
+                    );
                 }
             default:
                 switch (op2) {
@@ -747,8 +807,11 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                             // v1 OP v2 / v3
                             int[] bounds = VariableUtils.boundsForDivision(var2, var3);
                             IntVar var4 = ref().intVar(bounds[0], bounds[1]);
-                            ref().div(var2, var3, var4).post();
-                            return arithm(var1, op1, var4);
+                            return Constraint.merge(
+                                ConstraintsName.ARITHM,
+                                ref().div(var2, var3, var4),
+                                arithm(var1, op1, var4)
+                            );
                         }
                     case "+":
                         return scalar(new IntVar[]{var1, var3}, new int[]{1, -1}, op1, var2);
@@ -1176,8 +1239,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         Arrays.sort(vls);
         if (ref().getSolver().isLCG()) {
             if (ref().getSettings().warnUser()) {
-                ref().getSolver().log().white().println(
-                        "Warning: among constraint is decomposed (due to LCG).");
+                ref().getSolver().log().white().println("Warning: among constraint is decomposed (due to LCG).");
             }
             IntVar[] cs = ref().intVarArray(vls.length, 0, vars.length);
             for (int i = 0; i < vls.length; i++) {
@@ -1200,7 +1262,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         if (bools == null || bools.length == 0) {
             throw new IllegalArgumentException("The array of variables cannot be null or empty");
         }
-        if (bools.length == 1) return ref().arithm(bools[0], "=", 1);
+        if (bools.length == 1) {
+            return ref().arithm(bools[0], "=", 1);
+        }
         Model s = bools[0].getModel();
         IntVar sum = s.intVar(0, bools.length, true);
         s.sum(bools, "=", sum).post();
@@ -1237,8 +1301,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     default Constraint atLeastNValues(IntVar[] vars, IntVar nValues, boolean AC) {
         if (ref().getSolver().isLCG()) {
             if (ref().getSettings().warnUser()) {
-                ref().getSolver().log().white().println(
-                        "Warning: atMostNValues constraint is decomposed (due to LCG).");
+                ref().getSolver().log().white().println("Warning: atMostNValues constraint is decomposed (due to LCG).");
             }
             int[] vals = getDomainUnion(vars);
             BoolVar[] vs = ref().boolVarArray(vals.length);
@@ -1279,8 +1342,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         int[] vals = getDomainUnion(vars);
         if (ref().getSolver().isLCG()) {
             if (ref().getSettings().warnUser()) {
-                ref().getSolver().log().white().println(
-                        "Warning: atMostNValues constraint is decomposed (due to LCG).");
+                ref().getSolver().log().white().println("Warning: atMostNValues constraint is decomposed (due to LCG).");
             }
             BoolVar[] vs = ref().boolVarArray(vals.length);
             int k = 0;
@@ -1339,8 +1401,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         }
         if (ref().getSolver().isLCG()) {
             if (ref().getSettings().warnUser()) {
-                ref().getSolver().log().white().println(
-                        "Warning: binPacking constraint is decomposed (due to LCG).");
+                ref().getSolver().log().white().println("Warning: binPacking constraint is decomposed (due to LCG).");
             }
             for (int i = 0; i < itemBin.length; i++) {
                 ref().member(itemBin[i], offset, binLoad.length - 1 + offset).post();
@@ -1353,7 +1414,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 ref().sum(loads, "=", binLoad[i]).post();
             }
             ref().sum(binLoad, "=", sum).post();
-            if (!list.isEmpty()) ref().allDifferent(list.toArray(new IntVar[0])).post();
+            if (!list.isEmpty()) {
+                ref().allDifferent(list.toArray(new IntVar[0])).post();
+            }
             return ref().voidConstraint();
         }
         return Constraint.merge(
@@ -1365,25 +1428,30 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     /**
-     * Creates an channeling constraint between an integer variable and a set of boolean variables.
+     * Creates a channeling constraint between an integer variable and a set of boolean variables.
      * Maps the boolean assignments variables bVars with the standard assignment variable var. <br>
      * var = i <-> bVars[i-offset] = 1
+     * <p>
+     * Supports both enumerated domains (arc consistency) and bounded domains
+     * (bound consistency via bound-tightening in {@link PropEnumDomainChanneling}).
+     * With LCG, explanations require equality literals, which bounded domains do not provide:
+     * an enumerated copy of {@code var} is then channeled instead.
+     * </p>
      *
      * @param bVars  array of boolean variables
-     * @param var    observed variable. Should presumably have an enumerated domain
+     * @param var    observed variable
      * @param offset 0 by default but typically 1 if used within MiniZinc
      *               (which counts from 1 to n instead of from 0 to n-1)
      */
     default Constraint boolsIntChanneling(BoolVar[] bVars, IntVar var, int offset) {
-        if (var.hasEnumeratedDomain()) {
-            return new Constraint(ConstraintsName.BOOLCHANNELING, new PropEnumDomainChanneling(bVars, var, offset));
-        } else {
-            IntVar enumV = var.getModel().intVar(var.getName() + "_enumImage", var.getLB(), var.getUB(), false);
-            enumV.eq(var).post();
-            return new Constraint(ConstraintsName.BOOLCHANNELING,
-                    new PropEnumDomainChanneling(bVars, enumV, offset)
-            );
+        if (ref().getSolver().isLCG() && !var.hasEnumeratedDomain()) {
+            IntVar enumV = ref().intVar(ref().generateName("CHANNELING_"), var.getLB(), var.getUB(), false);
+            // Posting the copy is safe: its definition is functional and total (same bounds as var),
+            // so it does not restrict var when the returned constraint is reified.
+            ref().arithm(enumV, "=", var).post();
+            return new Constraint(ConstraintsName.BOOLCHANNELING, new PropEnumDomainChanneling(bVars, enumV, offset));
         }
+        return new Constraint(ConstraintsName.BOOLCHANNELING, new PropEnumDomainChanneling(bVars, var, offset));
     }
 
     /**
@@ -1548,8 +1616,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     default Constraint count(int value, IntVar[] vars, IntVar limit) {
         if (ref().getSolver().isLCG()) {
             if (ref().getSettings().warnUser()) {
-                ref().getSolver().log().white().println(
-                        "Warning: count constraint is decomposed (due to LCG).");
+                ref().getSolver().log().white().println("Warning: count constraint is decomposed (due to LCG).");
             }
             BoolVar[] bs = new BoolVar[vars.length];
             for (int i = 0; i < vars.length; i++) {
@@ -1562,9 +1629,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 
     /**
      * Creates a count constraint.
-     * Let N be the number of variables of the vars collection assigned to the value `value`;
+     * Let N be the number of variables of the vars collection assigned to the value {@code value};
      * Enforce condition N = limit to hold.
      * <p>
+     * Every value of {@code value} is supported when its domain is enumerated (arc consistency);
+     * only its bounds are guaranteed to be supported when its domain is bounded (bound consistency),
+     * since interior values of a bounded domain cannot be removed.
+     * </p>
      *
      * @param value a variable
      * @param vars  a vector of variables
@@ -1576,8 +1647,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         }
         if (ref().getSolver().isLCG()) {
             if (ref().getSettings().warnUser()) {
-                ref().getSolver().log().white().println(
-                        "Warning: count constraint is decomposed (due to LCG).");
+                ref().getSolver().log().white().println("Warning: count constraint is decomposed (due to LCG).");
             }
             BoolVar[] bs = ref().boolVarArray(vars.length);
             for (int i = 0; i < vars.length; i++) {
@@ -1585,15 +1655,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             }
             return ref().sum(bs, "=", limit);
         }
-        if (value.hasEnumeratedDomain()) {
-            return new Constraint(ConstraintsName.COUNT, new PropCountVar(vars, value, limit));
-        } else {
-            Model model = value.getModel();
-            IntVar Evalue = model.intVar(model.generateName("COUNT_"), value.getLB(), value.getUB(), false);
-            Evalue.eq(value).post();
-            return new Constraint(ConstraintsName.COUNT,
-                    new PropCountVar(vars, Evalue, limit));
-        }
+        return new Constraint(ConstraintsName.COUNT, new PropCountVar(vars, value, limit));
     }
 
     /**
@@ -1632,8 +1694,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         );
         if (ref().getSolver().isLCG()) {
             if (ref().getSettings().warnUser()) {
-                ref().getSolver().log().white().println(
-                        "Warning: diffN constraint is simplified (due to LCG).");
+                ref().getSolver().log().white().println("Warning: diffN constraint is simplified (due to LCG).");
             }
             addCumulativeReasoning = false;
         }
@@ -1718,7 +1779,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * Creates a global cardinality constraint (GCC):
      * Each value values[i] should be taken by exactly occurrences[i] variables of vars.
      * <br/>
-     * This constraint does not ensure any well-defined level of consistency, yet.
+     * Uses {@link GlobalCardinality#defaultConsistency()} (see
+     * {@link #globalCardinality(IntVar[], int[], IntVar[], boolean, String)}) — {@code "BC"}
+     * unless overridden via the {@value GlobalCardinality#CONSISTENCY_PROPERTY} system property.
      *
      * @param vars        collection of variables
      * @param values      collection of constrained values
@@ -1726,10 +1789,44 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param closed      restricts domains of vars to values if set to true
      */
     default Constraint globalCardinality(IntVar[] vars, int[] values, IntVar[] occurrences, boolean closed) {
+        return globalCardinality(vars, values, occurrences, closed,
+                GlobalCardinality.defaultConsistency().name());
+    }
+
+    /**
+     * Creates a global cardinality constraint (GCC):
+     * Each value values[i] should be taken by exactly occurrences[i] variables of vars.
+     *
+     * @param vars        collection of variables
+     * @param values      collection of constrained values
+     * @param occurrences collection of cardinality variables
+     * @param closed      restricts domains of vars to values if set to true
+     * @param consistency consistency level, among {"DEFAULT", "BC", "AC"}
+     *                    <p>
+     *                    <b>DEFAULT</b>:
+     *                    <br/>
+     *                    Fast filtering, without any well-defined level of consistency.
+     *                    <p>
+     *                    <b>BC</b>:
+     *                    <br/>
+     *                    Bound-consistency, based on:
+     *                    C.-G. Quimper, P. van Beek, A. Lopez-Ortiz, A. Golynski, and S.B. Sadjad.
+     *                    "An efficient bounds consistency algorithm for the global cardinality
+     *                    constraint." CP-2003.
+     *                    Posted in addition to the {@code "DEFAULT"} filtering.
+     *                    <p>
+     *                    <b>AC</b>:
+     *                    <br/>
+     *                    Arc-consistency, based on:
+     *                    J.-C. Regin. "Generalized Arc Consistency for Global Cardinality
+     *                    Constraint." AAAI-96.
+     *                    Posted in addition to the {@code "DEFAULT"} filtering.
+     */
+    default Constraint globalCardinality(IntVar[] vars, int[] values, IntVar[] occurrences,
+                                          boolean closed, String consistency) {
         if (ref().getSolver().isLCG()) {
             if (ref().getSettings().warnUser()) {
-                ref().getSolver().log().white().println(
-                        "Warning: globalCardinality constraint is decomposed (due to LCG).");
+                ref().getSolver().log().white().println("Warning: globalCardinality constraint is decomposed (due to LCG).");
             }
             for (int i = 0; i < values.length; i++) {
                 ref().count(values[i], vars, occurrences[i]).post();
@@ -1749,13 +1846,11 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 assert !givenValues.contains(i);
                 givenValues.add(i);
             }
-            for (IntVar var : vars) {
-                int ub = var.getUB();
-                for (int k = var.getLB(); k <= ub; k = var.nextValue(k)) {
-                    if (!givenValues.contains(k)) {
-                        if (!toAdd.contains(k)) {
-                            toAdd.add(k);
-                        }
+            for (IntVar variable : vars) {
+                int ub = variable.getUB();
+                for (int k = variable.getLB(); k <= ub; k = variable.nextValue(k)) {
+                    if (!givenValues.contains(k) && !toAdd.contains(k)) {
+                        toAdd.add(k);
                     }
                 }
             }
@@ -1769,10 +1864,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                     v2[i] = toAdd.get(i - values.length);
                     cards[i] = vars[0].getModel().intVar(0);
                 }
-                return new GlobalCardinality(vars, v2, cards);
+                return new GlobalCardinality(vars, v2, cards, consistency);
             }
         }
-        return new GlobalCardinality(vars, values, occurrences);
+        return new GlobalCardinality(vars, values, occurrences, consistency);
     }
 
     /**
@@ -1789,8 +1884,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     default Constraint increasing(IntVar[] vars, int delta) {
         if (ref().getSolver().isLCG()) {
             if (ref().getSettings().warnUser()) {
-                ref().getSolver().log().white().println(
-                        "Warning: increasing constraint is decomposed (due to LCG).");
+                ref().getSolver().log().white().println("Warning: increasing constraint is decomposed (due to LCG).");
             }
             for (int i = 0; i < vars.length - 1; i++) {
                 ref().arithm(vars[i], "<=", vars[i + 1], "-", delta).post();
@@ -1965,28 +2059,33 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                     es.add(energy[i]);
                     ws.add(weight[i]);
                 }
-                //ref().sum(doms, "=", occurrences[i]).post();
             }
         }
         if (ref().getSolver().isLCG()) {
             if (ref().getSettings().warnUser()) {
-                ref().getSolver().log().white().println(
-                        "Warning: weaker version of knapsack constraint (due to LCG).");
+                ref().getSolver().log().white().println("Warning: weaker version of knapsack constraint (due to LCG).");
             }
-            return new Constraint(ConstraintsName.KNAPSACK, ArrayUtils.append(
+            return new Constraint(
+                ConstraintsName.KNAPSACK,
+                ArrayUtils.append(
                     scalar1.propagators,
                     scalar2.propagators,
-                    new Propagator[]{new PropKnapsack(occurrences, weightSum, energySum, weight, energy)}));
+                    new Propagator[]{new PropKnapsack(occurrences, weightSum, energySum, weight, energy)}
+                )
+            );
         }
-        return new Constraint(ConstraintsName.KNAPSACK, ArrayUtils.append(
-                scalar1.propagators,
-                scalar2.propagators,
-                new Propagator[]{
+        return new Constraint(
+             ConstraintsName.KNAPSACK,
+             ArrayUtils.append(
+                 scalar1.propagators,
+                 scalar2.propagators,
+                 new Propagator[]{
                         new PropKnapsack(occurrences, weightSum, energySum, weight, energy),
                         new PropKnapsackKatriel01(bs.toArray(new BoolVar[0]), weightSum, energySum,
-                                ws.stream().mapToInt(k -> k).toArray(), es.stream().mapToInt(k -> k).toArray())
+                                                  ws.stream().mapToInt(k -> k).toArray(), es.stream().mapToInt(k -> k).toArray())
                 }
-        ));
+            )
+        );
     }
 
     /**
@@ -2022,12 +2121,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         }
         Constraint allDiff = ref().allDifferent(PERMvars);
         allDiff.ignore();
-        return new Constraint(ConstraintsName.KEYSORT,
-                ArrayUtils.append(
-                        allDiff.propagators,
-
-                        new Propagator[]{
-                                new PropKeysorting(vars, SORTEDvars, PERMvars, K)}));
+        return new Constraint(
+            ConstraintsName.KEYSORT,
+            ArrayUtils.append(
+                allDiff.propagators,
+                new Propagator[]{new PropKeysorting(vars, SORTEDvars, PERMvars, K)}
+            )
+        );
     }
 
     /**
@@ -2042,7 +2142,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         if (vars == null || vars.length == 0) {
             throw new IllegalArgumentException("The array of variables cannot be null or empty");
         }
-        if (vars.length == 1) return ref().trueConstraint();
+        if (vars.length == 1) {
+            return ref().trueConstraint();
+        }
         if (ref().getSolver().isLCG()) {
             if (ref().getSettings().warnUser()) {
                 ref().getSolver().log().white().println(
@@ -2052,6 +2154,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 ref().lexLess(vars[i], vars[i + 1]).post();
             }
             return ref().voidConstraint();
+        }
+        if (vars[0].length == 1) {
+            // if the vectors are of size 1, then lexChainLess is equivalent to increasing
+            IntVar[] rvars = new IntVar[vars.length];
+            for (int i = 0; i < vars.length; i++) {
+                rvars[i] = vars[i][0];
+            }
+            return increasing(rvars, 1);
         }
         return new Constraint(ConstraintsName.LEXCHAIN, new PropLexChain(vars, true));
     }
@@ -2078,6 +2188,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 ref().lexLessEq(vars[i], vars[i + 1]).post();
             }
             return ref().voidConstraint();
+        }
+        if (vars[0].length == 1) {
+            // if the vectors are of size 1, then lexChainLessEq is equivalent to increasing
+            IntVar[] rvars = new IntVar[vars.length];
+            for (int i = 0; i < vars.length; i++) {
+                rvars[i] = vars[i][0];
+            }
+            return increasing(rvars, 0);
         }
         return new Constraint(ConstraintsName.LEXCHAIN, new PropLexChain(vars, false));
     }
@@ -2299,8 +2417,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         nValues = ((IntVar[]) args[1])[0];
         if (ref().getSolver().isLCG()) {
             if (ref().getSettings().warnUser()) {
-                ref().getSolver().log().white().println(
-                        "Warning: nValues constraint is decomposed (due to LCG).");
+                ref().getSolver().log().white().println("Warning: nValues constraint is decomposed (due to LCG).");
             }
             /*return new Constraint(
                     ConstraintsName.NVALUES,
@@ -2542,33 +2659,31 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @return a subCircuit constraint
      */
     default Constraint subCircuit(IntVar[] vars, int offset, IntVar subCircuitLength) {
-        Constraint alldiff = allDifferent(vars, "AC");
-        alldiff.ignore();
+        final List<Constraint> constraints = new ArrayList<>();
+        constraints.add(allDifferent(vars, "AC"));
         int n = vars.length;
         Model model = vars[0].getModel();
         IntVar nbLoops = model.intVar("nLoops", 0, n, true);
-        nbLoops.add(subCircuitLength).eq(n).post();
+        constraints.add(nbLoops.add(subCircuitLength).eq(n).decompose());
         if (ref().getSolver().isLCG()) {
             if (ref().getSettings().warnUser()) {
                 ref().getSolver().log().white().println(
                         "Warning: subCircuit constraint restricted to lighter filtering options due to LCG.");
             }
-            return new Constraint(ConstraintsName.SUBCIRCUIT, ArrayUtils.append(
-                    alldiff.getPropagators(),
-                    ArrayUtils.toArray(
-                            new PropKLoops(vars, offset, nbLoops),
-                            new PropSubcircuit(vars, offset, subCircuitLength)
-                    )
+            constraints.add(new Constraint(
+                ConstraintsName.SUBCIRCUIT,
+                new PropKLoops(vars, offset, nbLoops),
+                new PropSubcircuit(vars, offset, subCircuitLength)
+            ));
+        } else {
+            constraints.add(new Constraint(
+                ConstraintsName.SUBCIRCUIT,
+                new PropKLoops(vars, offset, nbLoops),
+                new PropSubcircuit(vars, offset, subCircuitLength),
+                new PropSubcircuitDominatorFilter(vars, offset, true)
             ));
         }
-        return new Constraint(ConstraintsName.SUBCIRCUIT, ArrayUtils.append(
-                alldiff.getPropagators(),
-                ArrayUtils.toArray(
-                        new PropKLoops(vars, offset, nbLoops),
-                        new PropSubcircuit(vars, offset, subCircuitLength),
-                        new PropSubcircuitDominatorFilter(vars, offset, true)
-                )
-        ));
+        return Constraint.merge(ConstraintsName.SUBCIRCUIT, constraints.toArray(Constraint[]::new));
     }
 
     /**
@@ -2723,8 +2838,11 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         if (sum.getModel().getSettings().enableDecompositionOfBooleanSum()) {
             int[] bounds = VariableUtils.boundsForAddition(vars);
             IntVar p = sum.getModel().intVar(sum.getModel().generateName("RSLT_"), bounds[0], bounds[1], true);
-            IntLinCombFactory.reduce(vars, Operator.EQ, p, minCardForDecomp).post();
-            return arithm(p, operator, sum);
+            return Constraint.merge(
+                ConstraintsName.SUM,
+                IntLinCombFactory.reduce(vars, Operator.EQ, p, minCardForDecomp),
+                arithm(p, operator, sum)
+            );
         } else {
             return IntLinCombFactory.reduce(vars, Operator.get(operator), sum, minCardForDecomp);
         }

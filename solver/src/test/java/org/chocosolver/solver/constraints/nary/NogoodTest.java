@@ -10,6 +10,8 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.sat.MiniSat;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Providers;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.nary.sat.PropSat;
@@ -19,10 +21,14 @@ import org.chocosolver.solver.search.restart.MonotonicCutoff;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.Random;
+import org.chocosolver.solver.search.strategy.strategy.FullyRandom;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.util.stream.IntStream;
 
 import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 import static org.testng.Assert.assertEquals;
@@ -35,29 +41,62 @@ import static org.testng.Assert.assertEquals;
  */
 public class NogoodTest {
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void test1() {
-        final Model model = new Model();
-        IntVar[] vars = model.intVarArray("vars", 3, 0, 2, false);
-        model.getSolver().setNoGoodRecordingFromRestarts();
-        model.getSolver().setSearch(randomSearch(vars, 29091981L));
-        model.getSolver().setRestarts(new BacktrackCounter(model, 0), new MonotonicCutoff(30), 3);
-        while (model.getSolver().solve()) ;
-        assertEquals(model.getSolver().getSolutionCount(), 27);
-        assertEquals(model.getSolver().getBackTrackCount(), 54);
+    @DataProvider
+    public Object[][] intCombinations() {
+        return Providers.merge(
+                new Object[][]{{2, 2, 9, 17},
+                        {3, 2, 27, 54}, {3, 3, 64, 133},
+                        {4, 2, 81, 175}, {4, 3, 256, 558}, {4, 4, 625, 1396},
+                        {5, 3, 1024, 2469}, {5, 4, 3125, 6729}, {5, 5, 7776, 16057},
+                },
+                new Object[][]{
+                        {true, false},
+                        {false, false},
+                        {false, true}
+                },
+                IntStream.range(29091981, 29091981 + 20).mapToObj(i -> new Object[]{i}).toArray(Object[][]::new));
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void test2() {
-        final Model model = new Model();
-        IntVar[] vars = model.intVarArray("vars", 3, 0, 3, false);
-        model.getSolver().setNoGoodRecordingFromRestarts();
-        model.getSolver().setSearch(randomSearch(vars, 29091981L));
-        model.getSolver().setRestarts(new BacktrackCounter(model, 0), new MonotonicCutoff(30), 1000);
-        model.getSolver().limitTime(2000);
-        while (model.getSolver().solve()) ;
-        assertEquals(model.getSolver().getSolutionCount(), 64);
-        assertEquals(model.getSolver().getBackTrackCount(), 133);
+//    @Test(dataProviderClass = Providers.class, dataProvider = "trueOrFalse")
+//    public void test11(boolean ngSAT) {
+//        test2(5, 5, 7776, 16057, false, ngSAT, 29091981);
+//    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "intCombinations")
+    public void test1(int nbvars, int ub, int nbsols, int nbbcks, boolean ngSAT, boolean minimize, long seed) {
+        final Model model = new Model(SettingsBuilder.init()
+                .setNogoodFromRestartWithSAT(ngSAT)
+                .setNogoodFromRestartMinimize(minimize));
+        IntVar[] vars = model.intVarArray("vars", nbvars, 0, ub, false);
+        Solver solver = model.getSolver();
+        solver.setSearch(randomSearch(vars, seed));
+        solver.setNoGoodRecordingFromRestarts();
+        solver.setRestarts(new BacktrackCounter(model, 0), new MonotonicCutoff(30), 100);
+//        solver.showDecisions(() -> solver.getNodeCount()+"-"+solver.getFailCount()+"-"+solver.getRestartCount()+"::"+ Arrays.toString(vars));
+        while (solver.solve()) ;
+        assertEquals(solver.getSolutionCount(), nbsols);
+        if (seed == 29091981L) {
+            assertEquals(model.getSolver().getBackTrackCount(), nbbcks);
+        }
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "intCombinations")
+    public void test2(int nbvars, int ub, int nbsols, int nbbcks, boolean ngSAT, boolean minimize, long seed) {
+        final Model model = new Model(SettingsBuilder.init()
+                .setNogoodFromRestartWithSAT(ngSAT)
+                .setNogoodFromRestartMinimize(minimize));
+        IntVar[] vars = model.intVarArray("vars", nbvars, 0, ub, false);
+        Solver solver = model.getSolver();
+        solver.setSearch(new FullyRandom(vars, seed));
+        solver.setNoGoodRecordingFromRestarts();
+        solver.setRestarts(new BacktrackCounter(model, 0), new MonotonicCutoff(30), 1000);
+        solver.limitTime(2000);
+//        solver.showDecisions(() -> solver.getNodeCount()+"-"+solver.getFailCount()+"-"+solver.getRestartCount()+"::"+ Arrays.toString(vars));
+        while (solver.solve()) ;
+        assertEquals(model.getSolver().getSolutionCount(), nbsols);
+//        if(seed == 29091981L) {
+//            assertEquals(model.getSolver().getBackTrackCount(), nbbcks);
+//        }
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -133,16 +172,43 @@ public class NogoodTest {
         Assert.assertEquals(chocoModel.getSolver().getSolutionCount(), 4);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void test5() {
-        final Model model = new Model();
-        SetVar[] vars = model.setVarArray("vars", 3, new int[]{}, new int[]{1, 2});
-        model.getSolver().setNoGoodRecordingFromRestarts();
-        model.getSolver().setSearch(Search.setVarSearch(new Random<SetVar>(29091981L), new SetDomainMin(), true, vars));
-        model.getSolver().setRestarts(new BacktrackCounter(model, 0), new MonotonicCutoff(30), 3);
-        while (model.getSolver().solve()) ;
-        assertEquals(model.getSolver().getSolutionCount(), 64);
-        assertEquals(model.getSolver().getBackTrackCount(), 133);
+    @DataProvider
+    public Object[][] setCombinations() {
+        return Providers.merge(
+                new Object[][]{{2, 2, 4, 7},
+                        {3, 2, 8, 15}, {3, 3, 64, 133},
+                        {4, 2, 16, 31}, {4, 3, 256, 527}, {4, 4, 4096, 8218},
+                        {5, 3, 1024, 2066}, {5, 4, 32768, 65571}, //{5, 5, 1048576, 2097201},
+                },
+                new Object[][]{
+                        {true, false},
+                        {false, false},
+                        {false, true}
+                },
+                IntStream.range(29091981, 29091981 + 20).mapToObj(i -> new Object[]{i}).toArray(Object[][]::new));
+    }
+
+    @Test(dataProviderClass = Providers.class, dataProvider = "trueOrFalse")
+    public void test55(boolean ngSAT) {
+        test5(3, 3, 64, 133, ngSAT, false, 29091990);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "setCombinations")
+    public void test5(int nbvars, int ub, int nbsols, int nbbcks, boolean ngSAT, boolean minimize, long seed) {
+        final Model model = new Model(SettingsBuilder.init()
+                .setNogoodFromRestartWithSAT(ngSAT)
+                .setNogoodFromRestartMinimize(minimize));
+        SetVar[] vars = model.setVarArray("vars", nbvars, new int[]{}, IntStream.range(1, ub).toArray());
+        Solver solver = model.getSolver();
+        solver.setNoGoodRecordingFromRestarts();
+        solver.setSearch(Search.setVarSearch(new Random<>(seed), new SetDomainMin(), true, vars));
+        solver.setRestarts(new BacktrackCounter(model, 0), new MonotonicCutoff(30), 3);
+//        solver.showDecisions(() -> solver.getNodeCount()+"-"+solver.getFailCount()+"-"+solver.getRestartCount()+"::"+ Arrays.toString(vars));
+        while (solver.solve()) ;
+        assertEquals(solver.getSolutionCount(), nbsols);
+        if (seed == 29091981) {
+            assertEquals(solver.getBackTrackCount(), nbbcks);
+        }
     }
 
 

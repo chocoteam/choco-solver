@@ -235,7 +235,7 @@ public interface ReExpression extends ArExpression {
                 int un = 0;
                 int bi = 0;
                 for (ArExpression e : exp.getExpressionChild()) {
-                    if (e instanceof UnCReExpression) {
+                    if (e instanceof UnCReExpression  || e instanceof IntVar) {
                         un++;
                     } else if (e instanceof BiReExpression) {
                         bi++;
@@ -255,7 +255,7 @@ public interface ReExpression extends ArExpression {
         double s = TuplesFactory.sample(Math.min(card, MAX_SAMPLING_SIZE), new Random(uvars[0].getModel().getSeed()), values -> beval(values, map), uvars);
 
         if (card <= Math.pow(2, 19) && uvars.length <= 4 && s * card <= Math.pow(2, 16)) {
-            return extension("CT", s <= FEASIBILITY_THRESHOLD);
+            return extension("", s <= FEASIBILITY_THRESHOLD);
         } else {
             return decompose();
         }

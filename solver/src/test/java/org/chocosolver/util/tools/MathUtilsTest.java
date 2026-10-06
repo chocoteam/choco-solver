@@ -46,22 +46,22 @@ public class MathUtilsTest {
     @Test(groups="1s", timeOut=60000)
     public void testSafeAdd() {
         Assert.assertEquals(MathUtils.safeAdd(1, 1), 2);
-        Assert.assertEquals(MathUtils.safeAdd(Integer.MAX_VALUE, 1), Integer.MAX_VALUE);
-        Assert.assertEquals(MathUtils.safeAdd(Integer.MIN_VALUE, -1), Integer.MIN_VALUE);
+        Assert.assertEquals(MathUtils.safeAdd(MathUtils.MAX_VALUE, 1), MathUtils.MAX_VALUE);
+        Assert.assertEquals(MathUtils.safeAdd(MathUtils.MIN_VALUE, -1), MathUtils.MIN_VALUE);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testSafeSubstract() {
         Assert.assertEquals(MathUtils.safeSubstract(1, 1), 0);
-        Assert.assertEquals(MathUtils.safeSubstract(Integer.MIN_VALUE, 1), Integer.MIN_VALUE);
-        Assert.assertEquals(MathUtils.safeSubstract(Integer.MAX_VALUE, -1), Integer.MAX_VALUE);
+        Assert.assertEquals(MathUtils.safeSubstract(MathUtils.MIN_VALUE, 1), MathUtils.MIN_VALUE);
+        Assert.assertEquals(MathUtils.safeSubstract(MathUtils.MAX_VALUE, -1), MathUtils.MAX_VALUE);
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testSafeMultiply() {
         Assert.assertEquals(MathUtils.safeMultiply(1, 1), 1);
-        Assert.assertEquals(MathUtils.safeMultiply(Integer.MAX_VALUE, 10), Integer.MAX_VALUE);
-        Assert.assertEquals(MathUtils.safeSubstract(Integer.MIN_VALUE, 10), Integer.MIN_VALUE);
+        Assert.assertEquals(MathUtils.safeMultiply(MathUtils.MAX_VALUE, 10), MathUtils.MAX_VALUE);
+        Assert.assertEquals(MathUtils.safeSubstract(MathUtils.MIN_VALUE, 10), MathUtils.MIN_VALUE);
     }
 
     @Test(groups="1s", timeOut=60000)

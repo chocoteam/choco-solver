@@ -23,6 +23,14 @@ public interface IMonitorRestart extends ISearchMonitor {
     }
 
     /**
+     * Actions to execute during restarting the search (just before root propagation)
+     */
+    default void duringRestart(){
+        // nothing to do by default
+    }
+
+
+    /**
      * Actions to execute after restarting the search
      */
     default void afterRestart(){

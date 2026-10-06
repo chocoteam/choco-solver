@@ -31,7 +31,8 @@ public class DIMACS extends RegParser {
     public DIMACSParser[] parsers;
 
     @SuppressWarnings("FieldMayBeFinal")
-    @Option(name = "-cp", usage = "Pure CP approach (does not rely on the underlying SAT solver).")
+    @Option(name = "-cp", usage = "Pure CP approach (does not rely on the underlying SAT solver).",
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class)
     private boolean cp = false;
 
     /**

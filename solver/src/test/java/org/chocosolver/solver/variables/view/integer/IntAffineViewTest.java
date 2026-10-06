@@ -27,6 +27,7 @@ import static org.testng.Assert.assertEquals;
  * <br/>
  *
  * @author Charles Prud'homme
+ * @author Aditya Nikam <adityanikam9502@gmail.com>
  * @since 06/10/2023
  */
 public class IntAffineViewTest {
@@ -228,5 +229,31 @@ public class IntAffineViewTest {
         };
         assertEquals(m.getSolver().getSolutionCount(), 2);
         assertEquals(m.getSolver().getFailCount(), 2);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testNestedAffineViewOverflowKeepsSolution() {
+        Model m = new Model();
+        IntVar x = m.intVar("x", 46_341, 46_342, false);
+        // Flattening (x - 46341) * 46341 gives b = 46341 * -46341, which does
+        // not fit in an int, although the product itself is at most 46341.
+        IntVar result = x.sub(46_341).mul(46_341).intVar();
+        result.eq(0).post();
+        assertEquals(m.getSolver().solve(), true);
+        assertEquals(x.getValue(), 46_341);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testNestedAffineViewOverflowRejectsInvalidSolution() {
+        Model m = new Model();
+        IntVar x = m.intVar("x", 46_341, 46_342, false);
+        IntVar result = x.sub(46_341).mul(46_341).intVar();
+        result.ne(0).post();
+        m.getSolver().setSearch(inputOrderLBSearch(x));
+        while (m.getSolver().solve()) {
+            assertEquals(x.getValue(), 46_342);
+            assertEquals(result.getValue(), 46_341);
+        }
+        assertEquals(m.getSolver().getSolutionCount(), 1);
     }
 }

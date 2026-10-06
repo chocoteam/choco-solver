@@ -10,6 +10,7 @@ import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.binary.element.ElementFactory;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.util.tools.MathUtils;
 
 import java.util.Arrays;
 
@@ -103,8 +104,8 @@ public interface IResultVariableFactory extends ISelf<Model> {
 	 * @return an integer variable equal to the sum of input variables toSum
 	 */
 	default IntVar sum(String name, IntVar... toSum) {
-		int lb = Arrays.stream(toSum).mapToInt(IntVar::getLB).sum();
-		int ub = Arrays.stream(toSum).mapToInt(IntVar::getUB).sum();
+		int lb = MathUtils.safeSum(Arrays.stream(toSum).mapToInt(IntVar::getLB));
+		int ub = MathUtils.safeSum(Arrays.stream(toSum).mapToInt(IntVar::getUB));
 		IntVar result = ref().intVar(name, lb, ub, true);
 		if (!result.isInstantiated()) {
 			ref().sum(toSum, "=", result).post();
@@ -383,8 +384,8 @@ public interface IResultVariableFactory extends ISelf<Model> {
 	 * @return an integer variable equal to SUM_i_in_indices_(values[i-offset])
 	 */
 	default IntVar sum(String name, int[] values, int offset, SetVar indices) {
-		int lb = Arrays.stream(indices.getLB().toArray()).map(i -> values[i - offset]).sum();
-		int ub = Arrays.stream(indices.getUB().toArray()).map(i -> values[i - offset]).sum();
+		int lb = MathUtils.safeSum(Arrays.stream(indices.getLB().toArray()).map(i -> values[i - offset]));
+		int ub = MathUtils.safeSum(Arrays.stream(indices.getUB().toArray()).map(i -> values[i - offset]));
 		IntVar result = ref().intVar(name, lb, ub, true);
 		if (!result.isInstantiated()) {
 			ref().sumElements(indices, values, offset, result).post();

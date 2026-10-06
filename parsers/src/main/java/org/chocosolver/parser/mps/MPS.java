@@ -36,7 +36,8 @@ public class MPS extends RegParser {
     public MPSParser[] parsers;
 
     @SuppressWarnings("FieldMayBeFinal")
-    @Option(name = "-max", usage = "define to maximize (default: to minimize).")
+    @Option(name = "-max", usage = "define to maximize (default: to minimize).",
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class)
     private boolean maximize = false;
 
     @SuppressWarnings("FieldMayBeFinal")
@@ -44,7 +45,8 @@ public class MPS extends RegParser {
     private double precision = 1.0E-4D;
 
     @SuppressWarnings("FieldMayBeFinal")
-    @Option(name = "-ibex", usage = "Use Ibex for non-full integer equations (default: false).")
+    @Option(name = "-ibex", usage = "Use Ibex for non-full integer equations (default: false).",
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class)
     private boolean ibex = false;
 
     @SuppressWarnings("FieldMayBeFinal")
@@ -56,7 +58,8 @@ public class MPS extends RegParser {
     private double pinf = Integer.MAX_VALUE / 10d;
 
     @SuppressWarnings("FieldMayBeFinal")
-    @Option(name = "-noeq", usage = "Split EQ constraints into a LQ and a GQ constraint.")
+    @Option(name = "-noeq", usage = "Split EQ constraints into a LQ and a GQ constraint.",
+            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class)
     private boolean noeq = false;
 
     @Option(name = "-split", usage = "Split any contraints of cardinality greater than this value (default: 100).")

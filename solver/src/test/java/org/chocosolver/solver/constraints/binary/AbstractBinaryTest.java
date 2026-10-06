@@ -133,4 +133,37 @@ public abstract class AbstractBinaryTest {
             Assert.assertEquals(cp, base, seed +" >> found: " + cp + " solutions, while " + base + " are expected (" + seed + ")");
         }
     }
+
+    @Test(groups="10s", timeOut=60000)
+    public void testReified() {
+        boolean bounded; // true if domains are bounded, false if they are enumerated
+        Random rand = new Random(0);
+        for (int k = 0; k < 20000; k++) {
+            long seed = System.currentTimeMillis();
+            if(k==0){
+                seed = 1410851231099L;
+            }
+            rand.setSeed(seed);
+            bounded = rand.nextBoolean();
+            int size = 5; // domain size
+            int range = 15; // value range
+            int[][] domains;
+            if (bounded) {
+                domains = DomainBuilder.buildFullDomains(2, size, range, rand);
+            } else {
+                domains = DomainBuilder.buildFullDomains2(2, size, range, rand, rand.nextDouble(), rand.nextBoolean());
+            }
+            // total number of solutions: brut force algorithm
+            long base = brutForceTest(domains, bounded);
+            Model s = modeler(domains, bounded, seed);
+            try {
+                while (s.getSolver().solve()) ;
+            } catch (AssertionError ae) {
+                System.err.printf("seed: %d\n", seed);
+                throw ae;
+            }
+            long cp = s.getSolver().getSolutionCount();
+            Assert.assertEquals(cp, base, "found: " + cp + " solutions, while " + base + " are expected (" + seed + ")");
+        }
+    }
 }

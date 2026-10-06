@@ -17,8 +17,20 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
 /**
- * A propagator dedicated to express b &rArr; x != y
- * <br/>
+ * A propagator dedicated to express b &rArr; x != y.
+ * <p>
+ *     This propagator ensures that if b is true, then x and y must be different.
+ *     When b is false, no filtering is required.
+ * </p>
+ * <p>
+ *     <b>Important note on bounded domains:</b>
+ *     When x (or y) is instantiated and y (or x) has a bounded domain, attempting to remove
+ *     a value that is interior to the domain (not on a bound) will not change the domain
+ *     representation. However, the propagator must not passivate unconditionally after
+ *     calling {@code removeValue}, as this would fail to check the constraint when search
+ *     later narrows the domain to that value. The propagator checks whether the value was
+ *     actually removed or is no longer in the domain before passivating.
+ * </p>
  *
  * @author Charles Prud'homme
  * @since 08/02/2024
@@ -51,13 +63,17 @@ public class PropXneYHalfReif extends Propagator<IntVar> {
         } else if (b.isInstantiatedTo(1)) {
             // if b is true, then x and y must be different
             if (x.isInstantiated()) {
-                y.removeValue(x.getValue(), this,
-                        lcg() ? this.r(x.getValLit(), b.getValLit()) : Reason.undef());
-                setPassive();
+                if(y.removeValue(x.getValue(), this,
+                        lcg() ? this.r(x.getValLit(), b.getValLit()) : Reason.undef())
+                || !y.contains(x.getValue())){
+                    setPassive();
+                }
             }else if (y.isInstantiated()) {
-                x.removeValue(y.getValue(), this,
-                        lcg() ? this.r(y.getValLit(), b.getValLit()) : Reason.undef());
-                setPassive();
+                if(x.removeValue(y.getValue(), this,
+                        lcg() ? this.r(y.getValLit(), b.getValLit()) : Reason.undef())
+                || !x.contains(y.getValue())){
+                    setPassive();
+                }
             }
         } else if (x.isInstantiated() && y.isInstantiated() && x.getValue() == y.getValue()) {
             // if x and y are instantiated and equal, then b must be false

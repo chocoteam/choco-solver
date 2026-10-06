@@ -143,7 +143,7 @@ done
 
 FILE="$1"
 
-ARGS="$ARGS -limit=[${TIME_LIMIT}s] -f -varh DOMWDEG -valsel [MIN,true,32,true]  -restarts [luby,500,5000,true] -lc 1"
+ARGS="$ARGS -limit=[${TIME_LIMIT}s] "
 
 CMD="java -XX:+UseSerialGC -server -Xss128M -Xmx${MEM_LIMIT}m -cp .:${CHOCO_JAR} org.chocosolver.parser.xcsp.ChocoXCSP \"${FILE}\" ${ARGS}"
 

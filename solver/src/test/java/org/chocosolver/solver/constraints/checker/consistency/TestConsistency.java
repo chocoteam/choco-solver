@@ -75,6 +75,30 @@ public class TestConsistency {
         }
     }
 
+    // GlobalCardinality *******************************************************
+
+    @Test(groups="checker", timeOut=60000)
+    public void testGCC_AC() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 20; i++) {
+            for (int n = 2; n < (1 << 3) + 1; n *= 2) {
+                checkConsistency(Modeler.modelGCC_AC, n, 0, n, true, seed + i, "ac");
+                checkConsistency(Modeler.modelGCC_AC, n, 0, n, false, seed + i, "ac");
+            }
+        }
+    }
+
+    @Test(groups="checker", timeOut=60000)
+    public void testGCC_BC() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 10; i++) {
+            for (int n = 2; n < (1 << 4) + 1; n *= 2) {
+                checkConsistency(Modeler.modelGCC_BC, n, 0, n, true, seed + i, "bc");
+                checkConsistency(Modeler.modelGCC_BC, n, 0, n, false, seed + i, "bc");
+            }
+        }
+    }
+
     // Absolute *******************************************************
 
     @Test(groups="checker", timeOut=60000)

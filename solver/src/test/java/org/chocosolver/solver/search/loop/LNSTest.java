@@ -30,6 +30,8 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
+
 import static java.lang.Math.ceil;
 import static org.chocosolver.solver.search.strategy.Search.domOverWDegSearch;
 import static org.chocosolver.solver.search.strategy.Search.lastConflict;
@@ -62,7 +64,8 @@ public class LNSTest {
 
         Solver r = model.getSolver();
         r.setSearch(lastConflict(domOverWDegSearch(objects)));
-        r.limitTime(900);
+//        r.limitTime(900);
+        r.limitNode(3000);
         switch (lns) {
             case 0:
                 break;
@@ -103,7 +106,7 @@ public class LNSTest {
         // So, the least we can do is to check that a solution is found
         Assert.assertTrue(r.getSolutionCount() > 0, "No solution found with LNS=" + lns);
         // We can also check that the weight is not that bad
-        Assert.assertTrue(bp >= 7900, "Power is too low with LNS=" + lns);
+        Assert.assertTrue(bp >= 7900, "Power is too low "+bp+" with LNS=" + lns);
         Assert.assertTrue(bw >= 1090, "Weight is too low with LNS=" + lns);
     }
 
@@ -301,7 +304,7 @@ public class LNSTest {
         }
 
         int[] coeffs = new int[nodes];
-        for (int i = 0; i < nodes; i++) coeffs[i] = 1;
+        Arrays.fill(coeffs, 1);
         model.scalar(costmaxs, coeffs, "=", optVar).post();
 
         model.setObjective(Model.MINIMIZE, optVar);

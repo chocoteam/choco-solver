@@ -128,7 +128,7 @@ public class KnapsackTest {
         ks.solveIt(s, true);
         Assert.assertEquals(s.getSolver().getBestSolutionValue().intValue(), 2657, "obj val");
         Assert.assertEquals(s.getSolver().getSolutionCount(), 3, "nb sol");
-        Assert.assertEquals(s.getSolver().getNodeCount(), 59, "nb nod");
+        Assert.assertEquals(s.getSolver().getNodeCount(), 58, "nb nod");
     }
 
     @Test(groups = "1s", timeOut = 60000)

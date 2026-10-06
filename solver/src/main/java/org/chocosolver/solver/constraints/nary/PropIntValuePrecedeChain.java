@@ -136,7 +136,7 @@ public class PropIntValuePrecedeChain extends Propagator<IntVar> {
         if (b.get() < g.get() && i < g.get() && vars[i].isInstantiatedTo(t)) {
             g.set(i);
             if (b.get() > i) {
-                vars[a.get()].instantiateTo(s, this, explainSin2(a.get(), g.get()));
+                vars[a.get()].instantiateTo(s, this, explainSin(a.get(), g.get()));
                 setPassive();
             }
         }
@@ -164,22 +164,6 @@ public class PropIntValuePrecedeChain extends Propagator<IntVar> {
     }
 
     private Reason explainSin(int a, int g) {
-        Reason r = Reason.undef();
-        if (lcg()) {
-            // value t can be removed from the domains of the variables before or at position a
-            // because those variables do not contain s
-            int[] lits = new int[g - a + 1];
-            int m = 1;
-            lits[m++] = vars[g].getLit(t, IntVar.LR_NE);
-            for (int i = a + 1; i < g; i++) {
-                lits[m++] = vars[i].getLit(s, IntVar.LR_EQ);
-            }
-            r = this.r(lits);
-        }
-        return r;
-    }
-
-    private Reason explainSin2(int a, int g) {
         Reason r = Reason.undef();
         if (lcg()) {
             // value t can be removed from the domains of the variables before or at position a

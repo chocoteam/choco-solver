@@ -17,10 +17,22 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * A Propagation Guided LNS
+ * A Propagation Guided Large Neighborhood Search (LNS) neighbor.
  * <p>
  * Based on "Propagation Guided Large Neighborhood Search", Perron et al. CP2004.
- * <br/>
+ * <p>
+ * This implementation selects variables to be part of the fragment (to be frozen) based on
+ * the impact of constraint propagation. The algorithm maintains a fragment of variables
+ * that are frozen to their current values. It iteratively selects variables to add to the
+ * fragment, prioritizing those that cause the most domain reduction when frozen.
+ * <p>
+ * Variables that cause significant domain reduction in other variables through propagation
+ * are considered most influential and are prioritized for inclusion in the fragment.
+ * This creates a dynamic neighborhood that adapts based on constraint propagation effects.
+ * <p>
+ * This strategy is particularly effective when the constraint propagation provides
+ * strong guidance on which variables are most influential in reducing the search space.
+ * For a reverse approach, see {@link ReversePropagationGuidedNeighborhood}.
  *
  * @author Charles Prud'homme
  * @since 08/04/13
@@ -29,61 +41,79 @@ public class PropagationGuidedNeighborhood extends IntNeighbor {
 
 
     /**
-     * Number of variables
+     * Number of variables in the neighborhood
      */
     protected final int n;
     /**
-     * Domain size of each variable in {@link #variables}
+     * Current domain size of each variable in {@link #variables}
      */
     protected int[] curDoms;
     /**
-     * Domain size of each variable in {@link #variables} before propagation
+     * Domain size of each variable in {@link #variables} before the current propagation step.
+     * Used to compute the domain reduction caused by freezing a variable.
      */
     protected int[] befDoms;
     /**
-     * Store the modified variables
+     * Stores the domain reduction (in absolute values) for each variable,
+     * used to rank variables by their impact on propagation
      */
     protected int[] all;
     /**
-     * For randomness
+     * Random number generator for random variable selection
      */
     protected Random rd;
     /**
-     * Intial size of the fragment
+     * Desired size of the fragment (target logarithmic sum of domain sizes)
      */
     final double desiredSize;
     /**
-     * Current size of the fragment
+     * Current size of the fragment.
+     * This is dynamically adjusted by {@link #restrictLess()} to increase the neighborhood size
+     * over time (size *= 1.01 each call).
      */
     double size;
     /**
-     * Number of variables modified through propagation to consider while computing the neighbor
+     * Maximum number of candidate variables to store and consider.
+     * Only the top <code>listSize</code> variables with the highest domain reduction impact
+     * are kept as candidates for the next selection.
      */
     int listSize;
     /**
-     * Logarithmic cardinality of domains
+     * Current logarithmic sum of domain sizes of variables in the fragment.
+     * Used to track progress toward the desired fragment size.
+     * The loop in {@link #update()} continues while logSum > size.
      */
     double logSum = 0.;
     /**
-     * Store the variable elligible for propagation
+     * List of candidate variable indices eligible for selection.
+     * Contains variables from the fragment that caused domain reduction when frozen,
+     * sorted by their impact (highest first) and limited to {@link #listSize} entries.
      */
     List<Integer> candidates;
     /**
-     * Indicate which variables are selected in a fragment
+     * BitSet indicating which variables are currently in the fragment (to be frozen).
+     * A bit set to 1 means the variable is in the fragment and will be frozen.
      */
     protected BitSet fragment;
     /**
-     * Reference to the model
+     * Reference to the model containing the variables and constraints
      */
     protected Model mModel;
 
     /**
-     * Create a propagation-guided neighbor for LNS
+     * Constructs a Propagation Guided LNS neighbor.
+     * <p>
+     * This neighbor selects variables to be part of the fragment (to be frozen) based on
+     * the impact of constraint propagation. Variables that cause the most domain reduction
+     * when frozen are prioritized.
      *
-     * @param vars     set of variables to consider
-     * @param desiredSize desired size of the fragment
-     * @param listSize number of modified variable to store while propagating
-     * @param seed     for randomness
+     * @param vars         the integer variables to consider for the neighborhood
+     * @param desiredSize  the desired size of the fragment (logarithmic sum of domain sizes).
+     *                     Note: this is a double value representing a target sum, not a count of variables.
+     * @param listSize     the number of modified variables to store and consider while propagating.
+     *                     Variables are ranked by their impact (domain reduction caused) and only the
+     *                     top <code>listSize</code> are kept as candidates for the next selection.
+     * @param seed         the seed for the random number generator used when no candidates are available
      */
     public PropagationGuidedNeighborhood(IntVar[] vars, double desiredSize, int listSize, long seed) {
         super(vars);
@@ -97,6 +127,14 @@ public class PropagationGuidedNeighborhood extends IntNeighbor {
         this.fragment = new BitSet(n);
     }
 
+    /**
+     * Creates a fragment by freezing variables based on propagation guidance.
+     * Initially computes the logarithmic sum of all variable domain sizes and copies
+     * current domain sizes to {@link #befDoms}. All variables start in the fragment.
+     * Then calls {@link #update()} to iteratively select and freeze variables.
+     *
+     * @throws ContradictionException if the fragment is trivially infeasible
+     */
     @Override
     public void fixSomeVariables() throws ContradictionException {
         logSum = Arrays.stream(variables).mapToDouble(v -> MathUtils.log2(v.getDomainSize())).sum();
@@ -106,9 +144,19 @@ public class PropagationGuidedNeighborhood extends IntNeighbor {
     }
 
     /**
-     * Create the fragment
+     * Creates the fragment by iteratively selecting and freezing variables.
+     * For each selected variable, it freezes the variable to its solution value,
+     * propagates constraints, and measures the impact on other variables' domains.
+     * Variables that cause significant domain reduction in others are prioritized for
+     * inclusion in the fragment.
+     * <p>
+     * The method stops when either:
+     * <ul>
+     *   <li>The logarithmic sum of domain sizes falls below the target size</li>
+     *   <li>No more variables are left in the fragment</li>
+     * </ul>
      *
-     * @throws ContradictionException if the fragment is trivially infeasible
+     * @throws ContradictionException if propagating the freezing of a variable leads to a contradiction
      */
     protected void update() throws ContradictionException {
         while (logSum > size && fragment.cardinality() > 0) {
@@ -148,7 +196,12 @@ public class PropagationGuidedNeighborhood extends IntNeighbor {
     }
 
     /**
-     * @return a variable id in {@link #variables} to be part of the fragment
+     * Selects the next variable to process from the fragment.
+     * If there are candidate variables (those that caused significant domain reduction when
+     * frozen), it prioritizes them (selecting from the head of the list).
+     * Otherwise, it selects a variable randomly from the remaining variables in the fragment.
+     *
+     * @return the index of the selected variable in {@link #variables}
      */
     int selectVariable() {
         int id;
@@ -163,23 +216,44 @@ public class PropagationGuidedNeighborhood extends IntNeighbor {
         return id;
     }
 
+    /**
+     * Loads the neighborhood state from a solution.
+     * Resets the current size to the desired size.
+     *
+     * @param solution the solution to load from
+     */
     @Override
     public void loadFromSolution(Solution solution) {
         super.loadFromSolution(solution);
         size = desiredSize;
     }
 
+    /**
+     * Records the current solution.
+     * Resets the current size to the desired size after recording.
+     */
     @Override
     public void recordSolution() {
         super.recordSolution();
         size = desiredSize;
     }
 
+    /**
+     * Restricts the neighborhood less by increasing the fragment size.
+     * Multiplies the current size by 1.01, allowing the neighborhood to grow
+     * over time and explore larger fragments.
+     */
     @Override
     public void restrictLess() {
         size *= 1.01;
     }
 
+    /**
+     * Initializes the neighborhood by recording the initial domain sizes of all variables.
+     * This is called once at the beginning of the search to establish baseline domain sizes
+     * in {@link #curDoms} and {@link #befDoms} that are used to measure the impact of
+     * freezing variables during the neighborhood exploration.
+     */
     @Override
     public void init() {
         this.curDoms = new int[n];

@@ -7,8 +7,10 @@
 package org.chocosolver.solver.search.loop.monitors;
 
 import org.chocosolver.solver.ISelf;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.nary.NogoodBase;
 import org.chocosolver.solver.search.limits.*;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.criteria.Criterion;
@@ -35,11 +37,20 @@ public interface ISearchMonitorFactory extends ISelf<Solver> {
     }
 
     /**
-     * * Record nogoods from restart, that is, anytime the search restarts, a nogood is produced, based on the decision path, to prevent from
+     * Record nogoods from restart, that is, anytime the search restarts, a nogood is produced, based on the decision path, to prevent from
      * scanning the same sub-search tree.
+     * <p>
+     * The implementation used (SAT-based or NogoodBase) and whether minimization is enabled
+     * are controlled by the model's {@link Settings}: {@link Settings#nogoodFromRestartWithSAT()}
+     * and {@link Settings#nogoodFromRestartMinimize()}.
      */
     default void setNoGoodRecordingFromRestarts() {
-        if(!ref().isLCG()) ref().plugMonitor(new NogoodFromRestarts(ref().getModel()));
+        Settings settings = ref().getModel().getSettings();
+        if (settings.nogoodFromRestartWithSAT()) {
+            if (!ref().isLCG()) ref().plugMonitor(new NogoodFromRestarts(ref().getModel()));
+        } else {
+            ref().plugMonitor(new NogoodBase(ref().getModel(), settings.nogoodFromRestartMinimize()));
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

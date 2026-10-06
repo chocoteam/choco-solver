@@ -7,23 +7,29 @@
 package org.chocosolver.solver.constraints.nary.knapsack.structure;
 
 /**
- * class to transmit informations about the last search, useful for
- * {@code computeLimitWeightForbidden} and {@code computeLimitWeightMandatory}
+ * Information container for search results in the knapsack filtering algorithm.
+ * <p>
+ * This class is used to transmit information between calls to
+ * {@link ComputingLossWeightTree#computeLimitWeightMandatory} and
+ * {@link ComputingLossWeightTree#computeLimitWeightForbidden} methods.
+ * It contains the results of determining whether an item is mandatory or forbidden,
+ * along with accumulated values used for subsequent computations.
+ * <p>
+ * All fields are immutable to ensure consistency during the filtering process.
+ *
+ * @param decision          The decision result: true if the item is mandatory/forbidden, false otherwise.
+ * @param lastItemIndex     The index of the last item processed in the search.
+ *                          This is used as the starting point for the next search iteration.
+ * @param accumulatedProfit The total profit accumulated during the search.
+ *                          This represents the profit from items that can be used to replace or compensate
+ *                          for the item being checked.
+ * @param accumulatedWeight The total weight accumulated during the search.
+ *                          This represents the weight from items that can be used to replace or compensate
+ *                          for the item being checked.
+ * @param remainingWeight   The remaining weight of the last item after partial inclusion.
+ *                          This is used for precise calculations when an item is only partially included.
+ * @author Nicolas PIERRE
  */
-public class SearchInfos {
-    public final boolean decision;
-    public final int endItem;
-    public final double profitAccumulated;
-    public final double weightAccumulated;
-    public final double remainingWeightEndItem;
-
-    public SearchInfos(boolean decision, int endItem, double profitAccumulated, double weightAccumulated,
-                       double remainingWeightEndItem) {
-        this.decision = decision;
-        this.endItem = endItem;
-        this.profitAccumulated = profitAccumulated;
-        this.weightAccumulated = weightAccumulated;
-        this.remainingWeightEndItem = remainingWeightEndItem;
-    }
-
+public record SearchInfos(boolean decision, int lastItemIndex, double accumulatedProfit, double accumulatedWeight,
+                          double remainingWeight) {
 }

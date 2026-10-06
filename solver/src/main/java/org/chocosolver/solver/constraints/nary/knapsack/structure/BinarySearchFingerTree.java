@@ -10,13 +10,38 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+/**
+ * Finger tree with binary search capabilities for knapsack filtering.
+ * <p>
+ * This class extends {@link FingerTree} with the ability to perform efficient binary searches
+ * on the tree structure. It maintains aggregate information (weight) at inner nodes to enable
+ * efficient traversal and querying.
+ * <p>
+ * The tree supports activation and deactivation of leaf items, with automatic propagation
+ * of changes up the tree hierarchy.
+ *
+ * @author Nicolas PIERRE
+ */
 public class BinarySearchFingerTree extends FingerTree<InnerNode, KPItem> {
 
+    /**
+     * Constructs a binary search finger tree from a list of sorted knapsack items.
+     *
+     * @param sortedItems the knapsack items sorted by decreasing efficiency
+     * @param supplier    a supplier function that creates inner nodes of the appropriate type
+     */
     public BinarySearchFingerTree(List<KPItem> sortedItems, Supplier<InnerNode> supplier) {
         super(sortedItems);
         setupTree(supplier);
     }
 
+    /**
+     * Returns the weight interface for a node at the given index.
+     *
+     * @param index the global index of the node
+     * @return the weight interface for the node
+     * @throws IndexOutOfBoundsException if the index is invalid
+     */
     private WeightInterface getNodeWeightInterface(int index) {
         if (isLeaf(index)) {
             return getLeaf(index);
@@ -28,6 +53,12 @@ public class BinarySearchFingerTree extends FingerTree<InnerNode, KPItem> {
         }
     }
 
+    /**
+     * Returns the weight of a node at the given index.
+     *
+     * @param index the global index of the node
+     * @return the weight of the node, or -1 if the index is invalid
+     */
     public int getNodeWeight(int index) {
         if (isInnerNode(index) || isLeaf(index)) {
             return getNodeWeightInterface(index).getWeight();
@@ -51,7 +82,9 @@ public class BinarySearchFingerTree extends FingerTree<InnerNode, KPItem> {
     }
 
     /**
-     * deactivate leaf and updates inner nodes
+     * Deactivates a leaf and updates inner nodes.
+     * When a leaf is deactivated, it is treated as having zero weight and profit,
+     * and all ancestor nodes are updated to reflect this change.
      *
      * @param leafIndex global leaf index
      */
@@ -61,7 +94,9 @@ public class BinarySearchFingerTree extends FingerTree<InnerNode, KPItem> {
     }
 
     /**
-     * activate leaf and updates inner nodes
+     * Activates a leaf and updates inner nodes.
+     * When a leaf is activated, its weight and profit values are restored,
+     * and all ancestor nodes are updated to reflect this change.
      *
      * @param leafIndex global leaf index
      */
@@ -71,7 +106,9 @@ public class BinarySearchFingerTree extends FingerTree<InnerNode, KPItem> {
     }
 
     /**
-     * updates inner nodes, when we activate/deactivate a leaf
+     * Updates inner nodes when a leaf is activated or deactivated.
+     * This method propagates the change up the tree hierarchy, updating all
+     * affected inner nodes.
      *
      * @param leafIndex global leaf index
      */
@@ -95,11 +132,11 @@ public class BinarySearchFingerTree extends FingerTree<InnerNode, KPItem> {
     }
 
     /**
-     * Compute the minimum leaf global index starting from a given node.
-     * If indexNode has a valid leaf, it will return a valid leaf index
-     * 
-     * @param indexNode starting node
-     * @return a global leaf index
+     * Computes the minimum leaf global index starting from a given node.
+     * If the starting node is an inner node, traverses to the leftmost leaf.
+     *
+     * @param indexNode starting node (global index)
+     * @return a global leaf index (the leftmost leaf in the subtree)
      */
     private int minLeafIndexFromInnerNode(int indexNode) {
         int minIdx = indexNode;
@@ -110,11 +147,12 @@ public class BinarySearchFingerTree extends FingerTree<InnerNode, KPItem> {
     }
 
     /**
-     * Compute the maximum leaf global index starting from a given node.
-     * If indexNode has a valid leaf, it will return a valid leaf index
-     * 
-     * @param indexNode starting node
-     * @return a global leaf index
+     * Computes the maximum leaf global index starting from a given node.
+     * If the starting node is an inner node, traverses to the rightmost valid leaf.
+     * Skips subtrees that are marked as inactive.
+     *
+     * @param indexNode starting node (global index)
+     * @return a global leaf index (the rightmost valid leaf in the subtree)
      */
     private int maxLeafIndexFromInnerNode(int indexNode) {
         int maxIdx = indexNode;
@@ -129,16 +167,19 @@ public class BinarySearchFingerTree extends FingerTree<InnerNode, KPItem> {
     }
 
     /**
-     * Binary search in the leaves, does not consider "removed" leaves
-     * all information in () are valid when right=false
+     * Performs a binary search in the leaves, skipping removed/inactive leaves.
+     * <p>
+     * When searching right (true), finds the minimum index greater than startIndex where
+     * predicate is true and index is less than or equal to boundIndex.
+     * When searching left (false), finds the maximum index less than startIndex where
+     * predicate is true and index is greater than or equal to boundIndex.
      *
      * @param startIndex global starting leaf index
      * @param boundIndex global index that bounds the search
-     * @param predicate  int -> boolean
-     * @param right      true iff the search is left to right
-     * @return minimum(maximum) index bigger(smaller) than startingIndex for which
-     *         predicate(index) is true and index is
-     *         smaller(bigger) than or equal to boundIndex.
+     * @param predicate  predicate to test on node indices
+     * @param right      true if searching left to right, false if searching right to left
+     * @return minimum (maximum) index bigger (smaller) than startingIndex for which
+     *         predicate(index) is true and index is smaller (bigger) than or equal to boundIndex.
      *         -1 if no such index exists.
      */
     public int binarySearch(int startIndex, int boundIndex, Predicate<Integer> predicate,
@@ -193,6 +234,12 @@ public class BinarySearchFingerTree extends FingerTree<InnerNode, KPItem> {
         }
     }
 
+    /**
+     * Returns a DOT format string representation of the tree.
+     * This can be used to visualize the tree structure using Graphviz.
+     *
+     * @return a DOT format string
+     */
     public String toString() {
         StringBuilder str = new StringBuilder("digraph FingerTree{\n");
         for (int i = 0; i < getInnerNodeTreeList().size(); ++i) {
@@ -215,3 +262,4 @@ public class BinarySearchFingerTree extends FingerTree<InnerNode, KPItem> {
         return str.toString();
     }
 }
+

@@ -6,6 +6,10 @@
  */
 package org.chocosolver.util.tools;
 
+import java.util.Arrays;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+
 /**
  * various mathematics utilities. The functions do not exist in the basic math package Math.*
  *
@@ -15,12 +19,15 @@ package org.chocosolver.util.tools;
  */
 public final class MathUtils {
 
+    public static final int MIN_VALUE = Integer.MIN_VALUE + 1;
+    public static final int MAX_VALUE = Integer.MAX_VALUE - 1;
+
     /**
      * Precision for rounded logarithm.
      */
-    public final static double ROUNDED_LOG_PRECISION = 10000;
+    public static final double ROUNDED_LOG_PRECISION = 10000;
 
-    public final static double LOG10_2 = Math.log10(2);
+    public static final double LOG10_2 = Math.log10(2);
 
     private MathUtils() {
         //do nothing
@@ -28,6 +35,7 @@ public final class MathUtils {
 
     /**
      * simple recursive version of factorial
+     *
      * @param n size of the suite
      * @return n!
      */
@@ -66,8 +74,9 @@ public final class MathUtils {
     /**
      * Returns the value of the first argument raised to the power of the
      * second argument. See {@link Math#pow(double, double)} for special cases.
+     *
      * @param value value
-     * @param exp exponent
+     * @param exp   exponent
      * @return the power result
      */
     public static int pow(int value, int exp) {
@@ -87,9 +96,10 @@ public final class MathUtils {
 
     /**
      * Returns the sum of elements in <i>values</i> from position <i>begin</i> (inclusive) to position <i>end</i> (exclusive).
+     *
      * @param values array of ints
-     * @param begin starting position (inclusive)
-     * @param end ending position (exclusive)
+     * @param begin  starting position (inclusive)
+     * @param end    ending position (exclusive)
      * @return the sum of elements in <i>values</i> from position <i>begin</i> (inclusive) to position <i>end</i> (exclusive).
      */
     public static int sum(int[] values, int begin, int end) {
@@ -102,8 +112,9 @@ public final class MathUtils {
 
     /**
      * Returns the sum of elements in <i>values</i> from position <i>begin</i> (inclusive) to values.length.
+     *
      * @param values array of ints
-     * @param begin starting position (inclusive)
+     * @param begin  starting position (inclusive)
      * @return the sum of elements in <i>values</i> from position <i>begin</i> (inclusive) to values.length.
      */
     public static int sumFrom(int[] values, int begin) {
@@ -112,8 +123,9 @@ public final class MathUtils {
 
     /**
      * Returns the sum of elements in <i>values</i> from position <i>0</i> (inclusive) to position <i>end</i> (exclusive).
+     *
      * @param values array of ints
-     * @param end ending position (exclusive)
+     * @param end    ending position (exclusive)
      * @return the sum of elements in <i>values</i> from position <i>0</i> (inclusive) to position <i>end</i> (exclusive).
      */
     public static int sumTo(int[] values, int end) {
@@ -122,6 +134,7 @@ public final class MathUtils {
 
     /**
      * Returns the sum of elements in <i>values</i>.
+     *
      * @param values array of ints
      * @return the sum of elements in <i>values</i>.
      */
@@ -131,6 +144,7 @@ public final class MathUtils {
 
     /**
      * Retuns the sum of elements in <i>values</i>.
+     *
      * @param values matrix of ints
      * @return the sum of elements in <i>values</i>.
      */
@@ -146,6 +160,7 @@ public final class MathUtils {
 
     /**
      * Returns the element with the greatest value in <i>values</i>.
+     *
      * @param values array of ints
      * @return the element with the greatest value in <i>values</i>.
      */
@@ -161,6 +176,7 @@ public final class MathUtils {
 
     /**
      * Returns the element with the greatest value in <i>values</i>.
+     *
      * @param values array of ints
      * @return the element with the greatest value in <i>values</i>.
      */
@@ -178,6 +194,7 @@ public final class MathUtils {
 
     /**
      * Returns the element with the smallest value in <i>values</i>.
+     *
      * @param values array of ints
      * @return the element with the smallest value in <i>values</i>.
      */
@@ -193,6 +210,7 @@ public final class MathUtils {
 
     /**
      * Returns the element with the smallest value in <i>values</i>.
+     *
      * @param values array of ints
      * @return the element with the smallest value in <i>values</i>.
      */
@@ -211,6 +229,7 @@ public final class MathUtils {
     /**
      * Returns the largest (closest to positive infinity) {@code int} value that is less than or equal to a/b.
      * Adapted from {@link Math#floorDiv(int, int)}.
+     *
      * @param x the dividend
      * @param y the divisor
      * @return the largest (closest to positive infinity) {@code int} value that is less than or equal to a/b.
@@ -219,13 +238,14 @@ public final class MathUtils {
         if (y == 0) {
             return Integer.MAX_VALUE;
         } else {
-            return Math.floorDiv(x,y);
+            return Math.floorDiv(x, y);
         }
     }
 
     /**
      * Returns the smallest (closest to positive infinity) {@code int} value that is greater or equal to a/b.
      * Adapted from {@link Math#floorDiv(int, int)}.
+     *
      * @param x the dividend
      * @param y the divisor
      * @return the smallest (closest to positive infinity) {@code int} value that is greater or equal to a/b.
@@ -252,14 +272,8 @@ public final class MathUtils {
      * @param y the second value
      * @return the result
      */
-    public static int safeAdd(int x, int y){
-        int r = x + y;
-        // HD 2-12 Overflow iff both arguments have the opposite sign of the result
-        if (((x ^ r) & (y ^ r)) < 0) {
-            long rr = (long)x + y;
-            return rr > 0 ? Integer.MAX_VALUE:Integer.MIN_VALUE;
-        }
-        return r;
+    public static int safeAdd(int x, int y) {
+        return safeCast((long) x + (long) y);
     }
 
     /**
@@ -271,14 +285,8 @@ public final class MathUtils {
      * @param y the second value
      * @return the result
      */
-    public static int safeSubstract(int x, int y){
-        int r = x - y;
-        // HD 2-12 Overflow iff both arguments have the opposite sign of the result
-        if (((x ^ y) & (x ^ r)) < 0) {
-            long rr = (long)x - y;
-            return rr > 0 ? Integer.MAX_VALUE:Integer.MIN_VALUE;
-        }
-        return r;
+    public static int safeSubstract(int x, int y) {
+        return safeCast((long) x - (long) y);
     }
 
     /**
@@ -290,26 +298,55 @@ public final class MathUtils {
      * @param y the second value
      * @return the result
      */
-    public static int safeMultiply(int x, int y){
-        long r = (long)x * (long)y;
-        // HD 2-12 Overflow iff both arguments have the opposite sign of the result
-        if ((int)r != r) {
-            return r > 0 ? Integer.MAX_VALUE:Integer.MIN_VALUE;
-        }
-        return (int)r;
+    public static int safeMultiply(int x, int y) {
+        return safeCast((long) x * (long) y);
     }
 
     /**
      * @param x long to cast
      * @return the closest int value when safe casting a long into an int
      */
-    public static int safeCast(long x){
-        if(x > Integer.MAX_VALUE)return Integer.MAX_VALUE;
-        if(x < Integer.MIN_VALUE)return Integer.MIN_VALUE;
+    public static int safeCast(long x) {
+        if (x > MAX_VALUE) {
+            return MAX_VALUE;
+        }
+        if (x < MIN_VALUE) {
+            return MIN_VALUE;
+        }
         return (int) x;
     }
 
-    public static double log2(double a){
+    /**
+     * Compute a safe sum of integers
+     *
+     * @param values integers to sum
+     * @return the sum of values bounded to [MIN_VALUE, MAX_VALUE] to avoid integer overflows
+     */
+    public static int safeSum(int[] values) {
+        return safeSum(Arrays.stream(values));
+    }
+
+    /**
+     * Compute a safe sum of integers
+     *
+     * @param stream integers to sum
+     * @return the sum of stream bounded to [MIN_VALUE, MAX_VALUE] to avoid integer overflows
+     */
+    public static int safeSum(IntStream stream) {
+        return safeSum(stream.mapToLong(i -> (long) i));
+    }
+
+    /**
+     * Compute a safe sum of longs with an integer result
+     *
+     * @param stream long values to sum
+     * @return the sum of stream bounded to [MIN_VALUE, MAX_VALUE] to avoid integer overflows
+     */
+    public static int safeSum(LongStream stream) {
+        return safeCast(stream.sum());
+    }
+
+    public static double log2(double a) {
         return Math.log10(a) / LOG10_2;
     }
 
@@ -321,16 +358,13 @@ public final class MathUtils {
         if (n < 0) {
             return false;
         }
-        switch ((int) (n & 0xF)) {
-            case 0:
-            case 1:
-            case 4:
-            case 9:
-                long tst = (long) Math.sqrt(n);
-                return tst * tst == n;
-            default:
-                return false;
-        }
+		return switch ((int) (n & 0xF)) {
+		    case 0, 1, 4, 9 -> {
+				long tst = (long) Math.sqrt(n);
+				yield tst * tst == n;
+			}
+		    default -> false;
+	    };
     }
 
 }

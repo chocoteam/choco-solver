@@ -435,7 +435,7 @@ public class PropScalarMixed extends Propagator<Variable> {
                 }
             }
         }
-        return check(sumLB, sumUB);
+        return check(sumLB - 1e-9, sumUB + 1e-9);
     }
 
 

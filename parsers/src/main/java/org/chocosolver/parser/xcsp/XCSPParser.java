@@ -1521,7 +1521,7 @@ public class XCSPParser implements XCallbacks2 {
     @Override
     public void buildCtrCumulative(String id, XVariables.XVarInteger[] origins, int[] lengths, int[] heights, Condition condition) {
         if (condition instanceof Condition.ConditionRel) {
-            int sumLe = Arrays.stream(heights).sum();
+            int sumLe = MathUtils.safeSum(heights);
             model.cumulative(
                     IntStream.range(0, origins.length)
                             .mapToObj(i -> model.taskVar(var(origins[i]), lengths[i]))
@@ -1539,7 +1539,7 @@ public class XCSPParser implements XCallbacks2 {
     @Override
     public void buildCtrCumulative(String id, XVariables.XVarInteger[] origins, int[] lengths, XVariables.XVarInteger[] heights, Condition condition) {
         if (condition instanceof Condition.ConditionRel) {
-            int sumLe = (int) Arrays.stream(heights).mapToLong(XVariables.XVarInteger::lastValue).sum();
+            int sumLe = MathUtils.safeSum(Arrays.stream(heights).mapToLong(XVariables.XVarInteger::lastValue));
             model.cumulative(
                     IntStream.range(0, origins.length)
                             .mapToObj(i -> model.taskVar(var(origins[i]), lengths[i]))
@@ -1555,7 +1555,7 @@ public class XCSPParser implements XCallbacks2 {
     @Override
     public void buildCtrCumulative(String id, XVariables.XVarInteger[] origins, XVariables.XVarInteger[] lengths, int[] heights, Condition condition) {
         if (condition instanceof Condition.ConditionRel) {
-            int sumLe = Arrays.stream(heights).sum();
+            int sumLe = MathUtils.safeSum(heights);
             model.cumulative(
                     IntStream.range(0, origins.length)
                             .mapToObj(i -> model.taskVar(var(origins[i]), var(lengths[i])))
@@ -1573,7 +1573,7 @@ public class XCSPParser implements XCallbacks2 {
     @Override
     public void buildCtrCumulative(String id, XVariables.XVarInteger[] origins, XVariables.XVarInteger[] lengths, XVariables.XVarInteger[] heights, Condition condition) {
         if (condition instanceof Condition.ConditionRel) {
-            int sumLe = (int) Arrays.stream(heights).mapToLong(XVariables.XVarInteger::lastValue).sum();
+            int sumLe = MathUtils.safeSum(Arrays.stream(heights).mapToLong(XVariables.XVarInteger::lastValue));
             model.cumulative(
                     IntStream.range(0, origins.length)
                             .mapToObj(i -> model.taskVar(var(origins[i]), var(lengths[i])))
@@ -1589,7 +1589,7 @@ public class XCSPParser implements XCallbacks2 {
     @Override
     public void buildCtrCumulative(String id, XVariables.XVarInteger[] origins, int[] lengths, XVariables.XVarInteger[] ends, int[] heights, Condition condition) {
         if (condition instanceof Condition.ConditionRel) {
-            int sumLe = IntStream.of(heights).sum();
+            int sumLe = MathUtils.safeSum(heights);
             model.cumulative(
                     IntStream.range(0, origins.length)
                             .mapToObj(i -> model.taskVar(var(origins[i]), lengths[i]))
@@ -1605,7 +1605,7 @@ public class XCSPParser implements XCallbacks2 {
     @Override
     public void buildCtrCumulative(String id, XVariables.XVarInteger[] origins, int[] lengths, XVariables.XVarInteger[] ends, XVariables.XVarInteger[] heights, Condition condition) {
         if (condition instanceof Condition.ConditionRel) {
-            int sumLe = (int) Arrays.stream(heights).mapToLong(XVariables.XVarInteger::lastValue).sum();
+            int sumLe = MathUtils.safeSum(Arrays.stream(heights).mapToLong(XVariables.XVarInteger::lastValue));
             model.cumulative(
                     IntStream.range(0, origins.length)
                             .mapToObj(i -> model.taskVar(var(origins[i]), lengths[i]))
@@ -1621,7 +1621,7 @@ public class XCSPParser implements XCallbacks2 {
     @Override
     public void buildCtrCumulative(String id, XVariables.XVarInteger[] origins, XVariables.XVarInteger[] lengths, XVariables.XVarInteger[] ends, int[] heights, Condition condition) {
         if (condition instanceof Condition.ConditionRel) {
-            int sumLe = IntStream.of(heights).sum();
+            int sumLe = MathUtils.safeSum(heights);
             model.cumulative(
                     IntStream.range(0, origins.length)
                             .mapToObj(i -> model.taskVar(var(origins[i]), var(lengths[i])))
@@ -1637,7 +1637,7 @@ public class XCSPParser implements XCallbacks2 {
     @Override
     public void buildCtrCumulative(String id, XVariables.XVarInteger[] origins, XVariables.XVarInteger[] lengths, XVariables.XVarInteger[] ends, XVariables.XVarInteger[] heights, Condition condition) {
         if (condition instanceof Condition.ConditionRel) {
-            int sumLe = (int) Arrays.stream(heights).mapToLong(XVariables.XVarInteger::lastValue).sum();
+            int sumLe = MathUtils.safeSum(Arrays.stream(heights).mapToLong(XVariables.XVarInteger::lastValue));
             model.cumulative(
                     IntStream.range(0, origins.length)
                             .mapToObj(i -> model.taskVar(var(origins[i]), var(lengths[i])))
@@ -1652,7 +1652,7 @@ public class XCSPParser implements XCallbacks2 {
 
     @Override
     public void buildCtrBinPacking(String id, XVariables.XVarInteger[] list, int[] sizes, Condition condition) {
-        int sumSiz = Arrays.stream(sizes).sum();
+        int sumSiz = MathUtils.safeSum(sizes);
         IntVar[] cds = new IntVar[list.length];
         for (int i = 0; i < cds.length; i++) {
             cds[i] = condToVar(condition, 0, sumSiz);
@@ -1683,7 +1683,7 @@ public class XCSPParser implements XCallbacks2 {
 
     @Override
     public void buildCtrBinPacking(String id, XVariables.XVarInteger[] list, int[] sizes, Condition[] conditions, int startIndex) {
-        int sumSiz = Arrays.stream(sizes).sum();
+        int sumSiz = MathUtils.safeSum(sizes);
         IntVar[] cds = new IntVar[conditions.length];
         for (int i = 0; i < cds.length; i++) {
             cds[i] = condToVar(conditions[i], 0, sumSiz);
@@ -1695,8 +1695,9 @@ public class XCSPParser implements XCallbacks2 {
     public void buildCtrKnapsack(String id, XVariables.XVarInteger[] list, int[] weights, Condition wcondition, int[] profits, Condition pcondition) {
         assert IntStream.of(weights).min().orElse(0) > -1;
         assert IntStream.of(profits).min().orElse(0) > -1;
-        model.knapsack(vars(list), condToVar(wcondition, 0, Arrays.stream(weights).sum()),
-                condToVar(pcondition, 0, Arrays.stream(profits).sum()),
+        model.knapsack(vars(list),
+                condToVar(wcondition, 0, MathUtils.safeSum(weights)),
+                condToVar(pcondition, 0, MathUtils.safeSum(profits)),
                 weights, profits).post();
 
     }
@@ -1716,7 +1717,7 @@ public class XCSPParser implements XCallbacks2 {
                 balance,
                 IntStream.range(0, list.length).map(i -> 1).toArray(),
                 vars(list),
-                model.intVar(min * list.length, max * list.length),
+                model.intVar(MathUtils.safeMultiply(min, list.length), MathUtils.safeMultiply(max, list.length)),
                 offset);
     }
 
@@ -1736,7 +1737,7 @@ public class XCSPParser implements XCallbacks2 {
                 balance,
                 weights,
                 vars(list),
-                condToVar(condition, min * list.length, max * list.length),
+                condToVar(condition, MathUtils.safeMultiply(min, list.length), MathUtils.safeMultiply(max, list.length)),
                 offset);
     }
 

@@ -6,9 +6,6 @@
  */
 package org.chocosolver.solver.constraints;
 
-import java.util.*;
-import java.util.function.Function;
-
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.cumulative.PropagatorCumulative;
@@ -19,6 +16,12 @@ import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.search.strategy.strategy.SetTimes;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
+import org.chocosolver.util.tools.ArrayUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
 
 /**
  * Interface to make and declare everything useful for scheduling problems (Task objects, constraints, search heuristics, etc.)
@@ -117,9 +120,14 @@ public interface ISchedulingFactory extends ISelf<Model> {
             keptTasks[i] = tasksToKeep.get(i);
             keptHeights[i] = heightsToKeep.get(i);
         }
+        Propagator<IntVar> prop =
+            new PropagatorCumulative(keptTasks, keptHeights, capacity, energyNaive, disjunctiveEnergyNaive);
         return new Constraint(
-                ConstraintsName.CUMULATIVE,
-                new PropagatorCumulative(keptTasks, keptHeights, capacity, energyNaive, disjunctiveEnergyNaive)
+            ConstraintsName.CUMULATIVE,
+            ArrayUtils.append(
+                Arrays.stream(tasks).filter(p -> !p.isPassive()).toArray(Propagator[]::new),
+                new Propagator[]{prop}
+            )
         );
     }
 

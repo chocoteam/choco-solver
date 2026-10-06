@@ -42,6 +42,11 @@ public final class ArrayClause extends Clause {
     private final int id;
 
     /**
+     * Position of the last scanned literal
+     */
+    private int lastScannedLit = 1;
+
+    /**
      * Create a clause with a set of literals
      *
      * @param ps     literals
@@ -165,5 +170,20 @@ public final class ArrayClause extends Clause {
      */
     public void _s(int pos, int l) {
         literals_[pos] = l;
+    }
+
+    /**
+     * @return the position of the last scanned literal
+     */
+    public int getLastScannedLit() {
+        return lastScannedLit;
+    }
+
+    /**
+     * Set the position of the last scanned literal to <i>lastScannedLit</i>.
+     * @param lastScannedLit position to store
+     */
+    public void setLastScannedLit(int lastScannedLit) {
+        this.lastScannedLit = lastScannedLit;
     }
 }

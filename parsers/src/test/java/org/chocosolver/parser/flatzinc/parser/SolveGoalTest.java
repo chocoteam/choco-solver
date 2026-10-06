@@ -20,7 +20,7 @@ import java.io.IOException;
  * @author Charles Prud'homme
  * @since 18/10/12
  */
-public class T_solve_goal extends GrammarTest {
+public class SolveGoalTest extends GrammarTest {
 
     Model mSolver;
     Datas datas;

@@ -10,7 +10,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.unary.PropMember;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
@@ -174,7 +173,7 @@ public class ModXYTest extends AbstractBinaryTest {
         model.mod(x, 5, y).post();
         Assert.assertEquals(model.getNbCstrs(), 1);
         Constraint constraint = model.getCstrs()[0];
-        Assert.assertEquals(constraint.getName(), ConstraintsName.TABLE);
+        Assert.assertTrue(constraint.getPropagators()[0] instanceof PropModXY);
         Assert.assertEquals(model.getSolver().findAllSolutions().size(), 10);
     }
 
@@ -269,7 +268,7 @@ public class ModXYTest extends AbstractBinaryTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testMod2VarPropagExpr() throws ContradictionException {
-        Model model = new Model("model");
+        Model model = new Model("model", SettingsBuilder.init().setEnableTableSubstitution(true));
         IntVar x = model.intVar("x", new int[]{0, 2, 3, 5});
         IntVar z = model.mod("z", x, 3);
         model.arithm(z, ">=", 1).post();
@@ -345,7 +344,7 @@ public class ModXYTest extends AbstractBinaryTest {
         IntVar z = model.mod("z", x, 5);
         Assert.assertEquals(model.getNbCstrs(), 1);
         Constraint constraint = model.getCstrs()[0];
-        Assert.assertEquals(constraint.getName(), ConstraintsName.TABLE);
+        Assert.assertTrue(constraint.getPropagators()[0] instanceof PropModXY);
         Assert.assertEquals(model.getSolver().findAllSolutions().size(), 10);
     }
 

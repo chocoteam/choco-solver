@@ -87,17 +87,31 @@ public class PropTimesNaive extends Propagator<IntVar> {
         else if (c != 0 && d == 0 && (a > 0 || b < 0)) // case 4 b
             return div(vidx, a, b, c, -1);
         else { // if (c > 0 || d < 0) { // case 5
-            float ac = (float) a / c, ad = (float) a / d,
-                    bc = (float) b / c, bd = (float) b / d;
-            float low = Math.min(Math.min(ac, ad), Math.min(bc, bd));
-            float high = Math.max(Math.max(ac, ad), Math.max(bc, bd));
-            min = (int) Math.round(Math.ceil(low));
-            max = (int) Math.round(Math.floor(high));
-            if (min > max) this.fails(explain(1 - vidx, 2));
-            return var.updateLowerBound(min, this,
-                    explain(1 - vidx, 2)) | var.updateUpperBound(max, this, explain(1 - vidx, 2));
+            // Implémentation de ceil(a / b) pour entiers
+            int ceilAC = ceilDiv(a, c);
+            int ceilAD = ceilDiv(a, d);
+            int ceilBC = ceilDiv(b, c);
+            int ceilBD = ceilDiv(b, d);
+            min = Math.min(Math.min(ceilAC, ceilAD), Math.min(ceilBC, ceilBD));
+
+            // floor(a / b) = Math.floorDiv(a, b)
+            int floorAC = Math.floorDiv(a, c);
+            int floorAD = Math.floorDiv(a, d);
+            int floorBC = Math.floorDiv(b, c);
+            int floorBD = Math.floorDiv(b, d);
+            max = Math.max(Math.max(floorAC, floorAD), Math.max(floorBC, floorBD));
+
+            if (min > max) {
+                this.fails(explain(1 - vidx, 2));
+            }
+            return var.updateLowerBound(min, this, explain(1 - vidx, 2))
+                    | var.updateUpperBound(max, this, explain(1 - vidx, 2));
         }
         return false;
+    }
+
+    private int ceilDiv(int a, int b) {
+        return -Math.floorDiv(-a, b);
     }
 
     private boolean mul(IntVar var, int a, int b, int c, int d) throws ContradictionException {

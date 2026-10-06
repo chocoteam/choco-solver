@@ -22,7 +22,7 @@ import java.io.IOException;
  * @author Charles Prud'homme
  * @since 18/10/12
  */
-public class T_index_set extends GrammarTest {
+public class IndexSetTest extends GrammarTest {
 
     @Test(groups = "1s")
     public void test1() throws IOException, RecognitionException {

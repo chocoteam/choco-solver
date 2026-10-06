@@ -22,7 +22,7 @@ import java.io.IOException;
  * @author Charles Prud'homme
  * @since 19/10/12
  */
-public class T_flatzinc_model extends GrammarTest {
+public class FlatzincModelTest extends GrammarTest {
 
     Model mSolver;
     Datas datas;
