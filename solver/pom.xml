@@ -31,7 +31,7 @@
         <automaton.version>1.11-8</automaton.version>
         <jgrapht.core.version>1.5.3</jgrapht.core.version>
         <sizeof.version>0.4.4</sizeof.version>
-        <slf4j.nop.version>2.0.5</slf4j.nop.version>
+        <slf4j.nop.version>2.0.18</slf4j.nop.version>
         <main_dir>.${file.separator}..</main_dir>
     </properties>
 
