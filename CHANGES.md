@@ -4,7 +4,7 @@ Choco Solver ChangeLog
 This file is dedicated to sum up the new features added and bugs fixed in Choco-solver since the version, 4.0.0.
 **Note**: double-space is replaced by "\t" character on release process. Make sure the format is ok.
 
-NEXT MILESTONE
+6.0.2 - 06 Oct 2026
 ---------------------
 
 ### Major features:
@@ -12,15 +12,42 @@ NEXT MILESTONE
 - Fix declaring constraint for absolute constraint when the abs variable is already instantiated to 0
 - No more constraints are posted within factories (instead when LCG is activated)
 
+#### Constraints & LCG
+- GlobalCardinality: add bounds-consistency (BC) and arc-consistency (AC) propagators, selectable with `model.globalCardinality(..., "BC"/"AC")`. BC is now the default, overridable with the `choco.gcc.consistency` system property
+- Simplify some `arithm` constraints and manage bounded variables in bools-int channeling and count (#1246)
+- Knapsack: fix `PropKnapsackKatriel01` (#1231), strengthen its forced propagation and document the propagator and its structures
+- Fix `PropAbsolute` and `PropAbsoluteLight` (#1233)
+- Fix `PropXneYHalfReif` (#1240) and `PropXinSHalfReif` on bounded variables (#1242)
+- Fix overflows in `times` constraints (#1214) and when composing nested affine views
+- Add a `post()` method to `Task` (#1235, #1237)
+- Fix explanations of `int_value_precede_chain`
+- CompactTable: improve iteration when domains are dense
+- Cumulative: compute the tasks involved in the profile lazily when LCG is enabled
+- MiniSat: circular watch scheme, and highest decision literal moved to position 1 in learned clauses
+- Nogoods from restarts: add an alternative to the SAT-based recording, allowing minimization (see `NogoodBase`), with dedicated settings
+
+#### Search & Strategies
+- Fix `LastConflict` (#1219)
+- Fix `ReversePropagationGuidedNeighborhood`
+- Fix #1215 in `IResolutionHelper`
+- Change the way weights are flushed in criterion-based variable selectors
+- Settings: table substitution is disabled by default
+
+#### Parsers
+- XCSP3: fix #1202 and #1212, turn `lexChainLess` into `increasing` when possible
+- Better management of `boolean` arguments in command-line settings
+- MiniZinc: update Dockerfile and add a script to build the images required for the MiniZinc challenge
+
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:
-See [milestone 6.0.2](https://github.com/chocoteam/choco-solver/milestone/xx)
+See [milestone 6.0.2](https://github.com/chocoteam/choco-solver/milestone/43)
 
 #### Contributors to this release:
 - Charles Prud'homme <charles.prudhomme@imt-atlantique.fr>
 - Jean-Guillaume Fages <jg.fages@cosling.com>
 - Arthur Godet <arth.godet@gmail.com>
+- adityaanikam <adityanikam9502@gmail.com>
 
 
 **Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v6.0.1...v6.0.2
