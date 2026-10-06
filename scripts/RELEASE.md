@@ -20,3 +20,7 @@
    Use `--dry-run` to simulate the full process without pushing or deploying:
 
         ./scripts/release.sh --dry-run
+
+   Use `--skip-changelog` when **CHANGES.md** is already up to date: the changelog
+   generation and the interactive confirmation are skipped (this is what the
+   `choco-release` Claude skill uses, see `.claude/skills/choco-release/SKILL.md`).
