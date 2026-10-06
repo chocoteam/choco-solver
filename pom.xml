@@ -58,6 +58,7 @@
     </properties>
 
     <modules>
+        <module>codegen</module>
         <module>solver</module>
         <module>parsers</module>
         <module>examples</module>

@@ -50,6 +50,10 @@ public class HybridTuples {
      * For sanity check only
      */
     private int arity;
+    /**
+     * Once frozen, the tuples cannot be modified anymore and can be safely shared among models.
+     */
+    private volatile boolean frozen;
 
     /**
      * Create an empty structure that stores hybrid tuples
@@ -68,6 +72,9 @@ public class HybridTuples {
      * @throws SolverException if the tuple does not the match the arity of previously declared ones.
      */
     public void add(ISupportable... tuple) {
+        if (frozen) {
+            throw new SolverException("Cannot modify frozen hybrid tuples");
+        }
         if (hybridTuples.size() == 0) {
             arity = tuple.length;
         } else if (arity != tuple.length) {
@@ -131,6 +138,26 @@ public class HybridTuples {
         for (ISupportable[] tuple : tuples) {
             add(tuple);
         }
+    }
+
+    /**
+     * Freeze these hybrid tuples: any further modification will throw a {@link SolverException}.
+     * Frozen hybrid tuples can be safely shared among models solved concurrently.
+     * Freezing is irreversible and idempotent.
+     *
+     * @return this
+     */
+    public HybridTuples freeze() {
+        this.frozen = true;
+        return this;
+    }
+
+    /**
+     * @return <i>true</i> if these hybrid tuples are frozen
+     * @see #freeze()
+     */
+    public boolean isFrozen() {
+        return frozen;
     }
 
     /**

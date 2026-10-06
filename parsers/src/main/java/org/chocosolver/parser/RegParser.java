@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * A regular parser with default and common services
@@ -221,6 +222,18 @@ public abstract class RegParser extends SettingsBuilder implements IParser {
         }
     }
 
+    /**
+     * Create a model to be filled by the parser.
+     * Override to use a specific kind of model, e.g., a model which can be duplicated ({@link Model#record}).
+     *
+     * @param name     name of the model
+     * @param settings settings of the model
+     * @return a new model
+     */
+    protected Model newModel(String name, SettingsBuilder settings) {
+        return new Model(name, settings);
+    }
+
     public void freesearch(Solver solver) {
         BlackBoxConfigurator bb;
         if (solver.getObjectiveManager().isOptimization()) {
@@ -255,6 +268,13 @@ public abstract class RegParser extends SettingsBuilder implements IParser {
             Runtime.getRuntime().addShutdownHook(statOnKill);
         }
         return true;
+    }
+
+    /**
+     * @return the models built by this parser, one per core
+     */
+    public final List<Model> getModels() {
+        return portfolio.getModels();
     }
 
     /**
