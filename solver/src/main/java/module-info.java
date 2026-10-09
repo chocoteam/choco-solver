@@ -70,6 +70,7 @@ module org.chocosolver.solver {
     exports org.chocosolver.solver.expression.discrete.arithmetic;
     exports org.chocosolver.solver.expression.discrete.logical;
     exports org.chocosolver.solver.expression.discrete.relational;
+    exports org.chocosolver.solver.expression.discrete.set;
     exports org.chocosolver.solver.objective;
     exports org.chocosolver.solver.propagation;
     exports org.chocosolver.solver.search;
