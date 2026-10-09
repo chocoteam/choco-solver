@@ -164,11 +164,6 @@ public class Model implements IModel {
      */
     private ResolutionPolicy policy = ResolutionPolicy.SATISFACTION;
 
-    /**
-     * A seed for randomness
-     */
-    private long seed = 0L;
-
     private ModelAnalyser modelAnalyser = null;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -789,25 +784,6 @@ public class Model implements IModel {
         this.precision = p;
     }
 
-    /**
-     * Sets the seed used for random number generator using a single
-     * {@code long} seed.
-     *
-     * @param seed the initial seed
-     * @see java.util.Random#setSeed(long)
-     */
-    public void setSeed(long seed) {
-        this.seed = seed;
-    }
-
-    /**
-     * Gets the seed used random number generator.
-     *
-     * @return the seed
-     */
-    public long getSeed() {
-        return this.seed;
-    }
 
     /**
      * Adds the <code>hookObject</code> to store in this model, associated with the name <code>hookName</code>.

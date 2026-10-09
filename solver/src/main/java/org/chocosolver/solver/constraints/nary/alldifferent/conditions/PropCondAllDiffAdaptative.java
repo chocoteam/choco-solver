@@ -25,7 +25,7 @@ public class PropCondAllDiffAdaptative extends PropCondAllDiffAC {
 
     public PropCondAllDiffAdaptative(IntVar[] variables, Condition condition, boolean fast) {
         super(variables, condition, fast);
-        this.rd = new Random(vars[0].getModel().getSeed());
+        this.rd = new Random(vars[0].getModel().getSettings().getSeed());
         this.calls = 1;
         this.success = 1;
     }
