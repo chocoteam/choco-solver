@@ -211,8 +211,10 @@ public class Flatzinc extends RegParser {
                 SearchParams.Restart.LUBY, 500, 50_000, true);
         bb.setRestartPolicy(defaultResConf.make());
         // other parameters
+        // restarting on solution only makes sense when optimizing:
+        // when enumerating, the same solution would be found again and again
         bb.setNogoodOnRestart(true)
-                .setRestartOnSolution(true)
+                .setRestartOnSolution(opt)
                 .setExcludeObjective(true)
                 .setExcludeViews(false)
                 .setMetaStrategy(m -> Search.lastConflict(m, 1));
