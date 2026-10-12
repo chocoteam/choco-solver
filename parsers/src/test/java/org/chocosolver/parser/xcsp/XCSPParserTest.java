@@ -263,6 +263,38 @@ public class XCSPParserTest {
                 s -> count(s, 1) >= 1 && count(s, 1) <= 2, x);
     }
 
+    @Test(groups = "xcsp", timeOut = 60000)
+    public void testMod() throws Exception {
+        // rounding towards 0, as in Java
+        check("<intension> eq(mod(x,3),y) </intension>",
+                s -> s[0] % 3 == s[1], var("x", -3, 3), var("y", -3, 3));
+        check("<intension> eq(y,mod(x,2)) </intension>",
+                s -> s[1] == s[0] % 2, var("x", -3, 3), var("y", -3, 3));
+        check("<intension> eq(mod(x,-3),y) </intension>",
+                s -> s[0] % -3 == s[1], var("x", -3, 3), var("y", -3, 3));
+        check("<intension> eq(div(x,2),y) </intension>",
+                s -> s[0] / 2 == s[1], var("x", -3, 3), var("y", -3, 3));
+    }
+
+    private static int nValues(int... values) {
+        return (int) Arrays.stream(values).distinct().count();
+    }
+
+    @Test(groups = "xcsp", timeOut = 60000)
+    public void testNValuesOnExpressions() throws Exception {
+        Var[] x = {var("x0", 0, 2), var("x1", 0, 2), var("x2", 0, 2)};
+        check("<nValues><list> add(x0,1) add(x1,1) add(x2,1) </list><condition> (gt,1) </condition></nValues>",
+                s -> nValues(s) > 1, x);
+        check("<nValues><list> add(x0,1) add(x1,1) add(x2,1) </list><condition> (le,2) </condition></nValues>",
+                s -> nValues(s) <= 2, x);
+        check("<nValues><list> add(x0,1) add(x1,1) add(x2,1) </list><condition> (eq,2) </condition></nValues>",
+                s -> nValues(s) == 2, x);
+        check("<nValues><list> x0 x1 add(x2,1) </list><condition> (gt,1) </condition></nValues>",
+                s -> nValues(s[0], s[1], s[2] + 1) > 1, x);
+        check("<nValues><list> x0 x1 x2 </list><condition> (gt,1) </condition></nValues>",
+                s -> nValues(s) > 1, x);
+    }
+
     private static boolean lex(int[] a, String op, int[] b) {
         int c = Arrays.compare(a, b);
         return rel(c, op, 0);
@@ -297,5 +329,28 @@ public class XCSPParserTest {
                         s -> lexMatrix(s, size[0], size[1], op), matrix("x", size[0], size[1], 0, 1));
             }
         }
+    }
+
+    private static int in12(int v) {
+        return v == 1 || v == 2 ? 1 : 0;
+    }
+
+    @Test(groups = "xcsp", timeOut = 60000)
+    public void testSumAndCountOfMembership() throws Exception {
+        Var[] x = {var("x0", 0, 2), var("x1", 0, 2)};
+        check("<sum><list> in(x0,set(1,2)) in(x1,set(1,2)) </list><condition> (le,1) </condition></sum>",
+                s -> in12(s[0]) + in12(s[1]) <= 1, x);
+        check("<sum><list> in(x0,set(1,2)) in(x1,set(1,2)) </list><coeffs> 2 1 </coeffs>"
+                        + "<condition> (le,1) </condition></sum>",
+                s -> 2 * in12(s[0]) + in12(s[1]) <= 1, x);
+        check("<sum><list> in(x0,set(1,2)) x1 </list><condition> (le,0) </condition></sum>",
+                s -> in12(s[0]) + s[1] <= 0, x);
+        check("<count><list> in(x0,set(1,2)) in(x1,set(1,2)) </list><values> 1 </values>"
+                        + "<condition> (eq,1) </condition></count>",
+                s -> in12(s[0]) + in12(s[1]) == 1, x);
+        check("<sum><list> notin(x0,set(1,2)) notin(x1,set(1,2)) </list><condition> (le,1) </condition></sum>",
+                s -> (1 - in12(s[0])) + (1 - in12(s[1])) <= 1, x);
+        check("<intension> le(add(in(x0,set(1,2)),in(x1,set(1,2))),1) </intension>",
+                s -> in12(s[0]) + in12(s[1]) <= 1, x);
     }
 }

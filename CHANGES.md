@@ -9,6 +9,10 @@ NEXT MILESTONE
 
 ### Major features:
 
+#### Parsers
+- XCSP3: fix several constraints found wrong by the unit tests of PyCSP3 (#1248): `pow` in primitive constraints, `allDifferent` on a matrix with `except`, `ordered` with `lengths`, `lex` on a matrix with `ge` or `gt`, `sum` with a `notin` condition and `count` with a condition on an interval
+- XCSP3: add `XCSPParserTest`, which checks the solutions of small instances against the ones found by brute force
+
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:
