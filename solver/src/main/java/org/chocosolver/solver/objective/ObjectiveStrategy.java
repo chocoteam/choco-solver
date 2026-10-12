@@ -38,14 +38,14 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
     //***********************************************************************************
 
     private int globalLB, globalUB;
-    private final int coefLB;
-    private final int coefUB;
     private final IntVar obj;
     private long nbSols;
     private final Model model;
     private boolean firstCall;
     private DecisionOperator<IntVar> decOperator;
     private final OptimizationPolicy optPolicy;
+    private final double fraction;
+    private final boolean largerHalfFirst;
     public final DecisionOperator<IntVar> decUB = new BottomUpDecisionOperator();
     public final DecisionOperator<IntVar> incLB = new TopDownDecisionOperator();
     //***********************************************************************************
@@ -55,53 +55,40 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
     /**
      * Defines a branching strategy over the objective variable
      * BEWARE: only activated after a first solution
+     * <p>
+     * With DICHOTOMIC, the domain [LB, UB] of the objective is split at
+     * {@code LB + fraction * (UB - LB)}: 0.5 halves the domain, a greater value takes a split
+     * point closer to the upper bound, a lower value one closer to the lower bound.
+     * When the split point is not an integer, it is rounded so that minimizing an objective
+     * with {@code fraction} and maximizing its opposite with {@code 1 - fraction} try mirrored
+     * cuts. The direction of the rounding is given by {@code largerHalfFirst}:
+     * <ul>
+     * <li>{@code false}: the branch tried first keeps the smaller part of the domain
+     * (rounded down when minimizing, up when maximizing), the cut is more aggressive;</li>
+     * <li>{@code true}: the branch tried first keeps the larger part of the domain
+     * (rounded up when minimizing, down when maximizing), the cut is more cautious
+     * but its refutation is stronger.</li>
+     * </ul>
      *
-     * @param objective variable
-     * @param policy    BOTTOM_UP, TOP_TOWN or DICHOTOMIC
+     * @param objective       variable
+     * @param policy          BOTTOM_UP, TOP_TOWN or DICHOTOMIC
+     * @param fraction        with DICHOTOMIC, position of the split point in the domain,
+     *                        in [0, 1]; ignored otherwise
+     * @param largerHalfFirst with DICHOTOMIC, set to <i>true</i> to try first the larger part
+     *                        of the domain, <i>false</i> to try first the smaller one
      */
-    public ObjectiveStrategy(IntVar objective, OptimizationPolicy policy) {
-        this(objective, getCoefs(policy), policy);
-    }
-
-    /**
-     * Defines a parametrized dichotomic branching over the objective variable
-     * BEWARE: only activated after a first solution
-     *
-     * @param objective variable
-     * @param coefs     [a,b] defines how to split the domain of the objective variable
-     *                  [1,1] will halve its domain
-     *                  [1,2] will take a value closer to the upper bound than the lower bound
-     * @param policy    should be DICHOTOMIC
-     */
-    public ObjectiveStrategy(IntVar objective, int[] coefs, OptimizationPolicy policy) {
-        super(new IntVar[]{objective});
+    public ObjectiveStrategy(IntVar objective, OptimizationPolicy policy, double fraction, boolean largerHalfFirst) {
+        super(objective);
+        if (!(fraction >= 0. && fraction <= 1.)) {
+            throw new IllegalArgumentException("fraction should be in [0, 1], not " + fraction);
+        }
+        this.fraction = fraction;
+        this.largerHalfFirst = largerHalfFirst;
         this.obj = objective;
         this.model = obj.getModel();
         this.firstCall = true;
-        this.coefLB = coefs[0];
-        this.coefUB = coefs[1];
         this.optPolicy = policy;
         model.getSolver().setRestartOnSolutions();
-        if (coefLB < 0 || coefUB < 0 || coefLB + coefUB == 0) {
-            throw new UnsupportedOperationException("coefLB<0, coefUB<0 and coefLB+coefUB==0 are forbidden");
-        }
-        if (coefLB + coefUB != 1 && policy != DICHOTOMIC) {
-            throw new UnsupportedOperationException("Invalid coefficients for BOTTOM_UP or TOP_DOWN optimization" +
-                    "\nuse signature public ObjectiveStrategy(IntVar obj, OptimizationPolicy policy, Model model) instead");
-        }
-    }
-
-    private static int[] getCoefs(OptimizationPolicy policy) {
-        switch (policy) {
-            case BOTTOM_UP:
-                return new int[]{1, 0};
-            case TOP_DOWN:
-                return new int[]{0, 1};
-            case DICHOTOMIC:
-                return new int[]{1, 1};
-            default:
-                throw new UnsupportedOperationException("unknown OptimizationPolicy " + policy);
-        }
     }
 
     private DecisionOperator<IntVar> getOperator(OptimizationPolicy optPolicy, ResolutionPolicy resoPolicy) {
@@ -165,13 +152,30 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         if (model.getSettings().warnUser()) {
             model.getSolver().log().bold().println("- objective in [" + globalLB + ", " + globalUB + "]");
         }
-        int target;
-        target = (globalLB * coefLB + globalUB * coefUB) / (coefLB + coefUB);
+        int target = getTarget();
+        if (decOperator == incLB ? target <= obj.getLB() : target >= obj.getUB()) {
+            // the decision would not reduce the domain
+            return null;
+        }
         IntDecision dec = decisionPath.makeIntDecision(obj, decOperator, target);
         if (model.getSettings().warnUser()) {
             model.getSolver().log().bold().println("- trying " + obj + " " + (decOperator == decUB ? "<=" : ">=") + " " + target);
         }
         return dec;
+    }
+
+    private int getTarget() {
+        switch (optPolicy) {
+            case BOTTOM_UP:
+                return globalLB;
+            case TOP_DOWN:
+                return globalUB;
+            default:
+                double split = globalLB + fraction * ((double) globalUB - globalLB);
+                // rounded towards the bound to improve, unless the larger half is tried first
+                boolean roundUp = (decOperator == incLB) != largerHalfFirst;
+                return (int) (roundUp ? Math.ceil(split) : Math.floor(split));
+        }
     }
 
     public class BottomUpDecisionOperator implements DecisionOperator<IntVar> {
@@ -191,7 +195,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
 
         @Override
         public String toString() {
-            return " objective split(" + coefLB + "," + coefUB + "), decreases the upper bound first";
+            return " objective " + optPolicy + ", decreases the upper bound first";
         }
 
         @Override
@@ -216,7 +220,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
 
         @Override
         public String toString() {
-            return " objective split(" + coefLB + "," + coefUB + "), increases the lower bound first";
+            return " objective " + optPolicy + ", increases the lower bound first";
         }
 
         @Override

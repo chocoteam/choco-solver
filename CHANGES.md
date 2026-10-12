@@ -14,6 +14,12 @@ NEXT MILESTONE
 - XCSP3: handle reified constraints, i.e. `reifiedBy`, `hreifiedFrom` and `hreifiedTo`, which were ignored (#1248). The reification is refused with an explicit message when it cannot be handled, as for `slide` and logic meta-constraints
 - XCSP3: add `XCSPParserTest`, which checks the solutions of small instances against the ones found by brute force
 
+#### Search & Strategies
+- `ObjectiveStrategy`: fix the split point of the `DICHOTOMIC` policy, which was rounded down for both `MINIMIZE` and `MAXIMIZE` (#1252). It is now rounded towards the bound to improve, so that minimizing an objective and maximizing its opposite try mirrored cuts. This changes the cut tried when maximizing
+- `ObjectiveStrategy`: add a `largerHalfFirst` parameter to try the larger half of the objective domain first, also available with `Search.objectiveStrategy(objective, largerHalfFirst)`
+- `ObjectiveStrategy`: a decision that does not reduce the domain of the objective is not returned anymore
+- **Breaking**: `ObjectiveStrategy` has a single constructor, `ObjectiveStrategy(objective, policy, fraction, largerHalfFirst)`. The `int[] coefs` parameter is replaced by a `double` fraction in [0, 1]: `[a, b]` becomes `b / (a + b)`
+
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:

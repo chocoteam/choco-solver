@@ -16,6 +16,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.objective.IObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveFactory;
+import org.chocosolver.solver.objective.ObjectiveStrategy;
 import org.chocosolver.solver.objective.OptimizationPolicy;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.Search;
@@ -29,6 +30,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.Variable;
 import org.testng.annotations.Test;
+
+import gnu.trove.list.array.TIntArrayList;
 
 import java.io.IOException;
 import java.util.Random;
@@ -483,5 +486,52 @@ public class ObjectiveTest {
             while (model.getSolver().solve()) ;
             assertFalse(model.getSolver().isStopCriterionMet());
         }
+    }
+
+    /**
+     * Solves a problem reduced to its objective variable, whose first solution is the worst one,
+     * and returns the successive values of the objective.
+     */
+    private static int[] dichotomicTrace(boolean maximize, int lb, int ub, boolean largerHalfFirst) {
+        return dichotomicTrace(maximize, lb, ub, 0.5, largerHalfFirst);
+    }
+
+    private static int[] dichotomicTrace(boolean maximize, int lb, int ub, double fraction, boolean largerHalfFirst) {
+        Model model = new Model();
+        IntVar obj = model.intVar("obj", lb, ub, false);
+        model.setObjective(maximize, obj);
+        Solver solver = model.getSolver();
+        solver.setSearch(new ObjectiveStrategy(obj, OptimizationPolicy.DICHOTOMIC, fraction, largerHalfFirst),
+                maximize ? inputOrderLBSearch(obj) : inputOrderUBSearch(obj));
+        TIntArrayList values = new TIntArrayList();
+        while (solver.solve()) {
+            values.add(obj.getValue());
+        }
+        assertFalse(solver.isStopCriterionMet());
+        return values.toArray();
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testDichotomicIsSymmetric() {
+        // minimizing f in [7, 11] and maximizing 35 - f or -f must try mirrored cuts
+        assertEquals(dichotomicTrace(false, 7, 11, false), new int[]{11, 8, 7});
+        assertEquals(dichotomicTrace(true, 24, 28, false), new int[]{24, 27, 28});
+        assertEquals(dichotomicTrace(true, -11, -7, false), new int[]{-11, -8, -7});
+        assertEquals(dichotomicTrace(false, -28, -24, false), new int[]{-24, -27, -28});
+
+        assertEquals(dichotomicTrace(false, 7, 11, true), new int[]{11, 9, 8, 7});
+        assertEquals(dichotomicTrace(true, 24, 28, true), new int[]{24, 26, 27, 28});
+        assertEquals(dichotomicTrace(true, -11, -7, true), new int[]{-11, -9, -8, -7});
+        assertEquals(dichotomicTrace(false, -28, -24, true), new int[]{-24, -26, -27, -28});
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testDichotomicFraction() {
+        // minimizing f with fraction 0.75 and maximizing 35 - f with fraction 0.25 must try mirrored cuts
+        assertEquals(dichotomicTrace(false, 7, 11, 0.75, false), new int[]{11, 9, 7});
+        assertEquals(dichotomicTrace(true, 24, 28, 0.25, false), new int[]{24, 26, 28});
+        assertEquals(dichotomicTrace(false, 7, 11, 0.75, true), new int[]{11, 10, 9, 8, 7});
+        assertEquals(dichotomicTrace(true, 24, 28, 0.25, true), new int[]{24, 25, 26, 27, 28});
+        assertThrows(IllegalArgumentException.class, () -> dichotomicTrace(false, 7, 11, 1.5, false));
     }
 }
