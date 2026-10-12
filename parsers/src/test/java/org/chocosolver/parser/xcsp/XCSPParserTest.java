@@ -240,4 +240,26 @@ public class XCSPParserTest {
         check(list + "<condition> (in,{1,3,5}) </condition></sum>",
                 s -> Set.of(1, 3, 5).contains(Arrays.stream(s).sum()), x);
     }
+
+    private static int count(int[] values, int value) {
+        return (int) Arrays.stream(values).filter(v -> v == value).count();
+    }
+
+    @Test(groups = "xcsp", timeOut = 60000)
+    public void testCountWithSetCondition() throws Exception {
+        Var[] x = {var("x0", 0, 2), var("x1", 0, 2), var("x2", 0, 2)};
+        String list = "<count><list> x0 x1 x2 </list><values> 1 </values>";
+        check(list + "<condition> (in,1..2) </condition></count>",
+                s -> count(s, 1) >= 1 && count(s, 1) <= 2, x);
+        check(list + "<condition> (notin,1..2) </condition></count>",
+                s -> count(s, 1) < 1 || count(s, 1) > 2, x);
+        check(list + "<condition> (in,5..8) </condition></count>",
+                s -> false, x);
+        check(list + "<condition> (notin,5..8) </condition></count>",
+                s -> true, x);
+        check(list + "<condition> (in,{1,2}) </condition></count>",
+                s -> count(s, 1) >= 1 && count(s, 1) <= 2, x);
+        check(list + "<condition> (notin,{0,3}) </condition></count>",
+                s -> count(s, 1) >= 1 && count(s, 1) <= 2, x);
+    }
 }

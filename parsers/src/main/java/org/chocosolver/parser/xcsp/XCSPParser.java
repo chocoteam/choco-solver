@@ -1862,10 +1862,10 @@ public class XCSPParser implements XCallbacks2 {
         int ma = (int) condition.max;
         switch (condition.operator) {
             case IN:
-                return model.intVar(Math.min(mi, min), Math.max(ma, max));
+                return model.intVar(mi, ma);
             case NOTIN:
                 IntVar r = model.intVar(min, max);
-                model.notMember(r, min, max).post();
+                model.notMember(r, mi, ma).post();
                 return r;
         }
         throw new ParserException("dealWithConditionVal " + condition);
