@@ -12,6 +12,7 @@ import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.Arrays;
@@ -78,16 +79,17 @@ public class NaLoExpression extends LoExpression {
                     }
                     IntVar res = model.intVar(model.generateName(), 0, vs.length);
                     model.sum(vs, "=", res).post();
-                    IntVar exres = model.intVar(model.generateName(), values);
-                    model.reifyXeqY(res, exres, me);
+                    // true iff an odd number of expressions are true
+                    model.reifyXinS(res, new IntIterableRangeSet(values), me);
                     break;
                 case IFF:
                     if (vs.length == 2) {
                         model.reifyXeqY(vs[0], vs[1], me);
                     } else {
-                        IntVar count = model.intVar(op + "_count_", 1, 2);
-                        model.atMostNValues(vs, count, false).post();
-                        model.reifyXltC(count, 2, me);
+                        IntVar sum = model.intVar(model.generateName(), 0, vs.length);
+                        model.sum(vs, "=", sum).post();
+                        // true iff all the expressions are equal
+                        model.reifyXinS(sum, new IntIterableRangeSet(new int[]{0, vs.length}), me);
                     }
                     break;
                 default:
@@ -136,6 +138,15 @@ public class NaLoExpression extends LoExpression {
     @Override
     public boolean beval(int[] values, Map<IntVar, Integer> map) {
         boolean eval = es[0].beval(values, map);
+        if (op == Operator.IFF) {
+            // n-ary equivalence: all the expressions are equal, as in decompose()
+            for (int i = 1; i < es.length; i++) {
+                if (eval != es[i].beval(values, map)) {
+                    return false;
+                }
+            }
+            return true;
+        }
         for (int i = 1; i < es.length; i++) {
             eval = op.eval(eval, es[i].beval(values, map));
         }

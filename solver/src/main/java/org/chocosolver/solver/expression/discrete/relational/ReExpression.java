@@ -313,7 +313,10 @@ public interface ReExpression extends ArExpression {
     }
 
     /**
-     * @param y a relational expression
+     * With more than one argument, the equivalence is not evaluated as a chain of binary equivalences:
+     * the expression is true if and only if all the expressions are equal, i.e. all true or all false.
+     *
+     * @param y some relational expressions
      * @return return the expression "x &hArr; y_1 &hArr; y_2 &hArr; ..." where this is "x"
      */
     default ReExpression iff(ReExpression... y) {
