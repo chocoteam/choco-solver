@@ -190,4 +190,36 @@ public class XCSPParserTest {
         check("<allDifferent><matrix> " + rows("x", 3, 3) + " </matrix></allDifferent>",
                 s -> allDifferentMatrixExcept(s, 3, 3, Set.of()), matrix("x", 3, 3, 0, 2));
     }
+
+    private static boolean rel(int a, String op, int b) {
+        switch (op) {
+            case "lt":
+                return a < b;
+            case "le":
+                return a <= b;
+            case "ge":
+                return a >= b;
+            case "gt":
+                return a > b;
+            default:
+                throw new IllegalArgumentException(op);
+        }
+    }
+
+    @Test(groups = "xcsp", timeOut = 60000)
+    public void testOrderedWithLengths() throws Exception {
+        Var[] x = {var("x0", 0, 2), var("x1", 0, 2), var("x2", 0, 2)};
+        for (String op : new String[]{"lt", "le", "ge", "gt"}) {
+            check("<ordered><list> x0 x1 x2 </list><operator> " + op + " </operator></ordered>",
+                    s -> rel(s[0], op, s[1]) && rel(s[1], op, s[2]), x);
+            for (int[] l : new int[][]{{1, 1}, {0, 0}, {-1, -1}, {2, -1}}) {
+                check("<ordered><list> x0 x1 x2 </list><lengths> " + l[0] + " " + l[1] + " </lengths>"
+                                + "<operator> " + op + " </operator></ordered>",
+                        s -> rel(s[0] + l[0], op, s[1]) && rel(s[1] + l[1], op, s[2]), x);
+            }
+            check("<ordered><list> x0 x1 x2 </list><lengths> y0 y1 </lengths><operator> " + op + " </operator></ordered>",
+                    s -> rel(s[0] + s[3], op, s[1]) && rel(s[1] + s[4], op, s[2]),
+                    x[0], x[1], x[2], var("y0", -1, 1), var("y1", 0, 1));
+        }
+    }
 }

@@ -1378,28 +1378,39 @@ public class XCSPParser implements XCallbacks2 {
 
     @Override
     public void buildCtrOrdered(String id, XVariables.XVarInteger[] list, int[] lengths, Types.TypeOperatorRel operator) {
+        // Decomposed on purpose: a global constraint (lexChain over views shifted by the prefix sums
+        // of the lengths) explores the same search tree but is up to 2 times slower as soon as there are failures.
         IntVar[] vars = vars(list);
-        IntVar[][] vectors = new IntVar[vars.length * 2 - 1][1];
-        int k = 0;
         for (int i = 0; i < vars.length - 1; i++) {
-            vectors[k++] = new IntVar[]{vars[i]};
-            vectors[k++] = new IntVar[]{vars[i].add(lengths[i]).intVar()};
+            ordered(vars[i].add(lengths[i]), operator, vars[i + 1]);
         }
-        vectors[k] = new IntVar[]{vars[vars.length - 1]};
-        lexCtr(vectors, operator);
     }
 
     @Override
     public void buildCtrOrdered(String id, XVariables.XVarInteger[] list, XVariables.XVarInteger[] lengths, Types.TypeOperatorRel operator) {
+        // Decomposed on purpose: a global constraint over prefix sums of the lengths
+        // requires auxiliary variables, filters less and is much slower.
         IntVar[] vars = vars(list);
-        IntVar[][] vectors = new IntVar[vars.length * 2 - 1][1];
-        int k = 0;
         for (int i = 0; i < vars.length - 1; i++) {
-            vectors[k++] = new IntVar[]{vars[i]};
-            vectors[k++] = new IntVar[]{vars[i].add(var(lengths[i])).intVar()};
+            ordered(vars[i].add(var(lengths[i])), operator, vars[i + 1]);
         }
-        vectors[k] = new IntVar[]{vars[vars.length - 1]};
-        lexCtr(vectors, operator);
+    }
+
+    private static void ordered(ArExpression a, Types.TypeOperatorRel operator, IntVar b) {
+        switch (operator) {
+            case LT:
+                a.lt(b).post();
+                break;
+            case LE:
+                a.le(b).post();
+                break;
+            case GE:
+                a.ge(b).post();
+                break;
+            case GT:
+                a.gt(b).post();
+                break;
+        }
     }
 
     @Override
