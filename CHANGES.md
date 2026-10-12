@@ -11,6 +11,7 @@ NEXT MILESTONE
 
 #### Parsers
 - XCSP3: fix several constraints found wrong by the unit tests of PyCSP3 (#1248): `pow` in primitive constraints, `allDifferent` on a matrix with `except`, `ordered` with `lengths`, `lex` on a matrix with `ge` or `gt`, `sum` with a `notin` condition and `count` with a condition on an interval
+- XCSP3: handle reified constraints, i.e. `reifiedBy`, `hreifiedFrom` and `hreifiedTo`, which were ignored (#1248). The reification is refused with an explicit message when it cannot be handled, as for `slide` and logic meta-constraints
 - XCSP3: add `XCSPParserTest`, which checks the solutions of small instances against the ones found by brute force
 
 ### Deprecated API (to be removed in next release):
