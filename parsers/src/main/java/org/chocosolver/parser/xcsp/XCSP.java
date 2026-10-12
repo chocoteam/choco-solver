@@ -143,7 +143,9 @@ public class XCSP extends RegParser {
                     .setRestartPolicy(s -> new Restarter(new InnerOuterCutoff(50, 1.01, 1.01),
                             c -> s.getFailCount() >= c, 50_000, true))
                     .setNogoodOnRestart(!this.isLCG())
-                    .setRestartOnSolution(this.isLCG())
+                    // restarting on solution only makes sense when optimizing:
+                    // when enumerating, the same solution would be found again and again
+                    .setRestartOnSolution(this.isLCG() && target.getSolver().getObjectiveManager().isOptimization())
                     .setRefinedPartialAssignmentGeneration(false)
                     .setExcludeObjective(true)
                     .setExcludeViews(false);
@@ -155,6 +157,8 @@ public class XCSP extends RegParser {
     @Override
     public void freesearch(Solver solver) {
         BlackBoxConfigurator bb = BlackBoxConfigurator.init();
+        // restarting on solution only makes sense when optimizing:
+        // when enumerating, the same solution would be found again and again
         boolean opt = solver.getObjectiveManager().isOptimization();
         final SearchParams.ValSelConf defaultValSel;
         final SearchParams.VarSelConf defaultVarSel;
@@ -164,7 +168,7 @@ public class XCSP extends RegParser {
             defaultVarSel = varsel;
             defaultResConf = restarts;
             bb.setNogoodOnRestart(true)
-                    .setRestartOnSolution(true)
+                    .setRestartOnSolution(opt)
                     .setExcludeObjective(true)
                     .setExcludeViews(false)
                     .setMetaStrategy(
@@ -182,7 +186,7 @@ public class XCSP extends RegParser {
                     SearchParams.Restart.LUBY, 500, 50_000, true);
             // other parameters
             bb.setNogoodOnRestart(true)
-                    .setRestartOnSolution(true)
+                    .setRestartOnSolution(opt)
                     .setExcludeObjective(true)
                     .setExcludeViews(false)
                     .setMetaStrategy(m -> Search.lastConflict(m, 1));
