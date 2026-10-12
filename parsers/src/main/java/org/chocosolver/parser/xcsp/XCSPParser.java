@@ -575,6 +575,9 @@ public class XCSPParser implements XCallbacks2 {
             case MOD:
                 e = a.mod(b);
                 break;
+            case POW:
+                e = a.pow(b);
+                break;
             case DIST:
                 e = a.dist(b);
                 break;
