@@ -122,4 +122,72 @@ public class XCSPParserTest {
         check("<intension> le(pow(x,y),4) </intension>",
                 s -> pow(s[0], s[1]) <= 4, var("x", -3, 3), var("y", 0, 3));
     }
+
+    /**
+     * Declares the variables of a matrix, row by row.
+     */
+    private static Var[] matrix(String name, int rows, int cols, int lb, int ub) {
+        Var[] vars = new Var[rows * cols];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                vars[i * cols + j] = var(name + i + "_" + j, lb, ub);
+            }
+        }
+        return vars;
+    }
+
+    /**
+     * Lists the variables of a matrix, as rows of an XCSP3 matrix.
+     */
+    private static String rows(String name, int rows, int cols) {
+        StringBuilder st = new StringBuilder();
+        for (int i = 0; i < rows; i++) {
+            st.append('(');
+            for (int j = 0; j < cols; j++) {
+                st.append(j > 0 ? "," : "").append(name).append(i).append('_').append(j);
+            }
+            st.append(')');
+        }
+        return st.toString();
+    }
+
+    private static boolean allDifferentExcept(int[] values, Set<Integer> except) {
+        Set<Integer> seen = new HashSet<>();
+        for (int v : values) {
+            if (!except.contains(v) && !seen.add(v)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean allDifferentMatrixExcept(int[] s, int rows, int cols, Set<Integer> except) {
+        for (int i = 0; i < rows; i++) {
+            if (!allDifferentExcept(Arrays.copyOfRange(s, i * cols, (i + 1) * cols), except)) {
+                return false;
+            }
+        }
+        for (int j = 0; j < cols; j++) {
+            int[] col = new int[rows];
+            for (int i = 0; i < rows; i++) {
+                col[i] = s[i * cols + j];
+            }
+            if (!allDifferentExcept(col, except)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Test(groups = "xcsp", timeOut = 60000)
+    public void testAllDifferentMatrixExcept() throws Exception {
+        check("<allDifferent><matrix> " + rows("x", 3, 3) + " </matrix><except> 0 </except></allDifferent>",
+                s -> allDifferentMatrixExcept(s, 3, 3, Set.of(0)), matrix("x", 3, 3, 0, 2));
+        check("<allDifferent><matrix> " + rows("x", 3, 3) + " </matrix><except> 0 2 </except></allDifferent>",
+                s -> allDifferentMatrixExcept(s, 3, 3, Set.of(0, 2)), matrix("x", 3, 3, 0, 2));
+        check("<allDifferent><matrix> " + rows("x", 2, 3) + " </matrix><except> 1 </except></allDifferent>",
+                s -> allDifferentMatrixExcept(s, 2, 3, Set.of(1)), matrix("x", 2, 3, 0, 3));
+        check("<allDifferent><matrix> " + rows("x", 3, 3) + " </matrix></allDifferent>",
+                s -> allDifferentMatrixExcept(s, 3, 3, Set.of()), matrix("x", 3, 3, 0, 2));
+    }
 }

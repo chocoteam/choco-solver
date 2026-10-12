@@ -800,7 +800,13 @@ public class XCSPParser implements XCallbacks2 {
 
     @Override
     public void buildCtrAllDifferentMatrix(String id, XVariables.XVarInteger[][] matrix, int[] except) {
-        this.buildCtrAllDifferentExcept(id, ArrayUtils.flatten(matrix), except);
+        for (XVariables.XVarInteger[] list : matrix) {
+            this.buildCtrAllDifferentExcept(id, list, except);
+        }
+        XVariables.XVarInteger[][] tmatrix = ArrayUtils.transpose(matrix);
+        for (XVariables.XVarInteger[] list : tmatrix) {
+            this.buildCtrAllDifferentExcept(id, list, except);
+        }
     }
 
     @Override
