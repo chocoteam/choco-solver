@@ -6,10 +6,12 @@
  */
 package org.chocosolver.parser.xcsp;
 
+import org.chocosolver.parser.ParserException;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -336,6 +338,17 @@ public class XCSPParserTest {
     }
 
     @Test(groups = "xcsp", timeOut = 60000)
+    public void testNaryIffAndXor() throws Exception {
+        Var[] vars = {var("x", -3, 3), var("y", -3, 3), var("b", 0, 1)};
+        // all the arguments are equivalent
+        check("<intension> iff(gt(x,0),gt(y,0),b) </intension>",
+                v -> (v[0] > 0) == (v[1] > 0) && (v[1] > 0) == (v[2] == 1), vars);
+        // an odd number of arguments are true
+        check("<intension> xor(gt(x,0),gt(y,0),b) </intension>",
+                v -> ((v[0] > 0 ? 1 : 0) + (v[1] > 0 ? 1 : 0) + v[2]) % 2 == 1, vars);
+    }
+
+    @Test(groups = "xcsp", timeOut = 60000)
     public void testSumAndCountOfMembership() throws Exception {
         Var[] x = {var("x0", 0, 2), var("x1", 0, 2)};
         check("<sum><list> in(x0,set(1,2)) in(x1,set(1,2)) </list><condition> (le,1) </condition></sum>",
@@ -352,5 +365,135 @@ public class XCSPParserTest {
                 s -> (1 - in12(s[0])) + (1 - in12(s[1])) <= 1, x);
         check("<intension> le(add(in(x0,set(1,2)),in(x1,set(1,2))),1) </intension>",
                 s -> in12(s[0]) + in12(s[1]) <= 1, x);
+    }
+
+    @DataProvider(name = "reifiable")
+    public Object[][] reifiable() {
+        String l = "<list> x0 x1 x2 </list>";
+        return new Object[][]{
+                {"<element %s>" + l + "<value> 1 </value></element>",
+                        (Predicate<int[]>) v -> v[0] == 1 || v[1] == 1 || v[2] == 1},
+                {"<element %s>" + l + "<condition> (ge,2) </condition></element>",
+                        (Predicate<int[]>) v -> v[0] >= 2 || v[1] >= 2 || v[2] >= 2},
+                {"<element %s>" + l + "<condition> (ne,1) </condition></element>",
+                        (Predicate<int[]>) v -> v[0] != 1 || v[1] != 1 || v[2] != 1},
+                {"<element %s>" + l + "<condition> (lt,1) </condition></element>",
+                        (Predicate<int[]>) v -> v[0] < 1 || v[1] < 1 || v[2] < 1},
+                {"<allDifferent %s> x0 x1 x2 </allDifferent>",
+                        (Predicate<int[]>) v -> v[0] != v[1] && v[0] != v[2] && v[1] != v[2]},
+                {"<allEqual %s> x0 x1 x2 </allEqual>",
+                        (Predicate<int[]>) v -> v[0] == v[1] && v[1] == v[2]},
+                {"<intension %s> lt(x0,add(x1,x2)) </intension>",
+                        (Predicate<int[]>) v -> v[0] < v[1] + v[2]},
+                {"<intension %s> and(lt(x0,x1),ne(x1,x2)) </intension>",
+                        (Predicate<int[]>) v -> v[0] < v[1] && v[1] != v[2]},
+                {"<extension %s>" + l + "<supports> (0,1,2)(1,1,1)(2,0,0) </supports></extension>",
+                        (Predicate<int[]>) v -> (v[0] == 0 && v[1] == 1 && v[2] == 2) || (v[0] == 1 && v[1] == 1 && v[2] == 1) || (v[0] == 2 && v[1] == 0 && v[2] == 0)},
+                {"<extension %s>" + l + "<conflicts> (0,1,2)(1,1,1) </conflicts></extension>",
+                        (Predicate<int[]>) v -> !((v[0] == 0 && v[1] == 1 && v[2] == 2) || (v[0] == 1 && v[1] == 1 && v[2] == 1))},
+                {"<sum %s>" + l + "<condition> (le,3) </condition></sum>",
+                        (Predicate<int[]>) v -> v[0] + v[1] + v[2] <= 3},
+                {"<sum %s>" + l + "<coeffs> 1 2 3 </coeffs><condition> (eq,6) </condition></sum>",
+                        (Predicate<int[]>) v -> v[0] + 2 * v[1] + 3 * v[2] == 6},
+                {"<sum %s><list> x0 x1 </list><condition> (eq,x2) </condition></sum>",
+                        (Predicate<int[]>) v -> v[0] + v[1] == v[2]},
+                {"<ordered %s>" + l + "<operator> lt </operator></ordered>",
+                        (Predicate<int[]>) v -> v[0] < v[1] && v[1] < v[2]},
+                {"<ordered %s>" + l + "<operator> le </operator></ordered>",
+                        (Predicate<int[]>) v -> v[0] <= v[1] && v[1] <= v[2]},
+                {"<count %s>" + l + "<values> 1 </values><condition> (eq,2) </condition></count>",
+                        (Predicate<int[]>) v -> (v[0] == 1 ? 1 : 0) + (v[1] == 1 ? 1 : 0) + (v[2] == 1 ? 1 : 0) == 2},
+                {"<nValues %s>" + l + "<condition> (eq,2) </condition></nValues>",
+                        (Predicate<int[]>) v -> Arrays.stream(v, 0, 3).distinct().count() == 2},
+                {"<maximum %s>" + l + "<condition> (eq,1) </condition></maximum>",
+                        (Predicate<int[]>) v -> Math.max(v[0], Math.max(v[1], v[2])) == 1},
+                {"<element %s>" + l + "<index> x0 </index><value> 1 </value></element>",
+                        (Predicate<int[]>) v -> v[v[0]] == 1},
+                {"<lex %s><list> x0 x1 </list><list> x1 x2 </list><operator> lt </operator></lex>",
+                        (Predicate<int[]>) v -> v[0] < v[1] || (v[0] == v[1] && v[1] < v[2])},
+                {"<cardinality %s>" + l + "<values> 0 1 2 </values><occurs> 1 1 1 </occurs></cardinality>",
+                        (Predicate<int[]>) v -> v[0] != v[1] && v[0] != v[2] && v[1] != v[2]},
+                {"<channel %s>" + l + "</channel>",
+                        (Predicate<int[]>) v -> v[v[0]] == 0 && v[v[1]] == 1 && v[v[2]] == 2},
+                {"<noOverlap %s><origins> x0 x1 x2 </origins><lengths> 1 1 1 </lengths></noOverlap>",
+                        (Predicate<int[]>) v -> v[0] != v[1] && v[0] != v[2] && v[1] != v[2]},
+                {"<sum %s>" + l + "<condition> (in,2..3) </condition></sum>",
+                        (Predicate<int[]>) v -> v[0] + v[1] + v[2] >= 2 && v[0] + v[1] + v[2] <= 3},
+                {"<sum %s>" + l + "<condition> (notin,2..3) </condition></sum>",
+                        (Predicate<int[]>) v -> v[0] + v[1] + v[2] < 2 || v[0] + v[1] + v[2] > 3},
+                {"<sum %s>" + l + "<coeffs> 1 2 3 </coeffs><condition> (in,{2,5,9}) </condition></sum>",
+                        (Predicate<int[]>) v -> v[0] + 2 * v[1] + 3 * v[2] == 2 || v[0] + 2 * v[1] + 3 * v[2] == 5
+                                || v[0] + 2 * v[1] + 3 * v[2] == 9},
+                {"<sum %s>" + l + "<condition> (notin,{0,3,6}) </condition></sum>",
+                        (Predicate<int[]>) v -> (v[0] + v[1] + v[2]) % 3 != 0},
+                {"<count %s>" + l + "<values> 1 </values><condition> (ge,1) </condition></count>",
+                        (Predicate<int[]>) v -> v[0] == 1 || v[1] == 1 || v[2] == 1},
+                {"<count %s>" + l + "<values> 0 2 </values><condition> (in,1..2) </condition></count>",
+                        (Predicate<int[]>) v -> Arrays.stream(v, 0, 3).filter(a -> a != 1).count() >= 1
+                                && Arrays.stream(v, 0, 3).filter(a -> a != 1).count() <= 2},
+                {"<count %s><list> x0 x1 </list><values> 1 </values><condition> (ne,x2) </condition></count>",
+                        (Predicate<int[]>) v -> (v[0] == 1 ? 1 : 0) + (v[1] == 1 ? 1 : 0) != v[2]},
+                {"<nValues %s>" + l + "<condition> (gt,1) </condition></nValues>",
+                        (Predicate<int[]>) v -> Arrays.stream(v, 0, 3).distinct().count() > 1},
+                {"<minimum %s>" + l + "<condition> (ge,1) </condition></minimum>",
+                        (Predicate<int[]>) v -> Math.min(v[0], Math.min(v[1], v[2])) >= 1},
+                {"<minimum %s><list> x0 x1 </list><condition> (lt,x2) </condition></minimum>",
+                        (Predicate<int[]>) v -> Math.min(v[0], v[1]) < v[2]},
+                {"<maximum %s>" + l + "<condition> (notin,{1}) </condition></maximum>",
+                        (Predicate<int[]>) v -> Math.max(v[0], Math.max(v[1], v[2])) != 1},
+                {"<intension %s> eq(add(x0,mul(x1,x2)),3) </intension>",
+                        (Predicate<int[]>) v -> v[0] + v[1] * v[2] == 3},
+                {"<intension %s> or(eq(x0,x1),gt(x1,x2)) </intension>",
+                        (Predicate<int[]>) v -> v[0] == v[1] || v[1] > v[2]},
+                {"<intension %s> imp(eq(x0,1),ne(dist(x1,x2),1)) </intension>",
+                        (Predicate<int[]>) v -> v[0] != 1 || Math.abs(v[1] - v[2]) != 1},
+                {"<intension %s> iff(gt(x0,0),gt(x1,0),gt(x2,0)) </intension>",
+                        (Predicate<int[]>) v -> (v[0] > 0) == (v[1] > 0) && (v[1] > 0) == (v[2] > 0)},
+                {"<intension %s> xor(gt(x0,0),gt(x1,0),gt(x2,0)) </intension>",
+                        (Predicate<int[]>) v -> ((v[0] > 0 ? 1 : 0) + (v[1] > 0 ? 1 : 0) + (v[2] > 0 ? 1 : 0)) % 2 == 1},
+                {"<count %s>" + l + "<values> 1 </values><condition> (le,1) </condition></count>",
+                        (Predicate<int[]>) v -> Arrays.stream(v, 0, 3).filter(a -> a == 1).count() <= 1},
+        };
+    }
+
+    @Test(groups = "xcsp", dataProvider = "reifiable")
+    public void testReification(String constraint, Predicate<int[]> c) throws Exception {
+        Var[] vars = {var("x0", 0, 2), var("x1", 0, 2), var("x2", 0, 2), var("r", 0, 1)};
+        // r <=> c
+        check(String.format(constraint, "reifiedBy=\"r\""), v -> (v[3] == 1) == c.test(v), vars);
+        // r => c
+        check(String.format(constraint, "hreifiedFrom=\"r\""), v -> v[3] == 0 || c.test(v), vars);
+        // c => r
+        check(String.format(constraint, "hreifiedTo=\"r\""), v -> v[3] == 1 || !c.test(v), vars);
+    }
+
+    @DataProvider(name = "notReifiable")
+    public Object[][] notReifiable() {
+        String l = "<list> x0 x1 x2 </list>";
+        return new Object[][]{
+                {"<regular %s>" + l + "<transitions> (a,0,a)(a,1,b)(b,1,b) </transitions><start> a </start><final> b </final></regular>"},
+                {"<slide %s>" + l + "<intension> lt(%%0,%%1) </intension></slide>"},
+                {"<and %s><intension> lt(x0,x1) </intension><intension> lt(x1,x2) </intension></and>"},
+        };
+    }
+
+    @Test(groups = "xcsp", dataProvider = "notReifiable", expectedExceptions = ParserException.class)
+    public void testReificationNotSupported(String constraint) throws Exception {
+        // constraints that rely on auxiliary variables and meta-constraints:
+        // their reification must be refused, not ignored
+        check(String.format(constraint, "reifiedBy=\"r\""), v -> true,
+                var("x0", 0, 2), var("x1", 0, 2), var("x2", 0, 2), var("r", 0, 1));
+    }
+
+    @Test(groups = "xcsp")
+    public void testElementWithCondition() throws Exception {
+        Var[] vars = {var("x0", 0, 2), var("x1", 0, 2), var("x2", 0, 2)};
+        String l = "<list> x0 x1 x2 </list>";
+        check("<element>" + l + "<value> 1 </value></element>", v -> v[0] == 1 || v[1] == 1 || v[2] == 1, vars);
+        check("<element>" + l + "<condition> (ge,2) </condition></element>", v -> v[0] >= 2 || v[1] >= 2 || v[2] >= 2, vars);
+        check("<element>" + l + "<condition> (gt,1) </condition></element>", v -> v[0] > 1 || v[1] > 1 || v[2] > 1, vars);
+        check("<element>" + l + "<condition> (le,0) </condition></element>", v -> v[0] <= 0 || v[1] <= 0 || v[2] <= 0, vars);
+        check("<element>" + l + "<condition> (lt,1) </condition></element>", v -> v[0] < 1 || v[1] < 1 || v[2] < 1, vars);
+        check("<element>" + l + "<condition> (ne,1) </condition></element>", v -> v[0] != 1 || v[1] != 1 || v[2] != 1, vars);
     }
 }

@@ -11,6 +11,7 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import org.chocosolver.parser.ParserException;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
@@ -25,6 +26,7 @@ import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
+import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.objects.queues.CircularQueue;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -107,6 +109,189 @@ public class XCSPParser implements XCallbacks2 {
         model.addAsGroup(a.id, array);
     }
 
+    /**
+     * The reification of the constraint being loaded, if any, as long as no callback has dealt with it.
+     */
+    private XConstraints.XReification reification;
+
+    /**
+     * Loads a constraint. The (half) reification of a constraint is not passed to the callbacks by the XCSP3 tools,
+     * so it is handled here, in two steps:
+     * <ul>
+     * <li>the callback of the constraint may deal with the reification itself, by calling {@link #reify(BoolVar)};</li>
+     * <li>otherwise, the constraints posted by the callback are reified instead of being posted,
+     * provided that their conjunction is equivalent to the XCSP3 constraint.</li>
+     * </ul>
+     *
+     * @param c the constraint to load
+     */
+    @Override
+    public void loadCtr(XConstraints.XCtr c) {
+        if (c.reification == null) {
+            XCallbacks2.super.loadCtr(c);
+            return;
+        }
+        int nbVars = model.getNbVars();
+        int nbCstrs = model.getNbCstrs();
+        int nbClauses = model.getSolver().getSat() == null ? 0 : model.getSolver().getSat().nClauses();
+        reification = c.reification;
+        try {
+            XCallbacks2.super.loadCtr(c);
+            if (reification == null) {
+                // the callback dealt with the reification
+                return;
+            }
+            Constraint[] posted = Arrays.copyOfRange(model.getCstrs(), nbCstrs, model.getNbCstrs());
+            // The conjunction of the posted constraints is equivalent to the XCSP3 constraint
+            // only if no auxiliary variable was introduced: views and constants are harmless.
+            boolean auxiliary = false;
+            for (int i = nbVars; i < model.getNbVars() && !auxiliary; i++) {
+                Variable v = model.getVar(i);
+                auxiliary = !v.isAConstant() && (v.getTypeAndKind() & Variable.VIEW) == 0;
+            }
+            int nbClausesAfter = model.getSolver().getSat() == null ? 0 : model.getSolver().getSat().nClauses();
+            if (posted.length == 0 || auxiliary || nbClauses != nbClausesAfter) {
+                throw new ParserException("The reification of this constraint is not supported: " + c);
+            }
+            model.unpost(posted);
+            Constraint ctr = posted.length == 1 ? posted[0] : model.and(posted);
+            BoolVar r = reificationVar();
+            switch (reification.type) {
+                case FULL:
+                    ctr.reifyWith(r);
+                    break;
+                case HALF_FROM:
+                    ctr.impliedBy(r);
+                    break;
+                case HALF_TO:
+                    ctr.implies(r);
+                    break;
+                default:
+                    throw new ParserException("Unknown type of reification: " + reification.type);
+            }
+        } finally {
+            reification = null;
+        }
+    }
+
+    /**
+     * @return the 0/1 variable of the reification of the constraint being loaded
+     */
+    private BoolVar reificationVar() {
+        IntVar x = var(reification.var);
+        if (x instanceof BoolVar) {
+            return (BoolVar) x;
+        }
+        BoolVar r = model.boolVar();
+        model.arithm(r, "=", x).post();
+        return r;
+    }
+
+    /**
+     * To be called by the callback of a constraint that deals itself with the reification:
+     * links the truth value of the constraint to the 0/1 variable of the reification.
+     * Then, the reification is considered as done.
+     *
+     * @param b a variable which is true if and only if the constraint being loaded is satisfied
+     */
+    private void reify(BoolVar b) {
+        BoolVar r = reificationVar();
+        switch (reification.type) {
+            case FULL:
+                model.arithm(r, "=", b).post();
+                break;
+            case HALF_FROM:
+                model.arithm(r, "<=", b).post();
+                break;
+            case HALF_TO:
+                model.arithm(b, "<=", r).post();
+                break;
+            default:
+                throw new ParserException("Unknown type of reification: " + reification.type);
+        }
+        reification = null;
+    }
+
+    /**
+     * Returns a variable for the result of a function, which is subject to a condition.
+     * When the constraint being loaded is reified, the result is a fresh variable and the condition on it is reified.
+     * So, this must be called only if the callback then posts "result = f(...)" where f is a total function
+     * whose values are in [min, max].
+     *
+     * @param condition the condition on the result
+     * @param min       the smallest value of the result
+     * @param max       the largest value of the result
+     * @return the variable to be used as result
+     */
+    private IntVar resultVar(Condition condition, int min, int max) {
+        if (reification == null) {
+            return condToVar(condition, min, max);
+        }
+        IntVar res = model.intVar(model.generateName("res_"), min, max);
+        reify(satisfies(res, condition).boolVar());
+        return res;
+    }
+
+    /**
+     * @param res       a variable
+     * @param condition a condition
+     * @return the expression which is true if and only if the variable satisfies the condition
+     */
+    private ReExpression satisfies(IntVar res, Condition condition) {
+        if (condition instanceof Condition.ConditionRel) {
+            ArExpression k;
+            if (condition instanceof Condition.ConditionVal) {
+                k = model.intVar((int) ((Condition.ConditionVal) condition).k);
+            } else if (condition instanceof Condition.ConditionVar) {
+                k = var((XVariables.XVarInteger) ((Condition.ConditionVar) condition).x);
+            } else {
+                throw new ParserException("Unknown condition: " + condition);
+            }
+            switch (((Condition.ConditionRel) condition).operator) {
+                case LT:
+                    return res.lt(k);
+                case LE:
+                    return res.le(k);
+                case GE:
+                    return res.ge(k);
+                case GT:
+                    return res.gt(k);
+                case NE:
+                    return res.ne(k);
+                case EQ:
+                    return res.eq(k);
+                default:
+                    throw new ParserException("Unknown condition: " + condition);
+            }
+        } else if (condition instanceof Condition.ConditionIntvl) {
+            int lb = (int) ((Condition.ConditionIntvl) condition).min;
+            int ub = (int) ((Condition.ConditionIntvl) condition).max;
+            ReExpression in = res.ge(lb).and(res.le(ub));
+            return ((Condition.ConditionIntvl) condition).operator == Types.TypeConditionOperatorSet.IN ? in : in.not();
+        } else if (condition instanceof Condition.ConditionIntset) {
+            int[] values = ((Condition.ConditionIntset) condition).t;
+            return ((Condition.ConditionIntset) condition).operator == Types.TypeConditionOperatorSet.IN
+                    ? res.in(values) : res.notin(values);
+        }
+        throw new ParserException("Unknown condition: " + condition);
+    }
+
+    @Override
+    public void loadSlide(XConstraints.XSlide s) {
+        if (s.reification != null) {
+            throw new ParserException("The reification of this meta-constraint is not supported: " + s);
+        }
+        XCallbacks2.super.loadSlide(s);
+    }
+
+    @Override
+    public void loadLogic(XConstraints.XLogic l) {
+        if (l.reification != null) {
+            throw new ParserException("The reification of this meta-constraint is not supported: " + l);
+        }
+        XCallbacks2.super.loadLogic(l);
+    }
+
     @Override
     public void loadGroup(XConstraints.XGroup g) {
         beginGroup(g);
@@ -169,6 +354,10 @@ public class XCSPParser implements XCallbacks2 {
         }
 
         ReExpression exp = buildRe(tree);
+        if (reification != null) {
+            reify(exp.boolVar());
+            return;
+        }
         exp.embody().post();
     }
 
@@ -763,11 +952,23 @@ public class XCSPParser implements XCallbacks2 {
 
     @Override
     public void buildCtrAtLeast(String id, XVariables.XVarInteger[] list, int value, int k) {
+        if (reification != null) {
+            IntVar res = model.intVar(model.generateName("res_"), 0, list.length);
+            reify(res.ge(k).boolVar());
+            model.count(value, vars(list), res).post();
+            return;
+        }
         model.count(value, vars(list), model.intVar(k, list.length)).post();
     }
 
     @Override
     public void buildCtrAtMost(String id, XVariables.XVarInteger[] list, int value, int k) {
+        if (reification != null) {
+            IntVar res = model.intVar(model.generateName("res_"), 0, list.length);
+            reify(res.le(k).boolVar());
+            model.count(value, vars(list), res).post();
+            return;
+        }
         model.count(value, vars(list), model.intVar(0, k)).post();
     }
 
@@ -949,6 +1150,9 @@ public class XCSPParser implements XCallbacks2 {
                     model.scalar(res, coeffs, "=", resu).post();
                     break;
             }
+        } else if (reification != null) {
+            int[] bounds = VariableUtils.boundsForScalar(res, coeffs);
+            model.scalar(res, coeffs, "=", resultVar(condition, bounds[0], bounds[1])).post();
         } else if (condition instanceof Condition.ConditionSet) {
             Condition.ConditionSet conditionSet = (Condition.ConditionSet) condition;
             switch (conditionSet.operator) {
@@ -1036,14 +1240,14 @@ public class XCSPParser implements XCallbacks2 {
 
     @Override
     public void buildCtrCount(String id, XVariables.XVarInteger[] list, int[] values, Condition condition) {
-        IntVar x = condToVar(condition, 0, list.length);
+        IntVar x = resultVar(condition, 0, list.length);
         model.among(x, vars(list), values).post();
     }
 
 
     @Override
     public void buildCtrCount(String id, XNode<XVariables.XVarInteger>[] trees, int[] values, Condition condition) {
-        IntVar x = condToVar(condition, 0, trees.length);
+        IntVar x = resultVar(condition, 0, trees.length);
         model.among(x, vars(trees), values).post();
     }
 
@@ -1057,7 +1261,7 @@ public class XCSPParser implements XCallbacks2 {
     private void buildCtrNValues(String id, IntVar[] vars, Condition condition) {
         if (condition instanceof Condition.ConditionRel) {
             Condition.ConditionRel conditionRel = (Condition.ConditionRel) condition;
-            model.nValues(vars, condToVar(condition, 0, vars.length)).post();
+            model.nValues(vars, resultVar(condition, 0, vars.length)).post();
             return;
         }
         this.unimplementedCase(id);
@@ -1200,7 +1404,7 @@ public class XCSPParser implements XCallbacks2 {
     private void buildMin(IntVar[] vars, Condition condition) {
         int min = Arrays.stream(vars).min(Comparator.comparingInt(IntVar::getLB)).get().getLB();
         int max = Arrays.stream(vars).max(Comparator.comparingInt(IntVar::getUB)).get().getUB();
-        IntVar x = condToVar(condition, min, max);
+        IntVar x = resultVar(condition, min, max);
         model.min(x, vars).post();
     }
 
@@ -1228,6 +1432,38 @@ public class XCSPParser implements XCallbacks2 {
     @Override
     public void buildCtrElement(String id, XVariables.XVarInteger[] list, Condition condition) {
         IntVar[] vars = vars(list);
+        if (condition instanceof Condition.ConditionVal) {
+            // at least one variable satisfies the condition: stated on views, without any auxiliary variable,
+            // so that each solution is found once and the constraint can be reified
+            int k = (int) ((Condition.ConditionVal) condition).k;
+            BoolVar[] bs = new BoolVar[vars.length];
+            for (int i = 0; i < vars.length; i++) {
+                switch (((Condition.ConditionVal) condition).operator) {
+                    case LT:
+                        bs[i] = model.intLeView(vars[i], k - 1);
+                        break;
+                    case LE:
+                        bs[i] = model.intLeView(vars[i], k);
+                        break;
+                    case GE:
+                        bs[i] = model.intGeView(vars[i], k);
+                        break;
+                    case GT:
+                        bs[i] = model.intGeView(vars[i], k + 1);
+                        break;
+                    case NE:
+                        bs[i] = model.intNeView(vars[i], k);
+                        break;
+                    case EQ:
+                        bs[i] = model.intEqView(vars[i], k);
+                        break;
+                    default:
+                        throw new ParserException("Unknown operator: " + condition);
+                }
+            }
+            model.sum(bs, ">=", 1).post();
+            return;
+        }
         int min = Arrays.stream(vars).min(Comparator.comparingInt(IntVar::getLB)).get().getLB();
         int max = Arrays.stream(vars).max(Comparator.comparingInt(IntVar::getUB)).get().getUB();
         IntVar x = condToVar(condition, min, max);
@@ -1293,7 +1529,7 @@ public class XCSPParser implements XCallbacks2 {
     private void buildMax(IntVar[] vars, Condition condition) {
         int min = Arrays.stream(vars).min(Comparator.comparingInt(IntVar::getLB)).get().getLB();
         int max = Arrays.stream(vars).max(Comparator.comparingInt(IntVar::getUB)).get().getUB();
-        IntVar x = condToVar(condition, min, max);
+        IntVar x = resultVar(condition, min, max);
         model.max(x, vars).post();
     }
 
