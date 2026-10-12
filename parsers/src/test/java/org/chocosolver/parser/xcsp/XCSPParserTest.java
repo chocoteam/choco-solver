@@ -262,4 +262,40 @@ public class XCSPParserTest {
         check(list + "<condition> (notin,{0,3}) </condition></count>",
                 s -> count(s, 1) >= 1 && count(s, 1) <= 2, x);
     }
+
+    private static boolean lex(int[] a, String op, int[] b) {
+        int c = Arrays.compare(a, b);
+        return rel(c, op, 0);
+    }
+
+    private static boolean lexMatrix(int[] s, int rows, int cols, String op) {
+        int[][] m = new int[rows][cols];
+        int[][] t = new int[cols][rows];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                m[i][j] = t[j][i] = s[i * cols + j];
+            }
+        }
+        for (int i = 0; i < rows - 1; i++) {
+            if (!lex(m[i], op, m[i + 1])) {
+                return false;
+            }
+        }
+        for (int j = 0; j < cols - 1; j++) {
+            if (!lex(t[j], op, t[j + 1])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Test(groups = "xcsp", timeOut = 60000)
+    public void testLexMatrix() throws Exception {
+        for (int[] size : new int[][]{{2, 2}, {2, 3}, {3, 2}, {3, 3}}) {
+            for (String op : new String[]{"lt", "le", "ge", "gt"}) {
+                check("<lex><matrix> " + rows("x", size[0], size[1]) + " </matrix><operator> " + op + " </operator></lex>",
+                        s -> lexMatrix(s, size[0], size[1], op), matrix("x", size[0], size[1], 0, 1));
+            }
+        }
+    }
 }

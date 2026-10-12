@@ -1337,14 +1337,18 @@ public class XCSPParser implements XCallbacks2 {
                 XVariables.XVarInteger[][] rmatrix = matrix.clone();
                 ArrayUtils.reverse(rmatrix);
                 model.lexChainLess(vars(rmatrix)).post();
-                model.lexChainLess(vars(ArrayUtils.transpose(rmatrix))).post();
+                XVariables.XVarInteger[][] rtmatrix = ArrayUtils.transpose(matrix);
+                ArrayUtils.reverse(rtmatrix);
+                model.lexChainLess(vars(rtmatrix)).post();
             }
             break;
             case GE: {
                 XVariables.XVarInteger[][] rmatrix = matrix.clone();
                 ArrayUtils.reverse(rmatrix);
                 model.lexChainLessEq(vars(rmatrix)).post();
-                model.lexChainLessEq(vars(ArrayUtils.transpose(rmatrix))).post();
+                XVariables.XVarInteger[][] rtmatrix = ArrayUtils.transpose(matrix);
+                ArrayUtils.reverse(rtmatrix);
+                model.lexChainLessEq(vars(rtmatrix)).post();
             }
             break;
         }
