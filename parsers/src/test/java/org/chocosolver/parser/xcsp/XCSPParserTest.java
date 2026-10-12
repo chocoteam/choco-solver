@@ -222,4 +222,22 @@ public class XCSPParserTest {
                     x[0], x[1], x[2], var("y0", -1, 1), var("y1", 0, 1));
         }
     }
+
+    @Test(groups = "xcsp", timeOut = 60000)
+    public void testSumWithSetCondition() throws Exception {
+        Var[] x = {var("x0", 0, 2), var("x1", 0, 2), var("x2", 0, 2), var("x3", 0, 2)};
+        String list = "<sum><list> x0 x1 x2 x3 </list>";
+        check(list + "<condition> (notin,2..4) </condition></sum>",
+                s -> Arrays.stream(s).sum() < 2 || Arrays.stream(s).sum() > 4, x);
+        check(list + "<condition> (notin,{1,3,5}) </condition></sum>",
+                s -> !Set.of(1, 3, 5).contains(Arrays.stream(s).sum()), x);
+        check(list + "<condition> (notin,0..8) </condition></sum>",
+                s -> false, x);
+        check(list + "<coeffs> 1 2 3 4 </coeffs><condition> (notin,{5,6}) </condition></sum>",
+                s -> !Set.of(5, 6).contains(s[0] + 2 * s[1] + 3 * s[2] + 4 * s[3]), x);
+        check(list + "<condition> (in,2..4) </condition></sum>",
+                s -> Arrays.stream(s).sum() >= 2 && Arrays.stream(s).sum() <= 4, x);
+        check(list + "<condition> (in,{1,3,5}) </condition></sum>",
+                s -> Set.of(1, 3, 5).contains(Arrays.stream(s).sum()), x);
+    }
 }

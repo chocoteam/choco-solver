@@ -951,25 +951,30 @@ public class XCSPParser implements XCallbacks2 {
             }
         } else if (condition instanceof Condition.ConditionSet) {
             Condition.ConditionSet conditionSet = (Condition.ConditionSet) condition;
-            IntVar resu = null;
-            if (conditionSet instanceof Condition.ConditionIntset) {
-                int[] values = ((Condition.ConditionIntset) condition).t;
-                resu = model.intVar(values);
-            } else if (conditionSet instanceof Condition.ConditionIntvl) {
-                int lb = (int) ((Condition.ConditionIntvl) condition).min;
-                int ub = (int) ((Condition.ConditionIntvl) condition).max;
-                resu = model.intVar(lb, ub);
-            }
             switch (conditionSet.operator) {
                 case IN: {
+                    IntVar resu = null;
+                    if (conditionSet instanceof Condition.ConditionIntset) {
+                        resu = model.intVar(((Condition.ConditionIntset) condition).t);
+                    } else if (conditionSet instanceof Condition.ConditionIntvl) {
+                        int lb = (int) ((Condition.ConditionIntvl) condition).min;
+                        int ub = (int) ((Condition.ConditionIntvl) condition).max;
+                        resu = model.intVar(lb, ub);
+                    }
                     model.scalar(res, coeffs, "=", resu).post();
                 }
                 break;
                 case NOTIN: {
                     int[] bounds = VariableUtils.boundsForScalar(res, coeffs);
                     IntVar sum = model.intVar(bounds[0], bounds[1]);
-                    resu.ne(sum).post();
                     model.scalar(res, coeffs, "=", sum).post();
+                    if (conditionSet instanceof Condition.ConditionIntset) {
+                        model.notMember(sum, ((Condition.ConditionIntset) condition).t).post();
+                    } else if (conditionSet instanceof Condition.ConditionIntvl) {
+                        int lb = (int) ((Condition.ConditionIntvl) condition).min;
+                        int ub = (int) ((Condition.ConditionIntvl) condition).max;
+                        model.notMember(sum, lb, ub).post();
+                    }
                 }
                 break;
             }
