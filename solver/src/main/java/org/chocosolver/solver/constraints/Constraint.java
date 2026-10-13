@@ -10,6 +10,8 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.reification.Opposite;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.SearchState;
+import org.chocosolver.solver.spec.Recorder;
+import org.chocosolver.solver.spec.Step;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.util.ESat;
 
@@ -185,6 +187,15 @@ public class Constraint {
      * @param bool the variable to reify with
      */
     public void reifyWith(BoolVar bool) {
+        Recorder r = recorder();
+        if (r != null) {
+            r.link(Step.Link.Kind.REIFY_WITH, this, bool, () -> doReifyWith(bool));
+        } else {
+            doReifyWith(bool);
+        }
+    }
+
+    private void doReifyWith(BoolVar bool) {
         if (boolReif != null) {
             if (opposite == null) {
                 throw new SolverException("try to reify an implied constraint");
@@ -219,6 +230,11 @@ public class Constraint {
      * @return the boolean reifying the constraint
      */
     public final BoolVar reify() {
+        Recorder r = recorder();
+        return r != null ? r.reify(this, this::doReify) : doReify();
+    }
+
+    private BoolVar doReify() {
         if (boolReif == null) {
             Model model = propagators[0].getModel();
             reifyWith(model.boolVar(model.generateName("REIF_")));
@@ -243,7 +259,12 @@ public class Constraint {
      * @param r a boolean variable
      */
     public final void implies(BoolVar r) {
-        this.reify().imp(r).post();
+        Recorder rec = recorder();
+        if (rec != null) {
+            rec.link(Step.Link.Kind.IMPLIES, this, r, () -> this.reify().imp(r).post());
+        } else {
+            this.reify().imp(r).post();
+        }
     }
 
     /**
@@ -262,6 +283,15 @@ public class Constraint {
      * @param r a boolean variable
      */
     public final void impliedBy(BoolVar r) {
+        Recorder rec = recorder();
+        if (rec != null) {
+            rec.link(Step.Link.Kind.IMPLIED_BY, this, r, () -> doImpliedBy(r));
+        } else {
+            doImpliedBy(r);
+        }
+    }
+
+    private void doImpliedBy(BoolVar r) {
         if (boolReif == null) {
             boolReif = r;
             if (boolReif.isInstantiatedTo(1)
@@ -273,6 +303,15 @@ public class Constraint {
         } else if (r != boolReif && opposite != null) {
             throw new SolverException("try to imply a reified constraint");
         }
+    }
+
+    /**
+     * @return the recorder of the model of this constraint if the current operation must be journalized (the model
+     * is recorded and the operation is not triggered by another journalized one), null otherwise
+     */
+    private Recorder recorder() {
+        Recorder r = propagators.length > 0 ? propagators[0].getModel().getRecorder() : null;
+        return r == null || r.busy() ? null : r;
     }
 
     /**

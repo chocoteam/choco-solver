@@ -9,6 +9,7 @@ package org.chocosolver.util.objects.graphs;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.solver.constraints.extension.Tuples;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.ArrayList;
@@ -80,6 +81,10 @@ public class MultivaluedDecisionDiagram {
 
     private final Compact compact;
     private final boolean sortTuples;
+    /**
+     * Once frozen, the diagram cannot be modified anymore and can be safely shared among models.
+     */
+    private volatile boolean frozen;
 
     // TEMPORARY DATA STRUCTURE, PREFIX WITH "_", CLEARED AFTER USAGE
     private TIntIntHashMap _nodesToRemove; // store the nodes to remove and the size of each node
@@ -209,6 +214,26 @@ public class MultivaluedDecisionDiagram {
     }
 
     /**
+     * Freeze this diagram: any further modification will throw a {@link SolverException}.
+     * A frozen diagram can be safely shared among models solved concurrently.
+     * Freezing is irreversible and idempotent.
+     *
+     * @return this
+     */
+    public MultivaluedDecisionDiagram freeze() {
+        this.frozen = true;
+        return this;
+    }
+
+    /**
+     * @return <i>true</i> if this diagram is frozen
+     * @see #freeze()
+     */
+    public boolean isFrozen() {
+        return frozen;
+    }
+
+    /**
      * Add all tuples within the MDD
      *
      * @param TUPLES tuples to add
@@ -228,6 +253,9 @@ public class MultivaluedDecisionDiagram {
      * @param TUPLE tuple to add
      */
     public boolean addTuple(int[] TUPLE) {
+        if (frozen) {
+            throw new SolverException("Cannot modify a frozen diagram");
+        }
         for (int i = 0; i < nbLayers; i++) {
             // if the tuple is out of declared domain
             if (TUPLE[i] < offsets[i] || TUPLE[i] >= offsets[i] + sizes[i]) {

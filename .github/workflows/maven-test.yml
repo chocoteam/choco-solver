@@ -62,7 +62,7 @@ jobs:
     strategy:
       #fail-fast: false
       matrix:
-        group: [ "xcsp", "dimacs", "mps" ]
+        group: [ "xcsp", "dimacs", "mps", "spec" ]
 
     # The different steps
     steps:

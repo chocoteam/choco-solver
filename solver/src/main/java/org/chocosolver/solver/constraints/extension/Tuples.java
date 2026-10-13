@@ -34,6 +34,10 @@ public class Tuples {
     private final boolean allowStar;
     private final int star;
     private SoftReference<int[][]> cachedMatrix;
+    /**
+     * Once frozen, the tuples cannot be modified anymore and can be safely shared among models.
+     */
+    private volatile boolean frozen;
 
     //***********************************************************************************
     // CONSTRUCTOR
@@ -155,6 +159,7 @@ public class Tuples {
      * @throws org.chocosolver.solver.exception.SolverException if the size of the tuple added does not correspond to a the previous ones (if any).
      */
     public void add(int... tuple) {
+        checkNotFrozen();
         if (tuples.isEmpty()) {
             arity = tuple.length;
             ranges = new int[2 * arity];
@@ -244,19 +249,50 @@ public class Tuples {
      * @return an array of tuples, each tuple is an int array
      */
     public int[][] toMatrix() {
-        if (cachedMatrix == null) {
+        // the cache may have been cleared by the GC, or be computed concurrently when the tuples are shared
+        SoftReference<int[][]> ref = cachedMatrix;
+        int[][] matrix = ref == null ? null : ref.get();
+        if (matrix == null) {
             int i = 0;
-            int[][] matrix = new int[tuples.size()][];
+            matrix = new int[tuples.size()][];
             for (int[] tuple : tuples) {
                 matrix[i++] = tuple.clone();
             }
             cachedMatrix = new SoftReference<>(matrix);
         }
-        return cachedMatrix.get();
+        return matrix;
     }
 
     public void sort() {
+        checkNotFrozen();
         tuples.sort(new TupleComparator());
+    }
+
+    /**
+     * Freeze this set of tuples: any further modification ({@link #add(int...)}, {@link #sort()}) will throw a
+     * {@link SolverException}.
+     * A frozen set of tuples can be safely shared among models solved concurrently.
+     * Freezing is irreversible and idempotent.
+     *
+     * @return this
+     */
+    public Tuples freeze() {
+        this.frozen = true;
+        return this;
+    }
+
+    /**
+     * @return <i>true</i> if this set of tuples is frozen, <i>false</i> otherwise
+     * @see #freeze()
+     */
+    public boolean isFrozen() {
+        return frozen;
+    }
+
+    private void checkNotFrozen() {
+        if (frozen) {
+            throw new SolverException("Cannot modify a frozen set of tuples");
+        }
     }
 
     private static class TupleComparator implements Comparator<int[]> {

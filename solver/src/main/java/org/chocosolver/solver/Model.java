@@ -19,6 +19,8 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.objective.IObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveFactory;
 import org.chocosolver.solver.propagation.PropagationEngine;
+import org.chocosolver.solver.spec.Recorder;
+import org.chocosolver.solver.spec.RecordingModel;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
@@ -254,6 +256,95 @@ public class Model implements IModel {
      */
     public Model() {
         this("Model-" + nextModelNum());
+    }
+
+    /**
+     * Creates a model, as {@link #Model(String, Settings)}. Such a model cannot be duplicated: see
+     * {@link #record(String, Settings)}.
+     *
+     * @param name     name of the model
+     * @param settings settings of the model
+     * @return a new model
+     */
+    public static Model create(String name, Settings settings) {
+        return new Model(name, settings);
+    }
+
+    /**
+     * Creates a model, as {@link #Model(String)}. Such a model cannot be duplicated: see {@link #record(String)}.
+     *
+     * @param name name of the model
+     * @return a new model
+     */
+    public static Model create(String name) {
+        return new Model(name);
+    }
+
+    /**
+     * Creates a model, as {@link #Model(Settings)}. Such a model cannot be duplicated: see {@link #record(Settings)}.
+     *
+     * @param settings settings of the model
+     * @return a new model
+     */
+    public static Model create(Settings settings) {
+        return new Model(settings);
+    }
+
+    /**
+     * Creates a model, as {@link #Model()}. Such a model cannot be duplicated: see {@link #record()}.
+     *
+     * @return a new model
+     */
+    public static Model create() {
+        return new Model();
+    }
+
+    /**
+     * Creates a model whose construction is recorded, so that it can be duplicated: build it as usual, then call
+     * {@link #duplicate()} to get independent copies, or use {@link ParallelPortfolio#of(Model, int)} to solve it with
+     * several threads (it is then the first worker). The copies themselves are not recorded, hence cannot be
+     * duplicated. Only the construction of the model is recorded, not the configuration of its solver (search,
+     * limits...), and a model cannot be duplicated once its resolution has started.
+     * <p>
+     * A custom constraint must be built with {@link #custom(String, Variable[], java.util.function.Function)} (or its
+     * variant with data), not directly from propagators.
+     *
+     * @param name     name of the model
+     * @param settings settings of the model
+     * @return a model which can be duplicated
+     * @see org.chocosolver.solver.spec.RecordingModel
+     */
+    public static Model record(String name, Settings settings) {
+        return new RecordingModel(name, settings);
+    }
+
+    /**
+     * Creates a model whose construction is recorded, see {@link #record(String, Settings)}.
+     *
+     * @param name name of the model
+     * @return a model which can be duplicated
+     */
+    public static Model record(String name) {
+        return new RecordingModel(name);
+    }
+
+    /**
+     * Creates a model whose construction is recorded, see {@link #record(String, Settings)}.
+     *
+     * @param settings settings of the model
+     * @return a model which can be duplicated
+     */
+    public static Model record(Settings settings) {
+        return new RecordingModel(settings);
+    }
+
+    /**
+     * Creates a model whose construction is recorded, see {@link #record(String, Settings)}.
+     *
+     * @return a model which can be duplicated
+     */
+    public static Model record() {
+        return new RecordingModel();
     }
 
     /**
@@ -968,6 +1059,7 @@ public class Model implements IModel {
         }
         // specific behavior for dynamic addition and/or reified constraints
         for (Constraint c : cs) {
+            assert ownsVariablesOf(c) : "Constraint " + c.getName() + " involves variables of another model";
             for (Propagator<?> p : c.getPropagators()) {
                 if (p.isPassive()) {
                     throw new SolverException("Try to add a constraint with a passive propagator");
@@ -981,6 +1073,21 @@ public class Model implements IModel {
             c.declareAs(Constraint.Status.POSTED, cIdx);
             cstrs[cIdx++] = c;
         }
+    }
+
+    /**
+     * @return <i>true</i> if all the variables of <i>c</i> belong to this model (e.g., a constraint built by a
+     * lambda must not capture the variables of another model)
+     */
+    private boolean ownsVariablesOf(Constraint c) {
+        for (Propagator<?> p : c.getPropagators()) {
+            for (Variable v : p.getVars()) {
+                if (v.getModel() != this) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -1136,6 +1243,34 @@ public class Model implements IModel {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////// RELATED TO MODELING FACTORIES /////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Message of the exception thrown when duplicating a model which is not recorded.
+     */
+    static final String NOT_RECORDED = "This model cannot be duplicated: create it with Model.record(...)";
+
+    /**
+     * <b>Internal use only.</b>
+     *
+     * @return the recorder of this model, or <i>null</i> if this model is not a
+     * {@link org.chocosolver.solver.spec.RecordingModel}
+     */
+    public Recorder getRecorder() {
+        return null;
+    }
+
+    /**
+     * Creates an independent copy of this model: same variables, same constraints, same objective, in the same
+     * order, hence the same resolution with a deterministic search. The copy can be solved in another thread.
+     * The copy itself cannot be duplicated.
+     *
+     * @return a copy of this model
+     * @throws SolverException if this model was not created with {@link #record(String)}, or if its resolution
+     *                         has started, or if one of its constraints was not built by a factory method
+     */
+    public Model duplicate() {
+        throw new SolverException(NOT_RECORDED);
+    }
 
     @Override
     public Model ref() {

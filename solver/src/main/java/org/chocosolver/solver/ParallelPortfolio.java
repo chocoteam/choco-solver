@@ -18,21 +18,31 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.SearchParams;
 import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.spec.ModelSpec;
+import org.chocosolver.solver.spec.Recorder;
+import org.chocosolver.solver.spec.Resolver;
+import org.chocosolver.solver.spec.SpecSolution;
+import org.chocosolver.solver.spec.Variant;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Spliterator;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -140,6 +150,17 @@ public class ParallelPortfolio {
      */
     private Model finder;
 
+    /**
+     * For a portfolio built from a {@link ModelSpec}: the resolver of each model, which maps the identifiers of the
+     * spec to its objects.
+     */
+    private final Map<Model, Resolver> resolvers = new IdentityHashMap<>();
+
+    /**
+     * For a portfolio built from a recorded model: that model, in whose terms the solutions are expressed.
+     */
+    private Model origin;
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////      CONSTRUCTOR      //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -169,9 +190,174 @@ public class ParallelPortfolio {
         this(true);
     }
 
+    /**
+     * Creates a portfolio of <i>n</i> workers: <i>model</i> itself (the first worker) and <i>n</i>-1 copies of it,
+     * built concurrently. The search heuristics of the copies are diversified, as well as the one of <i>model</i>
+     * unless a search strategy was declared on it. {@link #getBestSolution()} expresses the solutions found with the
+     * variables of <i>model</i>.
+     * <p>
+     * Once its resolution has started, <i>model</i> cannot be duplicated anymore: duplicate it beforehand if needed.
+     * Note that a worker may not even start if another one completes the search first.
+     * <pre>{@code
+     * Model model = Model.record("pb");
+     * // ... variables and constraints ...
+     * ParallelPortfolio portfolio = ParallelPortfolio.of(model, 4);
+     * if (portfolio.solve()) {
+     *     Solution s = portfolio.getBestSolution();
+     * }
+     * }</pre>
+     *
+     * @param model a model created with {@link Model#record(String)}
+     * @param n     number of workers, <i>model</i> included
+     * @return a portfolio of <i>n</i> workers
+     * @throws SolverException if <i>model</i> cannot be duplicated
+     */
+    public static ParallelPortfolio of(Model model, int n) {
+        return of(model, Collections.nCopies(Math.max(0, n - 1), Variant.IDENTITY));
+    }
+
+    /**
+     * Creates a portfolio whose workers are <i>model</i> itself (the first worker) and one copy of it per variant,
+     * built concurrently, see {@link #of(Model, int)} and {@link #of(ModelSpec, List)}.
+     *
+     * @param model    a model created with {@link Model#record(String)}
+     * @param variants one variant per copy
+     * @return a portfolio of <i>variants.size()</i>+1 workers
+     * @throws SolverException if <i>model</i> cannot be duplicated
+     */
+    public static ParallelPortfolio of(Model model, List<Variant> variants) {
+        Recorder recorder = model.getRecorder();
+        if (recorder == null) {
+            throw new SolverException(Model.NOT_RECORDED);
+        }
+        List<ModelSpec> specs = specs(recorder.snapshot(), variants);
+        ParallelPortfolio portfolio = new ParallelPortfolio();
+        portfolio.origin = model;
+        portfolio.addModel(model, model.getSolver().getSearch() != null, true);
+        portfolio.resolvers.put(model, recorder);
+        portfolio.add(specs, instantiate(specs), 2);
+        return portfolio;
+    }
+
+    /**
+     * Creates a portfolio of <i>n</i> identical models built from <i>spec</i>, whose search heuristics are then
+     * diversified by the portfolio (see {@link #addModel(Model)}). This is equivalent to adding <i>n</i> models built
+     * the same way, but the problem is described once and the models are built concurrently.
+     *
+     * @param spec the spec of the problem
+     * @param n    number of models
+     * @return a portfolio of <i>n</i> models
+     */
+    public static ParallelPortfolio of(ModelSpec spec, int n) {
+        return of(spec, Collections.nCopies(n, Variant.IDENTITY));
+    }
+
+    /**
+     * Creates a portfolio with one model per variant of <i>spec</i>, built concurrently.
+     * A model whose variant declares a search ({@link ModelSpec#search()}) keeps it; the search heuristics of the
+     * other models are diversified by the portfolio.
+     * <p>
+     * The solutions found can be read with the identifiers of the spec: see {@link #getBestSpecSolution()} and
+     * {@link #resolverOf(Model)}.
+     *
+     * @param spec     the spec of the problem
+     * @param variants one variant per model (see {@link Variant#IDENTITY})
+     * @return a portfolio with one model per variant
+     */
+    public static ParallelPortfolio of(ModelSpec spec, List<Variant> variants) {
+        List<ModelSpec> specs = specs(spec, variants);
+        ParallelPortfolio portfolio = new ParallelPortfolio();
+        portfolio.add(specs, instantiate(specs), 1);
+        return portfolio;
+    }
+
+    private static List<ModelSpec> specs(ModelSpec spec, List<Variant> variants) {
+        return variants.stream().map(spec::with).collect(Collectors.toList());
+    }
+
+    /**
+     * Add the instances of <i>specs</i>, numbered from <i>rank</i>.
+     */
+    private void add(List<ModelSpec> specs, List<Resolver> instances, int rank) {
+        for (int i = 0; i < instances.size(); i++) {
+            Model m = instances.get(i).model();
+            m.setName(m.getName() + "_" + (rank + i));
+            addModel(m, specs.get(i).search() != null, true);
+            resolvers.put(m, instances.get(i));
+        }
+    }
+
+    /**
+     * @return the instances of <i>specs</i>, built concurrently
+     */
+    private static List<Resolver> instantiate(List<ModelSpec> specs) {
+        if (specs.isEmpty()) {
+            return List.of();
+        }
+        ExecutorService pool = Executors.newFixedThreadPool(
+                Math.min(specs.size(), Runtime.getRuntime().availableProcessors()));
+        try {
+            List<Future<Resolver>> futures = new ArrayList<>(specs.size());
+            for (ModelSpec s : specs) {
+                futures.add(pool.submit(() -> s.instantiate()));
+            }
+            List<Resolver> instances = new ArrayList<>(specs.size());
+            for (Future<Resolver> f : futures) {
+                instances.add(f.get());
+            }
+            return instances;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new SolverException("Interrupted while building the models of the portfolio");
+        } catch (ExecutionException e) {
+            throw e.getCause() instanceof RuntimeException re ? re : new SolverException(e.getCause().getMessage());
+        } finally {
+            pool.shutdownNow();
+        }
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////          API          //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * @param model a model of this portfolio
+     * @return the resolver of <i>model</i> if this portfolio was built from a {@link ModelSpec}, null otherwise
+     */
+    public Resolver resolverOf(Model model) {
+        return resolvers.get(model);
+    }
+
+    /**
+     * To be called once {@link #solve()} returned <i>true</i>.
+     *
+     * @return the (best) solution found, expressed with the variables of the recorded model for a portfolio built
+     * with {@link #of(Model, int)}, with the variables of the model which found it otherwise
+     * @throws SolverException if no solution was found
+     */
+    public Solution getBestSolution() {
+        if (finder == null) {
+            throw new SolverException("No solution found");
+        }
+        return origin == null || finder == origin
+                ? new Solution(finder).record()
+                : getBestSpecSolution().toSolution(origin.getRecorder());
+    }
+
+    /**
+     * To be called once {@link #solve()} returned <i>true</i>, on a portfolio built from a {@link ModelSpec} (or a
+     * recorded model).
+     *
+     * @return the (best) solution found, with the identifiers of the spec: it can be read from any model of the spec
+     * @throws SolverException if this portfolio was not built from a spec, or if no solution was found
+     */
+    public SpecSolution getBestSpecSolution() {
+        Resolver r = finder == null ? null : resolvers.get(finder);
+        if (r == null) {
+            throw new SolverException(finder == null ? "No solution found" : "The portfolio was not built from a ModelSpec");
+        }
+        return SpecSolution.record(r);
+    }
 
     /**
      * Calling this method will ensure that workers equipped with a restart policy not only

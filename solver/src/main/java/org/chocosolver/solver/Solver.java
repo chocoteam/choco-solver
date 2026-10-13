@@ -1376,6 +1376,9 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
             strategies = Arrays.stream(strategies).filter(Objects::nonNull)
                     .flatMap(s -> (s instanceof StrategiesSequencer) ? Arrays.stream(((StrategiesSequencer<?>) s).getStrategies()) : Stream.of(s))
                     .toArray(AbstractStrategy[]::new);
+            assert Arrays.stream(strategies).allMatch(s -> s.getVariables() == null
+                    || Arrays.stream(s.getVariables()).allMatch(v -> v == null || v.getModel() == mModel))
+                    : "A search strategy involves variables of another model";
             if (strategies.length == 0) {
                 M.removeStrategy();
             } else if (strategies.length == 1) {
