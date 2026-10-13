@@ -79,7 +79,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
      */
     public ObjectiveStrategy(IntVar objective, OptimizationPolicy policy, double fraction, boolean largerHalfFirst) {
         super(objective);
-        if (!(fraction >= 0. && fraction <= 1.)) {
+        if (Double.isNaN(fraction) || fraction < 0. || fraction > 1.) {
             throw new IllegalArgumentException("fraction should be in [0, 1], not " + fraction);
         }
         this.fraction = fraction;
