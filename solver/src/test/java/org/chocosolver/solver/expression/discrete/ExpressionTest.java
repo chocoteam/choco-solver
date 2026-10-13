@@ -687,4 +687,42 @@ public class ExpressionTest {
         yvar.eq(xvar.pow(3)).post();
         Assert.assertTrue(model.getSolver().solve());
     }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void testNaryIff(int p) {
+        // all the arguments are equivalent: (F, F, 0) or (T, T, 1)
+        Model model = new Model();
+        IntVar x = model.intVar(-3, 3);
+        IntVar y = model.intVar(-3, 3);
+        BoolVar b = model.boolVar();
+        eval(model, x.gt(0).iff(y.gt(0), b), p, 25);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void testNotNaryIff(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(-3, 3);
+        IntVar y = model.intVar(-3, 3);
+        BoolVar b = model.boolVar();
+        eval(model, x.gt(0).iff(y.gt(0), b).not(), p, 73);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void testNaryXor(int p) {
+        // an odd number of arguments are true
+        Model model = new Model();
+        IntVar x = model.intVar(-3, 3);
+        IntVar y = model.intVar(-3, 3);
+        BoolVar b = model.boolVar();
+        eval(model, x.gt(0).xor(y.gt(0), b), p, 49);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void testNotNaryXor(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(-3, 3);
+        IntVar y = model.intVar(-3, 3);
+        BoolVar b = model.boolVar();
+        eval(model, x.gt(0).xor(y.gt(0), b).not(), p, 49);
+    }
 }
