@@ -12,7 +12,10 @@ import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.chocosolver.solver.ModelTest.knapsack;
@@ -281,6 +284,40 @@ public class PortFolioTest {
             Model finder = pares.getBestModel();
             Assert.assertEquals(finder.getSolver().getObjectiveManager().getBestLB().intValue(), 51);
             System.gc();
+        }
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testEnumeration() {
+        // enumerating the solutions of a satisfaction problem must terminate: x % 3 = y has 7 solutions
+        for (int n : new int[]{1, 2, 4}) {
+            ParallelPortfolio pares = new ParallelPortfolio();
+            List<IntVar[]> vars = new ArrayList<>();
+            for (int i = 0; i < n; i++) {
+                Model model = new Model();
+                IntVar x = model.intVar("x", 0, 6);
+                IntVar y = model.intVar("y", 0, 6);
+                x.mod(3).eq(y).post();
+                vars.add(new IntVar[]{x, y});
+                pares.addModel(model);
+            }
+            Set<String> solutions = new HashSet<>();
+            int count = 0;
+            while (pares.solve()) {
+                count++;
+                // each model has 7 solutions and at least one model moves to its next solution on each call
+                Assert.assertTrue(count <= 7 * n, "endless enumeration with " + n + " model(s)");
+                IntVar[] xy = vars.get(pares.getModels().indexOf(pares.getBestModel()));
+                Assert.assertEquals(xy[0].getValue() % 3, xy[1].getValue());
+                solutions.add(xy[0].getValue() + "," + xy[1].getValue());
+            }
+            if (n == 1) {
+                Assert.assertEquals(count, 7);
+                Assert.assertEquals(solutions.size(), 7);
+            } else {
+                // the models enumerate independently: a solution may be found by several of them
+                Assert.assertTrue(count >= 7, "only " + count + " solution(s) with " + n + " model(s)");
+            }
         }
     }
 }
