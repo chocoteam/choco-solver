@@ -268,18 +268,22 @@ public interface SearchParams {
             switch (varsel) {
                 case ACTIVITY:
                     return (vars, vsel) -> new ActivityBased(vars[0].getModel(), vars, vsel,
-                            0.999d, 0.2d, 8, 1, 0);
+                            0.999d, 0.2d, 8, 1, vars[0].getModel().getSeed());
                 case CHS:
-                    return (vars, vsel) -> Search.intVarSearch(new ConflictHistorySearch<>(vars, 0), vsel, vars);
+                    return (vars, vsel) -> Search.intVarSearch(new ConflictHistorySearch<>(vars,
+                            vars[0].getModel().getSeed()), vsel, vars);
                 case DOM:
                 case FIRST_FAIL:
                     return (vars, vsel) -> Search.intVarSearch(new FirstFail(vars[0].getModel()), vsel, vars);
                 case DOMWDEG_CACD:
-                    return (vars, vsel) -> Search.intVarSearch(new DomOverWDegRef<>(vars, 0, flushRate), vsel, vars);
+                    return (vars, vsel) -> Search.intVarSearch(new DomOverWDegRef<>(vars,
+                            vars[0].getModel().getSeed(), flushRate), vsel, vars);
                 case FLBA:
-                    return (vars, vsel) -> Search.intVarSearch(new FailureBased<>(vars, 0, 4), vsel, vars);
+                    return (vars, vsel) -> Search.intVarSearch(new FailureBased<>(vars,
+                            vars[0].getModel().getSeed(), 4), vsel, vars);
                 case FRBA:
-                    return (vars, vsel) -> Search.intVarSearch(new FailureBased<>(vars, 0, 2), vsel, vars);
+                    return (vars, vsel) -> Search.intVarSearch(new FailureBased<>(vars,
+                            vars[0].getModel().getSeed(), 2), vsel, vars);
                 case INPUT:
                     return (vars, vsel) -> Search.intVarSearch(new InputOrder<>(vars[0].getModel()), vsel, vars);
                 case PICKONDOM:
@@ -290,7 +294,8 @@ public interface SearchParams {
                     return (vars, vsel) -> Search.intVarSearch(new Random<>(vars[0].getModel().getSeed()), vsel, vars);
                 case DOMWDEG:
                 default:
-                    return (vars, vsel) -> Search.intVarSearch(new DomOverWDeg<>(vars, 0, flushRate), vsel, vars);
+                    return (vars, vsel) -> Search.intVarSearch(new DomOverWDeg<>(vars,
+                            vars[0].getModel().getSeed(), flushRate), vsel, vars);
             }
         }
 
