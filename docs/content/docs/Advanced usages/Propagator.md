@@ -17,10 +17,19 @@ Constraint c = new Constraint("MyConstraint", new MyPropagator(vars));
 ```
 
 The only tricky part relies in the propagator implementation.
-Your propagator must extend the `Propagator` class but, at the begining, not all methods have to be overwritted.
+Your propagator must extend the `Propagator` class but, at the beginning, not all methods have to be overridden.
 We will see two ways to implement a propagator ensuring that `X >= Y`.
 
 A guided implementation of a scalar constraint is presented in the tutorial: [Designing a constraint]({{< ref "/tutos/Constraints.md" >}}).
+
+{{% alert title="Best practices" color="primary" %}}
+The developer guide lists rules learnt from real fixes, worth reading before writing a propagator:
+[building constraints](https://github.com/chocoteam/choco-solver/blob/develop/docs/dev/best-practices.md#1-building-constraints-factories),
+[variables and domains](https://github.com/chocoteam/choco-solver/blob/develop/docs/dev/best-practices.md#2-variables-and-domains),
+[writing a propagator](https://github.com/chocoteam/choco-solver/blob/develop/docs/dev/best-practices.md#3-writing-a-propagator)
+(explanations for LCG, bounded domains, backtrackable state)
+and [testing](https://github.com/chocoteam/choco-solver/blob/develop/docs/dev/best-practices.md#4-testing).
+{{% /alert %}}
 
 #### Basic propagator
 
