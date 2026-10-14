@@ -1,6 +1,6 @@
 ---
 title: "Contributing"
-weight: 7
+weight: 8
 description: >
   How to report a bug, improve the documentation or contribute code.
 ---
