@@ -118,10 +118,10 @@ public final class MyIncrementalPropagator extends Propagator<IntVar> {
     public int getPropagationConditions(int vIdx) {
         if (vIdx == 0) {
             // awakes if x gets instantiated or if its upper bound decreases
-            return IntEventType.combine(IntEventType.INSTANTIATE, IntEventType.DECUPP);
+            return IntEventType.upperBoundAndInst();
         } else {
             // awakes if y gets instantiated or if its lower bound increases
-            return IntEventType.combine(IntEventType.INSTANTIATE, IntEventType.INCLOW);
+            return IntEventType.lowerBoundAndInst();
         }
     }
 
@@ -196,16 +196,16 @@ The *coarse* option:
 > The coarse filtering algorithm should be surrounded like this:
 
 > ```java
-> // In the case of ``SetVar``, replace ``getDomSize()`` by ``getEnvSize()-getKerSize()``.
+> // In the case of ``SetVar``, replace ``getDomainSize()`` by ``getUB().size() - getLB().size()``.
 > long size;
 > do{
 >   size = 0;
 >   for(IntVar v:vars){
->     size+=v.getDomSize();
+>     size+=v.getDomainSize();
 >   }
 >   // really update domain variables here
 >   for(IntVar v:vars){
->     size-=v.getDomSize();
+>     size-=v.getDomainSize();
 >   }
 > }while(size>0);
 > ```

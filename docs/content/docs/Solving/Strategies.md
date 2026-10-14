@@ -22,23 +22,20 @@ Thus, it is strongly recommended to adapt the search space exploration to the pr
 
 ### Default search strategy
 
-If no search strategy is specified to the resolver, Choco-solver will rely on the default one (defined by a `defaultSearch` in `Search`).
-In many cases, this strategy will not be sufficient to produce satisfying performances and it will be necessary to specify a dedicated strategy, using `solver.setSearch(...)`.
-The default search strategy splits variables according to their type and defines specific search strategies for each type that are sequentially applied:
+If no search strategy is specified to the resolver, Choco-solver relies on a default one,
+built by [`BlackBoxConfigurator`](#blackboxconfigurator-automatic-search-configuration).
+It splits variables according to their type and defines specific search strategies for each type that are sequentially applied:
 
+1. integer and boolean variables: `intVarSearch(ivars)` (based on `domOverWDegSearch`),
+2. set variables: `setVarSearch(svars)`,
+3. graph variables: `graphVarSearch(gvars)`,
+4. real variables: `realVarSearch(rvars)`,
+5. objective variable, if any: lower bound or upper bound, depending on the optimization direction.
 
-1. integer variables and boolean variables : `intVarSearch(ivars)` (calls `domOverWDegSearch`)
-
-
-2. set variables: `setVarSearch(svars)`
-
-
-3. real variables `realVarSearch(rvars)`
-
-
-4. objective variable, if any: lower bound or upper bound, depending on the optimization direction
-
-Note that lastConflict is also plugged-in.
+A last conflict meta-strategy is also plugged in.
+In many cases, this strategy will not be sufficient to produce satisfying performances and it will be necessary
+to specify a dedicated strategy, using `solver.setSearch(...)`, or to tune the black box.
+The default search can be replaced with `SettingsBuilder.init().setDefaultSearch(...)`, when creating the model.
 
 ### Specifying a search strategy
 
@@ -125,8 +122,8 @@ import static org.chocosolver.solver.search.strategy.Search.*;
 Most available search strategies are listed in `Search`.
 This factory enables you to create search strategies using static methods.
 Most search strategies rely on :
-- variable selectors (see package `org.chocosolver.solver.search.strategy.selectors.values`)
-- value selectors (see package `org.chocosolver.solver.search.strategy.selectors.variables`)
+- variable selectors (see package `org.chocosolver.solver.search.strategy.selectors.variables`)
+- value selectors (see package `org.chocosolver.solver.search.strategy.selectors.values`)
 - operators (see `DecisionOperator`)
 
 `Search` is not exhaustive, look at the selectors package to see learn more search possibilities.
@@ -159,119 +156,37 @@ This is particularly useful for problems where:
 - You want the solver to automatically tune its search behavior
 - You have multiple good strategies but no way to predict which will work best
 
-### BlackBoxConfigurator: Automatic search tuning
+### BlackBoxConfigurator: automatic search configuration
 
-`BlackBoxConfigurator` is the **recommended approach** for automatically configuring search strategies. Instead of manually specifying variable selectors, value selectors, and meta-strategies, you provide problem characteristics and let the configurator build an optimized strategy:
+`BlackBoxConfigurator` builds a complete search strategy for a model: variables are grouped by type
+(integer, set, graph, real), each group gets a strategy, then a meta-strategy (e.g. last conflict)
+and a restart policy are added.
+**It is what Choco uses when no search strategy is declared** (`BlackBoxConfigurator.init().make(model)`).
 
-```java
-import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
+Two presets are tuned for satisfaction (`forCSP()`) and optimization (`forCOP()`) problems:
 
-Solver solver = model.getSolver();
+{{< tabpane langEqualsHeader=true >}}
+{{< example "solving/Strategies" "blackBox" >}}
+{{< /tabpane >}}
 
-// For CSP (Constraint Satisfaction): find any feasible solution
-BlackBoxConfigurator.init()
-    .forCSP()
-    .build()
-    .configureSearch(solver);
+Each part can be changed with a `set...` method before calling `make(model)`:
+`setIntVarStrategy`, `setSetVarStrategy`, `setGraphVarSearch`, `setRealVarStrategy`,
+`setIntObjVarStrategy`, `setMetaStrategy`, `setRestartPolicy`, `setNogoodOnRestart`,
+`setRestartOnSolution`, `setExcludeViews`, `setExcludeObjective`, ...
 
-// For COP (Constraint Optimization): find optimal solution
-BlackBoxConfigurator.init()
-    .forCOP()
-    .build()
-    .configureSearch(solver);
-```
+{{< tabpane langEqualsHeader=true >}}
+{{< example "solving/Strategies" "blackBoxCustom" >}}
+{{< /tabpane >}}
 
-**Presets:**
-- `forCSP()`: Optimized for satisfaction problems (find any solution)
-- `forCOP()`: Optimized for optimization problems (find best solution)
-
-**Customization:**
-
-You can customize the black-box configuration with additional settings:
-
-```java
-BlackBoxConfigurator.init()
-    .forCSP()
-    .searchRandomized()           // Use randomized value selection
-    .build()
-    .configureSearch(solver);
-```
-
-Example with full customization:
-
-```java
-var config = BlackBoxConfigurator.init()
-    .forCOP()
-    .searchDomOverWDeg()          // Variable selector: dom/wdeg
-    .maxDomainValues(1000)        // Adaptive heuristic for large domains
-    .build();
-
-config.configureSearch(solver);
-```
-
-**When to use:**
-- When you want **automatic tuning** without manual strategy composition
-- For **prototyping** and quick problem solving
-- When you're **unsure which strategy** would work best
-- For **production** use where you need robust default behavior
+`complete(model, strategy)` completes a declared strategy with the black-box one, for the variables it does not cover.
 
 ### Value selectors: IntDomainSticky
 
-The `IntDomainSticky` value selector **remembers previously chosen values** for variables and tends to revisit them. This can be effective for problems with **strong locality**:
-
-```java
-import org.chocosolver.solver.search.strategy.selectors.values.IntDomainSticky;
-import static org.chocosolver.solver.search.strategy.Search.*;
-
-Solver solver = model.getSolver();
-solver.setSearch(intVarSearch(
-    new FirstFail(model),           // Variable selector
-    new IntDomainSticky(),           // Value selector (sticky)
-    myIntVars
-));
-```
-
-**When to use:**
-- Problems with **strong value clustering** (solutions group around certain value assignments)
-- **Warm-start** scenarios where you have hints from previous runs
-- Problems where **locality matters** (neighboring solutions are often good)
-
-## Comparison: Manual vs. BlackBox
+`IntDomainSticky` is a value selector implementing *phase saving*:
+it selects the last value a variable took during propagation, if this value is still in its domain,
+and falls back to another value selector otherwise.
+It is useful together with restarts, to drive the search back towards the regions it explored before:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Manual Configuration" >}}
-```java
-// Explicit control, requires expertise
-solver.setSearch(
-    intVarSearch(
-        new DomOverWDeg(model),
-        new IntDomainMin(),
-        x, y, z
-    ),
-    setVarSearch(sets),
-    lastConflict(...)
-);
-```
-{{< /tab >}}
-{{< tab header="BlackBox Configuration" >}}
-```java
-// Automatic tuning, recommended for most cases
-BlackBoxConfigurator.init()
-    .forCOP()
-    .build()
-    .configureSearch(solver);
-```
-{{< /tab >}}
+{{< example "solving/Strategies" "sticky" >}}
 {{< /tabpane >}}
-
-**BlackBox advantages:**
-- Less expertise required
-- Robustness across different problem types
-- Automatically combines multiple heuristics
-- Well-tested for typical problems
-
-**Manual configuration advantages:**
-- Fine-grained control for expert users
-- Optimization for domain-specific patterns
-- Educational value for understanding search
-

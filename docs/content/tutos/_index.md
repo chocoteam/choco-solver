@@ -17,9 +17,7 @@ General documentation on constraint-programming may be found at:
 -   [Wikipedia](https://en.wikipedia.org/wiki/Constraint_programming)
 -   [Handbook of Constraint
     Programming](http://store.elsevier.com/Handbook-of-Constraint-Programming/isbn-9780444527264/)
--   [Hakan's
-     advices](http://cp2013.a4cp.org/sites/default/files/uploads/cpsolvers2013.Hakan_.pdf)
 -   [Bartak’s courses](http://ktiml.mff.cuni.cz/~bartak/constraints/index.html)
--   [MOOC](https://www.coursera.org/learn/modeling-discrete-optimization)
+-   [MOOC](https://www.coursera.org/learn/basic-modeling)
 
 In case the reader is completely new to the domain of constraint-programming, it is highly recommended to attend training courses.

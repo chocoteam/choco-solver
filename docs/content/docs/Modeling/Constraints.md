@@ -67,13 +67,8 @@ Please refer to the javadoc of `Model` to have the complete list of available co
 
 To be effective, a constraint must be posted to the solver. This is achieved using the `post()` method:
 
-{{< tabpane langEqualsHeader=true >}} 
-{{< tab header="Java" >}}
-model.allDifferent(vars).post();
-{{< /tab >}}
-{{< tab header="Python" >}}
-model.all_different(vars).post()
-{{< /tab >}} 
+{{< tabpane langEqualsHeader=true >}}
+{{< example "modeling/Constraints" "post" >}}
 {{< /tabpane >}}
 
 
@@ -85,23 +80,15 @@ it may not be satisfied in solutions.
 In Choco-solver, it is possible to reify any constraint. Reifying a constraint means associating it with a `BoolVar`
 to represent whether or not the constraint is satisfied :
 
-{{< tabpane langEqualsHeader=true >}} 
-{{< tab header="Java" >}}
-BoolVar b = constraint.reify();
-{{< /tab >}}
-{{< tab header="Python" >}}
-b = constraint.reify()
-{{< /tab >}} 
+{{< tabpane langEqualsHeader=true >}}
+{{< example "modeling/Constraints" "reify" >}}
 {{< /tabpane >}}
 
 
 Or:
 
-{{< tabpane langEqualsHeader=true >}} 
-{{< tab header="Java" >}}
-BoolVar b = model.boolVar();
-constraint.reifyWith(b);
-{{< /tab >}} 
+{{< tabpane langEqualsHeader=true >}}
+{{< example "modeling/Constraints" "reifyWith" >}}
 {{< /tabpane >}}
 
 
@@ -109,13 +96,8 @@ Reifying a constraint means that we allow the constraint not to be satisfied.
 Therefore, the reified constraint **should not** be posted.
 For instance, let us consider “if `x<0` then `y>42`”:
 
-{{< tabpane langEqualsHeader=true >}} 
-{{< tab header="Java" >}}
-model.ifThen(
-   model.arithm(x,"<",0),
-   model.arithm(y,">",42)
-);
-{{< /tab >}}
+{{< tabpane langEqualsHeader=true >}}
+{{< example "modeling/Constraints" "ifThen" >}}
 {{< /tabpane >}}
 
 
@@ -132,13 +114,8 @@ This is why `ifThen`, `ifThenElse`, `ifOnlyIf` and `reification` return void and
 A constraint is reified with only one boolean variable. Multiple calls to `constraint.reify()` will return the same variable.
 However, the following call will associate `b1` with the constraint and then post `b1 = b2`:
 
-{{< tabpane langEqualsHeader=true >}} 
-{{< tab header="Java" >}}
-BoolVar b1 = model.boolVar();
-BoolVar b2 = model.boolVar();
-constraint.reifyWith(b1);
-constraint.reifyWith(b2);
-{{< /tab >}}
+{{< tabpane langEqualsHeader=true >}}
+{{< example "modeling/Constraints" "reifyTwice" >}}
 {{< /tabpane >}}
 {{% /alert %}}
 

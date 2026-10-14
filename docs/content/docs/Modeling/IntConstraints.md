@@ -12,35 +12,13 @@ These constraints are used to express arithmetical relationships between two or 
 For instance, a threshold constraint can be posted as following:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-model.arithm(x, ">=", 3).post();
-{{< /tab >}}
-{{< tab header="Python" >}}
-model.arithm(x, ">=", 3).post()
-{{< /tab >}}
+{{< example "modeling/IntConstraints" "arithm" >}}
 {{< /tabpane >}}
 
 Accepted mathematical operators for these constraints are `>=`, `>`, `<=`, `<`, `=` and `!=`. When more than one variable is constrained, one can use the following methods:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-String op = ">="; // among ">=", ">", "<=", "<", "=" and "!="
-model.arithm(x, op, y).post();
-// with x an IntVar and y either an IntVar or an int
-
-String op2 = "+"; // either "+" or "-"
-model.arithm(x, op2, y, op, z).post();
-// with x and y IntVar, and z is either an int or an IntVar
-{{< /tab >}}
-{{< tab header="Python" >}}
-op = ">=" # among ">=", ">", "<=", "<", "=" and "!="
-model.arithm(x, op, y).post()
-# with x an IntVar and y either an IntVar or an int
-
-op2 = "+" # either "+" or "-"
-model.arithm(x, op2, y, op, z).post()
-# with x and y IntVar, and z is either an int or an IntVar
-{{< /tab >}}
+{{< example "modeling/IntConstraints" "arithm2" >}}
 {{< /tabpane >}}
 
 ## Other mathematical constraints
@@ -51,74 +29,35 @@ Choco-solver also supports other mathematical constraints than arithmetical ones
 *times* constraints are posted as following:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-model.times(x, a, z).post(); // x * a = z
-model.times(x, y, a).post(); // x * y = a
-model.times(x, y, z).post(); // x * y = z
-{{< /tab >}}
-{{< tab header="Python" >}}
-model.times(x, a, z).post() # x * a = z
-model.times(x, y, a).post() # x * y = a
-model.times(x, y, z).post() # x * y = z
-{{< /tab >}}
+{{< example "modeling/IntConstraints" "times" >}}
 {{< /tabpane >}}
 
 {{% alert title="Info" color="primary" %}}
-For the first type of *times* constraint, one might prefer to use a view: `z = model.intScaleView(x, a);`.
+For the first type of *times* constraint, one might prefer to use a view: `IntVar z = model.mul(x, a);`.
 {{% /alert %}}
 
 A *div* constraint corresponds to a euclidean division. It is posted as following:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-model.div(x, y, z).post(); // x / y = z
-// it assures that y != 0, and z is rounding towards 0.
-{{< /tab >}}
-{{< tab header="Python" >}}
-model.div(x, y, z).post() # x / y = z
-# it assures that y != 0, and z is rounding towards 0.
-{{< /tab >}}
+{{< example "modeling/IntConstraints" "div" >}}
 {{< /tabpane >}}
 
 *modulo* constraints are of three types:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-model.mod(x, a, b).post(); // x % a = b
-model.mod(x, a, z).post(); // x % a = z
-model.mod(x, y, z).post(); // x % y = z
-{{< /tab >}}
-{{< tab header="Python" >}}
-model.mod(x, a, b).post() # x % a = b
-model.mod(x, a, z).post() # x % a = z
-model.mod(x, y, z).post() # x % y = z
-{{< /tab >}}
+{{< example "modeling/IntConstraints" "mod" >}}
 {{< /tabpane >}}
 
 An *absolute* constraint is posted like this:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-model.absolute(x, y).post(); // x = |y|
-{{< /tab >}}
-{{< tab header="Python" >}}
-model.absolute(x, y).post() # x = |y|
-{{< /tab >}}
+{{< example "modeling/IntConstraints" "absolute" >}}
 {{< /tabpane >}}
 
-A *power* constraint can express `x = base ^ exponent`. Both the exponent and base can be variables:
+A *power* constraint can express `x = base ^ exponent`. Both the exponent and base can be variables (in Python, the exponent is a constant):
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-model.pow(base, exponent, x).post(); // x = base ^ exponent
-// where base, exponent, and x are IntVar
-// or exponent can be a fixed int: model.pow(base, 2, x).post()
-{{< /tab >}}
-{{< tab header="Python" >}}
-model.pow(base, exponent, x).post() # x = base ^ exponent
-# where base, exponent, and x are IntVar
-# or exponent can be a fixed int: model.pow(base, 2, x).post()
-{{< /tab >}}
+{{< example "modeling/IntConstraints" "pow" >}}
 {{< /tabpane >}}
 
 ### Global constraints
@@ -129,14 +68,7 @@ Let `min` and `max` be `IntVar` and let `vars` be an array of `IntVar`. One can 
 minimum of the variables in `vars` and `max` the maximum of them:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-model.min(min, vars).post();
-model.max(max, vars).post();
-{{< /tab >}}
-{{< tab header="Python" >}}
-model.min(min, vars).post()
-model.max(max, vars).post()
-{{< /tab >}}
+{{< example "modeling/IntConstraints" "minMax" >}}
 {{< /tabpane >}}
 
 #### Sum and scalar
@@ -144,29 +76,13 @@ model.max(max, vars).post()
 Similarly, one can want to sum some variables. For such an operation, one should use the `sum` constraint:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-String op = ">="; // among ">=", ">", "<=", "<", "=" and "!="
-model.sum(vars, op, x).post(); // here, it gives sum(vars) >= x
-{{< /tab >}}
-{{< tab header="Python" >}}
-op = ">=" # among ">=", ">", "<=", "<", "=" and "!="
-model.sum(vars, op, x).post() # here, it gives sum(vars) >= x
-{{< /tab >}}
+{{< example "modeling/IntConstraints" "sum" >}}
 {{< /tabpane >}}
 
 And, finally, for weighted sums, one should use the `scalar` constraint:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-String op = ">="; // among ">=", ">", "<=", "<", "=" and "!="
-model.scalar(vars, coefs, op, x).post(); // coefs being an array of int
-// here, it gives sum(vars[i] * coefs[i]) >= x
-{{< /tab >}}
-{{< tab header="Python" >}}
-op = ">=" # among ">=", ">", "<=", "<", "=" and "!="
-model.scalar(vars, coefs, op, x).post() # coefs being an array of int
-# here, it gives sum(vars[i] * coefs[i]) >= x
-{{< /tab >}}
+{{< example "modeling/IntConstraints" "scalar" >}}
 {{< /tabpane >}}
 
 ## Remarkable global constraints
@@ -179,14 +95,7 @@ One can consult the complete list of constraints in the [JavaDoc](https://javado
 The `alldifferent` constraint is probably the most famous one. It ensures that all variables in its scope take a distinct value in any solution.
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-IntVar[] vars = model.intVarArray("X", 4, 1, 5);
-model.allDifferent(vars).post();
-{{< /tab >}}
-{{< tab header="Python" >}}
-vars = model.intvars(4, 1, 5,"X")
-model.all_different(vars).post()
-{{< /tab >}}
+{{< example "modeling/IntConstraints" "allDifferent" >}}
 {{< /tabpane >}}
 
 An instantiation that satisfies this constraint is
@@ -203,16 +112,7 @@ An instantiation that satisfies this constraint is
 This constraint is very helpful to count the number of occurences of a value in an array of variables.
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-IntVar occ0 = model.intVar("occ0", 0, 5);
-IntVar[] vars = model.intVarArray("X", 7, 0, 5);
-model.count(0, vars, occ0).post();
-{{< /tab >}}
-{{< tab header="Python" >}}
-occ0 = model.intvar(0, 5, "occ0")
-vars = model.intvars(7, 0, 5, "X")
-model.count(0, vars, occ0).post();
-{{< /tab >}}
+{{< example "modeling/IntConstraints" "count" >}}
 {{< /tabpane >}}
 
 A solution to this constraint is `vars = [0, 1, 0, 1, 5, 5, 5]`, `occ0 = 2`.
@@ -222,18 +122,7 @@ A solution to this constraint is `vars = [0, 1, 0, 1, 5, 5, 5]`, `occ0 = 2`.
 This constraint is very helpful to count the number of occurences of some values in an array of variables.
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-IntVar[] vars = model.intVarArray("X", 7, 0, 5);
-int[] values = new int[]{1, 3, 5};
-IntVar[] occs = model.intVarArray("O", 2, 0, 3);
-model.globalCardinality(vars, values, occs, false).post();
-{{< /tab >}}
-{{< tab header="Python" >}}
-vars = model.intvars(7, 0, 5, "X")
-values = [1,3,5]
-occs = model.intvars(2, 0, 3, "O")
-model.global_cardinality(vars, values, occs, False).post();
-{{< /tab >}}
+{{< example "modeling/IntConstraints" "globalCardinality" >}}
 {{< /tabpane >}}
 
 A solution to this constraint is `vars = [0, 1, 0, 1, 5, 5, 5]`, `occs = [2, 0, 3]`.
@@ -247,16 +136,7 @@ A solution is : `vars = [3, 1, 3, 1, 5, 5, 5]`, `occs = [2, 2, 3]`.
 The `element` constraint is very convenient. It permits to dynamically assign a variable to a value based on an array and an index variable.
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-IntVar idx = model.intVar("I", 0, 5, false);
-IntVar rst = model.intVar("R", 0, 10, false);
-model.element(rst, new int[]{0, 2, 4, 6, 7}, idx).post();
-{{< /tab >}}
-{{< tab header="Python" >}}
-idx = model.intvar(0, 5, "I")
-rst = model.intvar(0, 10, "R")
-model.element(rst, [0, 2, 4, 6, 7], idx).post()
-{{< /tab >}}
+{{< example "modeling/IntConstraints" "element" >}}
 {{< /tabpane >}}
 
 An assignment of `idx` and `rst` that satisfies this constraint is: `idx = 3` and `rst = 6`.
@@ -272,48 +152,30 @@ The cumulative constraint limits the number of concurrent tasks.
 
 ### `Task` variables
 
-A task needs a start `IntVar` and a duration `int`.
+A task needs a start `IntVar` and a duration `int`. The end is then a view of *start + duration*, so the relation always holds.
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-Task task = new Task(start, duration);
-{{< /tab >}}
-{{< tab header="Python" >}}
-task = model.task(start, duration)
-{{< /tab >}}
+{{< example "modeling/IntConstraints" "task" >}}
 {{< /tabpane >}}
 
-Optionally an end `IntVar` can be supplied. Task will ensure that *start + duration = end*, end being an offset view of *start + duration*.
+Optionally an end `IntVar` can be supplied. A `Task` is also a propagator: *start + duration = end* only holds once the task is posted, or given to a scheduling constraint such as `cumulative`.
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-Task task = new Task(start, duration, end);
-{{< /tab >}}
-{{< tab header="Python" >}}
-task = model.task(start, duration, end)
-{{< /tab >}}
+{{< example "modeling/IntConstraints" "taskEnd" >}}
 {{< /tabpane >}}
 
-A task can have an unknown duration. In this case create the task with 3 `IntVar`: start, varDuration and end. Task will ensure that *start + varDuration = end*, end being an offset view of *start + varDuration*.
+A task can have an unknown duration. In this case create the task with 3 `IntVar`: start, varDuration and end, and post it to ensure *start + varDuration = end*.
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-Task task = new Task(start, varDuration, end);
-{{< /tab >}}
-{{< tab header="Python" >}}
-task = model.task(start, varDuration, end)
-{{< /tab >}}
+{{< example "modeling/IntConstraints" "taskVarDuration" >}}
 {{< /tabpane >}}
 
-Finally, a task can be created based on the `Model` and 5 `int`: earliestStart, latestStart, duration, earliestEnd, latestEnd.  
-A start `IntVar` will be created with a domain of *[earliestStart, latestStart]*.  
-An end `IntVar` will be created with a domain of *[earliestEnd, latestEnd]*.  
-Task will ensure that *start + duration = end*, end being an offset view of *start + duration*.
+Finally, a task can be created from 5 `int`: earliestStart, latestStart, duration, earliestEnd, latestEnd.  
+A start `IntVar` is created with a domain compatible with *[earliestStart, latestStart]* and *[earliestEnd - duration, latestEnd - duration]*,  
+and the end is a view of *start + duration*.
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-Task task = new Task(model, earliestStart, latestStart, duration, earliestEnd, latestEnd);
-{{< /tab >}}
+{{< example "modeling/IntConstraints" "taskBounds" >}}
 {{< /tabpane >}}
 
 ### `Cumulative` constraint
@@ -323,14 +185,7 @@ Let tasks be an array of `Task`, heights an array of `IntVar` and capacity an `I
 Make sure $|tasks| = |heights|$  
 Task duration and height should be $\geq$ 0. Tasks with duration or height equal to 0 will be discarded.
 
-{{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-model.cumulative(tasks, heights, capacity).post();
-{{< /tab >}}
-{{< tab header="Python" >}}
-model.cumulative(tasks, heights, capacity).post()
-{{< /tab >}}
-{{< /tabpane >}}
+
 
 If only one task can happen concurrently, set the heights fixed equal to the capacity, either by setting fixed values or posting constraints between the variables.  
 Other combinations of concurrently (or not) planned tasks can be modelled by setting different values for the heights and the capacity, or by defining different constraints between these variables.   
@@ -338,28 +193,11 @@ Other combinations of concurrently (or not) planned tasks can be modelled by set
 Example: 4 tasks with a set height that cannot happen at the same time by setting a fixed capacity:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-Task[] tasks = new Task[4];
-IntVar[] heights = new IntVar[4];
-for(int i = 0, i < starts.length; i++){
-  tasks[i] = new Task(starts[i], durations[i]);
-  heights[i] = model.intVar(1);
-}
-IntVar capacity = model.intVar(1);
-
-model.cumulative(tasks, heights, capacity).post();
-{{< /tab >}}
-{{< tab header="Python" >}}
-tasks = [ model.task(starts[i], durations[i]) for i in range(4) ]
-heights = [ model.intvar(1) for _ in range(4) ]
-capacity = model.intvar(1)
-
-model.cumulative(tasks, heights, capacity).post()
-{{< /tab >}}
+{{< example "modeling/IntConstraints" "cumulative" >}}
 {{< /tabpane >}}
 
-Solving this will result in all 4 tasks happening consecutively so:
-$start[i] + duration[i] \lt start[j]$
+Solving this will result in the 4 tasks not overlapping: for any two tasks $i$ and $j$, either
+$start[i] + duration[i] \leq start[j]$ or $start[j] + duration[j] \leq start[i]$.
 
 The cumulative constraint does not enforce a specific order of tasks. Define additional constraints between the variables for this if needed.
 
@@ -375,67 +213,34 @@ Consider an ordered set of variables $X=\\{X_i \mid i\in I\\}$ and an allowed co
 A Table constraint ensures that :
 $$Table(X,T)\equiv \bigvee_{t \in T}\bigwedge_{i \in I}(X_i = t_i)$$
 
-*When dealing with forbidden combinations, the `$=$` operator below is replaced by a `$\neq$` operator.*
+*When dealing with forbidden combinations, the $=$ operator above is replaced by a $\neq$ operator.*
 
 Table constraints are also known as constraints *in extension* since all possible (or impossible) combinations are needed as input.
 
 Table constraints usually provide domain consistency filtering algorithm, with diverse spatial and temporal complexities which depend on the number of variables involved and the number of tuples.
-
-{{% alert title="Hybrid Tuples" color="info" %}}
-The `HybridTuples` format provides a more efficient representation for large tables, especially when there are repeated values or patterns. Use `model.table(vars, new HybridTuples(tuples))` for automatic optimization.
-{{% /alert %}}
 
 ### Allowed combinations
 
 Let's take the example of four variables $X_i = [\\![0,3]\\!], i \in [1,4]$, that **must** all be equal. This relationship can be expressed with a Table constraint as follow:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-Tuples allEqual = new Tuples(true); // true stands for 'allowed' combinations
-allEqual.add({0,0,0,0});
-allEqual.add({1,1,1,1});
-allEqual.add({2,2,2,2});
-allEqual.add({3,3,3,3});
-model.table(X, allEqual, "CT+").post();
-{{< /tab >}}
-{{< tab header="Python" >}}
-allEqual = []
-allEqual.append([0,0,0,0])
-allEqual.append([1,1,1,1])
-allEqual.append([2,2,2,2])
-allEqual.append([3,3,3,3])
-model.table(X, allEqual, True, "CT+").post() # True stands for 'allowed' combinations
-{{< /tab >}}
+{{< example "modeling/IntConstraints" "tableAllowed" >}}
 {{< /tabpane >}}
 
 Only defined combinations are solutions.
 
-The parameter `"CT+"` is optional and defines the filtering algorithm to use. `"CT+"` is a really good default choice.
+The parameter `"CT+"` is optional and defines the filtering algorithm to use. `"CT+"` is a really good default choice for allowed combinations.
 
 ### Forbidden combinations
 
-Let's take the previous example but in that case, all variables **must not** be all be equal. This relationship can be expressed with a Table constraint as follow, with a little difference in the `Tuples` declaration:
+Let's take the previous example but in that case, all variables **must not** be all equal. This relationship can be expressed with a Table constraint as follow, with a little difference in the `Tuples` declaration.
+Note that `"CT+"` only handles allowed combinations: use `"CT"` (or no algorithm) for forbidden ones.
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-Tuples allEqual = new Tuples(false); // false stands for 'forbidden' combinations
-allEqual.add({0,0,0,0});
-allEqual.add({1,1,1,1});
-allEqual.add({2,2,2,2});
-allEqual.add({3,3,3,3});
-model.table(X, allEqual, "CT+").post();
-{{< /tab >}}
-{{< tab header="Python" >}}
-allEqual = []
-allEqual.append([0,0,0,0])
-allEqual.append([1,1,1,1])
-allEqual.append([2,2,2,2])
-allEqual.append([3,3,3,3])
-model.table(X, allEqual, False, "CT+").post() # False stands for 'forbidden' combinations
-{{< /tab >}}
+{{< example "modeling/IntConstraints" "tableForbidden" >}}
 {{< /tabpane >}}
 
-All undefined combinations are solution, for example `{0,0,0,1}` or `{0,1,2,3}`.
+All undefined combinations are solutions, for example `{0,0,0,1}` or `{0,1,2,3}`.
 
 
 ### Universal value
@@ -455,19 +260,20 @@ The allowed tuples are:
 {3, 2, 1}
 ```
 We can see that this relation requires 100 combinations to be expressed and 99 of them are needed to capture *$X_3$ can take any value*.
-It's a use case of universal value.
+It's a use case of universal value, given to the `Tuples` constructor:
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-int STAR = -1;
-Tuples rel = new Tuples(true);
-rel.setUniversalValue(STAR);
-rel.add({0,0,STAR});
-rel.add({3,2,1});
-model.table(X, rel).post();
-{{< /tab >}}
+{{< example "modeling/IntConstraints" "universal" >}}
 {{< /tabpane >}}
 `STAR` represents the universal value, here $-1$.
 The value must be taken outside variables domain.
+
+### Hybrid tuples
+
+`HybridTuples` express tuples in a compact way, with expressions such as `any()`, `eq(2)` or `col(0)` (the value of the first variable) instead of plain values:
+
+{{< tabpane langEqualsHeader=true >}}
+{{< example "modeling/IntConstraints" "hybrid" >}}
+{{< /tabpane >}}
 
 ## SAT constraints
 
@@ -478,11 +284,7 @@ Clauses can be added with the `Model` thanks to methods whose name begins with `
 There exists two type of clauses declaration: pre-defined ones (such as `addClausesBoolLt` or `addClausesAtMostNMinusOne`) or more free ones by specifying a `LogOp` that represents a clause expression:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-model.addClauses(LogOp.and(LogOp.nand(LogOp.nor(a, b), LogOp.or(c, d)), e));
-// with static import of LogOp
-model.addClauses(and(nand(nor(a, b), or(c, d)), e));
-{{< /tab >}}
+{{< example "modeling/IntConstraints" "clauses" >}}
 {{< /tabpane >}}
 
 ## Automaton-based Constraints

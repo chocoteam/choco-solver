@@ -121,18 +121,7 @@ If the premise $A$ is a conjunction of literals, like $A_1 \land A_2 \land \ldot
 When LCG is enabled, you can customize its behavior through the following settings. All are configured via `SettingsBuilder`:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-Model model = new Model("Problem", SettingsBuilder.init()
-    .setLCG(true)
-    .setLcgExtractFromVariablesOnSolution(false)
-    .setNbMaxLearntClauses(10000)
-    .setReduceLearntClausesBase(100)
-    .setReduceLearntClausesFactor(1.1)
-    .setSatCCMinMode(2)
-    .setReasonManager(1)
-    .setSortLitsOnSolution(true)
-    .build());
-{{< /tab >}}
+{{< example "advanced/Explanations" "lcgSettings" >}}
 {{< /tabpane >}}
 
 ### LCG Settings Reference
@@ -141,12 +130,12 @@ Model model = new Model("Problem", SettingsBuilder.init()
 |---------|--------|---------|-------------|
 | **LCG Enable** | `setLCG(boolean)` | `false` | Enable/disable Lazy Clause Generation framework |
 | **Extract from Variables** | `setLcgExtractFromVariablesOnSolution(boolean)` | `false` | When `true`, the solution-forbidding clause is built from current variable assignments; when `false`, from the decision path. See explanation below. |
-| **Max Learnt Clauses** | `setNbMaxLearntClauses(int)` | `100000` | Maximum number of clauses the SAT solver can learn before triggering reduction |
-| **Learnt Clause Reduction Base** | `setReduceLearntClausesBase(int)` | `100` | Initial threshold for reducing learnt clauses |
-| **Learnt Clause Reduction Factor** | `setReduceLearntClausesFactor(double)` | `1.5` | Multiplier for increasing reduction threshold after each reduction |
+| **Max Learnt Clauses** | `setNbMaxLearntClauses(int)` | `100000` | Number of learnt clauses that triggers a reduction of the clause database |
+| **Learnt Clause Reduction Base** | `setReduceLearntClausesBase(int)` | `1000` | A reduction also occurs periodically, based on the number of failures: the first one after `base` failures, the n-th one `base + factor × n` failures after the previous one |
+| **Learnt Clause Reduction Factor** | `setReduceLearntClausesFactor(int)` | `100` | See above |
 | **SAT CC Min Mode** | `setSatCCMinMode(int)` | `0` | Conflict clause minimization: 0=none, 1=local, 2=recursive |
-| **Reason Manager** | `setReasonManager(int)` | `0` | Reason manager strategy: 0=none, 1=array-based, 2=chunk-based |
-| **Sort Lits on Solution** | `setSortLitsOnSolution(boolean)` | `false` | Sort solution clause literals by search-tree depth (can improve clause quality) |
+| **Reason Manager** | `setReasonManager(int)` | `2` | Storage of the reasons of filtering events, to reduce garbage collection: 0=none, 1=array-based, 2=chunk-based |
+| **Sort Lits on Solution** | `setSortLitsOnSolution(boolean)` | `true` | Sort the literals of the clause generated on a solution by search-tree level, from the deepest to the shallowest |
 | **Lazy Lit with Weak Bounds** | `setIntVarLazyLitWithWeakBounds(boolean)` | `false` | Advanced option for literal creation |
 
 ### Extract from Variables vs. Decision Path

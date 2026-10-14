@@ -9,7 +9,7 @@ description: >
 ---
 
 
-Thanks to [Mathieu Vavrille](https://www.univ-nantes.fr/mathieu-vavrille) for his modelling of [problem 103 of the Euler project](https://projecteuler.net/problem=103), "Special subset sums: optimum", using Constraint Programming and Choco.
+Thanks to Mathieu Vavrille for his modelling of [problem 103 of the Euler project](https://projecteuler.net/problem=103), "Special subset sums: optimum", using Constraint Programming and Choco.
 
 
 

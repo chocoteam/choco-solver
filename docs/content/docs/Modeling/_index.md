@@ -10,35 +10,20 @@ description: >
 
 The object `Model` is the key component. It should be imported :
 
-{{< tabpane langEqualsHeader=true >}} 
-{{< tab header="Java" >}}
-import org.chocosolver.solver.Model;
-{{< /tab >}} 
-{{< tab header="Python" >}}
-from pychoco import Model
-{{< /tab >}} 
+{{< tabpane langEqualsHeader=true >}}
+{{< example "modeling/Model" "import" >}}
 {{< /tabpane >}}
 
 Then, an instance of a model is built as follows:
 
-{{< tabpane langEqualsHeader=true >}} 
-{{< tab header="Java" >}}
-Model model = new Model();
-{{< /tab >}} 
-{{< tab header="Python" >}}
-model = Model()
-{{< /tab >}} 
+{{< tabpane langEqualsHeader=true >}}
+{{< example "modeling/Model" "model" >}}
 {{< /tabpane >}}
 
 A name can be attached to an instance:
 
-{{< tabpane langEqualsHeader=true >}} 
-{{< tab header="Java" >}}
-Model model = new Model("my problem");
-{{< /tab >}} 
-{{< tab header="Python" >}}
-model = Model("my problem");
-{{< /tab >}} 
+{{< tabpane langEqualsHeader=true >}}
+{{< example "modeling/Model" "namedModel" >}}
 {{< /tabpane >}}
 
 `Model` is the top-level object that stores declared variables, posted constraints and gives access to the `Solver`. 

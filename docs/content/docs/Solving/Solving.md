@@ -11,22 +11,15 @@ description: >
 
 A call to `solver.solve()` launches a resolution which stops on the first solution found, if any:
 
-```java
-if(solver.solve()){
-    // do something, e.g. print out variable values
-}else if(solver.hasReachedLimit()){
-    System.out.println("The solver could not find a solution
-                        nor prove that none exists in the given limits");
-}else {
-    System.out.println("The solver has proved the problem has no solution");
-}
-```
+{{< tabpane langEqualsHeader=true >}}
+{{< example "solving/Solving" "solve" >}}
+{{< /tabpane >}}
 
 If `solver.solve()` returns `true`, then a solution has been found and each variable is instantiated to a value.
 Otherwise, two cases must be considered:
 
 
-* A limit has been declared and reached (`solver.hasReachedLimit()` returns true).
+* A limit has been declared and reached (`solver.isStopCriterionMet()` returns true).
 There may be a solution, but the solver has not been able to find it in the given limit
 or there is no solution but the solver has not been able to prove it (i.e., to close to search tree) in the given limit.
 The resolution process stops in no particular place in the search tree.
@@ -113,13 +106,15 @@ You can use custom cuts by overriding the default cut behavior.
 The *cut computer* function defines how the cut should bound the objective variable.
 The input *number* is the best solution value found so far, the output *number* define the new bound.
 When maximizing (resp. minimizing) a problem, the cut limits the lower bound (resp. upper bound) of the objective variable.
-For instance, one may want to indicate that the value of the objective variable is the next solution should be
-greater than or equal to the best value + 10
+For instance, one may want to indicate that the value of the objective variable in the next solution should be
+greater than or equal to the best value + 10:
 
-```java
-ObjectiveManager<IntVar, Integer> oman = solver.getObjectiveManager();
-oman.setCutComputer(n -> n - 10);
-```
+{{< tabpane langEqualsHeader=true >}}
+{{< example "solving/Solving" "cut" >}}
+{{< /tabpane >}}
+
+`setStrictDynamicCut()` (the default: strictly better solutions) and `setWalkingDynamicCut()` (solutions at least as good)
+are predefined cuts.
 
 ### Multi-objective optimization
 

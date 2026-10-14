@@ -32,7 +32,7 @@ Even if many Move and Learn implementation are already provided, it may be relev
 {{%alert title="Info" %}}
 The Propagate component is less prone to be modified, it will not be described here.
 However, its interface is minimalist and can be easily implemented.
-A look to `org.chocosolver.solver.search.loop.propagate.PropagateBasic.java` is a good starting point.
+A look to `org.chocosolver.solver.search.loop.propagate.Propagate.java` is a good starting point.
 {{%/alert%}}
 
 The two components can be easily set in the `Solver` search loop:
@@ -49,7 +49,7 @@ Move getMove()
 
     The current Move component is returned.
 
-`void setLearn(Learn l)` and `Learn getLearn()` are also avaiable.
+`void setLearner(Learn l)` is also available.
 
 Having access to the current `Move` (resp. `Learn`) component can be useful to combined it with another one.
 For instance, the `MoveLNS` is activated on a solution and creates a partial solution.
