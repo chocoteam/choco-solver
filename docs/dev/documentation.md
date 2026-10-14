@@ -13,6 +13,7 @@ The pull request template has a checkbox for it.
 | user guide and reference                     | `docs/content/docs/<section>/`                |
 | tutorials                                    | `docs/content/tutos/`                         |
 | images                                       | `docs/static/images/`, linked as `/images/...` |
+| code examples                                | see [Code examples](#code-examples)           |
 | release notes                                | `CHANGES.md` (root)                           |
 | API details                                  | Javadoc, published by [javadoc.io](https://javadoc.io/doc/org.choco-solver/choco-solver) from Maven Central |
 | internals, conventions, pitfalls             | `docs/dev/` (plain Markdown, not published)   |
@@ -21,18 +22,44 @@ The pull request template has a checkbox for it.
 A page starts with a front matter giving at least `title`, `weight` (order in the menu) and `description`.
 Add `math: "true"` to render LaTeX formulas.
 
+## Code examples
+
+Code shown in the pages is **tested**: it lives in example files, and the page includes regions of them.
+
+- Java: a TestNG test class in `examples/src/test/java/org/chocosolver/docs/<section>/<Page>Examples.java`,
+  group `1s` (`10s` for long examples, `ibex` for examples that require Ibex), run by the Maven workflow;
+- Python ([pychoco](https://github.com/chocoteam/pychoco)): `docs/examples/python/<section>/<Page>Examples.py`,
+  run with `pytest` (in `docs/examples/python`) against the pychoco release on PyPI. Optional.
+
+In an example file, delimit the region to show with comments, and check something after it:
+
+```java
+@Test(groups = "1s")
+public void globalCardinality() {
+    Model model = new Model();
+    // tag::globalCardinality[]
+    IntVar[] vars = model.intVarArray("X", 7, 0, 5);
+    ...
+    // end::globalCardinality[]
+    Assert.assertTrue(model.getSolver().solve());
+}
+```
+
+and include it in the page (the Python tab appears only if the Python file has the same region):
+
+```
+{{< tabpane langEqualsHeader=true >}}
+{{< example "modeling/IntConstraints" "globalCardinality" >}}
+{{< /tabpane >}}
+```
+
+pychoco follows choco-solver releases with some delay: a Python example of a feature that pychoco does not
+provide yet is marked `@pytest.mark.pychoco("<first pychoco version supporting it>")` and skipped until then.
+
+Code written directly in a page (`{{< tab header="Java" >}}`) is not tested: keep it for short
+illustrations that are not meant to run (signatures, pseudo-code), and migrate the others.
+
 ## Hugo conventions in use
-
-- **Code samples** use Docsy tabs, one tab per language (Java, and Python for
-  [pychoco](https://github.com/chocoteam/pychoco) when relevant):
-
-  ```
-  {{< tabpane langEqualsHeader=true >}}
-  {{< tab header="Java" >}}
-  IntVar x = model.intVar("x", 1, 3);
-  {{< /tab >}}
-  {{< /tabpane >}}
-  ```
 
 - **Notes and warnings**: `{{% alert title="Info" color="primary" %}} ... {{% /alert %}}`.
 - **Current version**: write `{{< param "choco_version" >}}` instead of a hard-coded version number
@@ -42,8 +69,9 @@ Add `math: "true"` to render LaTeX formulas.
 
 ## Check and preview
 
-The workflow `.github/workflows/docs.yml` builds the website with the `docs/` of the pull request,
-so a page that breaks the build fails the pull request.
+The workflow `.github/workflows/docs.yml` builds the website with the `docs/` of the pull request
+and runs the Python examples, so a page that breaks the build or a failing example fails the pull request.
+The Java examples run with the other tests.
 To preview locally, see [../README.md](../README.md).
 
 ## Publication

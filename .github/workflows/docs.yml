@@ -1,13 +1,19 @@
-# Checks that the documentation in docs/ still builds into the website.
-# The site itself (theme, home page, deployment) lives in chocoteam/website,
-# which imports docs/content and docs/static of this repository as a Hugo module.
-# Here, the website is built against the checked-out sources instead of the pinned version.
+# Checks the user documentation:
+# - the website still builds with the docs/ of the pull request. The site itself (theme, home page,
+#   deployment) lives in chocoteam/website, which imports this repository as a Hugo module
+#   (mounts declared in hugo.toml); here it is built against the checked-out sources;
+# - the Python examples run with the pychoco release on PyPI.
+# The Java examples (examples/src/test/java/org/chocosolver/docs) are TestNG tests run by the Maven workflow.
 
 name: Documentation
 
 on:
   pull_request:
-    paths: [ 'docs/**', '.github/workflows/docs.yml' ]
+    paths:
+      - 'docs/**'
+      - 'examples/src/test/java/org/chocosolver/docs/**'
+      - 'hugo.toml'
+      - '.github/workflows/docs.yml'
   workflow_dispatch:
 
 permissions:
@@ -45,3 +51,16 @@ jobs:
         run: |
           npm ci
           hugo --gc --minify
+
+  python-examples:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run the Python examples
+        working-directory: docs/examples/python
+        run: |
+          pip install pychoco pytest
+          pytest -v
