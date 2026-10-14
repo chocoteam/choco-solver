@@ -26,14 +26,14 @@ To record other variables (e.g. an objective variables) you have two options:
 * Declare them in the search strategy using a complementary strategy
 
 ```java
-solver.set(strategy(X),strategy(Y)).
+solver.setSearch(strategy(X), strategy(Y));
 ```
 
 
 * Specify which variables to store in the solution constructor
 
 ```java
-Solution solution = new Solution(model(), ArrayUtils.append(X,Y));
+Solution solution = new Solution(model, ArrayUtils.append(X, Y));
 ```
 
 You can record the last solution found as follows :
@@ -52,7 +52,7 @@ Solution solution = new Solution(model);
 solver.plugMonitor(new IMonitorSolution() {
       @Override
       public void onSolution() {
-          s.record();
+          solution.record();
       }
 });
 ```
@@ -61,7 +61,7 @@ Or with lambdas:
 
 ```java
 Solution solution = new Solution(model);
-solver.plugMonitor((IMonitorSolution) () -> s.record());
+solver.plugMonitor((IMonitorSolution) () -> solution.record());
 ```
 
 Note that the solution is erased on each new recording.
@@ -70,7 +70,7 @@ To store all solutions, you need to create one new solution object for each solu
 You can then access the value of a variable in a solution as follows:
 
 ```java
-int val = s.getIntVal(Y[0])
+int val = solution.getIntVal(Y[0]);
 ```
 
 The solution object can be used to store all variables in Choco Solver (binaries, integers, sets and reals)

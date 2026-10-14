@@ -9,442 +9,271 @@ description: >
 
 Graph variables represent directed or undirected graphs. They are useful for modeling problems involving networks, routes, connectivity, and structural properties. This section presents the main graph constraints available in Choco-solver.
 
-## Creating Graph Variables
+## Creating graph variables
 
-Graph variables have a lower bound (kernel) and an upper bound (envelope) representing the minimum and maximum edges that must or can be included:
-
-{{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-// Create an undirected graph on 5 nodes
-UndirectedGraph lb = new UndirectedGraph(5);
-UndirectedGraph ub = new UndirectedGraph(5);
-ub.addEdges(new int[][]{
-    {0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 0}  // forms a complete edge set
-});
-GraphVar gv = model.undirectedGraphVar("graph", lb, ub);
-
-// Create a directed graph
-DirectedGraph dlb = new DirectedGraph(5);
-DirectedGraph dub = new DirectedGraph(5);
-dub.addEdges(new int[][]{{0, 1}, {1, 2}, {2, 3}, {3, 4}});
-GraphVar dv = model.directedGraphVar("digraph", dlb, dub);
-{{< /tab >}}
-{{< /tabpane >}}
-
-## Node and Edge Counting
-
-### Node count
-
-The `nbNodes` constraint relates the number of nodes to an integer variable:
+The domain of a graph variable is defined by two graphs:
+the **kernel** (lower bound), whose nodes and edges belong to every solution,
+and the **envelope** (upper bound), which contains every node and edge that may belong to a solution.
+Bounds are built with `GraphFactory` (`create_undirected_graph` and its variants in Python),
+then the variable with `graphVar` (undirected) or `digraphVar` (directed):
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.undirectedGraphVar("g", lb, ub);
-IntVar nbN = model.intVar("nbN", 1, 5);
-model.nbNodes(g, nbN).post();
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "creation" >}}
 {{< /tabpane >}}
 
-The `nodeInducedGraphVar` and `nodeInducedDigraphVar` create node-induced subgraphs (where edges exist only between selected nodes):
+`nodeInducedGraphVar` and `nodeInducedDigraphVar` create variables whose values are *node-induced* subgraphs of the envelope:
+any two nodes of the solution that are connected in the envelope are also connected in the solution.
+
+In the following examples, `g` is an undirected graph variable and `dg` a directed one,
+both on 5 nodes, with an empty kernel and the complete graph as envelope.
+
+## Counting nodes, edges and loops
+
+`nbNodes` and `nbEdges` constrain the number of nodes and edges of a graph:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar fullGraph = model.undirectedGraphVar("full", lb, ub);
-GraphVar subgraph = model.nodeInducedGraphVar("sub", nlb, nub);
-// subgraph will be the node-induced subgraph of fullGraph
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "nbNodes" >}}
 {{< /tabpane >}}
-
-### Edge count
-
-The `nbEdges` constraint counts the number of edges:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.undirectedGraphVar("g", lb, ub);
-IntVar nbE = model.intVar("nbE", 0, 10);
-model.nbEdges(g, nbE).post();
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "nbEdges" >}}
 {{< /tabpane >}}
 
-The `nbLoops` constraint counts self-loops (edges from a node to itself):
+`loopSet` and `nbLoops` deal with loops, i.e. edges $(i,i)$.
+Note that the complete graph built by `GraphFactory` has no loop:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.directedGraphVar("g", lb, ub);
-IntVar nbL = model.intVar("nbL", 0, 5);
-model.nbLoops(g, nbL).post();
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "loopsEnvelope" >}}
 {{< /tabpane >}}
-
-### Loop set constraint
-
-The `loopSet` constraint retrieves the set of nodes with self-loops:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.directedGraphVar("g", lb, ub);
-SetVar loops = model.setVar("loops", new int[]{}, new int[]{0, 1, 2, 3, 4});
-model.loopSet(g, loops).post();
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "loops" >}}
 {{< /tabpane >}}
 
-## Structural Constraints
+## Structural constraints
 
 ### Symmetry and antisymmetry
 
-The `symmetric` constraint ensures that if edge $(i,j)$ exists, then edge $(j,i)$ also exists (making a directed graph undirected in structure):
+`symmetric` ensures that if the edge $(i,j)$ is in a directed graph, then $(j,i)$ is too:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.directedGraphVar("g", lb, ub);
-model.symmetric(g).post();
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "symmetry" >}}
 {{< /tabpane >}}
 
-The `antisymmetric` constraint ensures no edge exists in both directions:
+`antisymmetric` ensures that no edge is in the graph in both directions:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.directedGraphVar("g", lb, ub);
-model.antisymmetric(g).post();
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "antisymmetry" >}}
 {{< /tabpane >}}
 
 ### Transitivity
 
-The `transitivity` constraint ensures that if $(i,j)$ and $(j,k)$ exist, then $(i,k)$ must exist:
+`transitivity` ensures that if $(i,j)$ and $(j,k)$ are in the graph, then $(i,k)$ is too (loops are not considered).
+It can be used to build cliques:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.directedGraphVar("g", lb, ub);
-model.transitivity(g).post();
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "transitivity" >}}
 {{< /tabpane >}}
 
-### Subgraph constraint
+### Subgraph
 
-The `subgraph` constraint ensures one graph is a subgraph of another (all edges in the first are in the second):
+`subgraph` ensures that a graph is a subgraph of another one.
+Nodes are identified by their index: node 0 of `g1` is node 0 of `g2`.
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g1 = model.undirectedGraphVar("g1", lb1, ub1);
-GraphVar g2 = model.undirectedGraphVar("g2", lb2, ub2);
-model.subgraph(g1, g2).post();  // g1 ⊆ g2
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "subgraph" >}}
 {{< /tabpane >}}
 
-## Channeling Constraints
+## Channeling constraints
 
-### Nodes channeling
+### Nodes
 
-The `nodesChanneling` constraint links nodes to a set variable:
+`nodesChanneling` links the nodes of a graph to a set variable (or to an array of boolean variables),
+and `nodeChanneling` links the presence of one node to a boolean variable:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.undirectedGraphVar("g", lb, ub);
-SetVar nodes = model.setVar("nodes", new int[]{}, new int[]{0, 1, 2, 3, 4});
-model.nodesChanneling(g, nodes).post();
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "nodesChanneling" >}}
 {{< /tabpane >}}
 
-The `nodeChanneling` constraint links a specific node to an integer variable:
+### Edges
+
+`edgeChanneling` links the presence of one edge to a boolean variable:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.directedGraphVar("g", lb, ub);
-IntVar n = model.intVar("node", 0, 4);
-model.nodeChanneling(g, 2, n).post();  // relates node 2 to variable n
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "edgeChanneling" >}}
 {{< /tabpane >}}
 
-### Edge channeling
+### Neighbors, successors and predecessors
 
-The `edgeChanneling` constraint relates edges to boolean variables:
+`neighborsChanneling` links each node of an undirected graph to the set of its neighbors
+(set variables, or a matrix of boolean variables; a variant targets a single node):
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.undirectedGraphVar("g", lb, ub);
-BoolVar[][] edges = new BoolVar[5][5];
-// edge[i][j] is true iff edge (i,j) exists in g
-model.edgeChanneling(g, edges).post();
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "neighborsChanneling" >}}
 {{< /tabpane >}}
 
-### Neighbors/Successors/Predecessors channeling
-
-The `neighborsChanneling` constraint links each node to its set of neighbors:
+For directed graphs, `successorsChanneling` and `predecessorsChanneling` play the same role:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.undirectedGraphVar("g", lb, ub);
-SetVar[] neighbors = model.setVarArray("neighbors", 5, new int[]{}, new int[]{0, 1, 2, 3, 4});
-model.neighborsChanneling(g, neighbors).post();  // neighbors[i] = neighbors of node i
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "successorsChanneling" >}}
 {{< /tabpane >}}
 
-The `successorsChanneling` and `predecessorsChanneling` constraints apply to directed graphs:
+## Degree constraints
+
+`minDegree` and `maxDegree` bound the degree of every node of an undirected graph
+(`minDegrees` and `maxDegrees` take one bound per node).
+They only hold on the nodes that belong to the graph:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.directedGraphVar("g", lb, ub);
-SetVar[] successors = model.setVarArray("succ", 5, new int[]{}, new int[]{0, 1, 2, 3, 4});
-model.successorsChanneling(g, successors).post();  // successors[i] = nodes reachable from i
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "minMaxDegree" >}}
 {{< /tabpane >}}
 
-## Degree Constraints
-
-### Minimum and maximum degree
-
-The `minDegree` and `maxDegree` constraints set bounds on node degrees:
+`degrees` links the degree of each node to an integer variable.
+A node that is not in the graph has degree 0, and a node with a positive degree is in the graph:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.undirectedGraphVar("g", lb, ub);
-model.minDegree(g, 2).post();  // all nodes must have degree ≥ 2
-model.maxDegree(g, 4).post();  // all nodes must have degree ≤ 4
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "degrees" >}}
 {{< /tabpane >}}
 
-The `degrees` constraint links each node to an integer variable representing its degree:
+For directed graphs, the same constraints exist for in-degrees and out-degrees
+(`minInDegree`, `maxInDegree`, `inDegrees`, `minOutDegree`, `maxOutDegree`, `outDegrees`, ...):
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.undirectedGraphVar("g", lb, ub);
-IntVar[] degrees = model.intVarArray("deg", 5, 0, 4);
-model.degrees(g, degrees).post();  // degrees[i] = degree of node i
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "inOutDegrees" >}}
 {{< /tabpane >}}
 
-### In-degree and out-degree (directed graphs)
-
-For directed graphs:
-
-{{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.directedGraphVar("g", lb, ub);
-IntVar[] inDegrees = model.intVarArray("inDeg", 5, 0, 4);
-IntVar[] outDegrees = model.intVarArray("outDeg", 5, 0, 4);
-model.inDegrees(g, inDegrees).post();      // in-degree constraints
-model.outDegrees(g, outDegrees).post();    // out-degree constraints
-model.minInDegree(g, 1).post();            // all nodes must have in-degree ≥ 1
-model.maxOutDegree(g, 3).post();           // all nodes must have out-degree ≤ 3
-{{< /tab >}}
-{{< /tabpane >}}
-
-## Connectivity Constraints
+## Connectivity constraints
 
 ### Connected components
 
-The `nbConnectedComponents` constraint counts the number of connected components:
+`nbConnectedComponents` constrains the number of connected components of an undirected graph,
+and `sizeConnectedComponents` bounds the number of nodes of each of them
+(see also `sizeMinConnectedComponents` and `sizeMaxConnectedComponents`):
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.undirectedGraphVar("g", lb, ub);
-IntVar nbCC = model.intVar("nbCC", 1, 5);
-model.nbConnectedComponents(g, nbCC).post();
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "connectedComponents" >}}
 {{< /tabpane >}}
 
-The `sizeConnectedComponents` constraint retrieves the size of each connected component:
+### Connectedness
+
+`connected` ensures that an undirected graph is connected, and `biconnected` that it remains so
+when any single node is removed (use it together with `connected`).
+An empty graph, or a graph with a single node, is considered connected:
+use `nbNodes` to require more nodes.
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.undirectedGraphVar("g", lb, ub);
-SetVar[] ccSizes = model.setVarArray("ccSize", 5, new int[]{}, new int[]{0, 1, 2, 3, 4});
-model.sizeConnectedComponents(g, ccSizes).post();
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "connected" >}}
 {{< /tabpane >}}
 
-### Full connectivity
+### Directed graphs
 
-The `connected` constraint ensures the graph is fully connected:
+`stronglyConnected` ensures that a directed graph has exactly one strongly connected component:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.undirectedGraphVar("g", lb, ub);
-model.connected(g).post();  // graph must be connected
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "stronglyConnected" >}}
 {{< /tabpane >}}
 
-The `biconnected` constraint ensures the graph is biconnected (no cut vertices):
+`nbStronglyConnectedComponents` constrains the number of strongly connected components:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.undirectedGraphVar("g", lb, ub);
-model.biconnected(g).post();
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "nbStronglyConnectedComponents" >}}
 {{< /tabpane >}}
 
-### Directed connectivity
-
-The `stronglyConnected` constraint ensures all nodes are mutually reachable:
+`reachability` ensures that every node of the graph is reachable from a given root:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.directedGraphVar("g", lb, ub);
-model.stronglyConnected(g).post();
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "reachability" >}}
 {{< /tabpane >}}
 
-The `nbStronglyConnectedComponents` counts strongly connected components:
+## Cycles
+
+`noCycle` prevents an undirected graph from containing a cycle,
+and `noCircuit` prevents a directed graph from containing a circuit:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.directedGraphVar("g", lb, ub);
-IntVar nbSCC = model.intVar("nbSCC", 1, 5);
-model.nbStronglyConnectedComponents(g, nbSCC).post();
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "acyclic" >}}
 {{< /tabpane >}}
 
-### Reachability
-
-The `reachability` constraint ensures that every node is reachable from a source node:
+`cycle` ensures that an undirected graph forms a cycle (the empty graph is accepted).
+Combined with a constraint on the number of nodes, it forces a Hamiltonian cycle:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.directedGraphVar("g", lb, ub);
-model.reachability(g, 0).post();  // all nodes must be reachable from node 0
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "cycle" >}}
 {{< /tabpane >}}
 
-## Cycles and Paths
+## Trees
 
-### Acyclic constraints
-
-The `noCycle` constraint ensures the graph is acyclic:
+`tree` ensures that an undirected graph is connected and has no cycle:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.directedGraphVar("g", lb, ub);
-model.noCycle(g).post();
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "tree" >}}
 {{< /tabpane >}}
 
-The `noCircuit` constraint (undirected) ensures no cycles exist:
+`forest` ensures that it has no cycle, but possibly several connected components:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.undirectedGraphVar("g", lb, ub);
-model.noCircuit(g).post();
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "forest" >}}
 {{< /tabpane >}}
 
-### Cycle existence
-
-The `cycle` constraint forces a Hamiltonian cycle (a cycle visiting each node exactly once):
+For directed graphs, `directedTree` ensures that the graph is an arborescence rooted in a given node
+(no circuit and a path from the root to every node):
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.directedGraphVar("g", lb, ub);
-model.cycle(g).post();
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "directedTree" >}}
 {{< /tabpane >}}
 
-## Tree Constraints
-
-### Tree and forest
-
-The `tree` constraint ensures the graph is a tree (connected, acyclic, with n-1 edges for n nodes):
+and `directedForest` that it is made of disjoint, possibly singleton, arborescences:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.undirectedGraphVar("g", lb, ub);
-model.tree(g).post();
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "directedForest" >}}
 {{< /tabpane >}}
 
-The `forest` constraint ensures the graph is a forest (acyclic, can have multiple connected components):
+## Cliques and diameter
+
+`nbCliques` partitions an undirected graph into a given number of cliques:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.undirectedGraphVar("g", lb, ub);
-model.forest(g).post();
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "nbCliques" >}}
 {{< /tabpane >}}
 
-### Directed trees and forests
-
-For directed graphs:
+`diameter` states that a variable is the diameter of the graph, i.e. the number of edges of its longest shortest path.
+It implies that the graph is connected (strongly connected for a directed graph):
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.directedGraphVar("g", lb, ub);
-model.directedTree(g).post();   // a directed tree rooted at node 0
-model.directedForest(g).post();  // a directed forest
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "diameter" >}}
 {{< /tabpane >}}
 
-## Advanced Structural Constraints
+## Optimization constraints
 
-### Cliques
+### Traveling Salesman Problem
 
-The `nbCliques` constraint counts the number of maximal cliques:
+`tsp` states that an undirected graph is a Hamiltonian cycle of a given cost.
+The last parameter enables the Lagrangian relaxation of Held and Karp
+(0: disabled, 1: enabled from the root node, 2: enabled after the first solution):
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.undirectedGraphVar("g", lb, ub);
-IntVar nbC = model.intVar("nbCliques", 0, 5);
-model.nbCliques(g, nbC).post();
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "tsp" >}}
 {{< /tabpane >}}
 
-### Diameter
+### Degree-constrained minimum spanning tree
 
-The `diameter` constraint limits the graph diameter (maximum shortest path between any two nodes):
+`dcmst` states that an undirected graph is a spanning tree of a given cost, whose node degrees are constrained.
+It assumes that the degree variables are already linked to the graph, e.g. with `degrees`:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.undirectedGraphVar("g", lb, ub);
-model.diameter(g, 3).post();  // maximum diameter is 3
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "dcmst" >}}
 {{< /tabpane >}}
 
-## Optimization Constraints
+`tsp` and `dcmst` are not yet available in pychoco.
 
-### Traveling Salesman Problem (TSP)
+## Views on graph variables
 
-The `tsp` constraint models the Traveling Salesman Problem with edge weights:
+Views give access to parts of a graph variable as set variables:
+its nodes, and the neighbors (undirected) or the successors and predecessors (directed) of a node:
 
 {{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.directedGraphVar("g", lb, ub);
-int[][] distances = {{0, 10, 15}, {10, 0, 35}, {15, 35, 0}};
-IntVar cost = model.intVar("tspCost", 0, 1000);
-model.tsp(g, distances, cost).post();
-{{< /tab >}}
+{{< example "modeling/GraphConstraints" "views" >}}
 {{< /tabpane >}}
 
-### Directed Cost Minimum Spanning Tree (DCMST)
-
-The `dcmst` constraint models a minimum spanning tree for directed graphs:
-
-{{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.directedGraphVar("g", lb, ub);
-int[][] costs = {{0, 5, 10}, {5, 0, 15}, {10, 15, 0}};
-IntVar cost = model.intVar("dcmstCost", 0, 1000);
-model.dcmst(g, costs, cost).post();
-{{< /tab >}}
-{{< /tabpane >}}
-
-## Views on Graph Variables
-
-Graph variables support several views for working with their components:
-
-{{< tabpane langEqualsHeader=true >}}
-{{< tab header="Java" >}}
-GraphVar g = model.undirectedGraphVar("g", lb, ub);
-
-// Get the set of all nodes
-SetVar nodes = model.graphNodeSetView(g);
-
-// Get the set of successors for a specific node (directed graphs)
-SetVar succ = model.graphSuccessorsSetView((DirectedGraphVar) g, 2);
-
-// Get subgraph induced by a set of nodes
-SetVar nodeSet = model.setVar("nodes", new int[]{}, new int[]{0, 1, 2, 3, 4});
-GraphVar subgraph = model.nodeInducedSubgraphView(g, nodeSet, false);
-{{< /tab >}}
-{{< /tabpane >}}
+Other views build graph variables from graph variables:
+`nodeInducedSubgraphView`, `edgeInducedSubgraphView` and `graphUnionView`.

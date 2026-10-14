@@ -48,14 +48,15 @@ Solver s = model.getSolver();
 s.limitSearch(new Criterion() {
     @Override
     public boolean isMet() {
-        // todo return true if you want to stop search
+        // return true to stop the search, e.g. after 1000 nodes
+        return s.getNodeCount() >= 1000;
     }
 });
 ```
 
-In Java 8, this can be shortened using lambda expressions:
+This can be shortened using a lambda expression:
 
 ```java
 Solver s = model.getSolver();
-s.limitSearch(() -> { /*todo return true if you want to stop search*/ });
+s.limitSearch(() -> s.getNodeCount() >= 1000);
 ```

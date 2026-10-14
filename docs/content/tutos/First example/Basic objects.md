@@ -166,7 +166,7 @@ RealVar x = model.realVar("x", 0.2d, 3.4d, 0.001d);
 {{< /tabpane >}}
 
 {{% alert title="Info" color="primary" %}}
-Using RealVar requires to install [Ibex](http://www.ibx-lib.org)
+Using RealVar requires to install [Ibex](https://ibex-lib.org)
 before. 
 Indeed, Choco-solver relies on Ibex to deal with continuous
 constraints.

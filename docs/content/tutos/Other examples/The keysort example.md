@@ -21,9 +21,9 @@ Any task is either easy or hard.
 
 {{< tabpane langEqualsHeader=true >}} 
 {{< tab "Java" >}}
-int[] start_dates = {[6, 18, 2, 14, 2, 7, 0, 15, 7, 17]};
-int[] durations = {[1, 2, 2, 1, 2, 1, 2, 1, 1, 1]};
-int[] difficulties = {[1, 0, 0, 1, 0, 0, 0, 1, 1, 1]};
+int[] start_dates = {6, 18, 2, 14, 2, 7, 0, 15, 7, 17};
+int[] durations = {1, 2, 2, 1, 2, 1, 2, 1, 1, 1};
+int[] difficulties = {1, 0, 0, 1, 0, 0, 0, 1, 1, 1};
 {{< /tab >}}
 {{< /tabpane >}}
 

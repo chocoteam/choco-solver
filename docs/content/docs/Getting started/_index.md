@@ -36,17 +36,14 @@ Copy-paste the artifact description to your `pom.xml`:
 </dependency>
 {{< /highlight >}}
 
-To test snapshot release, you should update your `pom.xml` with :
+To test the development version, build it from the sources of the `develop` branch
+and install it in your local Maven repository:
 
-{{< highlight xml >}}
-<repository>
-    <id>sonatype</id>
-    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-    <snapshots>
-        <enabled>true</enabled>
-    </snapshots>
-</repository>
-{{< /highlight >}}
+```bash
+git clone -b develop https://github.com/chocoteam/choco-solver.git
+cd choco-solver
+mvn install -DskipTests
+```
 
 #### Gradle 6+ (requires Java 17)
 
@@ -66,15 +63,15 @@ dependencies {
 
 When one wants to manually add choco-solver as a dependency of a project, it's important to pay attention to the following points:
 
-- In the latest version, the library is available as a single JAR file that defines what is necessary and sufficient to model and solve problems programmatically and includes additional functions to parse FlatZinc, XCSP3, DIMACS or MPS files directly.
-- The archive is released with dependencies. If one wants an archive without any dependencies, it is recommended to use Maven or Gradle.
+- Each [release](https://github.com/chocoteam/choco-solver/releases/latest) provides a single JAR file, `choco-solver-<version>-light.jar`, that defines what is necessary and sufficient to model and solve problems programmatically and includes additional functions to parse FlatZinc, XCSP3, DIMACS or MPS files directly.
+- This archive embeds its dependencies. If one wants an archive without any dependencies, it is recommended to use Maven or Gradle.
 - Finally, the [javadoc](https://javadoc.io/doc/org.choco-solver/choco-solver/latest/org.chocosolver/module-summary.html) of each version is also available on line.
 
 The next step is simply to add the jar file to the classpath of your application and eventually the javadoc.
 
 ### Python
 
-We automatically build 64-bit wheels for Python versions 3.6, 3.7, 3.8, 3.9, and 3.10 on Linux, Windows and MacOSX. They can be directly downloaded from PyPI:
+[pychoco](https://github.com/chocoteam/pychoco) provides Python bindings to Choco-solver. 64-bit wheels are built for Python 3.10 and later, on Linux, Windows and macOS. They can be directly downloaded from PyPI:
 
 ```bash
 pip install pychoco

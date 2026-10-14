@@ -70,4 +70,4 @@ The script referred to in this file (_choco.msc)_, together with global constrai
 Note that the `fzn-choco` script can be used in a Docker container.
 A `Dockerfile` is available in the `parsers/src/main/minizinc` directory of the Choco-solver repository on GitHub.
 Some Choco-solver Docker images for the MiniZinc Challenge are available on 
-[hub.docker.com/](https://hub.docker.com/repository/docker/chocoteam/choco-solver-mzn/general).
+[hub.docker.com/](https://hub.docker.com/r/chocoteam/choco-solver-mzn).

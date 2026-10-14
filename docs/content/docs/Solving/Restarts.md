@@ -23,8 +23,8 @@ Several restart strategies are available in `Solver`.
 It may be relevant to restart after each solution.
 
 ```java
-// Restarts after after each new solution.
-solver.setRestartOnSolutions()
+// Restarts after each new solution.
+solver.setRestartOnSolutions();
 ```
 
 ### Geometrical
@@ -50,19 +50,12 @@ The [Luby](http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.47.5558) ’s
 It performs a search with restarts controlled by the number of resolution events  counted by `counter`.
 The maximum number of events allowed at a given restart iteration is given by base multiplied by the Las Vegas coefficient at this iteration.
 The sequence of these coefficients is defined recursively on its prefix subsequences:
-starting from the first prefix $1$, the $(k+1)^{th}$ prefix is the $k^{th}$ prefix repeated `grow` times and
-immediately followed by coefficient `grow`$^k$.
-
-
-* the first coefficients for `grow` = 2 :
+starting from the first prefix $1$, the $(k+1)^{th}$ prefix is the $k^{th}$ prefix repeated twice and
+immediately followed by coefficient $2^k$:
 $$ [1,1,2,1,1,2,4,1,1,2,1,1,2,4,8,1,\cdots]$$
 
-
-* the first coefficients for `grow` =3 : 
-$$ [1, 1, 1, 3, 1, 1, 1, 3, 1, 1, 1, 3, 9,\cdots] $$
-
 ```java
-solver.setLubyRestart(int base, int grow, ICounter counter, int limit)
+solver.setLubyRestart(long base, ICounter counter, int limit)
 ```
 
 You can design your own restart strategies using:

@@ -92,7 +92,7 @@ The entailment method can be implemented as is:
 
 {{< tabpane langEqualsHeader=true >}} 
 {{< tab "Java" >}}
-Override
+@Override
 public ESat isEntailed() {
    int sumUB = 0, sumLB = 0;
    for (int i = 0; i < vars.length; i++) {
@@ -224,7 +224,7 @@ optional but leads to better performances):
 {{< tab "Java" >}}
 @Override
 public int getPropagationConditions(int vIdx) {
-    return IntEventType.combine(IntEventType.INSTANTIATE, IntEventType.INCLOW);
+    return IntEventType.lowerBoundAndInst();
 }
 {{< /tab >}} 
 {{< /tabpane>}}
@@ -306,7 +306,7 @@ public class MyPropagator extends Propagator<IntVar> {
 
  @Override
  public int getPropagationConditions(int vIdx) {
-     return IntEventType.combine(IntEventType.INSTANTIATE, IntEventType.INCLOW);
+     return IntEventType.lowerBoundAndInst();
  }
 
  @Override

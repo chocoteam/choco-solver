@@ -57,7 +57,7 @@ In this example, we declare a `table` constraint over two variables, but another
 The underlying algorithm used to filter inconsistent values in such constraint can also be defined manually but the default one should work well in any case. More details are available in the Javadoc.
 
 There exists some specific cases wherein one wants to define a *universal value*, meaning that some variables can take any values from their domain.
-This is achieved calling `tuples.setUniversalValue(star)`, where `star` is the universal value (for example, -1).
+This is achieved by creating the tuples with `new Tuples(star)`, where `star` is the universal value (for example, -1).
 
 Alternatively in the TSP, table constraints can be replaced by element constraints:
 

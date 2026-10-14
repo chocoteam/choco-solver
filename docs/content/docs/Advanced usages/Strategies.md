@@ -7,67 +7,29 @@ description: >
   How to design search strategies?
 ---
 
-## Automatic Search Configuration with BlackBoxConfigurator
+## Automatic search configuration with BlackBoxConfigurator
 
-### Overview
+`BlackBoxConfigurator` builds a complete search strategy for a model: variables are grouped by type
+(integer, set, graph, real), each group gets a strategy, then a meta-strategy (e.g. last conflict)
+and a restart policy are added.
+**It is what Choco uses when no search strategy is declared** (`BlackBoxConfigurator.init().make(model)`).
 
-`BlackBoxConfigurator` is the **recommended approach** for configuring search strategies. Rather than manually selecting variable selectors, value selectors, and meta-strategies, you provide high-level problem characteristics and the configurator builds an optimized strategy automatically.
+Two presets are tuned for satisfaction (`forCSP()`) and optimization (`forCOP()`) problems:
 
-This is particularly useful when:
-- You're unsure which combination of heuristics will work best
-- You want robust default behavior across different problem types
-- You need quick prototyping without deep search expertise
-- You want automatic tuning based on problem characteristics
+{{< tabpane langEqualsHeader=true >}}
+{{< example "solving/Strategies" "blackBox" >}}
+{{< /tabpane >}}
 
-### Basic usage
+Each part can be changed with a `set...` method before calling `make(model)`:
+`setIntVarStrategy`, `setSetVarStrategy`, `setGraphVarSearch`, `setRealVarStrategy`,
+`setIntObjVarStrategy`, `setMetaStrategy`, `setRestartPolicy`, `setNogoodOnRestart`,
+`setRestartOnSolution`, `setExcludeViews`, `setExcludeObjective`, ...
 
-```java
-import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
+{{< tabpane langEqualsHeader=true >}}
+{{< example "solving/Strategies" "blackBoxCustom" >}}
+{{< /tabpane >}}
 
-Solver solver = model.getSolver();
-
-// For CSP (Constraint Satisfaction): find any feasible solution
-BlackBoxConfigurator.init()
-    .forCSP()
-    .build()
-    .configureSearch(solver);
-
-// For COP (Constraint Optimization): find optimal solution
-BlackBoxConfigurator.init()
-    .forCOP()
-    .build()
-    .configureSearch(solver);
-```
-
-### Customization options
-
-You can customize the configurator with additional settings:
-
-```java
-var configurator = BlackBoxConfigurator.init()
-    .forCOP()
-    .searchRandomized()           // Use randomized value selection
-    .maxDomainValues(1000)        // Threshold for adaptive heuristics
-    .build();
-
-configurator.configureSearch(solver);
-```
-
-**Common customization methods:**
-- `.searchDomOverWDeg()` — Use dom/wdeg heuristic (impact-based)
-- `.searchRandomized()` — Use randomized value selection
-- `.maxDomainValues(int)` — Set domain size threshold for branching decisions
-- `.withMaxRestarts(int)` — Configure restart policy
-
-### How it works
-
-The `BlackBoxConfigurator` internally:
-1. Analyzes the problem structure (number of variables, constraint density, etc.)
-2. Selects appropriate variable and value selectors
-3. Optionally applies meta-strategies (restart, last-conflict, etc.)
-4. Composes multiple strategies for different variable types (IntVar, SetVar, RealVar)
-
-This is more robust than manual configuration for most problems.
+`complete(model, strategy)` completes a declared strategy with the black-box one, for the variables it does not cover.
 
 ---
 
@@ -117,47 +79,16 @@ solver.setSearch(
 
 ---
 
-## IntDomainSticky: Memory-based value selection
+## IntDomainSticky: phase saving
 
-### Overview
+`IntDomainSticky` is a value selector implementing *phase saving*:
+it selects the last value a variable took during propagation, if this value is still in its domain,
+and falls back to another value selector otherwise.
+It is useful together with restarts, to drive the search back towards the regions it explored before:
 
-`IntDomainSticky` is a value selector that **remembers previously chosen values** for variables and tends to revisit them. This can be very effective for problems with **strong locality**.
-
-### Usage
-
-```java
-import org.chocosolver.solver.search.strategy.selectors.values.IntDomainSticky;
-import static org.chocosolver.solver.search.strategy.Search.*;
-
-Solver solver = model.getSolver();
-
-solver.setSearch(intVarSearch(
-    new FirstFail(model),              // Variable selector
-    new IntDomainSticky(),             // Value selector (sticky)
-    x, y, z
-));
-```
-
-### When to use
-
-`IntDomainSticky` is particularly useful for:
-- **Clustering problems**: Solutions tend to group around certain value assignments
-- **Warm-start scenarios**: You have hints from previous runs or similar problems
-- **Search with locality**: Neighboring solutions are often good (e.g., scheduling, routing)
-
-### Example: Scheduling with locality
-
-In scheduling problems, if task A was scheduled at time 10 in a previous solution, scheduling it near time 10 again is often promising:
-
-```java
-IntVar[] taskStarts = model.intVarArray("taskStart", nbTasks, 0, horizon);
-
-solver.setSearch(intVarSearch(
-    new FirstFail(model),
-    new IntDomainSticky(),    // Remember previous start times
-    taskStarts
-));
-```
+{{< tabpane langEqualsHeader=true >}}
+{{< example "solving/Strategies" "sticky" >}}
+{{< /tabpane >}}
 
 ---
 
@@ -328,7 +259,7 @@ boolean isSearchComplete()
 
 ### Performance tips
 
-- **Use `IntDomainSticky`** if the problem has strong locality
+- **Use `IntDomainSticky`** (phase saving) together with restarts
 - **Combine strategies** rather than replacing them
 - **Apply lastConflict** to adaptive/dynamic problems
 - **Monitor solver statistics** to detect inefficiencies

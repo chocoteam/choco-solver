@@ -2,7 +2,7 @@
 
 Contributions are welcome: bug reports, feature requests, code and documentation.
 For questions about using the library, read the [documentation](https://choco-solver.org/docs/)
-or ask on the [google group](https://groups.google.com/forum/#!forum/choco-solver).
+or ask on the [Discord server](https://discord.gg/aH6zxa7e64).
 
 ## Branches
 

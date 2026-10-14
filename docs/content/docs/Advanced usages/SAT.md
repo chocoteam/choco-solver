@@ -26,21 +26,19 @@ If you are looking to use a SAT solver, we can only recommend dedicated librarie
 [Offline_SAT_solvers](https://en.wikipedia.org/wiki/Boolean_satisfiability_problem#Offline_SAT_solvers).
 {{% /alert %}}
 
-If you still want to use this implementation, here is an example of its use:
-```java
-MiniSat sat = new MiniSat();
-int a = sat.newVariable();
-int b = sat.newVariable();
-sat.addClause(MiniSat.makeLiteral(a), MiniSat.neg(MiniSat.makeLiteral(b)));
-MiniSat.Boolean ret = sat.solve();
-```
+If you still want to use this implementation, `MiniSatSolver` is the complete solver
+(`MiniSat` itself is the propagation core used by Choco-solver):
+
+{{< tabpane langEqualsHeader=true >}}
+{{< example "advanced/Sat" "miniSat" >}}
+{{< /tabpane >}}
 
 Alternatively, you can parse a CNF file:
 
 ```java
-MiniSat solver = new MiniSat();
+MiniSatSolver solver = new MiniSatSolver();
 solver.parse("/path/to/instance.cnf");
-MiniSat.Boolean ret = solver.solve();
+ESat ret = solver.solve();
 ```
 
 Now, if you want to mix SAT and CP, having access to the SAT solver might be helpful.
@@ -52,34 +50,24 @@ This is achieved using `satVar()` API.
 Calling this method on an instance of `BoolVar` will create (or return) the
 variable in the SAT solver attached to a `Solver` and return its id (an `int`).
 
-```java
-Model model  = new Model();
-BoolVar a = m.boolVar("a");
-BoolVar b = m.boolVar("b");
-int sa = a.satVar();
-int sb = b.satVar();
-```
+{{< tabpane langEqualsHeader=true >}}
+{{< example "advanced/Sat" "bindBool" >}}
+{{< /tabpane >}}
 
 Then, it is possible to declare a clause using these SAT variables.
 However, this requires the positive (`lit(sb)`) and negative (`neg(sa)`) literals to be entered.
 
-```java
-// a is true implies b is true (a is false or b is true)
-model.addClause(model.neg(sa), model.lit(sb));
-```
+{{< tabpane langEqualsHeader=true >}}
+{{< example "advanced/Sat" "clause" >}}
+{{< /tabpane >}}
 
 One can also want to bind an integer variable to SAT variable.
-In that case, a relationship is needed; this is achieved thanks to some binary relational expression:
+In that case, a relationship is needed; this is achieved thanks to some binary relational expression,
+turned into a `BoolVar`:
 
-```java
-Model model  = new Model();
-IntVar c = m.intVar("c", 1, 3);
-IntVar d = m.intVar("d", 2, 4);
-int sc = c.eq(2).satVar();
-int sd = d.le(3).satVar();
-// c is equal to 2 and d is less than or equal to 3
-model.addClause(model.neg(sc), model.lit(sd))
-```
+{{< tabpane langEqualsHeader=true >}}
+{{< example "advanced/Sat" "bindInt" >}}
+{{< /tabpane >}}
 
 This can also be achieved by using views and reifications.
 
@@ -88,14 +76,12 @@ This can also be achieved by using views and reifications.
 It is also possible to declare its own links, by implementing the `Literalizer` interface.
 Doing so, it is possible to bind manually a relationship to a SAT variable:
 
-```java
-Model model  = new Model();
-IntVar e = m.setVar("e", new int[]{}, new int[]{1,2,3});
-// link the membership of the value 2 to the set e
-int se = model.satVar(v, new SetInLit(s, 2));
-// then declare clauses
-```
-where `SetInLit` is defined as:
+{{< tabpane langEqualsHeader=true >}}
+{{< example "advanced/Sat" "literalizer" >}}
+{{< /tabpane >}}
+
+`SetInLit` is provided by Choco-solver (`Literalizer.SetInLit`).
+It is reproduced below as a model to write your own `Literalizer`:
 
 
 ```java

@@ -83,12 +83,10 @@ This technique has proven to be very flexible and to be easily integrated within
 
 A complementary technique that appear to be efficient in practice is named `Walking` and consists in accepting equivalent intermediate solutions in a search iteration instead of requiring a strictly better one.
 
-This can be achieved by defining an `ObjectiveManager` like this:
+This can be achieved by changing the cut of the objective manager, once the objective is declared:
 
-```java
-solver.setObjectiveManager(new ObjectiveManager(objective, ResolutionPolicy.MAXIMIZE, false));
-```
+{{< tabpane langEqualsHeader=true >}}
+{{< example "solving/Solving" "walking" >}}
+{{< /tabpane >}}
 
-Where the last parameter, named `strict` must be set to false to accept equivalent intermediate solutions.
-
-Other optimization policies may be encoded by using either search monitors or a custom `ObjectiveManager`.
+Other optimization policies may be encoded by using either search monitors or a custom cut (see `IObjectiveManager.setCutComputer`).
