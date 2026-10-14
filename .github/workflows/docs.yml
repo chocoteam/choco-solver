@@ -1,0 +1,66 @@
+# Checks the user documentation:
+# - the website still builds with the docs/ of the pull request. The site itself (theme, home page,
+#   deployment) lives in chocoteam/website, which imports this repository as a Hugo module
+#   (mounts declared in hugo.toml); here it is built against the checked-out sources;
+# - the Python examples run with the pychoco release on PyPI.
+# The Java examples (examples/src/test/java/org/chocosolver/docs) are TestNG tests run by the Maven workflow.
+
+name: Documentation
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'examples/src/test/java/org/chocosolver/docs/**'
+      - 'hugo.toml'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  HUGO_VERSION: 0.160.1
+
+jobs:
+  build-website:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: choco-solver
+      - uses: actions/checkout@v4
+        with:
+          repository: chocoteam/website
+          path: website
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+          cache: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install Hugo
+        run: |
+          wget -q -O "${{ runner.temp }}/hugo.deb" https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.deb
+          sudo dpkg -i "${{ runner.temp }}/hugo.deb"
+      - name: Build the website with these docs
+        working-directory: website
+        env:
+          HUGO_MODULE_REPLACEMENTS: github.com/chocoteam/choco-solver -> ${{ github.workspace }}/choco-solver
+        run: |
+          npm ci
+          hugo --gc --minify
+
+  python-examples:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run the Python examples
+        working-directory: docs/examples/python
+        run: |
+          pip install pychoco pytest
+          pytest -v

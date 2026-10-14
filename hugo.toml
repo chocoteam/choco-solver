@@ -1,0 +1,21 @@
+# This repository is imported as a Hugo module by the website (https://github.com/chocoteam/website).
+# These mounts declare what it brings to the site; see docs/README.md.
+[module]
+  [[module.mounts]]
+    source = "docs/content"
+    target = "content"
+    [module.mounts.sites.matrix]
+      languages = ["en"]
+  [[module.mounts]]
+    source = "docs/static"
+    target = "static"
+  # The "example" shortcode and the tested examples it includes
+  [[module.mounts]]
+    source = "docs/layouts"
+    target = "layouts"
+  [[module.mounts]]
+    source = "examples/src/test/java/org/chocosolver/docs"
+    target = "assets/examples/java"
+  [[module.mounts]]
+    source = "docs/examples/python"
+    target = "assets/examples/python"
