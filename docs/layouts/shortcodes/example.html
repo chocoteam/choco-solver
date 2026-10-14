@@ -1,0 +1,61 @@
+{{- /*
+  Adds Java and Python tabs to the enclosing tabpane, from tested example files.
+
+  Usage, inside a tabpane:
+    {{< tabpane langEqualsHeader=true >}}
+    {{< example "modeling/IntConstraints" "globalCardinality" >}}
+    {{< /tabpane >}}
+
+  - Java:   examples/src/test/java/org/chocosolver/docs/modeling/IntConstraintsExamples.java (mandatory)
+  - Python: docs/examples/python/modeling/IntConstraintsExamples.py (optional)
+  The region shown is the one between "tag::globalCardinality[]" and "end::globalCardinality[]" comments,
+  without its common indentation. Other tag lines inside it are dropped.
+  See docs/dev/documentation.md.
+*/ -}}
+
+{{- if or (not $.Parent) (ne $.Parent.Name "tabpane") -}}
+  {{- errorf "Shortcode %q must be enclosed inside a tabpane block. Position: %s" $.Name $.Position -}}
+{{- end -}}
+{{- $base := .Get 0 -}}
+{{- $tag := .Get 1 -}}
+{{- $sources := slice
+    (dict "header" "Java" "path" (printf "examples/java/%sExamples.java" $base) "comment" "//" "required" true)
+    (dict "header" "Python" "path" (printf "examples/python/%sExamples.py" $base) "comment" "#" "required" false) -}}
+
+{{- range $i, $src := $sources -}}
+  {{- $code := "" -}}
+  {{- with resources.Get $src.path -}}
+    {{- $re := printf `(?s)%s tag::%s\[\][^\n]*\n(.*?)\n[ \t]*%s end::%s\[\]` $src.comment $tag $src.comment $tag -}}
+    {{- with findRESubmatch $re .Content 1 -}}
+      {{- $code = index (index . 0) 1 -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if $code -}}
+    {{- /* Drop nested tag lines, then remove the common indentation */ -}}
+    {{- $lines := slice -}}
+    {{- range split $code "\n" -}}
+      {{- if not (findRE `^\s*(//|#) (tag|end)::` .) -}}
+        {{- $lines = $lines | append . -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $indent := 1000 -}}
+    {{- range $lines -}}
+      {{- if trim . " \t" -}}
+        {{- $n := len (index (findRE `^[ ]*` . 1) 0) -}}
+        {{- if lt $n $indent }}{{ $indent = $n }}{{ end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $out := slice -}}
+    {{- range $lines -}}
+      {{- if ge (len .) $indent -}}
+        {{- $out = $out | append (substr . $indent) -}}
+      {{- else -}}
+        {{- $out = $out | append "" -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $tab := dict "header" $src.header "content" (delimit $out "\n") -}}
+    {{- $.Parent.Scratch.SetInMap "tabs" (printf "%02v-%v" $.Ordinal $i) $tab -}}
+  {{- else if $src.required -}}
+    {{- errorf "Shortcode %q: no region %q in %s. Position: %s" $.Name $tag $src.path $.Position -}}
+  {{- end -}}
+{{- end -}}
