@@ -165,9 +165,9 @@ public class Model implements IModel {
     private ResolutionPolicy policy = ResolutionPolicy.SATISFACTION;
 
     /**
-     * A seed for randomness
+     * A seed for randomness, initialized from {@link Settings#getSeed()}
      */
-    private long seed = 0L;
+    private long seed;
 
     private ModelAnalyser modelAnalyser = null;
 
@@ -205,6 +205,7 @@ public class Model implements IModel {
         this.objective = null;
         this.hooks = new HashMap<>();
         this.settings = settings;
+        this.seed = settings.getSeed();
         this.solver = new Solver(this);
         // to make sure MiniSat.C_Undef is not null, call it once
         this.hooks.put("C_Undef", MiniSat.C_Undef);
@@ -792,16 +793,23 @@ public class Model implements IModel {
     /**
      * Sets the seed used for random number generator using a single
      * {@code long} seed.
+     * <p>
+     * Only the objects created after this call use the new seed: propagators and search strategies read it
+     * when they are created.
      *
      * @param seed the initial seed
      * @see java.util.Random#setSeed(long)
+     * @deprecated declare the seed in the settings instead, with {@link SettingsBuilder#setSeed(long)}
+     * (or the {@code -seed} option of the parsers), so that it is known when the model is created.
      */
+    @Deprecated
     public void setSeed(long seed) {
         this.seed = seed;
     }
 
     /**
-     * Gets the seed used random number generator.
+     * Gets the seed used by random number generators.
+     * It is the one declared in the settings ({@link Settings#getSeed()}), unless {@link #setSeed(long)} was called.
      *
      * @return the seed
      */

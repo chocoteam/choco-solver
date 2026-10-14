@@ -14,7 +14,11 @@ NEXT MILESTONE
 - XCSP3: handle reified constraints, i.e. `reifiedBy`, `hreifiedFrom` and `hreifiedTo`, which were ignored (#1248). The reification is refused with an explicit message when it cannot be handled, as for `slide` and logic meta-constraints
 - XCSP3: add `XCSPParserTest`, which checks the solutions of small instances against the ones found by brute force
 
+#### Settings
+- The seed is declared in the settings: `SettingsBuilder.setSeed(long)`, the `seed` property or the `-seed` option (#1207, #1209). The `-seed` option of the parsers was ignored, and `dom/wdeg`, `CHS`, `FRBA`, `FLBA` and `activity` strategies always used a seed of 0; they now use the seed of the model. The default seed is still 0
+
 ### Deprecated API (to be removed in next release):
+- `Model.setSeed(long)`: declare the seed in the settings with `SettingsBuilder.setSeed(long)`
 
 ### Other closed issues and pull requests:
 See [milestone 6.0.3](https://github.com/chocoteam/choco-solver/milestone/44)
