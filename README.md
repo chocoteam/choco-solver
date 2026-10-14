@@ -59,6 +59,9 @@ solver.printStatistics();
 
 The [latest release](https://github.com/chocoteam/choco-solver/releases/latest) points to binaries and source code.
 
+The user documentation and tutorials are on [choco-solver.org](https://choco-solver.org/docs/);
+their sources are in [docs/](docs/README.md). Contributors will find the developer guide in [docs/dev/](docs/dev/README.md).
+
 You can get help on our [google group](https://groups.google.com/forum/#!forum/choco-solver).
 Most support requests are answered very fast.
 
