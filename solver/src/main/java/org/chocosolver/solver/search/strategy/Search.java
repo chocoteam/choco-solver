@@ -613,7 +613,24 @@ public class Search {
      */
     public static AbstractStrategy<IntVar> objectiveStrategy(IntVar objective,
                                                              OptimizationPolicy optPolicy) {
-        return new ObjectiveStrategy(objective, optPolicy);
+        return new ObjectiveStrategy(objective, optPolicy, 0.5, false);
+    }
+
+    /**
+     * Defines a dichotomic branching strategy over the objective variable Note that it is only
+     * activated after a first solution. This should be completed with another strategy with a
+     * larger scope.
+     *
+     * @param objective       objective variable
+     * @param largerHalfFirst set to <i>true</i> to try first the larger half of the objective
+     *                        domain (cautious cut, strong refutation), <i>false</i> to try first
+     *                        the smaller one (aggressive cut, weak refutation)
+     * @return a assignment strategy
+     * @see ObjectiveStrategy#ObjectiveStrategy(IntVar, OptimizationPolicy, double, boolean)
+     */
+    public static AbstractStrategy<IntVar> objectiveStrategy(IntVar objective,
+                                                             boolean largerHalfFirst) {
+        return new ObjectiveStrategy(objective, OptimizationPolicy.DICHOTOMIC, 0.5, largerHalfFirst);
     }
 
     /**

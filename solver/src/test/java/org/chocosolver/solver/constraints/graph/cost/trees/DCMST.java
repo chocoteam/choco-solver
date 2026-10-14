@@ -8,9 +8,9 @@ package org.chocosolver.solver.constraints.graph.cost.trees;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.objective.ObjectiveStrategy;
 import org.chocosolver.solver.objective.OptimizationPolicy;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.strategy.GraphCostBasedSearch;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
@@ -87,7 +87,7 @@ public class DCMST {
             System.out.println("Solution found : "+totalCost);
         });
         // bottom-up optimization : find a first solution then reach the global minimum from below
-        s.setSearch(new ObjectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP), mainSearch);
+        s.setSearch(Search.objectiveStrategy(totalCost, OptimizationPolicy.BOTTOM_UP), mainSearch);
         s.limitSolution(2); // therefore there is at most two solutions
         long TIMELIMIT = 300000;
         s.limitTime(TIMELIMIT); // time limit

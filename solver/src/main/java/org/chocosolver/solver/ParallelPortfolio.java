@@ -435,7 +435,9 @@ public class ParallelPortfolio {
         // common settings
         bb.setRestartPolicy(SearchParams.Restart.GEOMETRIC, 10, 1.05, 50_000, true);
         bb.setNogoodOnRestart(true);
-        bb.setRestartOnSolution(true);
+        // restarting on solution only makes sense when optimizing:
+        // when enumerating, the same solution would be found again and again
+        bb.setRestartOnSolution(opt);
         bb.setExcludeViews(false);
         SearchParams.ValSelConf intValConf;
         Function<Model, IntValueSelector> intValSel;

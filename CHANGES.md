@@ -17,6 +17,12 @@ NEXT MILESTONE
 #### Settings
 - The seed is declared in the settings: `SettingsBuilder.setSeed(long)`, the `seed` property or the `-seed` option (#1207, #1209). The `-seed` option of the parsers was ignored, and `dom/wdeg`, `CHS`, `FRBA`, `FLBA` and `activity` strategies always used a seed of 0; they now use the seed of the model. The default seed is still 0
 
+#### Search & Strategies
+- `ObjectiveStrategy`: fix the split point of the `DICHOTOMIC` policy, which was rounded down for both `MINIMIZE` and `MAXIMIZE` (#1252). It is now rounded towards the bound to improve, so that minimizing an objective and maximizing its opposite try mirrored cuts. This changes the cut tried when maximizing
+- `ObjectiveStrategy`: add a `largerHalfFirst` parameter to try the larger half of the objective domain first, also available with `Search.objectiveStrategy(objective, largerHalfFirst)`
+- `ObjectiveStrategy`: a decision that does not reduce the domain of the objective is not returned anymore
+- **Breaking**: `ObjectiveStrategy` has a single constructor, `ObjectiveStrategy(objective, policy, fraction, largerHalfFirst)`. The `int[] coefs` parameter is replaced by a `double` fraction in [0, 1]: `[a, b]` becomes `b / (a + b)`
+
 ### Deprecated API (to be removed in next release):
 - `Model.setSeed(long)`: declare the seed in the settings with `SettingsBuilder.setSeed(long)`
 
