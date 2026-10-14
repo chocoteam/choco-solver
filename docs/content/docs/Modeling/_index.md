@@ -1,7 +1,7 @@
 ---
 title: "Modeling"
 linkTitle: "Modeling"
-weight: 2
+weight: 3
 description: >
   What do you need to know to express a problem?
 ---
