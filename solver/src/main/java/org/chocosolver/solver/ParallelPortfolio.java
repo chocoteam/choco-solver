@@ -45,13 +45,13 @@ import java.util.stream.StreamSupport;
  * A Portfolio helper.
  * </p>
  * <p>
- * The ParallelPortfolio resolution of a problem is made of four steps:
+ * The ParallelPortfolio resolution of a problem is made of three steps:
  *      <ol>
  *          <li>adding models to be run in parallel,</li>
  *          <li>running resolution in parallel,</li>
  *          <li>getting the model which finds a solution (or the best one), if any.</li>
  *      </ol>
- *      Each of the four steps is needed and the order is imposed too.
+ *      Each of the three steps is needed and the order is imposed too.
  *      In particular, in step 1. each model should be populated individually with a model of the problem
  *      (presumably the same model, but not required).
  *      Populating model is not managed by this class and should be done before applying step 2.,
@@ -93,7 +93,8 @@ import java.util.stream.StreamSupport;
  *
  * </p>
  * <p>
- *     This class uses Java 8 streaming feature, and may be not compliant with older versions.
+ *     Each model runs in its own thread.
+ *     The threads are reused from one call to {@link #solve()} to the next.
  * </p>
  *
  *
@@ -190,7 +191,8 @@ public class ParallelPortfolio {
     /**
      * Creates a new ParallelPortfolio
      * This class stores the models to be executed in parallel in a {@link ArrayList} initially empty.
-     * Search heuristics will be changed automatically (except for the first thread that will remain in the same configuration).
+     * The search heuristics of a model are changed automatically, unless the model is declared unalterable
+     * with {@link #addModel(Model, boolean, boolean)}.
      */
     public ParallelPortfolio() {
         this(true);
@@ -483,6 +485,32 @@ public class ParallelPortfolio {
         }
     }
 
+    /**
+     * Search configuration of a worker whose search heuristics can be changed.
+     *
+     * @param varSel       the variable selection heuristic
+     * @param lastConflict the parameter of the last conflict meta-strategy
+     * @param shareNogoods whether the worker shares its nogoods, when it is reliable
+     */
+    private record WorkerConf(SearchParams.VariableSelection varSel, int lastConflict, boolean shareNogoods) {
+    }
+
+    /**
+     * The search configurations of the workers, the i-th worker gets the i-th one.
+     * The last one is given to the remaining workers.
+     */
+    private static final WorkerConf[] WORKER_CONFS = {
+            new WorkerConf(SearchParams.VariableSelection.DOMWDEG, 2, true),
+            new WorkerConf(SearchParams.VariableSelection.CHS, 2, true),
+            new WorkerConf(SearchParams.VariableSelection.DOMWDEG_CACD, 2, true),
+            new WorkerConf(SearchParams.VariableSelection.FRBA, 2, true),
+            new WorkerConf(SearchParams.VariableSelection.ACTIVITY, 2, false),
+            new WorkerConf(SearchParams.VariableSelection.DOMWDEG_CACD, 2, false),
+            new WorkerConf(SearchParams.VariableSelection.DOMWDEG, 2, true),
+            new WorkerConf(SearchParams.VariableSelection.FRBA, 2, false),
+            new WorkerConf(SearchParams.VariableSelection.CHS, 1, false),
+    };
+
     private void configureModel(Model worker, int searchID) {
         ResolutionPolicy policy = worker.getResolutionPolicy();
         boolean opt = policy != ResolutionPolicy.SATISFACTION;
@@ -494,125 +522,16 @@ public class ParallelPortfolio {
         // when enumerating, the same solution would be found again and again
         bb.setRestartOnSolution(opt);
         bb.setExcludeViews(false);
-        SearchParams.ValSelConf intValConf;
-        Function<Model, IntValueSelector> intValSel;
-        SearchParams.VarSelConf intVarConf;
-        BiFunction<IntVar[], IntValueSelector, AbstractStrategy<IntVar>> intVarSel;
-        switch (searchID) {
-            case 0:
-                intValConf = new SearchParams.ValSelConf(
-                        SearchParams.ValueSelection.MIN, opt, 16, true);
-                intValSel = intValConf.make();
-                intVarConf = new SearchParams.VarSelConf(
-                        SearchParams.VariableSelection.DOMWDEG, 32);
-                intVarSel = intVarConf.make();
-                bb.setIntVarStrategy((vars) -> intVarSel.apply(vars, intValSel.apply(worker)));
-                bb.setMetaStrategy(m -> Search.lastConflict(m, 2));
-                //TODO DEAL WITH SETVAR --> MINIZINC
-                if (reliableness.containsKey(worker)) {
-                    manager.add(worker);
-                }
-                break;
-            case 1:
-                intValConf = new SearchParams.ValSelConf(
-                        SearchParams.ValueSelection.MIN, opt, 16, true);
-                intValSel = intValConf.make();
-                intVarConf = new SearchParams.VarSelConf(
-                        SearchParams.VariableSelection.CHS, 32);
-                intVarSel = intVarConf.make();
-                bb.setIntVarStrategy((vars) -> intVarSel.apply(vars, intValSel.apply(worker)));
-                bb.setMetaStrategy(m -> Search.lastConflict(m, 2));
-                //TODO DEAL WITH SETVAR --> MINIZINC
-                if (reliableness.containsKey(worker)) {
-                    manager.add(worker);
-                }
-                break;
-            case 2:
-                intValConf = new SearchParams.ValSelConf(
-                        SearchParams.ValueSelection.MIN, opt, 16, true);
-                intValSel = intValConf.make();
-                intVarConf = new SearchParams.VarSelConf(
-                        SearchParams.VariableSelection.DOMWDEG_CACD, 32);
-                intVarSel = intVarConf.make();
-                bb.setIntVarStrategy((vars) -> intVarSel.apply(vars, intValSel.apply(worker)));
-                bb.setMetaStrategy(m -> Search.lastConflict(m, 2));
-                //TODO DEAL WITH SETVAR --> MINIZINC
-                if (reliableness.containsKey(worker)) {
-                    manager.add(worker);
-                }
-                break;
-            case 3:
-                intValConf = new SearchParams.ValSelConf(
-                        SearchParams.ValueSelection.MIN, opt, 16, true);
-                intValSel = intValConf.make();
-                intVarConf = new SearchParams.VarSelConf(
-                        SearchParams.VariableSelection.FRBA, 32);
-                intVarSel = intVarConf.make();
-                bb.setIntVarStrategy((vars) -> intVarSel.apply(vars, intValSel.apply(worker)));
-                bb.setMetaStrategy(m -> Search.lastConflict(m, 2));
-                //TODO DEAL WITH SETVAR --> MINIZINC
-                if (reliableness.containsKey(worker)) {
-                    manager.add(worker);
-                }
-                break;
-            case 4:
-                intValConf = new SearchParams.ValSelConf(
-                        SearchParams.ValueSelection.MIN, opt, 16, true);
-                intValSel = intValConf.make();
-                intVarConf = new SearchParams.VarSelConf(
-                        SearchParams.VariableSelection.ACTIVITY, 32);
-                intVarSel = intVarConf.make();
-                bb.setIntVarStrategy((vars) -> intVarSel.apply(vars, intValSel.apply(worker)));
-                bb.setMetaStrategy(m -> Search.lastConflict(m, 2));
-                //TODO DEAL WITH SETVAR --> MINIZINC
-                break;
-            case 5:
-                intValConf = new SearchParams.ValSelConf(
-                        SearchParams.ValueSelection.MIN, opt, 16, true);
-                intValSel = intValConf.make();
-                intVarConf = new SearchParams.VarSelConf(
-                        SearchParams.VariableSelection.DOMWDEG_CACD, 32);
-                intVarSel = intVarConf.make();
-                bb.setIntVarStrategy((vars) -> intVarSel.apply(vars, intValSel.apply(worker)));
-                bb.setMetaStrategy(m -> Search.lastConflict(m, 2));
-                //TODO DEAL WITH SETVAR --> MINIZINC
-                break;
-            case 6:
-                intValConf = new SearchParams.ValSelConf(
-                        SearchParams.ValueSelection.MIN, opt, 16, true);
-                intValSel = intValConf.make();
-                intVarConf = new SearchParams.VarSelConf(
-                        SearchParams.VariableSelection.DOMWDEG, 32);
-                intVarSel = intVarConf.make();
-                bb.setIntVarStrategy((vars) -> intVarSel.apply(vars, intValSel.apply(worker)));
-                bb.setMetaStrategy(m -> Search.lastConflict(m, 2));
-                //TODO DEAL WITH SETVAR --> MINIZINC
-                if (reliableness.containsKey(worker)) {
-                    manager.add(worker);
-                }
-                break;
-            case 7:
-                intValConf = new SearchParams.ValSelConf(
-                        SearchParams.ValueSelection.MIN, opt, 16, true);
-                intValSel = intValConf.make();
-                intVarConf = new SearchParams.VarSelConf(
-                        SearchParams.VariableSelection.FRBA, 32);
-                intVarSel = intVarConf.make();
-                bb.setIntVarStrategy((vars) -> intVarSel.apply(vars, intValSel.apply(worker)));
-                bb.setMetaStrategy(m -> Search.lastConflict(m, 2));
-                //TODO DEAL WITH SETVAR --> MINIZINC
-                break;
-            default:
-                intValConf = new SearchParams.ValSelConf(
-                        SearchParams.ValueSelection.MIN, opt, 16, true);
-                intValSel = intValConf.make();
-                intVarConf = new SearchParams.VarSelConf(
-                        SearchParams.VariableSelection.CHS, 32);
-                intVarSel = intVarConf.make();
-                bb.setIntVarStrategy((vars) -> intVarSel.apply(vars, intValSel.apply(worker)));
-                bb.setMetaStrategy(m -> Search.lastConflict(m, 1));
-                //TODO DEAL WITH SETVAR --> MINIZINC
-                break;
+        WorkerConf conf = WORKER_CONFS[Math.min(searchID, WORKER_CONFS.length - 1)];
+        Function<Model, IntValueSelector> intValSel = new SearchParams.ValSelConf(
+                SearchParams.ValueSelection.MIN, opt, 16, true).make();
+        BiFunction<IntVar[], IntValueSelector, AbstractStrategy<IntVar>> intVarSel = new SearchParams.VarSelConf(
+                conf.varSel(), 32).make();
+        bb.setIntVarStrategy((vars) -> intVarSel.apply(vars, intValSel.apply(worker)));
+        bb.setMetaStrategy(m -> Search.lastConflict(m, conf.lastConflict()));
+        //TODO DEAL WITH SETVAR --> MINIZINC
+        if (conf.shareNogoods() && reliableness.get(worker)) {
+            manager.add(worker);
         }
         bb.make(worker);
     }
