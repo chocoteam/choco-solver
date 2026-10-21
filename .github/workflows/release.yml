@@ -57,14 +57,14 @@ jobs:
           echo "::error::The release must be run from develop (got ${GITHUB_REF})"
           exit 1
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: develop
           fetch-depth: 0
           submodules: 'true'
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -169,7 +169,7 @@ jobs:
             cat release-notes.md
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: release-${{ steps.version.outputs.version }}
           path: |
@@ -187,14 +187,14 @@ jobs:
     env:
       VERSION: ${{ needs.prepare.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: develop
           fetch-depth: 0
           submodules: 'true'
           token: ${{ secrets.RELEASE_TOKEN }}
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: release-${{ needs.prepare.outputs.version }}
           path: ${{ runner.temp }}/release
@@ -217,7 +217,7 @@ jobs:
           git log --oneline -3
 
       - name: Set up Maven Central repository
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: '17'
           distribution: 'temurin'
