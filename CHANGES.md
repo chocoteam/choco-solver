@@ -20,6 +20,9 @@ NEXT MILESTONE
 - `java -jar choco-solver-X.Y.Z-light.jar <file>` no longer prints its arguments before solving, which broke the XCSP3 output format
 - Docker: the `chocoteam/choco-solver-mzn` images, standard and with LCG (`-X`), are built and pushed on each tag
 
+#### Settings
+- The seed is declared in the settings: `SettingsBuilder.setSeed(long)`, the `seed` property or the `-seed` option (#1207, #1209). The `-seed` option of the parsers was ignored, and `dom/wdeg`, `CHS`, `FRBA`, `FLBA` and `activity` strategies always used a seed of 0; they now use the seed of the model. The default seed is still 0
+
 #### Search & Strategies
 - `ObjectiveStrategy`: fix the split point of the `DICHOTOMIC` policy, which was rounded down for both `MINIMIZE` and `MAXIMIZE` (#1252). It is now rounded towards the bound to improve, so that minimizing an objective and maximizing its opposite try mirrored cuts. This changes the cut tried when maximizing
 - `ObjectiveStrategy`: add a `largerHalfFirst` parameter to try the larger half of the objective domain first, also available with `Search.objectiveStrategy(objective, largerHalfFirst)`
@@ -27,6 +30,7 @@ NEXT MILESTONE
 - **Breaking**: `ObjectiveStrategy` has a single constructor, `ObjectiveStrategy(objective, policy, fraction, largerHalfFirst)`. The `int[] coefs` parameter is replaced by a `double` fraction in [0, 1]: `[a, b]` becomes `b / (a + b)`
 
 ### Deprecated API (to be removed in next release):
+- `Model.setSeed(long)`: declare the seed in the settings with `SettingsBuilder.setSeed(long)`
 
 ### Other closed issues and pull requests:
 See [milestone 6.0.3](https://github.com/chocoteam/choco-solver/milestone/44)
