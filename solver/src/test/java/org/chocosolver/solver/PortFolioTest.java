@@ -8,6 +8,7 @@ package org.chocosolver.solver;
 
 import org.chocosolver.solver.search.SearchState;
 import org.chocosolver.solver.search.loop.monitors.IMonitorOpenNode;
+import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.restart.MonotonicCutoff;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
@@ -459,6 +460,27 @@ public class PortFolioTest {
                 found = ((IntVar) pares.getBestModel().getObjective()).getValue();
             }
             Assert.assertEquals(found, best, "seed " + seed);
+        }
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testThreads() {
+        // the models run in daemon threads, reused from one call to solve() to the next
+        ParallelPortfolio pares = new ParallelPortfolio();
+        Set<Thread> threads = java.util.concurrent.ConcurrentHashMap.newKeySet();
+        for (int i = 0; i < 2; i++) {
+            Model model = new Model();
+            IntVar x = model.intVar("x", 0, 6);
+            IntVar y = model.intVar("y", 0, 6);
+            x.mod(3).eq(y).post();
+            model.getSolver().plugMonitor((IMonitorSolution) () -> threads.add(Thread.currentThread()));
+            pares.addModel(model);
+        }
+        while (pares.solve()) ;
+        Assert.assertFalse(threads.isEmpty());
+        for (Thread t : threads) {
+            Assert.assertTrue(t.isDaemon(), t.getName());
+            Assert.assertTrue(t.getName().startsWith("choco-portfolio-"), t.getName());
         }
     }
 }
