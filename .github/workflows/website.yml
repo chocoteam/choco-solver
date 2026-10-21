@@ -1,0 +1,26 @@
+# Asks chocoteam/website to publish the documentation of a release (its workflow deploy.yml),
+# when a release tag is pushed.
+#
+# Requirements:
+# - secret WEBSITE_TOKEN: token allowed to write to chocoteam/website (contents: write),
+#   needed to send a repository_dispatch.
+
+name: Website
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions: {}
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ask the website to deploy ${{ github.ref_name }}
+        env:
+          GH_TOKEN: ${{ secrets.WEBSITE_TOKEN }}
+        run: |
+          gh api repos/chocoteam/website/dispatches \
+            -f event_type=choco-solver-release -f "client_payload[tag]=${GITHUB_REF_NAME}"

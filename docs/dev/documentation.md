@@ -79,13 +79,11 @@ To preview locally, see [../README.md](../README.md).
 The website shows the documentation of the **latest release**: `develop` contains unreleased features,
 and documenting them there is expected, they go online with the next release.
 
-After a release `vX.Y.Z`, in [chocoteam/website](https://github.com/chocoteam/website):
+Publication is automatic: pushing a tag `vX.Y.Z` runs `.github/workflows/website.yml`, which asks
+[chocoteam/website](https://github.com/chocoteam/website) to deploy (its workflow `deploy.yml`).
+That workflow pins the documentation to the tag (`hugo mod get github.com/chocoteam/choco-solver@vX.Y.Z`),
+sets `choco_version` in `config.toml`, commits both, builds the site and pushes it to `chocoteam.github.io`.
+Commits on `develop` never change the website.
 
-```bash
-hugo mod get github.com/chocoteam/choco-solver@vX.Y.Z
-# update choco_version in config.toml, then build and deploy as usual (deploy.sh)
-```
-
-For an urgent fix between two releases, pin the website to the commit that carries the fix
-(`hugo mod get github.com/chocoteam/choco-solver@<commit>`), typically on a branch made from the latest tag,
-and merge the fix into `develop` too.
+For an urgent fix between two releases, merge the fix into `develop`, then run `deploy.yml` by hand
+(Actions tab of chocoteam/website) with the commit that carries the fix: the website is pinned to that commit.

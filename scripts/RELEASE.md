@@ -51,7 +51,7 @@ In **Actions > Release > Run workflow**, on the `develop` branch:
    If `master` or `develop` moved in between, the job stops: run the workflow again.
 
 The commits and the tag are authored by the identity set in the `env` of the workflow.
-Pushing the tag triggers the Docker image (`docker-image.yml`).
+Pushing the tag triggers the Docker image (`docker-image.yml`) and the deployment of the website (`website.yml`).
 
 ## After the release (by hand)
 
@@ -59,7 +59,7 @@ Pushing the tag triggers the Docker image (`docker-image.yml`).
    and the [GitHub release](https://github.com/chocoteam/choco-solver/releases/latest).
 2. Create the milestone of the next version on GitHub, and put its number in the `NEXT MILESTONE` section
    of CHANGES.md on `develop`.
-3. Update the website, see [docs/dev/documentation.md](../docs/dev/documentation.md#publication).
+3. Check that the website was deployed (workflow `deploy.yml` of chocoteam/website), see [docs/dev/documentation.md](../docs/dev/documentation.md#publication).
 4. Announce the release.
 
 ## Configuration of the repository
@@ -77,6 +77,15 @@ not in the repository, so that they can only be read once a release is approved.
   it triggers the workflows that listen to tags. **It expires**: renew it before its expiration date.
 - `OSS_SONATYPE_USERNAME/PASSWORD`: user token of the Central Portal (namespace `org.choco-solver`).
 - `MAVEN_GPG_PRIVATE_KEY/PASSPHRASE`: the signing key (`gpg --armor --export-secret-keys <key id>`) and its passphrase.
+
+The website deployment needs two more secrets, stored as repository secrets (not in an environment):
+
+- `WEBSITE_TOKEN`, in chocoteam/choco-solver: fine-grained personal access token, restricted to `chocoteam/website`,
+  with *Contents* in read and write. `website.yml` uses it to send the `repository_dispatch` that deploys the website.
+- `PAGES_TOKEN`, in chocoteam/website: fine-grained personal access token, restricted to `chocoteam/chocoteam.github.io`,
+  with *Contents* in read and write. `deploy.yml` uses it to push the built site.
+
+Both **expire**: renew them with `RELEASE_TOKEN`.
 
 No snapshot is published: `-SNAPSHOT` versions only exist locally.
 
