@@ -8,6 +8,7 @@ package org.chocosolver.parser;
 
 import org.chocosolver.parser.dimacs.ChocoDIMACS;
 import org.chocosolver.parser.flatzinc.ChocoFZN;
+import org.chocosolver.parser.flatzinc.MiniZincInstaller;
 import org.chocosolver.parser.mps.ChocoMPS;
 import org.chocosolver.parser.xcsp.ChocoXCSP;
 import org.kohsuke.args4j.Argument;
@@ -40,6 +41,10 @@ public class Parser {
     private int pa = 0;
 
     public static void main(String[] args) throws Exception {
+        if (args.length > 0 && args[0].equals("--install-minizinc")) {
+            MiniZincInstaller.main(Arrays.copyOfRange(args, 1, args.length));
+            return;
+        }
         System.out.printf("%s\n", Arrays.toString(args));
         new Parser().main0(args);
     }
@@ -59,6 +64,7 @@ public class Parser {
             if (instance == null) {
                 System.err.println(e.getMessage());
                 System.err.println("Parser [options...] file");
+                System.err.println("Parser --install-minizinc [solvers-dir]");
                 cmdparser.printUsage(System.err);
                 System.err.println();
                 return;

@@ -58,23 +58,22 @@ update_date:
 
 compet: update_date clean package
 
+# The copy installed in ~/.minizinc/solvers needs absolute paths, the tracked msc file is left untouched
 msc: compet
-	@sed -i '' 's|  "version" : .*|  "version" : "$(CURRENT_VERSION)",|' parsers/src/main/minizinc/choco.msc
-	@sed -i '' 's|SNAPSHOT|$(DATE)|g' parsers/src/main/minizinc/choco.msc
-	@sed -i '' 's|  "mznlib" : .*|  "mznlib" : "$(ROOT_DIR)/parsers/src/main/minizinc/mzn_lib/",|' parsers/src/main/minizinc/choco.msc
-	@sed -i '' 's|  "executable" : .*|  "executable" : "$(ROOT_DIR)/parsers/src/main/minizinc/fzn-choco",|' parsers/src/main/minizinc/choco.msc
-	@sed -i '' 's|^[^ ]*JAR_FILE=.*|JAR_FILE="$(ROOT_DIR)/parsers/target/choco-parsers-$(CURRENT_VERSION)-light.jar"|' parsers/src/main/minizinc/fzn-choco.py
-	@cp $(ROOT_DIR)/parsers/src/main/minizinc/choco.msc ~/.minizinc/solvers/choco-$(CURRENT_VERSION)-$(DATE).msc
+	@mkdir -p ~/.minizinc/solvers
+	@sed -e 's|  "version": .*|  "version": "$(CURRENT_VERSION)",|' \
+		-e 's|SNAPSHOT|$(DATE)|g' \
+		-e 's|  "mznlib": .*|  "mznlib": "$(ROOT_DIR)/parsers/src/main/minizinc/mzn_lib/",|' \
+		-e 's|  "executable": .*|  "executable": "$(ROOT_DIR)/parsers/src/main/minizinc/fzn-choco.sh",|' \
+		parsers/src/main/minizinc/choco.msc > ~/.minizinc/solvers/choco-$(CURRENT_VERSION)-$(DATE).msc
 
 delmsc:
 	@rm ~/.minizinc/solvers/choco-$(VERSION).msc
 
 docker: compet
 	# add an image with LCG support
-	@sed -i '' 's|python3.*|python3 "$$(dirname "$$0")/fzn-choco.py" "$$@" "-lcg"|' parsers/src/main/minizinc/fzn-choco.sh
-	@docker build -f $(ROOT_DIR)/parsers/src/main/minizinc/docker/Dockerfile.dms -t chocoteam/choco-solver-mzn:$(CURRENT_VERSION)-X $(ROOT_DIR)
+	@docker build --build-arg EXTRA_FZN_ARGS="-lcg" -f $(ROOT_DIR)/parsers/src/main/minizinc/docker/Dockerfile.dms -t chocoteam/choco-solver-mzn:$(CURRENT_VERSION)-X $(ROOT_DIR)
 	# add an image without LCG support
-	@sed -i '' 's|python3.*|python3 "$$(dirname "$$0")/fzn-choco.py" "$$@"|' parsers/src/main/minizinc/fzn-choco.sh
 	@docker build -f $(ROOT_DIR)/parsers/src/main/minizinc/docker/Dockerfile.dms -t chocoteam/choco-solver-mzn:$(CURRENT_VERSION) $(ROOT_DIR)
 
 antlr:

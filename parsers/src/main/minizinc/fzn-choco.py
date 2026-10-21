@@ -3,10 +3,11 @@
 # nuitka-project: --remove-output
 
 import argparse
+import glob
 import os
 import sys
 
-# THIS IS WHERE YOU NEED TO CHANGE THE PATH TO THE JAR FILE
+# Last-resort location of the jar file (see find_jar_file)
 JAR_FILE='~/.m2/repository/org/choco-solver/choco-parsers/6.0.2/choco-parsers-6.0.2-light.jar'
 
 JVM_ARGS = '-server -Xss64M -Xms2G -Xmx8G -XX:NewSize=512M'
@@ -23,6 +24,21 @@ def parse_id_port(value):
         return id, port
     except ValueError:
         raise argparse.ArgumentTypeError("The cp-profiler argument must be in the form ID,PORT")
+
+
+def find_jar_file():
+    """Return the jar file to use, looking in this order for:
+    1. the CHOCO_JAR environment variable,
+    2. the most recent light jar built in the 'parsers/target' directory of the repository,
+    3. JAR_FILE, in the local Maven repository (or the jar file which installed this script)."""
+    if 'CHOCO_JAR' in os.environ:
+        return os.environ['CHOCO_JAR']
+    here = os.path.dirname(os.path.realpath(__file__))
+    parsers = os.path.join(here, '..', '..', '..')
+    built = glob.glob(os.path.join(parsers, 'target', 'choco-solver-*-light.jar'))
+    if built and os.path.isfile(os.path.join(parsers, 'pom.xml')):
+        return os.path.normpath(max(built, key=os.path.getmtime))
+    return os.path.expanduser(JAR_FILE)
 
 
 # parse arguments and options
@@ -71,8 +87,10 @@ parser.add_argument('--jvm-args', type=str,
                     help='JVM arguments to pass to the Java Virtual Machine.')
 
 parser.add_argument('--jar-file', type=str,
-                    default=JAR_FILE,
-                    help='Absolute path to the jar file.')
+                    default=find_jar_file(),
+                    help='Path to the jar file. By default, use the CHOCO_JAR environment variable, \
+                        then the light jar built in parsers/target, \
+                        then the one in the local Maven repository.')
 
 
 # Since the id can be negative, we need to surround the argument with parentheses
@@ -82,6 +100,10 @@ for i in sys.argv[1:]:
         sys.argv[sys.argv.index(i) + 1] = "(" + sys.argv[sys.argv.index(i) + 1] + ")"
 
 args = parser.parse_args()
+
+if not os.path.isfile(args.jar_file):
+    sys.exit(f'Choco jar file not found: {args.jar_file}\n'
+             'Build it with `mvn package -DskipTests`, or set the CHOCO_JAR environment variable.')
 
 if args.verbose:
     LOG_LEVEL = 'INFO'
@@ -101,13 +123,13 @@ if args.parallel:
 if args.stasol:
     arguments += ' -stasol'
 if args.random_seed:
-    arguments += ' -r ' + str(args.random_seed)
+    arguments += ' -seed ' + str(args.random_seed)
 if args.cp_profiler:
     arguments += ' --cp-profiler ' + str(args.cp_profiler[0]) + ',' + str(args.cp_profiler[1])
 if args.lazy_clause_generation:
     arguments += ' -lcg'
 
-cmd = f'java {args.jvm_args} -cp {args.jar_file} org.chocosolver.parser.flatzinc.ChocoFZN {args.fzn_file} {arguments}'
+cmd = f'java {args.jvm_args} -cp "{args.jar_file}" org.chocosolver.parser.flatzinc.ChocoFZN {args.fzn_file} {arguments}'
 
 # if __lvl__ == 'INFO':
 #cprint(f'Running command: {cmd}')

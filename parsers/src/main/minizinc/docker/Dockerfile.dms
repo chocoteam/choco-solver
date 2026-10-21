@@ -17,21 +17,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY ./parsers/target/choco-solver-*-light.jar /choco/choco.jar
-COPY ./parsers/src/main/minizinc/fzn-choco.py /choco/fzn-choco.py
-COPY ./parsers/src/main/minizinc/fzn-choco.sh /choco/fzn-choco.sh
-COPY ./parsers/src/main/minizinc/choco.msc /choco/choco.msc
-COPY ./parsers/src/main/minizinc/mzn_lib/* /choco/mzn-lib/
 
-RUN sed -i 's&JAR_FILE=.*&JAR_FILE="/choco/choco.jar"&g' /choco/fzn-choco.py && \
-    sed -i 's&"mznlib".*&"mznlib":"/choco/mzn-lib/",&g' /choco/choco.msc && \
-    sed -i 's&"executable".*&"executable":"/choco/fzn-choco.sh",&g' /choco/choco.msc && \
+# The jar installs itself as a MiniZinc solver in /choco (see parsers/src/main/minizinc/README.md)
+RUN java -jar /choco/choco.jar --install-minizinc /choco && \
     mkdir -p /root/.minizinc && \
     echo '{"mzn_solver_path": ["/choco"],' > /root/.minizinc/Preferences.json && \
     echo '"tagDefaults": [["", "org.choco.choco"]]}' >> /root/.minizinc/Preferences.json && \
-    chmod +x /choco/fzn-choco.sh && \
     if [ -n "$EXTRA_FZN_ARGS" ]; then \
-      echo '#!/bin/bash' > /choco/fzn-choco.sh && \
-      echo 'python3 "$(dirname "$0")/fzn-choco.py" "$@" "'"$EXTRA_FZN_ARGS"'"' >> /choco/fzn-choco.sh; \
+      WRAPPER=$(ls /choco/choco-*/fzn-choco.sh) && \
+      echo '#!/bin/bash' > "$WRAPPER" && \
+      echo 'python3 "$(dirname "$0")/fzn-choco.py" "$@" "'"$EXTRA_FZN_ARGS"'"' >> "$WRAPPER"; \
     fi
 
 # Stage 2: Runtime image - lean and efficient

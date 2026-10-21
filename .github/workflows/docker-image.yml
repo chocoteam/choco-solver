@@ -15,11 +15,43 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: 'true'
-      - name: Build and push Docker images
-        uses: docker/build-push-action@v1.1.0
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # The Dockerfile copies the light jar of the parsers module
+      - name: Build the jar
+        run: mvn --file pom.xml -q package -DskipTests
+
+      # Tag v6.0.2 gives images 6.0.2 (standard) and 6.0.2-X (with LCG), as build-images.sh does
+      - name: Compute the image version
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: chocoteam/choco-solver-mzn
-          dockerfile: parsers/src/main/minizinc/docker/Dockerfile_Choco.dms
-          tag_with_ref: true
+
+      - name: Build and push the standard image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: parsers/src/main/minizinc/docker/Dockerfile.dms
+          platforms: linux/amd64
+          push: true
+          tags: chocoteam/choco-solver-mzn:${{ steps.version.outputs.version }}
+
+      - name: Build and push the image with LCG
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: parsers/src/main/minizinc/docker/Dockerfile.dms
+          platforms: linux/amd64
+          push: true
+          build-args: EXTRA_FZN_ARGS=-lcg
+          tags: chocoteam/choco-solver-mzn:${{ steps.version.outputs.version }}-X

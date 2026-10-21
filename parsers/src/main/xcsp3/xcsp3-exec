@@ -3,11 +3,12 @@
 TIME_LIMIT=500
 MEM_LIMIT=4000
 LVL="COMPET"
-DIR=/Users/kyzrsoze/Sources/CHOCO/continuous-branch/parsers/target/
+# By default, look for the jar in the 'parsers/target' directory of the repository
+DIR="$(dirname "$0")/../../../target"
 TDIR=./
 SEED=0
-JAR_NAME=choco-parsers-4.10.15-SNAPSHOT-light.jar
-CHOCO_JAR=${DIR}/${JAR_NAME}
+# Can be set by the environment, otherwise the most recent light jar in DIR is used
+CHOCO_JAR=${CHOCO_JAR:-}
 usage="\
 
 Usage: xcsp3_choco.sh [<options>] [<file>]
@@ -24,8 +25,8 @@ OPTIONS:
         When this option is not given the solver should search for, and output the first solution or the best known one.
 
     -dir <s>
-        Stands for the directory where the uploaded files reside.
-        The default is ${DIR}.
+        Stands for the directory where the jar file resides.
+        The default is the 'parsers/target' directory of the repository.
 
     -tl <n>
         Stands for the maximum CPU time given to solver (in seconds).
@@ -50,7 +51,8 @@ OPTIONS:
         The default is ${SEED}.
 
     -jar <j>
-        Override the jar file.  (The default is $CHOCO_JAR.)
+        Override the jar file.  (The default is $CHOCO_JAR if set,
+        otherwise the most recent choco-solver-*-light.jar in the -dir directory.)
 
     --jargs <args>
 		Override default java argument (\"-Xss64m -Xms64m -Xmx4096m -server\")
@@ -143,9 +145,19 @@ done
 
 FILE="$1"
 
+if test -z "${CHOCO_JAR}"
+then
+    CHOCO_JAR=$(ls -t "${DIR}"/choco-solver-*-light.jar 2>/dev/null | head -n 1)
+fi
+if test ! -f "${CHOCO_JAR}"
+then
+    echo "%% Choco jar file not found, build it with 'mvn package -DskipTests' or use -jar" 1>&2
+    exit 1
+fi
+
 ARGS="$ARGS -limit=[${TIME_LIMIT}s] "
 
-CMD="java -XX:+UseSerialGC -server -Xss128M -Xmx${MEM_LIMIT}m -cp .:${CHOCO_JAR} org.chocosolver.parser.xcsp.ChocoXCSP \"${FILE}\" ${ARGS}"
+CMD="java -XX:+UseSerialGC -server -Xss128M -Xmx${MEM_LIMIT}m -cp \".:${CHOCO_JAR}\" org.chocosolver.parser.xcsp.ChocoXCSP \"${FILE}\" ${ARGS}"
 
 eval ${CMD}
 
