@@ -10,8 +10,6 @@ import gnu.trove.list.TIntList;
 
 import java.util.Arrays;
 
-import static org.chocosolver.sat.MiniSat.clauseCounter;
-
 /**
  * Clause -- a simple class for representing a clause
  * <br/>
@@ -81,7 +79,7 @@ public abstract class Clause extends Reason {
     public String toString() {
         StringBuilder st = new StringBuilder();
         st.append("T").append(Thread.currentThread().getId());
-        st/*.append("~#").append(id)*/.append(" Size:").append(size()).append(" - ");
+        st.append(" Size:").append(size()).append(" - ");
         if (size() > 0) {
             st.append(_g(0));
         }
@@ -93,7 +91,7 @@ public abstract class Clause extends Reason {
 
     public String toString(MiniSat sat) {
         StringBuilder st = new StringBuilder();
-        st.append("#")/*.append(id)*/.append(" Size:").append(size()).append(" - ");
+        st.append("#").append(" Size:").append(size()).append(" - ");
         if (size() > 0) {
             st.append(sat.printLit(_g(0)));
         }

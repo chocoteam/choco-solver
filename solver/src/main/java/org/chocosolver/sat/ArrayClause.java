@@ -10,8 +10,6 @@ import gnu.trove.list.TIntList;
 
 import java.util.Arrays;
 
-import static org.chocosolver.sat.MiniSat.clauseCounter;
-
 /**
  * An implementation of a clause as an array of literals.
  * @author Charles Prud'homme
@@ -36,10 +34,6 @@ public final class ArrayClause extends Clause {
      * s.t. literals are partitioned w.r.t their decision level. The LBD of C is exactly n."
      */
     private int lbd = Integer.MAX_VALUE;
-    /**
-     * A unique id
-     */
-    private final int id;
 
     /**
      * Position of the last scanned literal
@@ -60,8 +54,6 @@ public final class ArrayClause extends Clause {
             literals_ = ps.clone();//org.chocosolver.sat.ArrayClause.reduceOs(ps);
         }
         this.learnt = learnt;
-        this.id = clauseCounter.get();
-        clauseCounter.set(id + 1);
     }
 
     /**
@@ -106,8 +98,6 @@ public final class ArrayClause extends Clause {
         //super(0);
         literals_ = ps.toArray();
         this.learnt = learnt;
-        this.id = clauseCounter.get();
-        clauseCounter.set(id + 1);
     }
 
     /**

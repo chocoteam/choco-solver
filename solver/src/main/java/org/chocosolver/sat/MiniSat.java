@@ -90,8 +90,6 @@ public class MiniSat implements SatFactory {
     public static final int lTrue = 0b01;
     public static final int lFalse = 0b10;
     public static final int lUndef = 0b11;
-    // undefined clause
-    protected static ThreadLocal<Integer> clauseCounter = ThreadLocal.withInitial(() -> 0);
     private final Comparator<Clause> comp = Comparator.<Clause>comparingInt(c -> -c.getLBD())
             .thenComparingDouble(Clause::getActivity);
     public static final Clause C_Undef = Clause.undef();
@@ -176,7 +174,6 @@ public class MiniSat implements SatFactory {
             vardata.set(v, new VarData(R_Undef, trailMarker(), trail_.size()));
             trail_.add(l);
         }
-        clauseCounter.set(2);
         analysisRound = 1; // Starts at 1 so that 0 means unvisited
     }
 
