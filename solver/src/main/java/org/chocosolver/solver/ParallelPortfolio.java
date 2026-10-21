@@ -267,7 +267,9 @@ public class ParallelPortfolio {
      * </p>
      *
      * @return <code>true</code> if and only if at least one new solution has been found.
-     * @throws SolverException if no model or only model has been added.
+     * @throws SolverException if no model has been added.
+     * @throws RuntimeException the exception thrown by a reliable model, if any.
+     * The other models are then stopped.
      */
     public boolean solve() {
         solverTerminated.set(false);
@@ -291,18 +293,20 @@ public class ParallelPortfolio {
                 }
             }));
         }
-        SolverException error = null;
+        Throwable error = null;
         try {
-            for (Future<?> future : futures) {
+            for (int i = 0; i < futures.size(); i++) {
                 try {
-                    future.get();
+                    futures.get(i).get();
                 } catch (ExecutionException e) {
-                    //If an InvalidSolutionException occurs and at least one model is not reliable
-                    // the exception may come from this model and should be ignored
-                    if (e.getCause() instanceof InvalidSolutionException
-                            && reliableness.get(((InvalidSolutionException) e.getCause()).getModel())) {
-                        error = (SolverException) e.getCause();
-                        // stop the other models
+                    // An error in a reliable model makes the result of the portfolio unreliable:
+                    // the other models are stopped and the error is thrown.
+                    // An error in an unreliable model (for instance, an InvalidSolutionException
+                    // due to the constraints it adds) is ignored.
+                    if (reliableness.get(models.get(i))) {
+                        if (error == null) {
+                            error = e.getCause();
+                        }
                         solverTerminated.set(true);
                     } else {
                         if (!(e.getCause() instanceof InvalidSolutionException)) {
@@ -321,7 +325,11 @@ public class ParallelPortfolio {
         executorService.shutdownNow();
         if (error != null) {
             solverTerminated.set(false);
-            throw error;
+            // the tasks are runnables: they can only throw unchecked exceptions
+            if (error instanceof Error) {
+                throw (Error) error;
+            }
+            throw (RuntimeException) error;
         }
         solverTerminated.set(false);// otherwise, solver.isStopCriterionMet() always returns true
         if (solutionFound.get() && models.get(0).getResolutionPolicy() != ResolutionPolicy.SATISFACTION) {

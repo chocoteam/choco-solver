@@ -6,6 +6,7 @@
  */
 package org.chocosolver.solver;
 
+import org.chocosolver.solver.search.SearchState;
 import org.chocosolver.solver.search.loop.monitors.IMonitorOpenNode;
 import org.chocosolver.solver.search.restart.MonotonicCutoff;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
@@ -370,5 +371,54 @@ public class PortFolioTest {
             solving.join();
         }
         Assert.assertTrue(allStarted, (n - started.getCount()) + "/" + n + " searches started");
+    }
+
+    private static Model pigeonhole(int pigeons) {
+        Model model = new Model();
+        IntVar[] x = model.intVarArray("x", pigeons, 0, pigeons - 2);
+        for (int i = 0; i < x.length; i++) {
+            for (int j = i + 1; j < x.length; j++) {
+                model.arithm(x[i], "!=", x[j]).post();
+            }
+        }
+        model.getSolver().setSearch(intVarSearch(new InputOrder<>(model), new IntDomainMin(), x));
+        return model;
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testErrorInReliableModel() {
+        // the error of a reliable model is thrown, and the other models are stopped
+        ParallelPortfolio pares = new ParallelPortfolio();
+        Model failing = pigeonhole(14);
+        failing.getSolver().plugMonitor(new IMonitorOpenNode() {
+            @Override
+            public void beforeOpenNode() {
+                if (failing.getSolver().getNodeCount() == 1000) {
+                    throw new IllegalStateException("bug in a reliable model");
+                }
+            }
+        });
+        pares.addModel(failing, true, true);
+        pares.addModel(pigeonhole(14), true, true);
+        IllegalStateException e = Assert.expectThrows(IllegalStateException.class, pares::solve);
+        Assert.assertEquals(e.getMessage(), "bug in a reliable model");
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testErrorInUnreliableModel() {
+        // the error of an unreliable model is ignored
+        ParallelPortfolio pares = new ParallelPortfolio();
+        Model failing = pigeonhole(14);
+        failing.getSolver().plugMonitor(new IMonitorOpenNode() {
+            @Override
+            public void beforeOpenNode() {
+                throw new IllegalStateException("bug in an unreliable model");
+            }
+        });
+        pares.addModel(failing, true, false);
+        pares.addModel(pigeonhole(6), true, true);
+        Assert.assertFalse(pares.solve());
+        // the reliable model proves that there is no solution
+        Assert.assertEquals(pares.getModels().get(1).getSolver().getSearchState(), SearchState.TERMINATED);
     }
 }
