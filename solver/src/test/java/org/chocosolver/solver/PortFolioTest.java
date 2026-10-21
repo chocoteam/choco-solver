@@ -6,7 +6,10 @@
  */
 package org.chocosolver.solver;
 
+import org.chocosolver.solver.search.loop.monitors.IMonitorOpenNode;
 import org.chocosolver.solver.search.restart.MonotonicCutoff;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
+import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
@@ -16,6 +19,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static org.chocosolver.solver.ModelTest.knapsack;
@@ -319,5 +326,49 @@ public class PortFolioTest {
                 Assert.assertTrue(count >= 7, "only " + count + " solution(s) with " + n + " model(s)");
             }
         }
+    }
+
+    /**
+     * Every model of a portfolio must start its search, even when there are more models
+     * than threads in the common ForkJoinPool (issue #1262).
+     */
+    @Test(groups = "1s", timeOut = 60000)
+    public void testIssue1262() throws InterruptedException {
+        int n = ForkJoinPool.getCommonPoolParallelism() + 3;
+        CountDownLatch started = new CountDownLatch(n);
+        AtomicBoolean stop = new AtomicBoolean();
+        ParallelPortfolio pares = new ParallelPortfolio();
+        for (int k = 0; k < n; k++) {
+            // pigeonhole problem: 14 pigeons, 13 holes, long to prove unsatisfiable
+            Model model = new Model();
+            IntVar[] x = model.intVarArray("x", 14, 0, 12);
+            for (int i = 0; i < x.length; i++) {
+                for (int j = i + 1; j < x.length; j++) {
+                    model.arithm(x[i], "!=", x[j]).post();
+                }
+            }
+            model.getSolver().setSearch(intVarSearch(new InputOrder<>(model), new IntDomainMin(), x));
+            model.getSolver().addStopCriterion(stop::get);
+            AtomicBoolean counted = new AtomicBoolean();
+            model.getSolver().plugMonitor(new IMonitorOpenNode() {
+                @Override
+                public void beforeOpenNode() {
+                    if (counted.compareAndSet(false, true)) {
+                        started.countDown();
+                    }
+                }
+            });
+            pares.addModel(model, true, true);
+        }
+        Thread solving = new Thread(pares::solve);
+        solving.start();
+        boolean allStarted;
+        try {
+            allStarted = started.await(10, TimeUnit.SECONDS);
+        } finally {
+            stop.set(true);
+            solving.join();
+        }
+        Assert.assertTrue(allStarted, (n - started.getCount()) + "/" + n + " searches started");
     }
 }
