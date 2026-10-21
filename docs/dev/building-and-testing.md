@@ -35,8 +35,11 @@ Rules (details and rationale in [best-practices.md](best-practices.md), section 
 - tag each test with its group, e.g. `@Test(groups = "1s")`;
 - prefer many short tests to a long one.
 
-Continuous integration (`.github/workflows/maven-test.yml`) runs the groups `1s`, `10s`, `checker`, `lcg`,
-then the parser groups, and Ibex. It is not triggered by changes limited to `docs/`.
+Continuous integration (`.github/workflows/maven-test.yml`) runs, in parallel, the groups `1s`, `10s`, `checker`, `lcg`,
+the parser groups, `mzn` (a job of its own, re-run alone when it fails on a slow runner) and Ibex. It is not triggered by changes limited to `docs/`.
+A failed test does not stop the run: each job ends with the list of all its failed tests
+(`scripts/test-failures.py`, also in the job summary). Locally, `mvn test -Dmaven.test.failure.ignore=true` tests every module
+whatever the failures, and `python3 scripts/test-failures.py` lists them.
 
 ## Style and headers
 

@@ -7,7 +7,6 @@
 [![javadoc.io](https://javadoc.io/badge2/org.choco-solver/choco-solver/javadoc.io.svg)](https://javadoc.io/doc/org.choco-solver/choco-solver)
 
 ![Build](https://github.com/chocoteam/choco-solver/actions/workflows/maven-test.yml/badge.svg)
-[![codecov.io](https://codecov.io/github/chocoteam/choco-solver/coverage.svg?branch=master)](https://codecov.io/github/chocoteam/choco-solver?branch=master)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/f1bafa113f94486b96343d63782c0f7a)](https://www.codacy.com/gh/chocoteam/choco-solver/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=chocoteam/choco-solver&amp;utm_campaign=Badge_Grade)
 
 

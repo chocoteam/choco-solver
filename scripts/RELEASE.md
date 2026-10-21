@@ -51,7 +51,7 @@ In **Actions > Release > Run workflow**, on the `develop` branch:
    If `master` or `develop` moved in between, the job stops: run the workflow again.
 
 The commits and the tag are authored by the identity set in the `env` of the workflow.
-Pushing the tag triggers the Docker image (`docker-image.yml`) and the JOSS paper draft (`draft-pdf.yml`).
+Pushing the tag triggers the Docker image (`docker-image.yml`).
 
 ## After the release (by hand)
 

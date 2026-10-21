@@ -1,18 +1,27 @@
-# This workflow will build a Java project with Maven
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+# Builds the project and runs the tests, one job per TestNG group.
+# A failed test does not stop Maven (-Dmaven.test.failure.ignore=true), so that every module is tested;
+# scripts/test-failures.py then lists all the failed tests (log, annotations, job summary) and fails the job.
 
 name: Java CI with Maven
 
 on:
   push:
+    branches: [ master, develop ]
     paths-ignore: [ 'docs/**' ]
   pull_request:
     paths-ignore: [ 'docs/**' ]
 
+# A new push on a pull request cancels the run of the previous one
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   test-ibex:
     runs-on: ubuntu-latest
-    # The different steps
     steps:
       - uses: actions/checkout@v4
         with:
@@ -24,26 +33,24 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      # Install Ibex
       - name: Install ibex
-        run: |
-          sh scripts/install-ibex.sh
+        run: sh scripts/install-ibex.sh
 
-      # Regression tests
       - name: Test Ibex
         run: |
           export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib/ibex/3rd
-          mvn --file pom.xml test -Pcoverage -DtestFailureIgnore=true -Dgroups=ibex
+          mvn --file pom.xml test -Dmaven.test.failure.ignore=true -Dgroups=ibex
+
+      - name: List the failed tests
+        run: python3 scripts/test-failures.py
 
   test-solver:
     runs-on: ubuntu-latest
-    # Tests matrix
     strategy:
-      #fail-fast: false
+      # A failing group does not cancel the others
+      fail-fast: false
       matrix:
         group: [ "1s", "10s", "checker", "lcg" ]
-
-    # The different steps
     steps:
       - uses: actions/checkout@v4
         with:
@@ -55,20 +62,19 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      # Regression tests
       - name: Test ${{ matrix.group }}
-        run: mvn --file pom.xml test -Pcoverage -DtestFailureIgnore=true -Dgroups=${{ matrix.group }}
+        run: mvn --file pom.xml test -Dmaven.test.failure.ignore=true -Dgroups=${{ matrix.group }}
+
+      - name: List the failed tests
+        run: python3 scripts/test-failures.py
 
   test-parser:
-    needs: [ test-solver ]
     runs-on: ubuntu-latest
-    # Tests matrix
     strategy:
-      #fail-fast: false
+      # A failing group does not cancel the others
+      fail-fast: false
       matrix:
         group: [ "xcsp", "dimacs", "mps" ]
-
-    # The different steps
     steps:
       - uses: actions/checkout@v4
         with:
@@ -80,20 +86,15 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      # Regression tests
       - name: Test ${{ matrix.group }}
-        run: mvn --file pom.xml test -Pcoverage -DtestFailureIgnore=true -Dgroups=${{ matrix.group }}
+        run: mvn --file pom.xml test -Dmaven.test.failure.ignore=true -Dgroups=${{ matrix.group }}
 
+      - name: List the failed tests
+        run: python3 scripts/test-failures.py
+
+  # Apart: it sometimes fails because the runner is too slow, and can then be re-run alone
   test-mzn:
-    needs: [ test-solver ]
     runs-on: ubuntu-latest
-    # Tests matrix
-    strategy:
-      #fail-fast: false
-      matrix:
-        group: [ "mzn" ]
-
-    # The different steps
     steps:
       - uses: actions/checkout@v4
         with:
@@ -105,6 +106,8 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      # Regression tests
-      - name: Test ${{ matrix.group }}
-        run: mvn --file pom.xml test -Pcoverage -DtestFailureIgnore=true -Dgroups=${{ matrix.group }}
+      - name: Test mzn
+        run: mvn --file pom.xml test -Dmaven.test.failure.ignore=true -Dgroups=mzn
+
+      - name: List the failed tests
+        run: python3 scripts/test-failures.py
