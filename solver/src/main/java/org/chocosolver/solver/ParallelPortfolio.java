@@ -440,6 +440,7 @@ public class ParallelPortfolio {
             if (!unalterable.get(model)) {
                 configureModel(model, searchID++);
             }
+            solver.prepareForExternalCuts();
         }
     }
 

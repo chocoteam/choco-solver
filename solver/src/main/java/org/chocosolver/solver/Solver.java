@@ -916,6 +916,18 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
+     * Prepares this solver to receive cuts from another thread, with {@link #onReceivingExternalCut(int)},
+     * while it is running.
+     * When LCG is plugged-in, the restart strategy that manages the cut injection is declared now,
+     * so that the restart strategies are not modified by another thread during the search.
+     */
+    void prepareForExternalCuts() {
+        if (isLCG()) {
+            getRestartBeforeCut();
+        }
+    }
+
+    /**
      * Return or declare and return the restart strategy that manages the cut injection.
      *
      * @return the restart strategy that manages the cut injection

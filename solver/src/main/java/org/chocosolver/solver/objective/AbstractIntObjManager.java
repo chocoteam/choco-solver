@@ -40,13 +40,15 @@ public abstract class AbstractIntObjManager implements IObjectiveManager<IntVar>
 
     /**
      * best lower bound found so far
+     * @implNote volatile since it can be updated by another thread (see {@link org.chocosolver.solver.ParallelPortfolio})
      **/
-    protected int bestProvedLB;
+    protected volatile int bestProvedLB;
 
     /**
      * best upper bound found so far
+     * @implNote volatile since it can be updated by another thread (see {@link org.chocosolver.solver.ParallelPortfolio})
      **/
-    protected int bestProvedUB;
+    protected volatile int bestProvedUB;
 
     /**
      * Define how the cut should be updated when posting the cut

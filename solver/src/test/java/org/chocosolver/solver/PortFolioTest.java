@@ -11,6 +11,7 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorOpenNode;
 import org.chocosolver.solver.search.restart.MonotonicCutoff;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
@@ -420,5 +421,44 @@ public class PortFolioTest {
         Assert.assertFalse(pares.solve());
         // the reliable model proves that there is no solution
         Assert.assertEquals(pares.getModels().get(1).getSolver().getSearchState(), SearchState.TERMINATED);
+    }
+
+    private static Model knapsackModel(boolean lcg, int seed) {
+        java.util.Random rnd = new java.util.Random(seed);
+        int n = 20;
+        int[] weights = new int[n];
+        int[] values = new int[n];
+        for (int i = 0; i < n; i++) {
+            weights[i] = 5 + rnd.nextInt(30);
+            values[i] = 5 + rnd.nextInt(30);
+        }
+        Model model = new Model("knapsack", SettingsBuilder.init().setLCG(lcg));
+        BoolVar[] take = model.boolVarArray("take", n);
+        IntVar profit = model.intVar("profit", 0, 1000);
+        model.scalar(take, weights, "<=", 150).post();
+        model.scalar(take, values, "=", profit).post();
+        model.setObjective(Model.MAXIMIZE, profit);
+        return model;
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testLCGOptimization() {
+        // the cuts are shared between LCG models running in parallel
+        for (int seed = 0; seed < 5; seed++) {
+            Model ref = knapsackModel(false, seed);
+            int best = -1;
+            while (ref.getSolver().solve()) {
+                best = ((IntVar) ref.getObjective()).getValue();
+            }
+            ParallelPortfolio pares = new ParallelPortfolio();
+            for (int k = 0; k < 4; k++) {
+                pares.addModel(knapsackModel(true, seed));
+            }
+            int found = -1;
+            while (pares.solve()) {
+                found = ((IntVar) pares.getBestModel().getObjective()).getValue();
+            }
+            Assert.assertEquals(found, best, "seed " + seed);
+        }
     }
 }
