@@ -33,7 +33,7 @@ NEXT MILESTONE
 - `ObjectiveStrategy`: a decision that does not reduce the domain of the objective is not returned anymore
 - **Breaking**: `ObjectiveStrategy` has a single constructor, `ObjectiveStrategy(objective, policy, fraction, largerHalfFirst)`. The `int[] coefs` parameter is replaced by a `double` fraction in [0, 1]: `[a, b]` becomes `b / (a + b)`
 - `ParallelPortfolio`: fix an endless enumeration of the same solution on satisfaction problems. Workers now restart on each solution only when optimizing
-- `ParallelPortfolio`: each model runs on its own thread (#1262). The searches were run by a parallel stream, i.e. on the common `ForkJoinPool`, so that some of them did not start before the end of others when there were more models than processors
+- `ParallelPortfolio`: each model runs on its own thread, so that all the searches start at once, even with more models than processors (#1262). The threads are reused between calls to `solve()` and the models no longer take a lock to check whether they must stop (twice as many nodes per second with 8 models). An exception thrown by a reliable model is now thrown by `solve()`, and the cuts on the objective shared between models are thread-safe
 
 #### Documentation
 - The user documentation and tutorials move from the website repository to `docs/` (imported by the website as a Hugo module), with tested Java and Python examples
