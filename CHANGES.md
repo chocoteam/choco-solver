@@ -19,15 +19,24 @@ NEXT MILESTONE
 - XCSP3: `xcsp3-exec` and `run.sh` no longer refer to absolute paths
 - `java -jar choco-solver-X.Y.Z-light.jar <file>` no longer prints its arguments before solving, which broke the XCSP3 output format
 - Docker: the `chocoteam/choco-solver-mzn` images, standard and with LCG (`-X`), are built and pushed on each tag
+- XCSP3 and FlatZinc: fix an endless enumeration of the same solution when enumerating all solutions of a satisfaction problem with free search or LCG. Restarting on each solution is now turned on only when optimizing
 
 #### Settings
 - The seed is declared in the settings: `SettingsBuilder.setSeed(long)`, the `seed` property or the `-seed` option (#1207, #1209). The `-seed` option of the parsers was ignored, and `dom/wdeg`, `CHS`, `FRBA`, `FLBA` and `activity` strategies always used a seed of 0; they now use the seed of the model. The default seed is still 0
+
+#### Constraints & Expressions
+- Fix n-ary `iff` and `xor` expressions (#1248, #1255): n-ary `iff` is now evaluated as "all the expressions are equal", as in `decompose()`, and their reification no longer relies on a free auxiliary variable
 
 #### Search & Strategies
 - `ObjectiveStrategy`: fix the split point of the `DICHOTOMIC` policy, which was rounded down for both `MINIMIZE` and `MAXIMIZE` (#1252). It is now rounded towards the bound to improve, so that minimizing an objective and maximizing its opposite try mirrored cuts. This changes the cut tried when maximizing
 - `ObjectiveStrategy`: add a `largerHalfFirst` parameter to try the larger half of the objective domain first, also available with `Search.objectiveStrategy(objective, largerHalfFirst)`
 - `ObjectiveStrategy`: a decision that does not reduce the domain of the objective is not returned anymore
 - **Breaking**: `ObjectiveStrategy` has a single constructor, `ObjectiveStrategy(objective, policy, fraction, largerHalfFirst)`. The `int[] coefs` parameter is replaced by a `double` fraction in [0, 1]: `[a, b]` becomes `b / (a + b)`
+- `ParallelPortfolio`: fix an endless enumeration of the same solution on satisfaction problems. Workers now restart on each solution only when optimizing
+
+#### Documentation
+- The user documentation and tutorials move from the website repository to `docs/` (imported by the website as a Hugo module), with tested Java and Python examples
+- Add a developer guide (`docs/dev`), `AGENTS.md`, and refresh `CONTRIBUTING.md` and the pull request template
 
 ### Deprecated API (to be removed in next release):
 - `Model.setSeed(long)`: declare the seed in the settings with `SettingsBuilder.setSeed(long)`
@@ -36,6 +45,7 @@ NEXT MILESTONE
 See [milestone 6.0.3](https://github.com/chocoteam/choco-solver/milestone/44)
 
 #### Contributors to this release:
+- Charles Prud'homme <charles.prudhomme@imt-atlantique.fr>
 
 
 **Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v6.0.2...v6.0.3
