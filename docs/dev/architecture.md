@@ -69,3 +69,8 @@ Any state of a propagator that must be restored on backtrack has to be stored in
 Main class: `org.chocosolver.parser.Parser`. Each format (`flatzinc`, `xcsp`, `dimacs`, `mps`) maps its input
 to `Model` and `Solver` API calls. Parser tests are run with dedicated TestNG groups
 (see [building-and-testing.md](building-and-testing.md)).
+
+`parsers/src/main/minizinc` holds what MiniZinc needs to call Choco-solver (`choco.msc`, the `mzn_lib`
+global constraints definition, the `fzn-choco` scripts). It is embedded in the jar under `minizinc/`,
+which `MiniZincInstaller` extracts on `java -jar ... --install-minizinc`.
+`parsers/src/main/xcsp3` holds scripts to run XCSP3 instances from the source code.
