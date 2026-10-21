@@ -27,8 +27,11 @@ import java.util.List;
 import java.util.Spliterator;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
@@ -140,6 +143,24 @@ public class ParallelPortfolio {
     private final AtomicBoolean solverTerminated = new AtomicBoolean(false);
     private final AtomicBoolean solutionFound = new AtomicBoolean(false);
     private final AtomicInteger solverRunning = new AtomicInteger(0);
+
+    /**
+     * Runs the models.
+     * A thread is created on demand when all the threads are busy and stops after being idle for a while,
+     * so that the threads are reused by successive calls to {@link #solve()} (e.g., when enumerating solutions).
+     * They are daemon threads, so that they do not prevent the JVM from exiting.
+     */
+    private final ExecutorService executor = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+            10L, TimeUnit.SECONDS, new SynchronousQueue<>(), new ThreadFactory() {
+                private final AtomicInteger count = new AtomicInteger();
+
+                @Override
+                public Thread newThread(Runnable r) {
+                    Thread t = new Thread(r, "choco-portfolio-" + count.getAndIncrement());
+                    t.setDaemon(true);
+                    return t;
+                }
+            });
 
     /**
      * Point to (one of) the solver(s) which found a solution
@@ -278,12 +299,11 @@ public class ParallelPortfolio {
         if (!isPrepared) {
             prepare();
         }
-        ExecutorService executorService = Executors.newFixedThreadPool(models.size());
         // run the solve() method of each model in parallel, one dedicated thread per model,
         // so that no model waits for another one to complete (see issue #1262)
         List<Future<?>> futures = new ArrayList<>(models.size());
         for (Model m : models) {
-            futures.add(executorService.submit(() -> {
+            futures.add(executor.submit(() -> {
                 if (!solverTerminated.get()) {
                     boolean so = m.getSolver().solve();
                     // if a solution is found, update the best model
@@ -322,7 +342,6 @@ public class ParallelPortfolio {
             Thread.currentThread().interrupt();
             solverTerminated.set(true);
         }
-        executorService.shutdownNow();
         if (error != null) {
             solverTerminated.set(false);
             // the tasks are runnables: they can only throw unchecked exceptions
