@@ -122,7 +122,7 @@ public class Flatzinc extends RegParser {
         datas = new Datas[nb_cores];
         String iname = instance == null ? "" : Paths.get(instance).getFileName().toString();
         for (int i = 0; i < nb_cores; i++) {
-            Model threadModel = new Model(iname + "_" + (i + 1), this);
+            Model threadModel = newModel(iname + "_" + (i + 1), this);
             threadModel.getSolver().logWithANSI(ansi);
             portfolio.addModel(threadModel);
             datas[i] = new Datas(threadModel, level, oss);

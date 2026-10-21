@@ -36,6 +36,14 @@
     </properties>
 
     <dependencies>
+        <!-- build-time only: generates RecordingModel; declared here so that the reactor builds it first -->
+        <dependency>
+            <groupId>org.choco-solver</groupId>
+            <artifactId>choco-codegen</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
         <dependency>
             <groupId>dk.brics.automaton</groupId>
             <artifactId>automaton</artifactId>
@@ -61,6 +69,19 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.choco-solver</groupId>
+                            <artifactId>choco-codegen</artifactId>
+                            <version>${project.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>${maven.assembly.plugin.version}</version>

@@ -37,7 +37,7 @@ public class FiniteAutomaton implements IAutomaton {
     private ArrayList<State> states;
     private TIntHashSet alphabet;
     private int nbStates;
-    private final HashSet<State> nexts = new HashSet<>();
+    private HashSet<State> nexts = new HashSet<>();
     private int min = Character.MIN_VALUE;
     private int max = Character.MAX_VALUE;
 
@@ -595,6 +595,8 @@ public class FiniteAutomaton implements IAutomaton {
 
     public FiniteAutomaton clone() throws CloneNotSupportedException {
         FiniteAutomaton auto = (FiniteAutomaton) super.clone();
+        // working buffer of delta(int, int, TIntHashSet): must not be shared with the clone
+        auto.nexts = new HashSet<>();
         auto.representedBy = new Automaton();
         auto.states = new ArrayList<>();
         auto.stateToIndex = new TObjectIntHashMap<>();
@@ -613,6 +615,7 @@ public class FiniteAutomaton implements IAutomaton {
         for (int[] t : transitions) {
             auto.addTransition(t[0], t[1], t[2]);
         }
+        auto.representedBy.setDeterministic(this.representedBy.isDeterministic());
         return auto;
     }
 

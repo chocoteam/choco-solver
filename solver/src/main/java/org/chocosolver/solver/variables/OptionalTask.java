@@ -10,6 +10,7 @@ import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.spec.Recorder;
 
 /**
  * Container representing an optional task:
@@ -58,8 +59,11 @@ public class OptionalTask extends Task {
      * @param performed performed variable
      */
     public OptionalTask(Model model, int est, int lst, int d, int ect, int lct, BoolVar performed) {
-        super(model, est, lst, d, ect, lct);
-        this.performed = performed;
+        this(buildVars(model, est, lst, d, ect, lct), performed);
+    }
+
+    private OptionalTask(IntVar[] vars, BoolVar performed) {
+        this(vars[0], vars[1], vars[2], performed);
     }
 
     /**
@@ -82,8 +86,7 @@ public class OptionalTask extends Task {
      * @param performed performed variable
      */
     public OptionalTask(IntVar s, int d, BoolVar performed) {
-        super(s, d);
-        this.performed = performed;
+        this(s, s.getModel().intVar(d), s.getModel().offset(s, d), performed);
     }
 
     /**
@@ -106,8 +109,7 @@ public class OptionalTask extends Task {
      * @param performed performed variable
      */
     public OptionalTask(IntVar s, IntVar d, BoolVar performed) {
-        super(s, d);
-        this.performed = performed;
+        this(s, d, endOf(s, d), performed);
     }
 
     /**
@@ -132,8 +134,7 @@ public class OptionalTask extends Task {
      * @param performed performed variable
      */
     public OptionalTask(IntVar s, int d, IntVar e, BoolVar performed) {
-        super(s, d, e);
-        this.performed = performed;
+        this(s, s.getModel().intVar(d), e, performed);
     }
 
     /**
@@ -160,6 +161,13 @@ public class OptionalTask extends Task {
     public OptionalTask(IntVar s, IntVar d, IntVar e, BoolVar performed) {
         super(s, d, e);
         this.performed = performed;
+        // every constructor ends here: journalize the creation of this task, if its model is recorded
+        if (getClass() == OptionalTask.class) {
+            Recorder r = s.getModel().getRecorder();
+            if (r != null) {
+                r.newTask(this, s, d, e, performed);
+            }
+        }
     }
 
     //***********************************************************************************
