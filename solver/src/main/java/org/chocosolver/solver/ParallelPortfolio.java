@@ -28,6 +28,7 @@ import java.util.Spliterator;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
@@ -271,9 +272,11 @@ public class ParallelPortfolio {
             prepare();
         }
         ExecutorService executorService = Executors.newFixedThreadPool(models.size());
-        try {
-            // run the solve() method of each model in parallel
-            executorService.submit(() -> models.parallelStream().forEach(m -> {
+        // run the solve() method of each model in parallel, one dedicated thread per model,
+        // so that no model waits for another one to complete (see issue #1262)
+        List<Future<?>> futures = new ArrayList<>(models.size());
+        for (Model m : models) {
+            futures.add(executorService.submit(() -> {
                 if (!getSolverTerminated().get()) {
                     boolean so = m.getSolver().solve();
                     // if a solution is found, update the best model
@@ -281,21 +284,40 @@ public class ParallelPortfolio {
                         getSolverTerminated().set(so || reliableness.get(m) || getSolverRunning().decrementAndGet() <= 0);
                     }
                 }
-            })).get();
-        } catch (InterruptedException | ExecutionException | SolverException e) {
-            getSolverRunning().decrementAndGet();
-            //If an InvalidSolutionException occurs and at least one model is not reliable
-            // the exception may come from this model and should be ignored
-            if (e.getCause() instanceof InvalidSolutionException) {
-                InvalidSolutionException ex = (InvalidSolutionException) e.getCause();
-                if (reliableness.get(ex.getModel())) {
-                    throw (SolverException) e.getCause();
-                }// else ignore the error
-            } else {
-                e.printStackTrace();
+            }));
+        }
+        SolverException error = null;
+        try {
+            for (Future<?> future : futures) {
+                try {
+                    future.get();
+                } catch (ExecutionException e) {
+                    //If an InvalidSolutionException occurs and at least one model is not reliable
+                    // the exception may come from this model and should be ignored
+                    if (e.getCause() instanceof InvalidSolutionException
+                            && reliableness.get(((InvalidSolutionException) e.getCause()).getModel())) {
+                        error = (SolverException) e.getCause();
+                        // stop the other models
+                        getSolverTerminated().set(true);
+                    } else {
+                        if (!(e.getCause() instanceof InvalidSolutionException)) {
+                            e.printStackTrace();
+                        }
+                        if (getSolverRunning().decrementAndGet() <= 0) {
+                            getSolverTerminated().set(true);
+                        }
+                    }
+                }
             }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            getSolverTerminated().set(true);
         }
         executorService.shutdownNow();
+        if (error != null) {
+            getSolverTerminated().set(false);
+            throw error;
+        }
         getSolverTerminated().set(false);// otherwise, solver.isStopCriterionMet() always returns true
         if (getSolutionFound().get() && models.get(0).getResolutionPolicy() != ResolutionPolicy.SATISFACTION) {
             int bestAll = getBestModel().getSolver().getBestSolutionValue().intValue();
