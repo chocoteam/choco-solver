@@ -72,8 +72,10 @@ for(int s=0;s<nbModels;s++){
 }
 ```
 
-Here all models are the same and the portfolio will change the search heuristics of all models but the first one.
-This means that the first thread will run according to your settings whereas the others will have a different configuration.
+Here all models are the same and the portfolio will change the search heuristics of each of them,
+so that the threads explore the search space in different ways.
+This means that the search strategy declared in a model added with `addModel(model)` is replaced
+(see [Auto-configuration](#auto-configuration) to keep it).
 
 Then, a call to `portfolio.solve()` will look for the first solution, whatever model you use to find it.
 The solver that found the solution first can then be consulted using the `portfolio.getBestModel()` method.
@@ -114,13 +116,17 @@ portfolio.streamSolutions().forEach(solution -> {
 
 ### Auto-configuration
 
-In order to specify yourself the configuration of each thread, you need to create the portfolio by setting the optional
-boolean argument `searchAutoConf` to false as follows:
+In order to specify yourself the configuration of a thread, declare the search strategy of its model,
+then add the model with `addModel(model, unalterable, reliable)` and `unalterable` set to `true`:
 
+{{< tabpane langEqualsHeader=true >}}
+{{< example "solving/Portfolio" "unalterable" >}}
+{{< /tabpane >}}
 
-```Java
-ParallelPortfolio portfolio = new ParallelPortfolio(false);
-```
+A model is *reliable* when it is expected to prove the absence of a solution (or of a better one).
+A model with constraints that remove solutions, posted to speed up the resolution, is unreliable:
+it does not stop the other models when it ends.
+There should be at least one reliable model in a portfolio.
 
 When dealing with multi threading resolution, very few data is shared between threads:
 every time a solution has been found its value is shared among solvers. Moreover,
@@ -129,6 +135,15 @@ This enables to explore the search space in various way, using different model s
 (this should be done in the dedicated method which builds the model, though).
 
 This assumes that the models are identical. It is possible to declare different models. But in the case of COP, you need to be aware that the value of the objective variable will be broadcast to the models for each new solution, to reduce the search space.
+
+### Threads and errors
+
+Each model runs in its own thread, whatever the number of processors: all the searches start at once.
+The threads are daemon threads, named `choco-portfolio-<i>`, and they are reused from one call to `solve()` to the next.
+They stop after 10 seconds of inactivity.
+
+If a reliable model throws an exception, the other models are stopped and `solve()` throws this exception.
+An exception thrown by an unreliable model is ignored, and the other models go on.
 
 ### Sharing no-goods
 
