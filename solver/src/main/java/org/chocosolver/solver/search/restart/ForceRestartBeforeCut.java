@@ -26,7 +26,7 @@ public class ForceRestartBeforeCut extends AbstractRestart {
     /**
      * Indicate if the search must restart
      */
-    private boolean mustRestart;
+    private volatile boolean mustRestart;
     /**
      * The value to cut
      */
@@ -70,8 +70,14 @@ public class ForceRestartBeforeCut extends AbstractRestart {
     @Override
     public boolean mustRestart(Solver solver) {
         if (mustRestart) {
-            cut.accept(value);
-            mustRestart = false;
+            // the cut is stored by another thread: read and reset it atomically,
+            // so that a cut stored in the meantime is not lost
+            Number n;
+            synchronized (this) {
+                n = value;
+                mustRestart = false;
+            }
+            cut.accept(n);
             return true;
         }
         return next.mustRestart(solver);
