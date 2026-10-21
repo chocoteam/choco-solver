@@ -100,8 +100,6 @@ Requirements:
 Choco-solver is available on [Maven Central Repository](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.choco-solver%22%20AND%20a%3A%22choco-solver%22),
 or directly from the [latest release](https://github.com/chocoteam/choco-solver/releases/latest).
 
-[Snapshot releases](https://oss.sonatype.org/content/repositories/snapshots/org/choco-solver/choco-solver/) are also available for curious.
-
 In the following, we distinguish two usages of Choco:
 
 - as a standalone library: the jar file includes all required dependencies,
@@ -129,18 +127,6 @@ So you only have to edit your `pom.xml` to declare the following library depende
    <artifactId>choco-solver</artifactId>
    <version>6.0.2</version>
 </dependency>
-```
-
-Note that if you want to test snapshot release, you should update your `pom.xml` with :
-
-```xml
-<repository>
-    <id>sonatype</id>
-    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-    <snapshots>
-        <enabled>true</enabled>
-    </snapshots>
-</repository>
 ```
 
 ### As a stand-alone library ###

@@ -1,0 +1,256 @@
+# Releases the version of develop (X.Y.Z-SNAPSHOT -> X.Y.Z), as scripts/release.sh does:
+# - prepare: checks develop, then builds the release commits (release branch, merge into master,
+#   merge back into develop with the next SNAPSHOT version) without pushing anything.
+#   The commits are uploaded as a git bundle, with the release notes and a summary;
+# - publish (not in dry-run, and only once approved in the 'release' environment): deploys to Maven Central
+#   (published automatically), pushes master, develop and the tag, creates the GitHub release
+#   and closes the milestone.
+#
+# Before running it, CHANGES.md must be up to date on develop (NEXT MILESTONE section, milestone link, contributors).
+#
+# Requirements:
+# - environment 'release' with required reviewers;
+# - secret RELEASE_TOKEN: token allowed to push to master and develop (bypassing branch protection),
+#   to create tags and releases, and to close milestones (contents: write, issues: write).
+#   Pushing with it, unlike with GITHUB_TOKEN, triggers the workflows that listen to tags;
+# - secrets OSS_SONATYPE_USERNAME / OSS_SONATYPE_PASSWORD: Central Portal user token;
+# - secrets MAVEN_GPG_PRIVATE_KEY / MAVEN_GPG_PASSPHRASE: signing key.
+
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry-run: build the release commits, but deploy and push nothing'
+        type: boolean
+        default: true
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  GIT_AUTHOR_NAME: "Charles Prud'homme"
+  GIT_AUTHOR_EMAIL: charles.prudhomme@imt-atlantique.fr
+  GIT_COMMITTER_NAME: "Charles Prud'homme"
+  GIT_COMMITTER_EMAIL: charles.prudhomme@imt-atlantique.fr
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      milestone: ${{ steps.changes.outputs.milestone }}
+      master_sha: ${{ steps.version.outputs.master_sha }}
+      develop_sha: ${{ steps.version.outputs.develop_sha }}
+    steps:
+      - name: Check the workflow runs on develop
+        if: github.ref != 'refs/heads/develop'
+        run: |
+          echo "::error::The release must be run from develop (got ${GITHUB_REF})"
+          exit 1
+
+      - uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-depth: 0
+          submodules: 'true'
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Determine the version to release
+        id: version
+        run: |
+          CURRENT=$(mvn -B -q org.apache.maven.plugins:maven-help-plugin:3.5.1:evaluate -Dexpression=project.version -DforceStdout)
+          [[ "${CURRENT}" == *-SNAPSHOT ]] || { echo "::error::develop is not a SNAPSHOT version (${CURRENT})"; exit 1; }
+          VERSION="${CURRENT%%-SNAPSHOT}"
+          if git rev-parse -q --verify "refs/tags/v${VERSION}" > /dev/null; then
+            echo "::error::Tag v${VERSION} already exists"
+            exit 1
+          fi
+          echo "Releasing version ${VERSION}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "master_sha=$(git rev-parse origin/master)" >> "$GITHUB_OUTPUT"
+          echo "develop_sha=$(git rev-parse origin/develop)" >> "$GITHUB_OUTPUT"
+
+      # Commits limited to docs/ do not trigger the CI: the last completed run on develop covers the last code change
+      - name: Check the CI of develop
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PENDING=$(gh run list --workflow maven-test.yml --branch develop --json status \
+            --jq '[.[] | select(.status != "completed")] | length')
+          [[ "${PENDING}" == "0" ]] || { echo "::error::The CI of develop is still running"; exit 1; }
+          read -r CONCLUSION SHA < <(gh run list --workflow maven-test.yml --branch develop --status completed --limit 1 \
+            --json conclusion,headSha --jq '.[0] | "\(.conclusion) \(.headSha)"')
+          echo "Last CI run on develop: ${CONCLUSION} (${SHA})"
+          [[ "${CONCLUSION}" == "success" ]] || { echo "::error::The last CI run on develop did not succeed"; exit 1; }
+
+      - name: Check CHANGES.md
+        id: changes
+        run: |
+          SECTION=$(awk '/^NEXT MILESTONE/{f=1; next} f && /^[0-9]+\.[0-9]+\.[0-9]+ - /{exit} f' CHANGES.md)
+          [[ -n "${SECTION}" ]] || { echo "::error::No NEXT MILESTONE section in CHANGES.md"; exit 1; }
+          MAJOR=$(echo "${SECTION}" | awk '/^### Major features/{f=1; next} /^### /{f=0} f && /^- /')
+          [[ -n "${MAJOR}" ]] || { echo "::error::The 'Major features' of NEXT MILESTONE are empty"; exit 1; }
+          MILESTONE=$(echo "${SECTION}" | grep -oE 'milestone/[0-9]+' | head -1 | cut -d/ -f2)
+          [[ -n "${MILESTONE}" ]] || { echo "::error::No milestone link in NEXT MILESTONE"; exit 1; }
+          CONTRIBUTORS=$(echo "${SECTION}" | awk '/^#### Contributors/{f=1; next} /^\*\*Full Changelog/{f=0} f && /^- /')
+          [[ -n "${CONTRIBUTORS}" ]] || { echo "::error::No contributors in NEXT MILESTONE"; exit 1; }
+          echo "milestone=${MILESTONE}" >> "$GITHUB_OUTPUT"
+
+      - name: Build the release commits
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git config user.name "${GIT_COMMITTER_NAME}"
+          git config user.email "${GIT_COMMITTER_EMAIL}"
+          git checkout -b "release-${VERSION}" develop
+          ./scripts/set_version.sh "${VERSION}"
+          mvn -B -q license:format
+          git commit -a -m "initiate release ${VERSION}"
+
+          git checkout -B master origin/master
+          git merge --no-ff -m "Merge branch 'release-${VERSION}'" "release-${VERSION}"
+
+          git checkout develop
+          git merge --no-ff -m "Merge branch 'master' into develop" master
+          ./scripts/set_version.sh --next "${VERSION}"
+          git commit -a -m "Prepare the code for the next version"
+
+      - name: Check the release builds
+        run: |
+          git checkout master
+          mvn -B -q install -DskipTests
+
+      - name: Extract the release notes
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          awk -v v="${VERSION}" '
+            index($0, v " - ") == 1 {f=1; getline; next}
+            f && /^[0-9]+\.[0-9]+\.[0-9]+ - /{exit}
+            f' CHANGES.md > release-notes.md
+          cat release-notes.md
+
+      - name: Bundle the release commits
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git bundle create release.bundle origin/master..master origin/develop..develop
+          {
+            echo "## Release ${VERSION}"
+            echo
+            echo "### master"
+            echo '```'
+            git log --oneline --graph origin/master..master | head -30
+            echo '```'
+            echo "### develop"
+            echo '```'
+            git log --oneline -3 develop
+            echo '```'
+            echo "### Changed files"
+            echo '```'
+            git diff --stat origin/master master | tail -15
+            echo '```'
+            echo "### Release notes"
+            cat release-notes.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ steps.version.outputs.version }}
+          path: |
+            release.bundle
+            release-notes.md
+
+  publish:
+    needs: prepare
+    if: ${{ !inputs.dry_run }}
+    runs-on: ubuntu-latest
+    environment: release
+    timeout-minutes: 90
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-depth: 0
+          submodules: 'true'
+          token: ${{ secrets.RELEASE_TOKEN }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-${{ needs.prepare.outputs.version }}
+          path: ${{ runner.temp }}/release
+
+      # The release commits are built on master and develop as they were when 'prepare' ran
+      - name: Check master and develop did not move
+        run: |
+          [[ "$(git rev-parse origin/master)" == "${{ needs.prepare.outputs.master_sha }}" ]] \
+            || { echo "::error::master moved since the preparation, run the release again"; exit 1; }
+          [[ "$(git rev-parse origin/develop)" == "${{ needs.prepare.outputs.develop_sha }}" ]] \
+            || { echo "::error::develop moved since the preparation, run the release again"; exit 1; }
+
+      - name: Restore the release commits
+        run: |
+          git config user.name "${GIT_COMMITTER_NAME}"
+          git config user.email "${GIT_COMMITTER_EMAIL}"
+          git checkout --detach
+          git fetch "${RUNNER_TEMP}/release/release.bundle" master:master develop:develop
+          git checkout master
+          git log --oneline -3
+
+      - name: Set up Maven Central repository
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+          server-id: central
+          server-username: CENTRAL_USERNAME
+          server-password: CENTRAL_PASSWORD
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+
+      # Deploy BEFORE pushing: if deployment fails, nothing is published
+      - name: Deploy to Maven Central
+        env:
+          CENTRAL_USERNAME: ${{ secrets.OSS_SONATYPE_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.OSS_SONATYPE_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+        run: mvn -B -P centralDeploy javadoc:jar source:jar deploy -DskipTests central-publishing:publish
+
+      - name: Push master, develop and the tag
+        run: |
+          git tag -a "v${VERSION}" -m "create tag ${VERSION}" master
+          git push --atomic origin master develop "v${VERSION}"
+
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          gh release create "v${VERSION}" --verify-tag --title "${VERSION}" \
+            --notes-file "${RUNNER_TEMP}/release/release-notes.md"
+
+      - name: Close the milestone
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          gh api -X PATCH "repos/${GITHUB_REPOSITORY}/milestones/${{ needs.prepare.outputs.milestone }}" \
+            -f state=closed --jq '"Closed milestone \(.title)"'
