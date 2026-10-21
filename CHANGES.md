@@ -17,6 +17,7 @@ NEXT MILESTONE
 - MiniZinc: `choco.msc` refers to its files with relative paths and the scripts find the jar file built in `parsers/target` (or given by `CHOCO_JAR`): nothing has to be edited to use them from the source code
 - MiniZinc: fix the random seed set from MiniZinc (`-r`), which was refused by Choco-solver
 - XCSP3: `xcsp3-exec` and `run.sh` no longer refer to absolute paths
+- `java -jar choco-solver-X.Y.Z-light.jar <file>` no longer prints its arguments before solving, which broke the XCSP3 output format
 - Docker: the `chocoteam/choco-solver-mzn` images, standard and with LCG (`-X`), are built and pushed on each tag
 
 #### Search & Strategies

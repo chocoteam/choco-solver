@@ -45,7 +45,6 @@ public class Parser {
             MiniZincInstaller.main(Arrays.copyOfRange(args, 1, args.length));
             return;
         }
-        System.out.printf("%s\n", Arrays.toString(args));
         new Parser().main0(args);
     }
 
