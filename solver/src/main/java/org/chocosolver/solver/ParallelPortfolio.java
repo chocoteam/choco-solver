@@ -132,6 +132,11 @@ public class ParallelPortfolio {
      */
     private final HashMap<Model, Boolean> unalterable;
 
+    /**
+     * Set to {@code true} to stop all the models.
+     * @implNote It is read by each model at each step of its search loop,
+     * so it must be accessed without any lock.
+     */
     private final AtomicBoolean solverTerminated = new AtomicBoolean(false);
     private final AtomicBoolean solutionFound = new AtomicBoolean(false);
     private final AtomicInteger solverRunning = new AtomicInteger(0);
@@ -139,7 +144,7 @@ public class ParallelPortfolio {
     /**
      * Point to (one of) the solver(s) which found a solution
      */
-    private Model finder;
+    private volatile Model finder;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////      CONSTRUCTOR      //////////////////////////////////////////////////////
@@ -265,9 +270,9 @@ public class ParallelPortfolio {
      * @throws SolverException if no model or only model has been added.
      */
     public boolean solve() {
-        getSolverTerminated().set(false);
-        getSolutionFound().set(false);
-        getSolverRunning().set(models.size());
+        solverTerminated.set(false);
+        solutionFound.set(false);
+        solverRunning.set(models.size());
         if (!isPrepared) {
             prepare();
         }
@@ -277,11 +282,11 @@ public class ParallelPortfolio {
         List<Future<?>> futures = new ArrayList<>(models.size());
         for (Model m : models) {
             futures.add(executorService.submit(() -> {
-                if (!getSolverTerminated().get()) {
+                if (!solverTerminated.get()) {
                     boolean so = m.getSolver().solve();
                     // if a solution is found, update the best model
                     if (!so || finder == m) {
-                        getSolverTerminated().set(so || reliableness.get(m) || getSolverRunning().decrementAndGet() <= 0);
+                        solverTerminated.set(so || reliableness.get(m) || solverRunning.decrementAndGet() <= 0);
                     }
                 }
             }));
@@ -298,28 +303,28 @@ public class ParallelPortfolio {
                             && reliableness.get(((InvalidSolutionException) e.getCause()).getModel())) {
                         error = (SolverException) e.getCause();
                         // stop the other models
-                        getSolverTerminated().set(true);
+                        solverTerminated.set(true);
                     } else {
                         if (!(e.getCause() instanceof InvalidSolutionException)) {
                             e.printStackTrace();
                         }
-                        if (getSolverRunning().decrementAndGet() <= 0) {
-                            getSolverTerminated().set(true);
+                        if (solverRunning.decrementAndGet() <= 0) {
+                            solverTerminated.set(true);
                         }
                     }
                 }
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            getSolverTerminated().set(true);
+            solverTerminated.set(true);
         }
         executorService.shutdownNow();
         if (error != null) {
-            getSolverTerminated().set(false);
+            solverTerminated.set(false);
             throw error;
         }
-        getSolverTerminated().set(false);// otherwise, solver.isStopCriterionMet() always returns true
-        if (getSolutionFound().get() && models.get(0).getResolutionPolicy() != ResolutionPolicy.SATISFACTION) {
+        solverTerminated.set(false);// otherwise, solver.isStopCriterionMet() always returns true
+        if (solutionFound.get() && models.get(0).getResolutionPolicy() != ResolutionPolicy.SATISFACTION) {
             int bestAll = getBestModel().getSolver().getBestSolutionValue().intValue();
             for (Model m : models) {
                 int mVal = m.getSolver().getBestSolutionValue().intValue();
@@ -330,7 +335,7 @@ public class ParallelPortfolio {
                 } else assert m.getResolutionPolicy() != ResolutionPolicy.MINIMIZE || mVal >= bestAll || m.getSolver().isLCG() : mVal + " < " + bestAll;
             }
         }
-        return getSolutionFound().get();
+        return solutionFound.get();
     }
 
     /**
@@ -422,7 +427,7 @@ public class ParallelPortfolio {
         for (int i = 0; i < models.size(); i++) {
             Model model = models.get(i);
             Solver solver = model.getSolver();
-            solver.addStopCriterion(() -> getSolverTerminated().get());
+            solver.addStopCriterion(solverTerminated::get);
             solver.plugMonitor((IMonitorSolution) () -> updateFromSolution(solver.getModel()));
             if (!unalterable.get(model)) {
                 configureModel(model, searchID++);
@@ -433,7 +438,7 @@ public class ParallelPortfolio {
     private synchronized void updateFromSolution(Model m) {
         if (m.getResolutionPolicy() == ResolutionPolicy.SATISFACTION) {
             finder = m;
-            getSolutionFound().set(true);
+            solutionFound.set(true);
         } else {
             int solverVal = ((IntVar) m.getObjective()).getValue();
             int bestVal = m.getSolver().getObjectiveManager().getBestSolutionValue().intValue();
@@ -443,7 +448,7 @@ public class ParallelPortfolio {
                 assert
                         m.getResolutionPolicy() != ResolutionPolicy.MINIMIZE || solverVal >= bestVal : solverVal + "<" + bestVal;
             if (solverVal == bestVal) {
-                getSolutionFound().set(true);
+                solutionFound.set(true);
                 finder = m;
                 models.forEach(s1 -> s1.getSolver().onReceivingExternalCut(bestVal));
             }
@@ -601,17 +606,5 @@ public class ParallelPortfolio {
                 }
             }
         }
-    }
-
-    private synchronized AtomicBoolean getSolverTerminated() {
-        return solverTerminated;
-    }
-
-    private synchronized AtomicBoolean getSolutionFound() {
-        return solutionFound;
-    }
-
-    private synchronized AtomicInteger getSolverRunning() {
-        return solverRunning;
     }
 }
