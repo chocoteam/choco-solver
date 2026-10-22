@@ -2541,10 +2541,17 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * For example regexp = "(1|2)(3*)(4|5)";
      * The same dfa can be used for different propagators.
      *
+     * When <i>vars</i> is empty, the constraint is satisfied if and only if the automaton accepts the empty word.
+     *
      * @param vars      sequence of variables
      * @param automaton a deterministic finite automaton defining the regular language
      */
     default Constraint regular(IntVar[] vars, IAutomaton automaton) {
+        if (vars.length == 0) {
+            return automaton.isFinal(automaton.getInitialState())
+                    ? ref().trueConstraint()
+                    : ref().falseConstraint();
+        }
         if (ref().getSolver().isLCG()) {
             throw new SolverException("regular constraint is not supported in LCG mode");
         }

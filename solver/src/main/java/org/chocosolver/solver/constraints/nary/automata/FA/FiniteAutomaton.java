@@ -74,6 +74,7 @@ public class FiniteAutomaton implements IAutomaton {
      * The regexp accepts digits  and numbers, in [0,65535].
      * However, to distinguish a number from a suite of digits, the former must be surrounded by '<' and '>'.
      * For instance, "12<34>" stands for a '1' (digit), followed by a '2' (digit) followed by a '34' (number).
+     * Letters are not symbols: a regexp containing a letter is refused.
      *
      * @param regexp the regular expression
      * @param min    an overall minimum value for transitions
@@ -93,6 +94,7 @@ public class FiniteAutomaton implements IAutomaton {
      * The regexp accepts digits  and numbers, in [0,65535].
      * However, to distinguish a number from a suite of digits, the former must be surrounded by '<' and '>'.
      * For instance, "12<34>" stands for a '1' (digit), followed by a '2' (digit) followed by a '34' (number).
+     * Letters are not symbols: a regexp containing a letter is refused.
      *
      * @param regexp the regular expression
      */
@@ -279,6 +281,9 @@ public class FiniteAutomaton implements IAutomaton {
         } catch (StateNotInAutomatonException e) {
 //            LOGGER.warn("Unable to perform delta lookup, state not in automaton : " + e);
         }
+        if (symbol < Character.MIN_VALUE || symbol > Character.MAX_VALUE) {
+            return -1;
+        }
         State s = states.get(source);
         State d = s.step(getCharFromInt(symbol));
         if (d != null) {
@@ -293,6 +298,9 @@ public class FiniteAutomaton implements IAutomaton {
             checkState(source);
         } catch (StateNotInAutomatonException e) {
 //            LOGGER.warn("Unable perform delta lookup, state not in automaton : " + e);
+        }
+        if (symbol < Character.MIN_VALUE || symbol > Character.MAX_VALUE) {
+            return;
         }
         State s = this.states.get(source);
         nexts.clear();

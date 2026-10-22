@@ -7,6 +7,7 @@
 package org.chocosolver.util.tools;
 
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
+import org.chocosolver.solver.exception.SolverException;
 
 /*
  * User : charles
@@ -61,6 +62,7 @@ public class StringUtils {
      *
      * @param strRegExp a regexp of integer
      * @return a char regexp
+     * @throws SolverException if the regexp contains a letter: a symbol is a digit or a number between '<' and '>'
      */
     public static String toCharExp(String strRegExp) {
         StringBuilder b = new StringBuilder(32);
@@ -73,7 +75,9 @@ public class StringUtils {
                 i = out;
             } else if (Character.isDigit(c)) {
                 b.append(FiniteAutomaton.getCharFromInt(Character.getNumericValue(c)));
-
+            } else if (Character.isLetter(c)) {
+                throw new SolverException("Unexpected letter '" + c + "' in the regexp \"" + strRegExp
+                        + "\": a symbol is either a digit or a number between '<' and '>', e.g. <" + (int) c + ">.");
             } else if (c == '{') {
                 int out = strRegExp.indexOf('}', i + 1);
                 b.append(c);
