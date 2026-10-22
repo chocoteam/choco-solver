@@ -12,6 +12,7 @@ NEXT MILESTONE
 #### Parsers
 - XCSP3: fix several constraints found wrong by the unit tests of PyCSP3 (#1248): `pow` in primitive constraints, `allDifferent` on a matrix with `except`, `ordered` with `lengths`, `lex` on a matrix with `ge` or `gt`, `sum` with a `notin` condition and `count` with a condition on an interval
 - XCSP3: handle reified constraints, i.e. `reifiedBy`, `hreifiedFrom` and `hreifiedTo`, which were ignored (#1248). The reification is refused with an explicit message when it cannot be handled, as for `slide` and logic meta-constraints
+- XCSP3: fix `cardinality` with variables as values and `closed="true"` (#1260): the closure was posted on free set variables, linked neither to the list nor to the values, which raised a `ClassCastException` in the default search. `globalCardinalityDec` now states that each variable of the list is equal to one of the values
 - XCSP3: add `XCSPParserTest`, which checks the solutions of small instances against the ones found by brute force
 - MiniZinc: the jar file installs itself as a MiniZinc solver with `java -jar choco-solver-X.Y.Z-light.jar --install-minizinc`, so that the scripts and the global constraints definition no longer need to be downloaded separately
 - MiniZinc: `choco.msc` refers to its files with relative paths and the scripts find the jar file built in `parsers/target` (or given by `CHOCO_JAR`): nothing has to be edited to use them from the source code

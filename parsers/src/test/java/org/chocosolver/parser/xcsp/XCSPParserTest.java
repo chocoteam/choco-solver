@@ -496,4 +496,17 @@ public class XCSPParserTest {
         check("<element>" + l + "<condition> (lt,1) </condition></element>", v -> v[0] < 1 || v[1] < 1 || v[2] < 1, vars);
         check("<element>" + l + "<condition> (ne,1) </condition></element>", v -> v[0] != 1 || v[1] != 1 || v[2] != 1, vars);
     }
+
+    @Test(groups = "xcsp")
+    public void testCardinalityClosedWithVariablesAsValues() throws Exception {
+        // #1260
+        Var[] vars = {var("x0", 0, 2), var("x1", 0, 2), var("x2", 0, 2), var("v", 0, 2), var("w", 0, 2)};
+        String c = "<cardinality><list> x0 x1 x2 </list><values closed=\"true\"> v w </values><occurs> %s </occurs></cardinality>";
+        Predicate<int[]> closed = s -> Arrays.stream(s, 0, 3).allMatch(x -> x == s[3] || x == s[4]);
+        check(String.format(c, "0..3 0..3"), closed, vars);
+        check(String.format(c, "1 0..3"), s -> closed.test(s) && Arrays.stream(s, 0, 3).filter(x -> x == s[3]).count() == 1, vars);
+        check(String.format(c, "1 2"), s -> closed.test(s)
+                && Arrays.stream(s, 0, 3).filter(x -> x == s[3]).count() == 1
+                && Arrays.stream(s, 0, 3).filter(x -> x == s[4]).count() == 2, vars);
+    }
 }

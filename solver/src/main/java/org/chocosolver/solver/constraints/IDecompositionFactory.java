@@ -17,7 +17,6 @@ import org.chocosolver.solver.constraints.nary.flow.PropMinCostMaxFlow;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -25,7 +24,6 @@ import org.chocosolver.util.tools.ArrayUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -320,7 +318,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
      * @param vars        collection of variables
      * @param values      collection of constrained values
      * @param occurrences collection of cardinality variables
-     * @param closed      restricts domains of vars to values if set to true
+     * @param closed      if set to true, each variable of vars takes the value of a variable of values
      */
     default void globalCardinalityDec(IntVar[] vars, IntVar[] values, IntVar[] occurrences, boolean closed) {
         assert values.length == occurrences.length;
@@ -328,21 +326,20 @@ public interface IDecompositionFactory extends ISelf<Model> {
             ref().count(values[i], vars, occurrences[i]).post();
         }
         if (closed) {
-            SetVar svars = ref().setVar(new int[]{},
-                    Arrays.stream(vars)
-                            .flatMapToInt(IntVar::stream)
-                            .boxed()
-                            .collect(Collectors.toSet())
-                            .stream().mapToInt(i -> i)
-                            .sorted().toArray());
-            SetVar svalues = ref().setVar(new int[]{},
-                    Arrays.stream(values)
-                            .flatMapToInt(IntVar::stream)
-                            .boxed()
-                            .collect(Collectors.toSet())
-                            .stream().mapToInt(i -> i)
-                            .sorted().toArray());
-            ref().subsetEq(svars, svalues).post();
+            // each variable of vars takes the value of (at least) one variable of values
+            for (IntVar x : vars) {
+                List<BoolVar> bools = new ArrayList<>();
+                for (IntVar v : values) {
+                    if (x.getLB() <= v.getUB() && v.getLB() <= x.getUB()) {
+                        bools.add(ref().arithm(x, "=", v).reify());
+                    }
+                }
+                if (bools.isEmpty()) {
+                    ref().falseConstraint().post();
+                } else {
+                    ref().addClausesBoolOrArrayEqualTrue(bools.toArray(new BoolVar[0]));
+                }
+            }
         }
     }
 
