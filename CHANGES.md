@@ -27,6 +27,9 @@ NEXT MILESTONE
 
 #### Constraints & Expressions
 - Fix n-ary `iff` and `xor` expressions (#1248, #1255): n-ary `iff` is now evaluated as "all the expressions are equal", as in `decompose()`, and their reification no longer relies on a free auxiliary variable
+- `regular`, `costRegular` and `multiCostRegular`: values of the variables outside [0,65535], e.g. negative ones, are no longer accepted instead of raising an exception (#280)
+- `regular` on an empty array is satisfied if and only if the automaton accepts the empty word, instead of raising an exception (#335)
+- `FiniteAutomaton` refuses a regexp containing a letter, which was silently mapped to another value (#318)
 
 #### Search & Strategies
 - `ObjectiveStrategy`: fix the split point of the `DICHOTOMIC` policy, which was rounded down for both `MINIMIZE` and `MAXIMIZE` (#1252). It is now rounded towards the bound to improve, so that minimizing an objective and maximizing its opposite try mirrored cuts. This changes the cut tried when maximizing
@@ -39,6 +42,7 @@ NEXT MILESTONE
 #### Documentation
 - The user documentation and tutorials move from the website repository to `docs/` (imported by the website as a Hugo module), with tested Java and Python examples
 - Add a developer guide (`docs/dev`), `AGENTS.md`, and refresh `CONTRIBUTING.md` and the pull request template
+- Document `CostAutomaton` and `ICostAutomaton`, and the limits of the regexps of `FiniteAutomaton` (#305)
 
 ### Deprecated API (to be removed in next release):
 - `Model.setSeed(long)`: declare the seed in the settings with `SettingsBuilder.setSeed(long)`

@@ -19,6 +19,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton.makeSingleResource;
@@ -433,5 +434,46 @@ public class CostRegularTest {
                 costmatrix[i][j] = (j==1 ? 1 : 0);
 
         return CostAutomaton.makeSingleResource(fa,costmatrix,0,taille);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testJavadocExample() {
+        // the example of the Javadoc of CostAutomaton and of the documentation (#305)
+        Model model = new Model();
+        IntVar[] vars = model.intVarArray("x", 3, 0, 2);
+        IntVar cost = model.intVar("cost", 0, 10);
+        int[][] costs = new int[3][];
+        Arrays.fill(costs, new int[]{0, 1, 5});
+        ICostAutomaton auto = CostAutomaton.makeSingleResource(new FiniteAutomaton("(0|1|2)*"), costs,
+                cost.getLB(), cost.getUB());
+        model.costRegular(vars, cost, auto).post();
+        int count = 0;
+        while (model.getSolver().solve()) {
+            int c = 0;
+            for (IntVar x : vars) {
+                c += costs[0][x.getValue()];
+            }
+            assertEquals(cost.getValue(), c);
+            count++;
+        }
+        // brute force: the words of length 3 over {0,1,2} whose cost is at most 10
+        int expected = 0;
+        for (int w = 0; w < 27; w++) {
+            if (costs[0][w % 3] + costs[0][w / 3 % 3] + costs[0][w / 9] <= 10) {
+                expected++;
+            }
+        }
+        assertEquals(count, expected);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testNegativeValuesInDomains() {
+        // #280: values outside [0,65535] are never accepted, instead of raising an exception
+        Model model = new Model();
+        IntVar[] vars = model.intVarArray("x", 2, -2, 1);
+        IntVar cost = model.intVar("cost", 0, 2);
+        int[][] costs = {{0, 1}, {0, 1}};
+        model.costRegular(vars, cost, makeSingleResource(new FiniteAutomaton("(0|1)*"), costs, 0, 2)).post();
+        assertEquals(model.getSolver().findAllSolutions().size(), 4);
     }
 }

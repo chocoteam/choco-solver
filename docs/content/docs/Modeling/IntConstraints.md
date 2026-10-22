@@ -301,5 +301,24 @@ The mapping enables declaring regular expressions where a symbol is not only a d
 Then to distinct, in the word 101, the symbols 0, 1, 10 and 101, two additional `char` are allowed in a regexp: < and > which delimits numbers.
 
 In summary, a valid regexp for the automaton-based constraints is a combination of **digits** and Java Regexp special characters.
+Letters are not symbols: a regexp containing a letter is refused (write `<97>`, not `a`).
+A symbol is in [0,65535]; values of the variables outside this range are simply never accepted.
+`.` (any symbol) and negated classes such as `[^12]` are very slow on the whole range:
+restrict it with `new FiniteAutomaton(regexp, min, max)`.
+Posted on an empty array of variables, `regular` is satisfied if and only if the automaton accepts the empty word.
 
 `CostAutomaton` is an extension of `FiniteAutomaton` where costs can be declared for each transition.
+They are built with `CostAutomaton.makeSingleResource(automaton, costs, inf, sup)` for `costRegular`,
+and `CostAutomaton.makeMultiResources(...)` for `multiCostRegular`.
+In the cost arrays, a value is used as an index: `costs[layer][value]` is the cost of assigning `value`
+to the variable at index `layer`, and `inf` and `sup` bound the cost of a word.
+
+```java
+IntVar[] vars = model.intVarArray("x", 3, 0, 2);
+IntVar cost = model.intVar("cost", 0, 10);
+int[][] costs = new int[3][];
+Arrays.fill(costs, new int[]{0, 1, 5}); // the values 0, 1 and 2 cost 0, 1 and 5
+ICostAutomaton auto = CostAutomaton.makeSingleResource(
+        new FiniteAutomaton("(0|1|2)*"), costs, cost.getLB(), cost.getUB());
+model.costRegular(vars, cost, auto).post();
+```

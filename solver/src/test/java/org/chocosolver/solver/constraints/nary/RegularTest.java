@@ -343,6 +343,46 @@ public class RegularTest {
         assertEquals(model.getSolver().getSolutionCount(), 32);
     }
 
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "two")
+    public void testNegativeValuesInDomains(boolean decomposition) {
+        // #280: values outside [0,65535] are never accepted, instead of raising an exception
+        Model model = new Model();
+        IntVar[] x = model.intVarArray("x", 3, -2, 2);
+        FiniteAutomaton auto = new FiniteAutomaton("(0|1)*2");
+        if (decomposition) {
+            model.regularDec(x, auto);
+        } else {
+            model.regular(x, auto).post();
+        }
+        List<Solution> solutions = model.getSolver().findAllSolutions();
+        // brute force: x0, x1 in {0,1}, x2 = 2
+        assertEquals(solutions.size(), 4);
+        for (Solution s : solutions) {
+            Assert.assertTrue(s.getIntVal(x[0]) == 0 || s.getIntVal(x[0]) == 1);
+            Assert.assertTrue(s.getIntVal(x[1]) == 0 || s.getIntVal(x[1]) == 1);
+            assertEquals(s.getIntVal(x[2]), 2);
+        }
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testEmptyArray() {
+        // #335: satisfied if and only if the automaton accepts the empty word
+        Model model = new Model();
+        model.regular(new IntVar[0], new FiniteAutomaton("1*")).post();
+        Assert.assertTrue(model.getSolver().solve());
+
+        model = new Model();
+        model.regular(new IntVar[0], new FiniteAutomaton("1+")).post();
+        Assert.assertFalse(model.getSolver().solve());
+    }
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = SolverException.class,
+            expectedExceptionsMessageRegExp = ".*letter 'a'.*<97>.*")
+    public void testLetterRefused() {
+        // #318: a letter is not a symbol, it must not be silently mapped to another value
+        new FiniteAutomaton("1a2");
+    }
+
 
     @DataProvider(name = "two")
     public Object[][] two(){
