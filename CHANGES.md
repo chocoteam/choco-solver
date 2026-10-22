@@ -9,6 +9,9 @@ NEXT MILESTONE
 
 ### Major features:
 
+#### Backtrackable memory
+- Fix the bounds of one-word bit sets (#934): 32-bit range operations accept the exclusive end `32`, and 64-bit writes reject indices and ranges beyond the word instead of modifying unrelated bits
+
 #### Parsers
 - XCSP3: fix several constraints found wrong by the unit tests of PyCSP3 (#1248): `pow` in primitive constraints, `allDifferent` on a matrix with `except`, `ordered` with `lengths`, `lex` on a matrix with `ge` or `gt`, `sum` with a `notin` condition and `count` with a condition on an interval
 - XCSP3: handle reified constraints, i.e. `reifiedBy`, `hreifiedFrom` and `hreifiedTo`, which were ignored (#1248). The reification is refused with an explicit message when it cannot be handled, as for `slide` and logic meta-constraints
@@ -52,6 +55,7 @@ See [milestone 6.0.3](https://github.com/chocoteam/choco-solver/milestone/44)
 
 #### Contributors to this release:
 - Charles Prud'homme <charles.prudhomme@imt-atlantique.fr>
+- Jaehong Park <105151063+PHJ2000@users.noreply.github.com>
 
 
 **Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v6.0.2...v6.0.3
