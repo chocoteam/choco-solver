@@ -405,8 +405,7 @@ public class SolverTest {
                 " 5              0         0         0         0         0  \"VGU5\"\n" +
                 " 6              1         0         0         0         0  \"binLoad[0]\"\n" +
                 " 7              1         0         0         0         0  \"binLoad[1]\"\n" +
-                " 8              1         0         0         0         0  \"binLoad[2]\"\n" +
-                " 9              0         0         0         0         0  \"cste -- 24576\"\n\n");
+                " 8              1         0         0         0         0  \"binLoad[2]\"\n\n");
     }
 
     @Test(groups = "1s")

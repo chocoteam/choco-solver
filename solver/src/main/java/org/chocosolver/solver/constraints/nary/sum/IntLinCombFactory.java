@@ -51,6 +51,21 @@ public class IntLinCombFactory {
         return reduce(VARS, COEFFS, OPERATOR, SUM, minCardForDecomposition);
     }
 
+    /**
+     * Reduce coefficients, and variables if required, when dealing with a sum (all coefficients are implicitly equal to 1)
+     * compared to a constant. No variable is created for the constant.
+     *
+     * @param VARS     array of integer variables
+     * @param OPERATOR an operator among "=", "!=", ">", "<", ">=",>" and "<="
+     * @param SUM      the resulting constant
+     * @return a constraint to post or reify
+     */
+    public static Constraint reduce(IntVar[] VARS, Operator OPERATOR, int SUM, int minCardForDecomposition) {
+        int[] COEFFS = new int[VARS.length];
+        Arrays.fill(COEFFS, 1);
+        return reduce(VARS, COEFFS, OPERATOR, SUM, minCardForDecomposition);
+    }
+
 
     /**
      * Reduce coefficients, and variables if required, when dealing with a scalar product
@@ -63,8 +78,31 @@ public class IntLinCombFactory {
      */
     public static Constraint reduce(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, IntVar SCALAR,
                                     int minCardForDecomposition) {
+        return reduce(SCALAR.getModel(), VARS, COEFFS, OPERATOR, SCALAR, 0, minCardForDecomposition);
+    }
+
+    /**
+     * Reduce coefficients, and variables if required, when dealing with a scalar product compared to a constant.
+     * No variable is created for the constant.
+     *
+     * @param VARS     array of integer variables
+     * @param COEFFS   array of integers
+     * @param OPERATOR an operator among "=", "!=", ">", "<", ">=",>" and "<="
+     * @param SCALAR   the resulting constant
+     * @return a constraint to post or reify
+     */
+    public static Constraint reduce(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, int SCALAR,
+                                    int minCardForDecomposition) {
+        return reduce(VARS[0].getModel(), VARS, COEFFS, OPERATOR, null, SCALAR, minCardForDecomposition);
+    }
+
+    /**
+     * @param SCALAR the resulting variable, or null when the result is the constant <i>CST</i>
+     * @param CST    the resulting constant, ignored when <i>SCALAR</i> is not null
+     */
+    private static Constraint reduce(Model model, IntVar[] VARS, int[] COEFFS, Operator OPERATOR, IntVar SCALAR,
+                                     int CST, int minCardForDecomposition) {
         // 0. normalize data
-        Model model = SCALAR.getModel();
         if (VARS.length > minCardForDecomposition) {
             int k = VARS.length;
             int d1 = (int) Math.sqrt(k);
@@ -81,13 +119,15 @@ public class IntLinCombFactory {
                 intermVar[z] = model.intVar(bounds[0], bounds[1]);
                 model.scalar(copyV, copyC, "=", intermVar[z]).post();
             }
-            return model.sum(intermVar, OPERATOR.toString(), SCALAR);
+            return SCALAR == null
+                    ? model.sum(intermVar, OPERATOR.toString(), CST)
+                    : model.sum(intermVar, OPERATOR.toString(), SCALAR);
         }
         IntVar[] NVARS;
         int[] NCOEFFS;
         long RESULT = 0;
-        if (VariableUtils.isConstant(SCALAR)) {
-            RESULT = SCALAR.getValue();
+        if (SCALAR == null || VariableUtils.isConstant(SCALAR)) {
+            RESULT = SCALAR == null ? CST : SCALAR.getValue();
             NVARS = VARS.clone();
             NCOEFFS = COEFFS.clone();
         } else {

@@ -725,4 +725,27 @@ public class ExpressionTest {
         BoolVar b = model.boolVar();
         eval(model, x.gt(0).xor(y.gt(0), b).not(), p, 49);
     }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testNoVariableForConstants() {
+        // #743: comparing to a constant must not add a variable to the model
+        Model model = new Model();
+        IntVar[] x = model.intVarArray("x", 4, 1, 2);
+        int nbVars = model.getNbVars();
+        for (int j = 0; j < 3; j++) {
+            x[j].eq(j % 2 + 1).post();
+        }
+        x[0].add(x[1]).le(3).post();
+        model.sum(x, ">=", 5).post();
+        model.scalar(x, new int[]{1, 2, 3, 4}, "<=", 15).post();
+        Assert.assertEquals(model.getNbVars(), nbVars);
+        // brute force: x0 = 1, x1 = 2, x2 = 1, x3 in [1,2], and the three other constraints
+        int count = 0;
+        for (int x3 = 1; x3 <= 2; x3++) {
+            if (1 + 2 <= 3 && 1 + 2 + 1 + x3 >= 5 && 1 + 2 * 2 + 3 + 4 * x3 <= 15) {
+                count++;
+            }
+        }
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), count);
+    }
 }

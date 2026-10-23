@@ -11,6 +11,11 @@ import org.chocosolver.memory.IStateBitSet;
 import org.chocosolver.memory.IStateInt;
 
 
+/**
+ * A backtrackable bit set stored in one 32-bit word.
+ *
+ * @author Charles Prud'homme
+ */
 public class OneWordS32BitSet implements IStateBitSet {
 
     /*
@@ -60,8 +65,11 @@ public class OneWordS32BitSet implements IStateBitSet {
      * @param toIndex   ending index
      */
     private static void checkRange(int fromIndex, int toIndex) {
-        checkIndex(fromIndex);
-        checkIndex(toIndex);
+        if (fromIndex < 0)
+            throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
+        // The range end is exclusive, so it may equal the word capacity.
+        if (toIndex > BITS_PER_WORD)
+            throw new IndexOutOfBoundsException("toIndex > " + BITS_PER_WORD + ": " + toIndex);
         if (fromIndex > toIndex)
             throw new IndexOutOfBoundsException("fromIndex: " + fromIndex + " > toIndex: " + toIndex);
     }
@@ -70,7 +78,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      * Sets the bit at the specified index to <code>true</code>.
      *
      * @param bitIndex a bit index.
-     * @throws IndexOutOfBoundsException if the specified index is negative.
+     * @throws IndexOutOfBoundsException if the specified index is negative or at least 32.
      * @since JDK1.0
      */
     @Override
@@ -85,7 +93,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      *
      * @param bitIndex a bit index.
      * @param value    a boolean value to set.
-     * @throws IndexOutOfBoundsException if the specified index is negative.
+     * @throws IndexOutOfBoundsException if the specified index is negative or at least 32.
      * @since 1.4
      */
     @Override
@@ -103,7 +111,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      * @param fromIndex index of the first bit to be set.
      * @param toIndex   index after the last bit to be set.
      * @throws IndexOutOfBoundsException if <tt>fromIndex</tt> is negative,
-     *                                   or <tt>toIndex</tt> is negative, or <tt>fromIndex</tt> is
+     *                                   or <tt>toIndex</tt> exceeds 32, or <tt>fromIndex</tt> is
      *                                   larger than <tt>toIndex</tt>.
      * @since 1.4
      */
@@ -123,7 +131,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      * Sets the bit specified by the index to <code>false</code>.
      *
      * @param bitIndex the index of the bit to be cleared.
-     * @throws IndexOutOfBoundsException if the specified index is negative.
+     * @throws IndexOutOfBoundsException if the specified index is negative or at least 32.
      * @since JDK1.0
      */
     @Override
@@ -140,7 +148,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      * @param fromIndex index of the first bit to be cleared.
      * @param toIndex   index after the last bit to be cleared.
      * @throws IndexOutOfBoundsException if <tt>fromIndex</tt> is negative,
-     *                                   or <tt>toIndex</tt> is negative, or <tt>fromIndex</tt> is
+     *                                   or <tt>toIndex</tt> exceeds 32, or <tt>fromIndex</tt> is
      *                                   larger than <tt>toIndex</tt>.
      * @since 1.4
      */

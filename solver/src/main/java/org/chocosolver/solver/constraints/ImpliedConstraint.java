@@ -18,8 +18,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Equivalence constraint: boolean b <=> constraint c
- * Also known as reification
+ * Implication constraint: boolean b => constraint c
+ * Also known as half-reification
  * <br/>
  *
  * @author Jean-Guillaume Fages
@@ -48,7 +48,7 @@ public class ImpliedConstraint extends Constraint {
     //***********************************************************************************
 
     protected ImpliedConstraint(BoolVar bVar, Constraint consIfBoolTrue) {
-        super(ConstraintsName.REIFICATIONCONSTRAINT, createProps(bVar, consIfBoolTrue));
+        super(ConstraintsName.IMPLIEDCONSTRAINT, createProps(bVar, consIfBoolTrue));
         this.propReif = (PropImplied) propagators[0];
         propReif.setReifCons(this);
         trueCons = consIfBoolTrue;

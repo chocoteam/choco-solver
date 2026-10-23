@@ -154,6 +154,8 @@ public class ConstraintsName {
 
     public static final String REIFICATIONCONSTRAINT = "REIFICATIONCONSTRAINT";
 
+    public static final String IMPLIEDCONSTRAINT = "IMPLIEDCONSTRAINT";
+
     public static final String SATCONSTRAINT = "SATCONSTRAINT";
 
     public static final String CUMULATIVE = "CUMULATIVE";

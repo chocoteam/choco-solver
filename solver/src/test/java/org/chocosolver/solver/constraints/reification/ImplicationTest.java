@@ -10,6 +10,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -83,5 +84,17 @@ public class ImplicationTest {
             Assert.assertEquals(m2.getSolver().getSolutionCount(), 30);
             Assert.assertEquals(m2.getSolver().getNodeCount(), m1.getSolver().getNodeCount());
         }
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testNames() {
+        // #1087: an implication is not named as a reification
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 3);
+        BoolVar b = model.boolVar("b");
+        model.arithm(x, "=", 1).impliedBy(b);
+        model.arithm(x, ">", 0).reifyWith(model.boolVar("r"));
+        Assert.assertEquals(model.getCstrs()[0].getName(), ConstraintsName.IMPLIEDCONSTRAINT);
+        Assert.assertEquals(model.getCstrs()[1].getName(), ConstraintsName.REIFICATIONCONSTRAINT);
     }
 }

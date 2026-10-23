@@ -11,6 +11,11 @@ import org.chocosolver.memory.IStateBitSet;
 import org.chocosolver.memory.IStateLong;
 
 
+/**
+ * A backtrackable bit set stored in one 64-bit word.
+ *
+ * @author Charles Prud'homme
+ */
 public class OneWordS64BitSet implements IStateBitSet {
 
     /*
@@ -42,6 +47,16 @@ public class OneWordS64BitSet implements IStateBitSet {
     }
 
     /**
+     * Rejects indices that would wrap around in a Java long shift.
+     *
+     * @param bitIndex the index of a bit in this word
+     */
+    private static void checkIndex(int bitIndex) {
+        if (bitIndex < 0 || bitIndex >= BITS_PER_WORD)
+            throw new IndexOutOfBoundsException("bitIndex outside word: " + bitIndex);
+    }
+
+    /**
      * Checks that fromIndex ... toIndex is a valid range of bit indices.
      *
      * @param fromIndex starting index
@@ -50,8 +65,9 @@ public class OneWordS64BitSet implements IStateBitSet {
     private static void checkRange(int fromIndex, int toIndex) {
         if (fromIndex < 0)
             throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
-        if (toIndex < 0)
-            throw new IndexOutOfBoundsException("toIndex < 0: " + toIndex);
+        // The range end is exclusive, so it may equal the word capacity.
+        if (toIndex > BITS_PER_WORD)
+            throw new IndexOutOfBoundsException("toIndex > " + BITS_PER_WORD + ": " + toIndex);
         if (fromIndex > toIndex)
             throw new IndexOutOfBoundsException("fromIndex: " + fromIndex + " > toIndex: " + toIndex);
     }
@@ -60,12 +76,11 @@ public class OneWordS64BitSet implements IStateBitSet {
      * Sets the bit at the specified index to <code>true</code>.
      *
      * @param bitIndex a bit index.
-     * @throws IndexOutOfBoundsException if the specified index is negative.
+     * @throws IndexOutOfBoundsException if the specified index is negative or at least 64.
      * @since JDK1.0
      */
     public void set(int bitIndex) {
-        if (bitIndex < 0)
-            throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
+        checkIndex(bitIndex);
 
         word.set(word.get() | (1L << bitIndex)); // Restores invariants
         //checkInvariants();
@@ -76,7 +91,7 @@ public class OneWordS64BitSet implements IStateBitSet {
      *
      * @param bitIndex a bit index.
      * @param value    a boolean value to set.
-     * @throws IndexOutOfBoundsException if the specified index is negative.
+     * @throws IndexOutOfBoundsException if the specified index is negative or at least 64.
      * @since 1.4
      */
     public void set(int bitIndex, boolean value) {
@@ -93,7 +108,7 @@ public class OneWordS64BitSet implements IStateBitSet {
      * @param fromIndex index of the first bit to be set.
      * @param toIndex   index after the last bit to be set.
      * @throws IndexOutOfBoundsException if <tt>fromIndex</tt> is negative,
-     *                                   or <tt>toIndex</tt> is negative, or <tt>fromIndex</tt> is
+     *                                   or <tt>toIndex</tt> exceeds 64, or <tt>fromIndex</tt> is
      *                                   larger than <tt>toIndex</tt>.
      * @since 1.4
      */
@@ -113,12 +128,11 @@ public class OneWordS64BitSet implements IStateBitSet {
      * Sets the bit specified by the index to <code>false</code>.
      *
      * @param bitIndex the index of the bit to be cleared.
-     * @throws IndexOutOfBoundsException if the specified index is negative.
+     * @throws IndexOutOfBoundsException if the specified index is negative or at least 64.
      * @since JDK1.0
      */
     public void clear(int bitIndex) {
-        if (bitIndex < 0)
-            throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
+        checkIndex(bitIndex);
 
         word.set(word.get() & ~(1L << bitIndex));
         //checkInvariants();
@@ -131,7 +145,7 @@ public class OneWordS64BitSet implements IStateBitSet {
      * @param fromIndex index of the first bit to be cleared.
      * @param toIndex   index after the last bit to be cleared.
      * @throws IndexOutOfBoundsException if <tt>fromIndex</tt> is negative,
-     *                                   or <tt>toIndex</tt> is negative, or <tt>fromIndex</tt> is
+     *                                   or <tt>toIndex</tt> exceeds 64, or <tt>fromIndex</tt> is
      *                                   larger than <tt>toIndex</tt>.
      * @since 1.4
      */
