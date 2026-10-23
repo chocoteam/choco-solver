@@ -477,13 +477,6 @@ backtrackable primitive or operation is created thanks to the
 *environment* attached to the model. This ensures the integrity of the
 structure when backtracks occur.
 
-Backtrackable bit sets are also available through `IStateBitSet`. When using the
-fixed-size `OneWordS32BitSet` or `OneWordS64BitSet` implementations, single-bit
-writes require an index in `[0, 32)` or `[0, 64)`, respectively. The range
-operations `set(from, to)` and `clear(from, to)` use an exclusive end: `to` may
-equal the word size, and an empty range at that boundary is valid. Writes outside
-these bounds throw `IndexOutOfBoundsException` without changing the bit set.
-
 The role of prev\_ubs is to store the value of each variable lower
 bound. Then, anytime a variable lower bound is modified, its value can
 be retrieved and substracted from the current value to update $F$.

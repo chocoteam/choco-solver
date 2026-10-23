@@ -375,21 +375,6 @@ The parsers' performance tests (`parsers/src/test/resources/{flatzinc,xcsp,mps,d
 check node and failure counts. A filtering change may alter them. Only update a line
 once the difference is understood, and explain why in the commit message.
 
-### 4.6 Test fixed-size bit-set boundaries and restoration
-
-**Rule.** Test the last valid bit separately from the exclusive end of a range,
-including the empty range at the word size. Check that rejected writes preserve
-the contents, and that valid writes are undone by `worldPop()`.
-
-**Why.** A range ending at the word size is valid even though a single-bit write
-at that index is not. Java masks shift distances, so an unchecked index beyond
-a word can silently modify another bit.
-
-**How.** Compare all ranges of the 32-bit and 64-bit implementations with
-`java.util.BitSet`, then verify restoration after each range operation.
-
-**Ref.** #934, `OneWordBitSetRangeTest`.
-
 ---
 
 ## 5. Delivering a change

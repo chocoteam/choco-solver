@@ -14,7 +14,7 @@ import org.chocosolver.memory.IStateLong;
 /**
  * A backtrackable bit set stored in one 64-bit word.
  *
- * @author Jaehong Park (105151063+PHJ2000@users.noreply.github.com)
+ * @author Charles Prud'homme
  */
 public class OneWordS64BitSet implements IStateBitSet {
 
