@@ -13,14 +13,21 @@ import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.utils.Counter;
 import org.chocosolver.solver.constraints.nary.automata.FA.utils.CounterState;
 import org.chocosolver.solver.constraints.nary.automata.FA.utils.ICounter;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
+import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
+import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import static org.chocosolver.solver.constraints.nary.automata.FA.CostAutomaton.makeSingleResource;
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
@@ -475,5 +482,64 @@ public class CostRegularTest {
         int[][] costs = {{0, 1}, {0, 1}};
         model.costRegular(vars, cost, makeSingleResource(new FiniteAutomaton("(0|1)*"), costs, 0, 2)).post();
         assertEquals(model.getSolver().findAllSolutions().size(), 4);
+    }
+
+    private static long countSolutionsOfRandomCostRegular(long seed, IntValueSelector valueSelector) {
+        Random rnd = new Random(seed);
+        int n = 4 + rnd.nextInt(4);
+        int q = 2 + rnd.nextInt(4);
+        FiniteAutomaton auto = new FiniteAutomaton();
+        for (int i = 0; i < q; i++) {
+            auto.addState();
+        }
+        auto.setInitialState(0);
+        for (int i = 0; i < q; i++) {
+            if (rnd.nextInt(3) > 0) {
+                auto.setFinal(i);
+            }
+            for (int v = 0; v < 3; v++) {
+                if (rnd.nextInt(4) > 0) {
+                    auto.addTransition(i, rnd.nextInt(q), v);
+                }
+            }
+        }
+        if (auto.getFinalStates().isEmpty()) {
+            auto.setFinal(0);
+        }
+        int[][] costs = new int[n][3];
+        for (int[] row : costs) {
+            for (int v = 0; v < 3; v++) {
+                row[v] = rnd.nextInt(6);
+            }
+        }
+        Model model = new Model();
+        IntVar[] vars = model.intVarArray("x", n, 0, 2);
+        int lo = rnd.nextInt(5 * n / 2 + 1);
+        int hi = lo + rnd.nextInt(8);
+        IntVar cost = model.intVar("z", lo, hi);
+        try {
+            model.costRegular(vars, cost, makeSingleResource(auto, costs, lo, hi)).post();
+        } catch (SolverException e) {
+            // no word of length n is accepted
+            return -1;
+        }
+        // another propagator that may fail while arcs are waiting to be removed
+        model.sum(vars, "<=", rnd.nextInt(2 * n + 1)).post();
+        model.getSolver().setSearch(Search.intVarSearch(new InputOrder<>(model), valueSelector,
+                ArrayUtils.append(vars, new IntVar[]{cost})));
+        // a constant objective, required by IntDomainBest, with a non-strict cut to enumerate all the solutions
+        model.setObjective(Model.MAXIMIZE, model.intVar("obj", 0));
+        model.getSolver().getObjectiveManager().setWalkingDynamicCut();
+        return model.getSolver().streamSolutions().count();
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testLookAhead() {
+        // #1163: the look-ahead of IntDomainBest pushes and cancels worlds without counting backtracks,
+        // the arcs waiting to be removed in a cancelled world must not be removed in the next one
+        for (long seed = 0; seed < 100; seed++) {
+            assertEquals(countSolutionsOfRandomCostRegular(seed, new IntDomainBest()),
+                    countSolutionsOfRandomCostRegular(seed, new IntDomainMin()), "seed: " + seed);
+        }
     }
 }

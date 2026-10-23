@@ -10,6 +10,7 @@ import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateBool;
+import org.chocosolver.memory.IStateLong;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
@@ -43,9 +44,16 @@ public class PropCostRegular extends Propagator<IntVar> {
     private final TIntStack toRemove;
 
     private final IStateBool boundChange;
-    private int lastWorld = -1;
-
-    private long lastNbOfBacktracks = -1, lastNbOfRestarts = -1;
+    /**
+     * Last stamp given by {@link #checkWorld()}, strictly increasing.
+     */
+    private long lastStamp = -1;
+    /**
+     * Backtrackable copy of {@link #lastStamp}: when it differs from {@link #lastStamp}, the environment has been
+     * restored (backtrack, restart, or a trail cancelled by a look-ahead) and the arcs waiting to be removed
+     * belong to another branch.
+     */
+    private final IStateLong stamp;
 
     private final RemProc rem_proc;
     private final IIntDeltaMonitor[] idms;
@@ -63,6 +71,7 @@ public class PropCostRegular extends Propagator<IntVar> {
         IEnvironment environment = model.getEnvironment();
         this.toRemove = new TIntArrayStack();
         this.boundChange = environment.makeBool(false);
+        this.stamp = environment.makeLong(lastStamp);
         this.graph = graph;
         this.cautomaton = cautomaton;
     }
@@ -192,19 +201,21 @@ public class PropCostRegular extends Propagator<IntVar> {
         }
     }
 
+    /**
+     * Clears the non-backtrackable stacks when the environment has been restored since the last call.
+     * Comparing the world index or the number of backtracks is not enough: a look-ahead
+     * (e.g., {@link org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest}) pushes and cancels a
+     * world without counting a backtrack, and comes back to the same world index (issue #1163).
+     */
     private void checkWorld() {
-        int currentworld = model.getEnvironment().getWorldIndex();
-        long currentbt = model.getSolver().getBackTrackCount();
-        long currentrestart = model.getSolver().getRestartCount();
-        if (currentworld < lastWorld || currentbt != lastNbOfBacktracks || currentrestart > lastNbOfRestarts) {
+        if (stamp.get() != lastStamp) {
             this.toRemove.clear();
             this.graph.inStack.clear();
             this.graph.toUpdateLeft.clear();
             this.graph.toUpdateRight.clear();
         }
-        lastWorld = currentworld;
-        lastNbOfBacktracks = currentbt;
-        lastNbOfRestarts = currentrestart;
+        // a new value in each world, so that restoring any of them is detected
+        stamp.set(++lastStamp);
     }
 
     private void filter() throws ContradictionException {

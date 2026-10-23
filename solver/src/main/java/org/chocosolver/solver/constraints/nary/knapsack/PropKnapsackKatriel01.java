@@ -9,6 +9,7 @@ package org.chocosolver.solver.constraints.nary.knapsack;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.IStateLong;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.nary.knapsack.structure.*;
@@ -175,19 +176,15 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
     private boolean mustRecomputeCriticalInfos;
 
     /**
-     * Last known world index, used to detect backtracks.
+     * Last stamp given by {@link #checkWorld()}, strictly increasing.
      */
-    private int lastWorld = -1;
+    private long lastStamp = -1;
 
     /**
-     * Last known backtrack count, used to detect backtracks.
+     * Backtrackable copy of {@link #lastStamp}: when it differs from {@link #lastStamp}, the environment has been
+     * restored (backtrack, restart, or a trail cancelled by a look-ahead) and {@link #criticalItemInfos} is outdated.
      */
-    private long lastNbOfBacktracks = -1;
-
-    /**
-     * Last known restart count, used to detect restarts.
-     */
-    private long lastNbOfRestarts = -1;
+    private final IStateLong stamp;
 
     // ***********************************************************************************
     // CONSTRUCTORS
@@ -238,6 +235,7 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
         this.findingTree = new ItemFindingSearchTree(orderedItems);
         this.computingTree = new ComputingLossWeightTree(orderedItems);
         this.mustRecomputeCriticalInfos = true;
+        this.stamp = model.getEnvironment().makeLong(lastStamp);
     }
 
     // ***********************************************************************************
@@ -325,8 +323,7 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
      * Checks if the critical item information needs to be recomputed.
      * This happens when:
      * <ul>
-     *   <li>A backtrack has occurred</li>
-     *   <li>A restart has occurred</li>
+     *   <li>A backtrack, a restart or a look-ahead has restored the environment</li>
      *   <li>The capacity upper bound has changed</li>
      *   <li>An item has been added to or removed from the solution</li>
      * </ul>
@@ -339,20 +336,19 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
     }
 
     /**
-     * Checks if the solver's world has changed (due to backtrack or restart).
-     * If a change is detected, sets the flag to recompute critical item information.
+     * Checks if the environment has been restored since the last call (due to backtrack, restart or look-ahead).
+     * If so, sets the flag to recompute critical item information.
+     * Comparing the world index or the number of backtracks is not enough: a look-ahead
+     * (e.g., {@link org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest}) pushes and cancels a
+     * world without counting a backtrack, and comes back to the same world index (issue #1163).
      */
     private void checkWorld() {
-        int currentworld = model.getEnvironment().getWorldIndex();
-        long currentbt = model.getSolver().getBackTrackCount();
-        long currentrestart = model.getSolver().getRestartCount();
-        if (currentworld < lastWorld || currentbt != lastNbOfBacktracks || currentrestart > lastNbOfRestarts) {
+        if (stamp.get() != lastStamp) {
             // case 1.  from mustRecomputeCriticalInfos()
             mustRecomputeCriticalInfos = true;
         }
-        lastWorld = currentworld;
-        lastNbOfBacktracks = currentbt;
-        lastNbOfRestarts = currentrestart;
+        // a new value in each world, so that restoring any of them is detected
+        stamp.set(++lastStamp);
     }
 
     @Override
