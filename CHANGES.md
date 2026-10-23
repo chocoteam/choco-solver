@@ -33,6 +33,8 @@ NEXT MILESTONE
 - `regular`, `costRegular` and `multiCostRegular`: values of the variables outside [0,65535], e.g. negative ones, are no longer accepted instead of raising an exception (#280)
 - `regular` on an empty array is satisfied if and only if the automaton accepts the empty word, instead of raising an exception (#335)
 - `FiniteAutomaton` refuses a regexp containing a letter, which was silently mapped to another value (#318)
+- `sum` and `scalar` compared to a constant, and the expressions compared to a constant (e.g. `x.eq(1)`), no longer add a variable for the constant to the model (#743)
+- An implication (`impliedBy`, `ImpliedConstraint`) is named `IMPLIEDCONSTRAINT` instead of `REIFICATIONCONSTRAINT`, and the Javadoc of `ImpliedConstraint` and `PropReif` is fixed (#1087)
 
 #### Search & Strategies
 - `ObjectiveStrategy`: fix the split point of the `DICHOTOMIC` policy, which was rounded down for both `MINIMIZE` and `MAXIMIZE` (#1252). It is now rounded towards the bound to improve, so that minimizing an objective and maximizing its opposite try mirrored cuts. This changes the cut tried when maximizing
