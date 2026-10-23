@@ -7,6 +7,7 @@
 package org.chocosolver.solver.search.strategy.decision;
 
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.assignments.GraphDecisionOperator;
 import org.chocosolver.solver.variables.GraphVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -52,6 +53,13 @@ public class DecisionMaker {
 
     /**
      * Creates and returns an {@link IntDecision}: "{@code var} {@code dop} {@code value}".
+     * <p>
+     * An assignment ("=") or a removal ("!=") of a value that is not in the domain of {@code var}
+     * would be trivially refuted or have no effect: the search would loop or, with LCG, wrongly
+     * conclude that there is no solution (#1210). In that case, the decision is made on the value
+     * of the domain closest to {@code value} (the smallest one in case of a tie).
+     * This can happen with a value selector that returns a bound rather than a value of the domain,
+     * such as {@link org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle}.
      * @param var an integer variable
      * @param dop a decision operator
      * @param value a value
@@ -62,8 +70,29 @@ public class DecisionMaker {
         if (d == null) {
             d = new IntDecision(intDecisionPool);
         }
+        if ((dop == DecisionOperatorFactory.makeIntEq() || dop == DecisionOperatorFactory.makeIntNeq())
+                && !var.contains(value)) {
+            value = closestValue(var, value);
+        }
         d.set(var, value, dop);
         return d;
+    }
+
+    /**
+     * @param var an integer variable
+     * @param value a value, not in the domain of {@code var}
+     * @return the value of the domain of {@code var} closest to {@code value}, the smallest one in case of a tie
+     */
+    private static int closestValue(IntVar var, int value) {
+        if (value < var.getLB()) {
+            return var.getLB();
+        }
+        if (value > var.getUB()) {
+            return var.getUB();
+        }
+        int prev = var.previousValue(value);
+        int next = var.nextValue(value);
+        return (long) value - prev <= (long) next - value ? prev : next;
     }
 
     /**

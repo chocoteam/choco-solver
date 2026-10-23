@@ -7,14 +7,23 @@
 package org.chocosolver.solver.search.strategy.decision;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.SettingsBuilder;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
+import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * <p>
@@ -198,5 +207,57 @@ public class DecisionPathTest {
         dp.transferInto(decisions, false);
         Assert.assertEquals(decisions.size(), 1);
         Assert.assertEquals(decisions.get(0), d3);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testIntDecisionOnValueOutOfDomain() {
+        // #1210: "=" and "!=" decisions are made on the closest value of the domain
+        Model model = new Model();
+        IntVar x = model.intVar("x", new int[]{1, 4, 5});
+        DecisionPath path = model.getSolver().getDecisionPath();
+        Assert.assertEquals(path.makeIntDecision(x, DecisionOperatorFactory.makeIntEq(), 3).getDecisionValue(), 4);
+        Assert.assertEquals(path.makeIntDecision(x, DecisionOperatorFactory.makeIntNeq(), 2).getDecisionValue(), 1);
+        Assert.assertEquals(path.makeIntDecision(x, DecisionOperatorFactory.makeIntEq(), -2).getDecisionValue(), 1);
+        Assert.assertEquals(path.makeIntDecision(x, DecisionOperatorFactory.makeIntEq(), 9).getDecisionValue(), 5);
+        Assert.assertEquals(path.makeIntDecision(x, DecisionOperatorFactory.makeIntEq(), 5).getDecisionValue(), 5);
+        // a split does not need a value of the domain
+        Assert.assertEquals(path.makeIntDecision(x, DecisionOperatorFactory.makeIntSplit(), 3).getDecisionValue(), 3);
+        // tie: the smallest value
+        IntVar y = model.intVar("y", new int[]{1, 5});
+        Assert.assertEquals(path.makeIntDecision(y, DecisionOperatorFactory.makeIntEq(), 3).getDecisionValue(), 1);
+    }
+
+    @DataProvider
+    public Object[][] lcgAndOperators() {
+        List<Object[]> params = new ArrayList<>();
+        for (boolean lcg : new boolean[]{false, true}) {
+            params.add(new Object[]{lcg, DecisionOperatorFactory.makeIntEq()});
+            params.add(new Object[]{lcg, DecisionOperatorFactory.makeIntNeq()});
+            params.add(new Object[]{lcg, DecisionOperatorFactory.makeIntSplit()});
+        }
+        return params.toArray(new Object[0][]);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "lcgAndOperators")
+    public void testMiddleValueOutOfDomain(boolean lcg, DecisionOperator<IntVar> op) {
+        // #1210: IntDomainMiddle returns the middle of the bounds, which may not be in the domain;
+        // with "=" or "!=", the search used to loop, or to wrongly report no solution with LCG
+        Model model = new Model(SettingsBuilder.init().setLCG(lcg));
+        IntVar x = model.intVar("x", 0, 4);
+        IntVar y = model.intVar("y", 0, 6);
+        model.arithm(x, "!=", 2).post();
+        model.arithm(y, "!=", 3).post();
+        model.arithm(y, "!=", 2).post();
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.intVarSearch(new InputOrder<>(model), new IntDomainMiddle(true), op, x, y));
+        Set<String> found = new HashSet<>();
+        int count = 0;
+        while (solver.solve()) {
+            found.add(x.getValue() + "," + y.getValue());
+            count++;
+        }
+        // brute force: x in [0,4] \ {2}, y in [0,6] \ {2,3}
+        Assert.assertEquals(count, 4 * 5);
+        Assert.assertEquals(found.size(), 4 * 5);
     }
 }

@@ -11,11 +11,14 @@ import org.chocosolver.solver.variables.IntVar;
 import java.util.function.ToDoubleFunction;
 
 /**
- * Selects the value in the variable domain closest to the mean of its current bounds.
+ * Selects the middle of the current bounds of the variable.
  * <br/>
- * It computes the middle value of the domain. Then it checks if the mean is contained in the domain.
- * If not, the closest value to the middle is chosen. It uses a policy to define whether the mean value should
- * be floored or ceiled
+ * On an enumerated domain, it returns the mean of the bounds, floored or ceiled according to the rounding policy.
+ * This value may not belong to the domain, which is fine with a split decision (<code>x &le; v</code>), where it
+ * is only a bound. With an assignment (<code>x = v</code>) or a removal (<code>x &ne; v</code>) decision, the decision
+ * is made on the value of the domain closest to it
+ * (see {@link org.chocosolver.solver.search.strategy.decision.DecisionMaker#makeIntDecision}).
+ * On a bounded domain, it returns the lower bound (floor) or the upper bound (ceil).
  * <br/>
  * <p>
  * BEWARE: should not be used with assignment decisions over bounded variables (because the decision negation
@@ -28,9 +31,7 @@ public class IntDomainMiddle implements IntValueSelector {
 
     // VARIABLES
     public final static boolean FLOOR = true;
-    private final static ToDoubleFunction<IntVar> MIDEDEF = var -> (var.getLB() + var.getUB()) / 2.;
     private final boolean roundingPolicy;
-    private final ToDoubleFunction<IntVar> middle;
 
     /**
      * Selects the middle value
@@ -38,12 +39,19 @@ public class IntDomainMiddle implements IntValueSelector {
      * @param roundingPolicy should be either FLOOR or !FLOOR (ceil)
      */
     public IntDomainMiddle(boolean roundingPolicy) {
-        this(MIDEDEF, roundingPolicy);
+        this.roundingPolicy = roundingPolicy;
     }
 
-    public IntDomainMiddle(ToDoubleFunction<IntVar> middle, boolean roudingPolicy) {
-        this.middle = middle;
-        this.roundingPolicy = roudingPolicy;
+    /**
+     * Selects the middle value
+     *
+     * @param middle         ignored: the middle is always the mean of the bounds
+     * @param roundingPolicy should be either FLOOR or !FLOOR (ceil)
+     * @deprecated <i>middle</i> is ignored, use {@link #IntDomainMiddle(boolean)} instead
+     */
+    @Deprecated(forRemoval = true)
+    public IntDomainMiddle(ToDoubleFunction<IntVar> middle, boolean roundingPolicy) {
+        this(roundingPolicy);
     }
 
     /**
