@@ -16,6 +16,9 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMax;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
+import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
+import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
 import org.chocosolver.solver.search.strategy.selectors.variables.Largest;
 import org.chocosolver.solver.search.strategy.strategy.FullyRandom;
 import org.chocosolver.solver.variables.BoolVar;
@@ -660,5 +663,38 @@ public class KnapsackTest {
         Assert.assertEquals(solver.getSolutionCount(), 0,
                 "Expected 0 solution, but found: " + solver.getSolutionCount());
 
+    }
+
+    private static long countSolutionsOfRandomKnapsack(long seed, IntValueSelector valueSelector) {
+        Random rnd = new Random(seed);
+        int n = 4 + rnd.nextInt(5);
+        int[] weights = new int[n];
+        int[] energies = new int[n];
+        for (int i = 0; i < n; i++) {
+            weights[i] = 1 + rnd.nextInt(9);
+            energies[i] = 1 + rnd.nextInt(9);
+        }
+        Model model = new Model();
+        BoolVar[] objects = model.boolVarArray("x", n);
+        IntVar capacity = model.intVar("W", 0, 5 + rnd.nextInt(20));
+        IntVar profit = model.intVar("E", 0, 80);
+        model.knapsack(objects, capacity, profit, weights, energies).post();
+        // decisions on the profit only modify its lower bound, which does not trigger a recomputation
+        model.getSolver().setSearch(Search.intVarSearch(new InputOrder<>(model), valueSelector,
+                ArrayUtils.append(new IntVar[]{profit}, objects, new IntVar[]{capacity})));
+        // a constant objective, required by IntDomainBest, with a non-strict cut to enumerate all the solutions
+        model.setObjective(Model.MAXIMIZE, model.intVar("obj", 0));
+        model.getSolver().getObjectiveManager().setWalkingDynamicCut();
+        return model.getSolver().streamSolutions().count();
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testLookAhead() {
+        // #1163: the look-ahead of IntDomainBest pushes and cancels worlds without counting backtracks,
+        // the critical item computed in a cancelled world must not be used in the next one
+        for (long seed = 0; seed < 100; seed++) {
+            Assert.assertEquals(countSolutionsOfRandomKnapsack(seed, new IntDomainBest()),
+                    countSolutionsOfRandomKnapsack(seed, new IntDomainMin()), "seed: " + seed);
+        }
     }
 }

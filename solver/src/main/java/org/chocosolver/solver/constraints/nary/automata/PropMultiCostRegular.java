@@ -12,6 +12,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
 import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.IStateLong;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
@@ -141,9 +142,16 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     private final TIntStack[] toUpdateLeft;
     private final TIntStack[] toUpdateRight;
 
-    private int lastWorld = -1;
-    private long lastNbOfBacktracks = -1;
-    private long lastNbOfRestarts = -1;
+    /**
+     * Last stamp given by {@link #checkWorld()}, strictly increasing.
+     */
+    private long lastStamp = -1;
+    /**
+     * Backtrackable copy of {@link #lastStamp}: when it differs from {@link #lastStamp}, the environment has been
+     * restored (backtrack, restart, or a trail cancelled by a look-ahead) and the non-backtrackable path
+     * information of the graph is outdated.
+     */
+    private final IStateLong stamp;
     private final TIntHashSet boundUpdate;
     private boolean computed;
 
@@ -191,6 +199,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
             this.toUpdateRight[i] = new TIntArrayStack();
         }
         this.boundUpdate = new TIntHashSet();
+        this.stamp = model.getEnvironment().makeLong(lastStamp);
         this.pi = cauto;
         rem_proc = new RemProc(this);
         vrms = new IntIterableBitSet();
@@ -666,13 +675,16 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         }
     }
 
+    /**
+     * Recomputes the non-backtrackable path information when the environment has been restored since the last call.
+     * Comparing the world index or the number of backtracks is not enough: a look-ahead
+     * (e.g., {@link org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest}) pushes and cancels a
+     * world without counting a backtrack, and comes back to the same world index (issue #1163).
+     *
+     * @throws ContradictionException if the recomputation empties a domain
+     */
     private void checkWorld() throws ContradictionException {
-        int currentworld = model.getEnvironment().getWorldIndex();
-        long currentbt = model.getSolver().getBackTrackCount();
-        long currentrestart = model.getSolver().getRestartCount();
-        //System.err.println("TIME STAMP : "+currentbt+"   BT COUNT : "+solver.getBackTrackCount());
-        // assert (currentbt == model.getBackTrackCount());
-        if (currentworld < lastWorld || currentbt != lastNbOfBacktracks || currentrestart > lastNbOfRestarts) {
+        if (needPropagation()) {
 
             for (int i = 0; i <= nbR; i++) {
                 this.toUpdateLeft[i].clear();
@@ -689,9 +701,8 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
             // this.graph.toUpdateLeft.reset();
             //this.graph.toUpdateRight.reset();
         }
-        lastWorld = currentworld;
-        lastNbOfBacktracks = currentbt;
-        lastNbOfRestarts = currentrestart;
+        // a new value in each world, so that restoring any of them is detected
+        stamp.set(++lastStamp);
     }
 
 
@@ -787,12 +798,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     }
 
     public boolean needPropagation() {
-        int currentworld = model.getEnvironment().getWorldIndex();
-        long currentbt = model.getSolver().getBackTrackCount();
-        long currentrestart = model.getSolver().getRestartCount();
-
-        return (currentworld < lastWorld || currentbt != lastNbOfBacktracks || currentrestart > lastNbOfRestarts);
-
+        return stamp.get() != lastStamp;
     }
 
 
@@ -918,7 +924,8 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     }
 
     public void forcePathRecomputation() throws ContradictionException {
-        lastWorld = Integer.MAX_VALUE;
+        // a value not stored in the environment
+        lastStamp++;
         checkWorld();
     }
 

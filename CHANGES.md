@@ -30,6 +30,8 @@ NEXT MILESTONE
 - `regular`, `costRegular` and `multiCostRegular`: values of the variables outside [0,65535], e.g. negative ones, are no longer accepted instead of raising an exception (#280)
 - `regular` on an empty array is satisfied if and only if the automaton accepts the empty word, instead of raising an exception (#335)
 - `FiniteAutomaton` refuses a regexp containing a letter, which was silently mapped to another value (#318)
+- `multiCostRegular`: fix solutions wrongly removed after a look-ahead of the search, e.g. `IntDomainBest` in the default strategy of an optimization problem (#1163). The propagator did not detect that a world was cancelled without a backtrack, and filtered with the shortest and longest paths computed for another branch
+- `costRegular` and `knapsack`: fix solutions wrongly removed after a look-ahead of the search, for the same reason (#1163). `costRegular` removed arcs of another branch and `knapsack` used the critical item of another branch
 
 #### Search & Strategies
 - `ObjectiveStrategy`: fix the split point of the `DICHOTOMIC` policy, which was rounded down for both `MINIMIZE` and `MAXIMIZE` (#1252). It is now rounded towards the bound to improve, so that minimizing an objective and maximizing its opposite try mirrored cuts. This changes the cut tried when maximizing
