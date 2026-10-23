@@ -14,7 +14,7 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 
 /**
- * Implication propagator
+ * Reification propagator: boolean b <=> constraint c
  * <p>
  * <br/>
  *

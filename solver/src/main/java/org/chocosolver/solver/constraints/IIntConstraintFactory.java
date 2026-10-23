@@ -2583,9 +2583,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint scalar(IntVar[] vars, int[] coeffs, String operator, int scalar, int minCardForDecomp) {
         assert vars.length > 0;
-        Model s = vars[0].getModel();
-        IntVar scalarVar = s.intVar(scalar);
-        return scalar(vars, coeffs, operator, scalarVar, minCardForDecomp);
+        if (vars.length != coeffs.length) {
+            throw new SolverException("vars and coeffs arrays should have same size");
+        }
+        return IntLinCombFactory.reduce(vars, coeffs, Operator.get(operator), scalar, minCardForDecomp);
     }
 
     /**
@@ -2773,9 +2774,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint sum(IntVar[] vars, String operator, int sum, int minCardForDecomp) {
         assert vars.length > 0;
-        Model s = vars[0].getModel();
-        IntVar sumVar = s.intVar(sum);
-        return IntLinCombFactory.reduce(vars, Operator.get(operator), sumVar, minCardForDecomp);
+        return IntLinCombFactory.reduce(vars, Operator.get(operator), sum, minCardForDecomp);
     }
 
     /**
