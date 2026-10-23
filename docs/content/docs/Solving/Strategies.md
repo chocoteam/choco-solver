@@ -126,6 +126,11 @@ Most search strategies rely on :
 - value selectors (see package `org.chocosolver.solver.search.strategy.selectors.values`)
 - operators (see `DecisionOperator`)
 
+A value selector may return a value that is not in the domain of the variable: `IntDomainMiddle`, for instance,
+returns the middle of the bounds. That is fine with a split operator (`x ≤ v`), where the value is only a bound.
+With an assignment (`x = v`) or a removal (`x ≠ v`), the decision is made on the value of the domain closest to `v`
+(the smallest one in case of a tie), since a decision on a value out of the domain would be refuted at once or have no effect.
+
 `Search` is not exhaustive, look at the selectors package to see learn more search possibilities.
 
 {{% alert title="Info" color="primary" %}}

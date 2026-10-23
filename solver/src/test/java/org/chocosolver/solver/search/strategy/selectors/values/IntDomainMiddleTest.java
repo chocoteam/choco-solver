@@ -41,7 +41,7 @@ public class IntDomainMiddleTest {
         Model model = new Model();
         IntVar x = model.intVar("x", new int[]{0, 3, 5, 6, 7, 8, 11});
         int[] order = {5, 8, 9};
-        IntDomainMiddle sel = new IntDomainMiddle(v -> 7, true);
+        IntDomainMiddle sel = new IntDomainMiddle(true);
         int i = 0;
         while (!x.isInstantiated()) {
             int val = sel.selectValue(x);

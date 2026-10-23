@@ -32,6 +32,7 @@ NEXT MILESTONE
 - `FiniteAutomaton` refuses a regexp containing a letter, which was silently mapped to another value (#318)
 
 #### Search & Strategies
+- Fix a wrong "no solution" with LCG, and an endless search without LCG, when an assignment ("=") or a removal ("!=") decision is made on a value that is not in the domain, e.g. with `IntDomainMiddle` (as for the MiniZinc annotation `indomain_middle`) on a domain with holes (#1210). Such a decision is now made on the closest value of the domain
 - `ObjectiveStrategy`: fix the split point of the `DICHOTOMIC` policy, which was rounded down for both `MINIMIZE` and `MAXIMIZE` (#1252). It is now rounded towards the bound to improve, so that minimizing an objective and maximizing its opposite try mirrored cuts. This changes the cut tried when maximizing
 - `ObjectiveStrategy`: add a `largerHalfFirst` parameter to try the larger half of the objective domain first, also available with `Search.objectiveStrategy(objective, largerHalfFirst)`
 - `ObjectiveStrategy`: a decision that does not reduce the domain of the objective is not returned anymore
@@ -46,6 +47,7 @@ NEXT MILESTONE
 
 ### Deprecated API (to be removed in next release):
 - `Model.setSeed(long)`: declare the seed in the settings with `SettingsBuilder.setSeed(long)`
+- `IntDomainMiddle(ToDoubleFunction, boolean)`: the function was ignored, use `IntDomainMiddle(boolean)`
 
 ### Other closed issues and pull requests:
 See [milestone 6.0.3](https://github.com/chocoteam/choco-solver/milestone/44)

@@ -13,6 +13,9 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
+import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -765,5 +768,18 @@ public class LCGTest {
         IntVar b = model.intVar("b", new int[]{offset, 10, 20, 30});
         model.arithm(a, "=", b).post();
         model.getSolver().solve();
+    }
+
+    @Test(groups = "lcg", timeOut = 60000)
+    public void testIssue1210() {
+        // a decision on a value pruned from the domain made LCG report no solution
+        Model model = new Model(SettingsBuilder.init().setLCG(true));
+        IntVar x = model.intVar("x", 0, 4);
+        model.arithm(x, "!=", 2).post();
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.intVarSearch(new InputOrder<>(model), new IntDomainMiddle(true),
+                DecisionOperatorFactory.makeIntEq(), x));
+        Assert.assertTrue(solver.solve());
+        Assert.assertNotEquals(x.getValue(), 2);
     }
 }
