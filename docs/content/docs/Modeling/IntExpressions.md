@@ -66,7 +66,7 @@ A relational expression can be posted into the model or be turned into a Boolean
 
 Calling `decompose()` on a relation expression will return a `Constraint` object. It must be then posted or reified.
 
-The expression forms a tree structure where nodes are either expressions (including variables) and branches are operators.
+The expression forms a tree structure where nodes are expressions (including variables) and branches are operators.
 Leaves are either an `int` or `IntVar`.
 When decomposed, an analysis of the tree structure is done, starting from leaves. 
 A call to this method creates additional variables and posts additional constraints.
