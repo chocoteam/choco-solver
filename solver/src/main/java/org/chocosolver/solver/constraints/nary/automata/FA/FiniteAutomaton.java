@@ -71,14 +71,18 @@ public class FiniteAutomaton implements IAutomaton {
 
     /**
      * Create a finite automaton based on a regular expression.
-     * The regexp accepts digits  and numbers, in [0,65535].
+     * The regexp accepts digits  and numbers, in [0,65526].
+     * The 9 characters reserved by the regexp syntax ({@code "{}<>[]()}) cannot stand for an integer:
+     * the integers above 65526 are not representable, and the upper bound of 65535 used previously is an
+     * overestimate.
      * However, to distinguish a number from a suite of digits, the former must be surrounded by '<' and '>'.
      * For instance, "12<34>" stands for a '1' (digit), followed by a '2' (digit) followed by a '34' (number).
      * Letters are not symbols: a regexp containing a letter is refused.
+     * A symbol is an integer: {@code .} stands for any integer of [min,max], not for a digit.
      *
      * @param regexp the regular expression
-     * @param min    an overall minimum value for transitions
-     * @param max    an overall maximum value for transitions
+     * @param min    an overall minimum value (an integer, included) for transitions
+     * @param max    an overall maximum value (an integer, included) for transitions
      */
     public FiniteAutomaton(String regexp, int min, int max) {
         this();
@@ -91,10 +95,11 @@ public class FiniteAutomaton implements IAutomaton {
 
     /**
      * Create a finite automaton based on a regular expression.
-     * The regexp accepts digits  and numbers, in [0,65535].
+     * The regexp accepts digits  and numbers, in [0,65526] (see {@link #FiniteAutomaton(String, int, int)}).
      * However, to distinguish a number from a suite of digits, the former must be surrounded by '<' and '>'.
      * For instance, "12<34>" stands for a '1' (digit), followed by a '2' (digit) followed by a '34' (number).
      * Letters are not symbols: a regexp containing a letter is refused.
+     * A symbol is an integer: {@code .} stands for any integer of [0,65526], not for a digit.
      *
      * @param regexp the regular expression
      */
