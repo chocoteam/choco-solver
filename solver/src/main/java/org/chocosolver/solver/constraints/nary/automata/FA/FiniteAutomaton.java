@@ -672,10 +672,14 @@ public class FiniteAutomaton implements IAutomaton {
             states.add(s);
             stateToIndex.put(s, idx++);
             for (Transition t : s.getTransitions()) {
-                char m = (char) Math.max(min, t.getMin());
-                char M = (char) Math.min(max, t.getMax());
-                for (char c = m; c <= M; c++) {
-                    alphabet.add(getIntFromChar(c));
+                // int counter: a char one would overflow after Character.MAX_VALUE and never end (#336)
+                int m = Math.max(min, t.getMin());
+                int M = Math.min(max, t.getMax());
+                for (int c = m; c <= M; c++) {
+                    int v = getIntFromChar((char) c);
+                    if (v >= 0) { // reserved characters have no integer counterpart
+                        alphabet.add(v);
+                    }
                 }
             }
         }
@@ -689,11 +693,11 @@ public class FiniteAutomaton implements IAutomaton {
         b.append("{");
         b.append(getIntFromChar(t.getMin()));
         if (t.getMin() != t.getMax()) {
-            char m = (char) (Math.max(min, t.getMin())+1);
-            char M = (char) Math.min(max, t.getMax());
-            for (char c = m; c <= M; c++) {
+            int m = Math.max(min, t.getMin()) + 1;
+            int M = Math.min(max, t.getMax());
+            for (int c = m; c <= M; c++) {
                 b.append(",");
-                b.append(getIntFromChar(c));
+                b.append(getIntFromChar((char) c));
             }
         }
         b.append("}");

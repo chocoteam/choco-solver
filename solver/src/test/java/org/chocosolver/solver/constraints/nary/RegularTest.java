@@ -459,4 +459,17 @@ public class RegularTest {
         return null;
     }
 
+    @Test(groups = "1s", timeOut = 20000)
+    public void testAnyCharacter() {
+        // "." covers the whole alphabet, up to Character.MAX_VALUE (#336)
+        FiniteAutomaton auto = new FiniteAutomaton(".");
+        Assert.assertEquals(auto.getNbStates(), 2);
+        Assert.assertTrue(auto.getAlphabet().contains(0));
+        Assert.assertTrue(auto.getAlphabet().contains(1000));
+        // no fake symbol for the characters reserved by the regexp syntax
+        Assert.assertFalse(auto.getAlphabet().contains(-1));
+        Assert.assertTrue(auto.getAlphabet().size() > 65000);
+        Assert.assertNotNull(auto.toDot());
+    }
+
 }

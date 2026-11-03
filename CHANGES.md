@@ -35,6 +35,7 @@ NEXT MILESTONE
 - `regular`, `costRegular` and `multiCostRegular`: values of the variables outside [0,65535], e.g. negative ones, are no longer accepted instead of raising an exception (#280)
 - `regular` on an empty array is satisfied if and only if the automaton accepts the empty word, instead of raising an exception (#335)
 - `FiniteAutomaton` refuses a regexp containing a letter, which was silently mapped to another value (#318)
+- `FiniteAutomaton`: fix the endless loop when building an automaton from a regexp covering the upper bound of the alphabet, e.g. `new FiniteAutomaton(".")` (#336). The alphabet no longer contains a fake `-1` symbol
 - `multiCostRegular`: fix solutions wrongly removed after a look-ahead of the search, e.g. `IntDomainBest` in the default strategy of an optimization problem (#1163). The propagator did not detect that a world was cancelled without a backtrack, and filtered with the shortest and longest paths computed for another branch
 - `costRegular` and `knapsack`: fix solutions wrongly removed after a look-ahead of the search, for the same reason (#1163). `costRegular` removed arcs of another branch and `knapsack` used the critical item of another branch
 - `sum` and `scalar` compared to a constant, and the expressions compared to a constant (e.g. `x.eq(1)`), no longer add a variable for the constant to the model (#743)
