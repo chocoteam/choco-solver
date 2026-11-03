@@ -481,4 +481,26 @@ public class RegularTest {
         Assert.assertEquals(nbTransitions, auto.getAlphabet().size());
     }
 
+    @Test(groups = "1s", timeOut = 20000)
+    public void testBoundsAreIntegers() {
+        // min and max are integers, not character codes: the characters reserved by the regexp
+        // syntax ('"', '(', ')', '<', '>', '[', ']', '{', '}') must not shift them
+        int[][] bounds = {{0, 100}, {5, 40}, {50, 200}, {0, 5}, {0, 65526}, {65520, 65526}};
+        for (int[] b : bounds) {
+            FiniteAutomaton auto = new FiniteAutomaton(".", b[0], b[1]);
+            Assert.assertEquals(auto.getAlphabet().size(), b[1] - b[0] + 1, "[" + b[0] + "," + b[1] + "]");
+            for (int v = b[0]; v <= b[1]; v++) {
+                Assert.assertTrue(auto.getAlphabet().contains(v), v + " in [" + b[0] + "," + b[1] + "]");
+            }
+            int nbTransitions = 0;
+            for (int i = 0; i < auto.getNbStates(); i++) {
+                nbTransitions += auto.getTransitions(i).size();
+            }
+            Assert.assertEquals(nbTransitions, b[1] - b[0] + 1);
+        }
+        // a bound beyond the representable integers keeps the values below it
+        FiniteAutomaton all = new FiniteAutomaton(".", 0, 65535);
+        Assert.assertEquals(all.getAlphabet().size(), 65527);
+    }
+
 }

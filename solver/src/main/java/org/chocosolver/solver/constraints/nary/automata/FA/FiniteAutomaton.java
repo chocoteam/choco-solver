@@ -532,8 +532,8 @@ public class FiniteAutomaton implements IAutomaton {
             State s = states.get(i);
             for (Transition t : s.getTransitions()) {
                 int dest = stateToIndex.get(t.getDest());
-                int m = Math.max(min, t.getMin());
-                int M = Math.min(max, t.getMax());
+                int m = Math.max(minCode(), t.getMin());
+                int M = Math.min(maxCode(), t.getMax());
                 for (int c = m; c <= M; c++) {
                     int symbol = getIntFromChar((char) c);
                     if (symbol >= 0) { // reserved characters have no integer counterpart
@@ -549,8 +549,8 @@ public class FiniteAutomaton implements IAutomaton {
         List<int[]> transitions = new ArrayList<>();
         for (Transition t : states.get(state).getTransitions()) {
             int dest = stateToIndex.get(t.getDest());
-            int m = Math.max(min, t.getMin());
-            int M = Math.min(max, t.getMax());
+            int m = Math.max(minCode(), t.getMin());
+            int M = Math.min(maxCode(), t.getMax());
             for (int c = m; c <= M; c++) {
                 int symbol = getIntFromChar((char) c);
                 if (symbol >= 0) { // reserved characters have no integer counterpart
@@ -671,6 +671,24 @@ public class FiniteAutomaton implements IAutomaton {
             }
     }
 
+    /**
+     * @return the smallest character code that stands for an integer greater than or equal to {@link #min}.
+     * The transitions of the underlying automaton are expressed in character codes, which are shifted from
+     * the integers since the reserved characters of the regexp syntax are skipped.
+     */
+    private int minCode() {
+        int code = charFromIntMap.get(min);
+        return code < 0 ? Character.MAX_VALUE + 1 : code;
+    }
+
+    /**
+     * @return the greatest character code that may stand for an integer less than or equal to {@link #max}.
+     */
+    private int maxCode() {
+        int code = charFromIntMap.get(max);
+        return code < 0 ? Character.MAX_VALUE : code;
+    }
+
     private void syncStates() {
         this.alphabet.clear();
         this.states.clear();
@@ -681,8 +699,8 @@ public class FiniteAutomaton implements IAutomaton {
             stateToIndex.put(s, idx++);
             for (Transition t : s.getTransitions()) {
                 // int counter: a char one would overflow after Character.MAX_VALUE and never end (#336)
-                int m = Math.max(min, t.getMin());
-                int M = Math.min(max, t.getMax());
+                int m = Math.max(minCode(), t.getMin());
+                int M = Math.min(maxCode(), t.getMax());
                 for (int c = m; c <= M; c++) {
                     int v = getIntFromChar((char) c);
                     if (v >= 0) { // reserved characters have no integer counterpart
@@ -701,8 +719,8 @@ public class FiniteAutomaton implements IAutomaton {
         b.append("{");
         b.append(getIntFromChar(t.getMin()));
         if (t.getMin() != t.getMax()) {
-            int m = Math.max(min, t.getMin()) + 1;
-            int M = Math.min(max, t.getMax());
+            int m = Math.max(minCode(), t.getMin()) + 1;
+            int M = Math.min(maxCode(), t.getMax());
             for (int c = m; c <= M; c++) {
                 b.append(",");
                 b.append(getIntFromChar((char) c));
