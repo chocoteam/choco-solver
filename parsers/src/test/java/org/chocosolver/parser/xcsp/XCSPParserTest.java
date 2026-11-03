@@ -509,4 +509,23 @@ public class XCSPParserTest {
                 && Arrays.stream(s, 0, 3).filter(x -> x == s[3]).count() == 1
                 && Arrays.stream(s, 0, 3).filter(x -> x == s[4]).count() == 2, vars);
     }
+
+    @Test(groups = "xcsp")
+    public void testArgExtremumRank() throws Exception {
+        // #1260
+        Var[] vars = {var("x0", 0, 2), var("x1", 0, 2), var("x2", 0, 2), var("y", 0, 2)};
+        for (String op : new String[]{"maximumArg", "minimumArg"}) {
+            boolean max = op.equals("maximumArg");
+            for (String rank : new String[]{"", " rank=\"first\"", " rank=\"last\"", " rank=\"any\""}) {
+                String c = "<" + op + rank + "><list> x0 x1 x2 </list><condition> (eq,y) </condition></" + op + ">";
+                check(c, s -> {
+                    int e = max ? Math.max(s[0], Math.max(s[1], s[2])) : Math.min(s[0], Math.min(s[1], s[2]));
+                    if (s[s[3]] != e) return false;
+                    if (rank.contains("first")) return s[0] == e ? s[3] == 0 : (s[1] == e ? s[3] == 1 : s[3] == 2);
+                    if (rank.contains("last")) return s[2] == e ? s[3] == 2 : (s[1] == e ? s[3] == 1 : s[3] == 0);
+                    return true;
+                }, vars);
+            }
+        }
+    }
 }

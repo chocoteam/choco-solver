@@ -1419,13 +1419,21 @@ public class XCSPParser implements XCallbacks2 {
     }
 
     private void buildArgmin(IntVar[] vars, Types.TypeRank rank, Condition condition) {
-        IntVar max = condToVar(condition, 0, vars.length);
+        IntVar idx = condToVar(condition, 0, vars.length);
         if (rank.equals(Types.TypeRank.LAST)) {
+            // first index j in the reversed list is the index n - 1 - j in the original one
             ArrayUtils.reverse(vars);
-            IntVar max2 = model.intView(-1, max, vars.length);
-            model.argmin(max2, 0, vars).post();
+            IntVar idx2 = model.intView(-1, idx, vars.length - 1);
+            model.argmin(idx2, 0, vars).post();
+        } else if (rank.equals(Types.TypeRank.FIRST)) {
+            model.argmin(idx, 0, vars).post();
         } else {
-            model.argmin(max, 0, vars).post();
+            // any: idx is the index of any extremum
+            int lb = Arrays.stream(vars).mapToInt(IntVar::getLB).min().getAsInt();
+            int ub = Arrays.stream(vars).mapToInt(IntVar::getUB).max().getAsInt();
+            IntVar ext = model.intVar(lb, ub);
+            model.min(ext, vars).post();
+            model.element(ext, vars, idx, 0).post();
         }
     }
 
@@ -1544,13 +1552,21 @@ public class XCSPParser implements XCallbacks2 {
     }
 
     private void buildArgmax(IntVar[] vars, Types.TypeRank rank, Condition condition) {
-        IntVar max = condToVar(condition, 0, vars.length);
+        IntVar idx = condToVar(condition, 0, vars.length);
         if (rank.equals(Types.TypeRank.LAST)) {
+            // first index j in the reversed list is the index n - 1 - j in the original one
             ArrayUtils.reverse(vars);
-            IntVar max2 = model.intView(-1, max, vars.length);
-            model.argmax(max2, 0, vars).post();
+            IntVar idx2 = model.intView(-1, idx, vars.length - 1);
+            model.argmax(idx2, 0, vars).post();
+        } else if (rank.equals(Types.TypeRank.FIRST)) {
+            model.argmax(idx, 0, vars).post();
         } else {
-            model.argmax(max, 0, vars).post();
+            // any: idx is the index of any extremum
+            int lb = Arrays.stream(vars).mapToInt(IntVar::getLB).min().getAsInt();
+            int ub = Arrays.stream(vars).mapToInt(IntVar::getUB).max().getAsInt();
+            IntVar ext = model.intVar(lb, ub);
+            model.max(ext, vars).post();
+            model.element(ext, vars, idx, 0).post();
         }
     }
 
