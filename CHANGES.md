@@ -27,6 +27,10 @@ NEXT MILESTONE
 - Docker: the `chocoteam/choco-solver-mzn` images, standard and with LCG (`-X`), are built and pushed on each tag
 - XCSP3 and FlatZinc: fix an endless enumeration of the same solution when enumerating all solutions of a satisfaction problem with free search or LCG. Restarting on each solution is now turned on only when optimizing
 
+#### Constraints & LCG
+- `reify()` on a constraint without propagator, such as the void constraint returned by constraints decomposed with LCG (`globalCardinality`, `increasing`, `element`, `table`, ...), raises an explicit `SolverException` instead of an `ArrayIndexOutOfBoundsException` (#1274)
+- Document that some constraints decomposed with LCG cannot be reified, and that the decomposed `mod` forbids `Y = 0` (#1274)
+
 #### Settings
 - The seed is declared in the settings: `SettingsBuilder.setSeed(long)`, the `seed` property or the `-seed` option (#1207, #1209). The `-seed` option of the parsers was ignored, and `dom/wdeg`, `CHS`, `FRBA`, `FLBA` and `activity` strategies always used a seed of 0; they now use the seed of the model. The default seed is still 0
 

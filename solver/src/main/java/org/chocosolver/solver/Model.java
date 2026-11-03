@@ -628,7 +628,8 @@ public class Model implements IModel {
     }
 
     /**
-     * Create a VOID constraint that cannot be reified --  for LCG mainly
+     * Create a VOID constraint that cannot be reified --  for LCG mainly.
+     * Calling {@link Constraint#reify()} or {@link Constraint#reifyWith(BoolVar)} on it throws a {@link SolverException}.
      * @return a void constraint
      * todo: find a more elegant way to do that
      */
