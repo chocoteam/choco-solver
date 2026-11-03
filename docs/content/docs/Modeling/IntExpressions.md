@@ -87,7 +87,7 @@ This is achieved calling the `extension()` method which returns a `Constraint` o
 {{< /tabpane >}}
 
 {{% alert title="Info" color="primary" %}}
-The allowed combinations are extracted from the expression by generating all possible combinations and filtering the valid ones (the ones that satisfy the relationship).
+The allowed combinations are extracted from the expression by generating all possible combinations and filtering them to keep the valid ones (the ones that satisfy the relationship).
 
 {{% /alert %}}
 
