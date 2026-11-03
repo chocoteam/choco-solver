@@ -528,4 +528,35 @@ public class XCSPParserTest {
             }
         }
     }
+
+    @Test(groups = "xcsp")
+    public void testArgExtremumAnyWithConditionNotFixingIndex() throws Exception {
+        // #1260: the index is not a variable of the problem, so each solution must be found once
+        Var[] vars3 = {var("x0", 0, 2), var("x1", 0, 2), var("x2", 0, 2)};
+        Var[] vars4 = {var("x0", 0, 2), var("x1", 0, 2), var("x2", 0, 2), var("y", 0, 2)};
+        String[] conds = {"(ne,1)", "(in,{0,2})", "(gt,y)", "(le,y)", "(ge,1)", "(lt,y)"};
+        for (String op : new String[]{"maximumArg", "minimumArg"}) {
+            boolean max = op.equals("maximumArg");
+            for (int c = 0; c < conds.length; c++) {
+                int cc = c;
+                String x = "<" + op + " rank=\"any\"><list> x0 x1 x2 </list><condition> " + conds[c] + " </condition></" + op + ">";
+                check(x, s -> {
+                    int e = max ? Math.max(s[0], Math.max(s[1], s[2])) : Math.min(s[0], Math.min(s[1], s[2]));
+                    for (int i = 0; i < 3; i++) {
+                        boolean ok;
+                        switch (cc) {
+                            case 0: ok = i != 1; break;
+                            case 1: ok = i == 0 || i == 2; break;
+                            case 2: ok = i > s[3]; break;
+                            case 3: ok = i <= s[3]; break;
+                            case 4: ok = i >= 1; break;
+                            default: ok = i < s[3]; break;
+                        }
+                        if (ok && s[i] == e) return true;
+                    }
+                    return false;
+                }, cc == 0 || cc == 1 || cc == 4 ? vars3 : vars4);
+            }
+        }
+    }
 }
