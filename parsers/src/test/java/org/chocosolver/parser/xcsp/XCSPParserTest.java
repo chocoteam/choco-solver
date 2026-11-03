@@ -498,6 +498,20 @@ public class XCSPParserTest {
     }
 
     @Test(groups = "xcsp")
+    public void testElementWithoutIndexFindsEachSolutionOnce() throws Exception {
+        // #1270: no auxiliary index variable, so a solution is not found once per matching position
+        Var[] vars = {var("x0", 0, 1), var("x1", 0, 1), var("x2", 0, 1), var("x3", 0, 1), var("v", 0, 2)};
+        String l = "<list> x0 x1 x2 x3 </list>";
+        check("<element>" + l + "<value> v </value></element>", s -> Arrays.stream(s, 0, 4).anyMatch(x -> x == s[4]), vars);
+        check("<element>" + l + "<condition> (ne,v) </condition></element>", s -> Arrays.stream(s, 0, 4).anyMatch(x -> x != s[4]), vars);
+        check("<element>" + l + "<condition> (lt,v) </condition></element>", s -> Arrays.stream(s, 0, 4).anyMatch(x -> x < s[4]), vars);
+        check("<element>" + l + "<condition> (in,{0,2}) </condition></element>", s -> Arrays.stream(s, 0, 4).anyMatch(x -> x == 0 || x == 2),
+                Arrays.copyOf(vars, 4));
+        check("<element>" + l + "<condition> (notin,0..0) </condition></element>", s -> Arrays.stream(s, 0, 4).anyMatch(x -> x != 0),
+                Arrays.copyOf(vars, 4));
+    }
+
+    @Test(groups = "xcsp")
     public void testCardinalityClosedWithVariablesAsValues() throws Exception {
         // #1260
         Var[] vars = {var("x0", 0, 2), var("x1", 0, 2), var("x2", 0, 2), var("v", 0, 2), var("w", 0, 2)};

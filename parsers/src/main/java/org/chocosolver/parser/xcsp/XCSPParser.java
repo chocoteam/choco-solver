@@ -1513,10 +1513,12 @@ public class XCSPParser implements XCallbacks2 {
             model.sum(bs, ">=", 1).post();
             return;
         }
-        int min = Arrays.stream(vars).min(Comparator.comparingInt(IntVar::getLB)).get().getLB();
-        int max = Arrays.stream(vars).max(Comparator.comparingInt(IntVar::getUB)).get().getUB();
-        IntVar x = condToVar(condition, min, max);
-        model.element(x, vars(list), model.intVar(0, list.length), 0).post();
+        // other conditions (variable, interval, set): same decomposition, still without any index variable
+        BoolVar[] bs = new BoolVar[vars.length];
+        for (int i = 0; i < vars.length; i++) {
+            bs[i] = satisfies(vars[i], condition).boolVar();
+        }
+        model.sum(bs, ">=", 1).post();
     }
 
     @Override
