@@ -1499,6 +1499,13 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
+     * @return a copy of the stop criteria currently declared.
+     */
+    public List<Criterion> getStopCriteria() {
+        return new ArrayList<>(criteria);
+    }
+
+    /**
      * Empties the list of stop criteria declared.
      * This is automatically called on {@link #reset()}.
      */
