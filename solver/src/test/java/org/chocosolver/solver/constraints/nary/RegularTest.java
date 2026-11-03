@@ -470,6 +470,15 @@ public class RegularTest {
         Assert.assertFalse(auto.getAlphabet().contains(-1));
         Assert.assertTrue(auto.getAlphabet().size() > 65000);
         Assert.assertNotNull(auto.toDot());
+        // the copy and the transitions must also end
+        FiniteAutomaton copy = new FiniteAutomaton(auto);
+        Assert.assertEquals(copy.getNbStates(), 2);
+        Assert.assertEquals(copy.getAlphabet().size(), auto.getAlphabet().size());
+        int nbTransitions = 0;
+        for (int i = 0; i < auto.getNbStates(); i++) {
+            nbTransitions += auto.getTransitions(i).size();
+        }
+        Assert.assertEquals(nbTransitions, auto.getAlphabet().size());
     }
 
 }

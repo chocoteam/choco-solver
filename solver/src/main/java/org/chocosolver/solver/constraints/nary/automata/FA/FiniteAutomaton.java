@@ -532,11 +532,13 @@ public class FiniteAutomaton implements IAutomaton {
             State s = states.get(i);
             for (Transition t : s.getTransitions()) {
                 int dest = stateToIndex.get(t.getDest());
-                char m = (char) Math.max(min, t.getMin());
-                char M = (char) Math.min(max, t.getMax());
-                for (char c = m; c <= M; c++) {
-                    int symbol = getIntFromChar(c);
-                    transitions.add(new int[]{i, dest, symbol});
+                int m = Math.max(min, t.getMin());
+                int M = Math.min(max, t.getMax());
+                for (int c = m; c <= M; c++) {
+                    int symbol = getIntFromChar((char) c);
+                    if (symbol >= 0) { // reserved characters have no integer counterpart
+                        transitions.add(new int[]{i, dest, symbol});
+                    }
                 }
             }
         }
@@ -547,11 +549,13 @@ public class FiniteAutomaton implements IAutomaton {
         List<int[]> transitions = new ArrayList<>();
         for (Transition t : states.get(state).getTransitions()) {
             int dest = stateToIndex.get(t.getDest());
-            char m = (char) Math.max(min, t.getMin());
-            char M = (char) Math.min(max, t.getMax());
-            for (char c = m; c <= M; c++) {
-                int symbol = getIntFromChar(c);
-                transitions.add(new int[]{state, dest, symbol});
+            int m = Math.max(min, t.getMin());
+            int M = Math.min(max, t.getMax());
+            for (int c = m; c <= M; c++) {
+                int symbol = getIntFromChar((char) c);
+                if (symbol >= 0) { // reserved characters have no integer counterpart
+                    transitions.add(new int[]{state, dest, symbol});
+                }
             }
         }
         return transitions;
@@ -584,8 +588,12 @@ public class FiniteAutomaton implements IAutomaton {
             for (Transition t : s.getTransitions()) {
                 int dest = stateToIndex.get(t.getDest());
                 if (setOfRemoved.contains(dest)) {
-                    for (char d = t.getMin(); d <= t.getMax(); d++)
-                        couple.add(new int[]{i, getIntFromChar(d)});
+                    for (int d = t.getMin(); d <= t.getMax(); d++) {
+                        int symbol = getIntFromChar((char) d);
+                        if (symbol >= 0) { // reserved characters have no integer counterpart
+                            couple.add(new int[]{i, symbol});
+                        }
+                    }
                 }
 
             }
