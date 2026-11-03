@@ -912,6 +912,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * The quotient is rounded towards zero: equal to the first integer
      * in the direction of zero from the exact rational quotient.
      * </p>
+     * <p>
+     * <b>Note:</b> the value 0 is not allowed for {@code Y}. When the constraint is decomposed
+     * (with LCG, or when the domains are too large for a table or {@code PropModXYZ}),
+     * a part of the decomposition (the division, which forbids {@code Y = 0}) is posted when the constraint is created,
+     * even if the constraint itself is never posted.
+     * The value 0 is then removed from the domain of {@code Y}, whether the constraint is posted, reified or ignored.
+     * </p>
      *
      * @param X first variable
      * @param Y second variable
