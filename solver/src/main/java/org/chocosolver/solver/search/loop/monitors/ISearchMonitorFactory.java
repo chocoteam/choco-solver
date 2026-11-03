@@ -134,7 +134,9 @@ public interface ISearchMonitorFactory extends ISelf<Solver> {
      * <p>
      * Based on {@code SearchMonitorFactory.convertInMilliseconds(String duration)}
      *
-     * @param duration a String which states the duration like "WWd XXh YYm ZZs".
+     * @param duration a String which states the duration like "WWd XXh YYm ZZs", see
+     *                 {@link TimeUtils#convertInMilliseconds(String)} for the accepted format
+     * @throws IllegalArgumentException if the duration does not respect the format
      * @see TimeUtils#convertInMilliseconds(String)
      */
     default void limitTime(String duration) {

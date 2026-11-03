@@ -8,6 +8,7 @@ package org.chocosolver.solver;
 
 import org.chocosolver.util.tools.TimeUtils;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.util.ProblemMaker.makeNQueenWithBinaryConstraints;
@@ -73,23 +74,39 @@ public class LimitsTest {
         assertEquals(sc, sl);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void durationTest() {
-        long d = TimeUtils.convertInMilliseconds("0.50s");
-        Assert.assertEquals(d, 500);
-        d += TimeUtils.convertInMilliseconds("30s");
-        Assert.assertEquals(d, 30500);
-        d += TimeUtils.convertInMilliseconds("30m");
-        Assert.assertEquals(d, 1830500);
-        d += TimeUtils.convertInMilliseconds("12h");
-        Assert.assertEquals(d, 45030500);
-        d += TimeUtils.convertInMilliseconds("2d");
-        Assert.assertEquals(d, 217830500);
+    @DataProvider
+    public Object[][] durations() {
+        return new Object[][]{
+                {"0s", 0},
+                {"0", 0},
+                {"50", 50},
+                {" 2h 30m ", 9_000_000},
+                {"50ms", 50},
+                {"0.50s", 500},
+                {"30s", 30_000},
+                {"71s", 71_000},
+                {"1m30s", 90_000},
+                {"1m500ms", 60_500},
+                {"30m", 1_800_000},
+                {"12h", 43_200_000},
+                {"2d", 172_800_000},
+                {"2d12h30m30.5s", 217_830_500},
+        };
+    }
 
-        long t = TimeUtils.convertInMilliseconds("2d12h30m30.5s");
-        Assert.assertEquals(t, d);
+    @Test(groups="1s", timeOut=60000, dataProvider = "durations")
+    public void durationTest(String str, long dur) {
+        long d = TimeUtils.convertInMilliseconds(str);
+        Assert.assertEquals(d, dur);
+    }
 
-        d = TimeUtils.convertInMilliseconds("71s");
-        Assert.assertEquals(d, 71000);
+    @DataProvider
+    public Object[][] invalidDurations() {
+        return new Object[][]{{"1.5m"}, {"0.5h"}, {"2min"}, {"3x"}, {""}, {"s"}, {"30s2m"}, {"-5s"}, {"1.5"}, {"10 seconds"}};
+    }
+
+    @Test(groups = "1s", dataProvider = "invalidDurations", expectedExceptions = IllegalArgumentException.class)
+    public void invalidDurationTest(String str) {
+        TimeUtils.convertInMilliseconds(str);
     }
 }

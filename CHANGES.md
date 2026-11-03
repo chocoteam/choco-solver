@@ -39,6 +39,7 @@ NEXT MILESTONE
 - An implication (`impliedBy`, `ImpliedConstraint`) is named `IMPLIEDCONSTRAINT` instead of `REIFICATIONCONSTRAINT`, and the Javadoc of `ImpliedConstraint` and `PropReif` is fixed (#1087)
 
 #### Search & Strategies
+- Fix `TimeUtils.convertInMilliseconds` (used by `limitTime(String)`), which silently misread durations such as "50ms" (50 minutes), "1.5m" or "0.5h" (#1271): the whole string is now checked, "ms" is accepted, and an `IllegalArgumentException` is thrown when the format is not respected (e.g. decimal minutes, "2min")
 - Fix a wrong "no solution" with LCG, and an endless search without LCG, when an assignment ("=") or a removal ("!=") decision is made on a value that is not in the domain, e.g. with `IntDomainMiddle` (as for the MiniZinc annotation `indomain_middle`) on a domain with holes (#1210). Such a decision is now made on the closest value of the domain
 - `ObjectiveStrategy`: fix the split point of the `DICHOTOMIC` policy, which was rounded down for both `MINIMIZE` and `MAXIMIZE` (#1252). It is now rounded towards the bound to improve, so that minimizing an objective and maximizing its opposite try mirrored cuts. This changes the cut tried when maximizing
 - `ObjectiveStrategy`: add a `largerHalfFirst` parameter to try the larger half of the objective domain first, also available with `Search.objectiveStrategy(objective, largerHalfFirst)`
