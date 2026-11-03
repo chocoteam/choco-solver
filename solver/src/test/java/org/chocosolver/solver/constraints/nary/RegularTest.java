@@ -503,4 +503,13 @@ public class RegularTest {
         Assert.assertEquals(all.getAlphabet().size(), 65527);
     }
 
+    @Test(groups = "1s", timeOut = 20000)
+    public void testToDotBounds() {
+        // the labels only contain the integers of [min,max], without the reserved characters
+        String dot = new FiniteAutomaton(".", 30, 45).toDot();
+        Assert.assertTrue(dot.contains("[label=\"{30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45}\"]"), dot);
+        Assert.assertFalse(dot.contains("-1"), dot);
+        Assert.assertTrue(new FiniteAutomaton("<12>").toDot().contains("[label=\"{12}\"]"));
+    }
+
 }

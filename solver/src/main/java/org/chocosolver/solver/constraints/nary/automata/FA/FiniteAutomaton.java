@@ -717,13 +717,17 @@ public class FiniteAutomaton implements IAutomaton {
 
         b.append(" -> ").append(destIdx).append(" [label=\"");
         b.append("{");
-        b.append(getIntFromChar(t.getMin()));
-        if (t.getMin() != t.getMax()) {
-            int m = Math.max(minCode(), t.getMin()) + 1;
-            int M = Math.min(maxCode(), t.getMax());
-            for (int c = m; c <= M; c++) {
-                b.append(",");
-                b.append(getIntFromChar((char) c));
+        int m = Math.max(minCode(), t.getMin());
+        int M = Math.min(maxCode(), t.getMax());
+        boolean first = true;
+        for (int c = m; c <= M; c++) {
+            int symbol = getIntFromChar((char) c);
+            if (symbol >= 0) { // reserved characters have no integer counterpart
+                if (!first) {
+                    b.append(",");
+                }
+                b.append(symbol);
+                first = false;
             }
         }
         b.append("}");
