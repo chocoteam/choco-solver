@@ -29,6 +29,7 @@ NEXT MILESTONE
 
 #### Constraints & LCG
 - `reify()` on a constraint without propagator, such as the void constraint returned by constraints decomposed with LCG (`globalCardinality`, `increasing`, `element`, `table`, ...), raises an explicit `SolverException` instead of an `ArrayIndexOutOfBoundsException` (#1274)
+- Fix `allDifferent` with LCG (#1274): when the variables have enumerated domains and as many values as variables, permanent SAT clauses ("each value occurs") were added when the propagator was created, thus a reified (or unused) `allDifferent` lost solutions. They are now added when the constraint is posted, through the new `Propagator.onPost(dynamic, reified)` hook, which tells whether the propagator is reified or added during the resolution
 - Document that some constraints decomposed with LCG cannot be reified, and that the decomposed `mod` forbids `Y = 0` (#1274)
 
 #### Settings

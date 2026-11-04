@@ -637,4 +637,40 @@ public class ConstraintTest {
         m.getSolver().setSearch(org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch(v));
         Assert.assertEquals(m.getSolver().findAllSolutions().size(), 18);
     }
+
+    private static int countAllDiffLCG(int ub, String mode) {
+        Model m = new Model(new SettingsBuilder().setLCG(true).build());
+        IntVar[] x = m.intVarArray("x", 3, 0, ub, false);
+        switch (mode) {
+            case "posted":
+                m.allDifferent(x).post();
+                break;
+            case "false":
+                m.arithm(m.allDifferent(x).reify(), "=", 0).post();
+                break;
+            case "implied":
+                m.allDifferent(x).impliedBy(m.boolVar("b", false));
+                break;
+            default: // unused
+                m.allDifferent(x);
+        }
+        m.getSolver().setSearch(org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch(x));
+        return m.getSolver().findAllSolutions().size();
+    }
+
+    @Test(groups = "lcg", timeOut = 60000)
+    public void testAllDiffLCGNoSpareValue_1274() {
+        Assert.assertEquals(countAllDiffLCG(2, "posted"), 6);
+        Assert.assertEquals(countAllDiffLCG(2, "false"), 21);
+        Assert.assertEquals(countAllDiffLCG(2, "unused"), 27);
+        // implied by a Boolean fixed to false: the constraint is not enforced
+        Assert.assertEquals(countAllDiffLCG(2, "implied"), 27);
+    }
+
+    @Test(groups = "lcg", timeOut = 60000)
+    public void testAllDiffLCGSpareValue_1274() {
+        Assert.assertEquals(countAllDiffLCG(3, "posted"), 24);
+        Assert.assertEquals(countAllDiffLCG(3, "false"), 40);
+        Assert.assertEquals(countAllDiffLCG(3, "unused"), 64);
+    }
 }
