@@ -19,6 +19,7 @@ DIMACS, MPS), `examples`. The user documentation (website pages) and the develop
 ## Build and test
 
 ```bash
+git submodule update --init                # once per clone/worktree, else CPProfiler does not compile
 mvn clean package -DskipTests              # build
 mvn test -Dgroups=1s                       # fast tests; also 10s, checker, lcg
 mvn test -Dtest=ClassName#methodName       # one test
