@@ -21,7 +21,8 @@ permissions:
 
 jobs:
   test-ibex:
-    runs-on: ubuntu-latest
+    # Pinned: SoPlex 4.0.2 (bundled with ibex 2.9.1) does not compile with the GCC 15 of ubuntu-26.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
         with:
