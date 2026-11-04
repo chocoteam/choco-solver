@@ -983,6 +983,7 @@ public class Model implements IModel {
                 }
                 p.getConstraint().checkNewStatus(Constraint.Status.POSTED);
                 p.linkVariables();
+                p.onPost(dynAdd, p.isReified());
             }
             if (dynAdd) {
                 engine.dynamicAddition(permanent, c.getPropagators());

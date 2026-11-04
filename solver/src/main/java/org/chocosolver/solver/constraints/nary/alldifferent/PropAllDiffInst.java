@@ -50,7 +50,13 @@ public class PropAllDiffInst extends Propagator<IntVar> {
     public PropAllDiffInst(IntVar[] variables) {
         super(variables, PropagatorPriority.UNARY, true);
         n = vars.length;
-        if (lcg() && Arrays.stream(variables).allMatch(IntVar::hasEnumeratedDomain)) {
+    }
+
+    @Override
+    public void onPost(boolean dynamic, boolean reified) {
+        // These clauses are valid only if the constraint holds, hence they are not added at construction,
+        // nor when reified; they are permanent, hence not added during the resolution
+        if (lcg() && !dynamic && !reified && Arrays.stream(vars).allMatch(IntVar::hasEnumeratedDomain)) {
             IntIterableRangeSet set = new IntIterableRangeSet();
             for (IntVar var : vars) {
                 set.addAll(var);
