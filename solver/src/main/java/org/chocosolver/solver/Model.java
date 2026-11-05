@@ -7,6 +7,7 @@
 package org.chocosolver.solver;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
+import org.chocosolver.lp.PropSimplex;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.sat.MiniSat;
 import org.chocosolver.solver.constraints.Constraint;
@@ -110,6 +111,11 @@ public class Model implements IModel {
     private int cIdx;
 
     /**
+     * Number of constraints removed from the constraint network since the creation of this model
+     */
+    private int nbUnpostedCstrs;
+
+    /**
      * Groups of variables
      */
     private List<Group<?>> groups;
@@ -211,6 +217,10 @@ public class Model implements IModel {
         this.hooks.put("C_Undef", MiniSat.C_Undef);
         this.hooks.clear();
         this.groups = new ArrayList<>();
+        if(settings.getLinearRelaxation()!=null){
+            new Constraint("LinearRelaxation",
+                    new PropSimplex(this, settings.getLinearRelaxation())).post();
+        }
     }
 
     /**
@@ -489,6 +499,16 @@ public class Model implements IModel {
      */
     public int getNbCstrs() {
         return cIdx;
+    }
+
+    /**
+     * The number of constraints unposted from this model since its creation. It lets a component that relies on
+     * some posted constraints detect cheaply that they may not all hold any more.
+     *
+     * @return the number of constraints unposted so far
+     */
+    public int getNbUnpostedCstrs() {
+        return nbUnpostedCstrs;
     }
 
     /**
@@ -1034,6 +1054,7 @@ public class Model implements IModel {
                 int idx = c.getCidxInModel();
                 c.declareAs(Constraint.Status.FREE, -1);
                 c.ignore();
+                nbUnpostedCstrs++;
                 // 2. remove it from the network
                 Constraint cm = cstrs[--cIdx];
                 if (idx < cIdx) {

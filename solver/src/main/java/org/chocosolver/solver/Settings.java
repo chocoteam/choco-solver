@@ -11,6 +11,8 @@ import org.chocosolver.solver.constraints.ISatFactory;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.impl.IntVarLazyLit;
 
+import org.chocosolver.lp.ILinearRelaxation;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -102,6 +104,8 @@ public class Settings {
 
     private final Supplier<IEnvironment> environmentSupplier;
 
+    private final ILinearRelaxation.Solver linearRelaxation;
+
     protected Settings(SettingsBuilder builder) {
         this.modelChecker = builder.getModelChecker();
         this.seed = builder.getSeed();
@@ -138,6 +142,7 @@ public class Settings {
         this.nogoodFromRestartWithSAT = builder.nogoodFromRestartWithSAT();
         this.nogoodFromRestartMinimize = builder.nogoodFromRestartMinimize();
         this.environmentSupplier = builder.getEnvironmentSupplier();
+        this.linearRelaxation = builder.getLinearRelaxation();
         this.additionalSettings = new HashMap<>(builder.getAdditionalSettings());
     }
 
@@ -413,6 +418,13 @@ public class Settings {
      */
     public boolean getIbexRestoreRounding() {
         return ibexRestoreRounding;
+    }
+
+    /**
+     * @return the linear relaxation solver to use, or {@code null} if linear relaxation is disabled.
+     */
+    public ILinearRelaxation.Solver getLinearRelaxation() {
+        return linearRelaxation;
     }
 
     /**
