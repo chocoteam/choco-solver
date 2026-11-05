@@ -41,6 +41,12 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <!-- optional in choco-solver: the command-line tools offer the linear relaxation (-lr) -->
+            <groupId>org.ojalgo</groupId>
+            <artifactId>ojalgo</artifactId>
+            <version>${ojalgo.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.xcsp</groupId>
             <artifactId>xcsp3-tools</artifactId>
             <version>2.5</version>

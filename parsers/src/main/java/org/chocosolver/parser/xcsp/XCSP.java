@@ -323,7 +323,7 @@ public class XCSP extends RegParser {
                             
                             \t],
                             \t"exit":{"time":%.1f, \
-                            "bound":%d, "nodes":%d, "failures":%d, "restarts":%d, "status":"%s"}
+                            "bound":%d, "nodes":%d, "failures":%d, "restarts":%d, "status":"%s"}%s
                             }""",
                     solver.getTimeCount(),
                     solver.getObjectiveManager().isOptimization() ?
@@ -332,7 +332,8 @@ public class XCSP extends RegParser {
                     solver.getNodeCount(),
                     solver.getFailCount(),
                     solver.getRestartCount(),
-                    solver.getSearchState()
+                    solver.getSearchState(),
+                    lpStatisticsAsJson(solver.getModel())
             );
         }
         if (level.is(Level.IRACE)) {

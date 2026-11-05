@@ -6,9 +6,10 @@
   "mznlib": "mzn_lib/",
   "executable": "fzn-choco.sh",
   "tags": ["cp","int"],
-  "stdFlags": ["-a","-f","-n","-p","-r","-s","-t","--cp-profiler"],
+  "stdFlags": ["-a","-f","-n","-p","-r","-s","-t","-v","--cp-profiler"],
   "extraFlags": [
-    ["-lcg", "Use LCG", "bool", "false"]
+    ["-lcg", "Use LCG", "bool", "false"],
+    ["-lr", "Use a linear relaxation, solved with the given backend (OJALGO or OJALGO_EBM)", "string", ""]
   ],
   "supportsMzn": false,
   "supportsFzn": true,
