@@ -630,5 +630,53 @@ public class LitVarTests {
         Assert.assertEquals(b.getLit(l + 1, LR_GE), MiniSat.neg(b.getLit(l, LR_LE)));
     }
 
-
+    /**
+     * Bound literals of a lazy-literal variable are created on demand, in any order, and kept in
+     * a sorted chain ({@code StrongBound}). A value must always map to the same literal, two values
+     * to two literals, and the literals of the current bounds must be true.
+     */
+    @Test(groups = {"1s", "lcg"})
+    public void testIntVarLLRandomOrder() throws ContradictionException {
+        Model model = new Model("LCG testIntVarLLRandomOrder",
+                SettingsBuilder.init().setLCG(true)
+                        .setWarnUser(true));
+        int lb = -500;
+        int ub = 500;
+        IntVar x = model.intVar("x", lb, ub, true);
+        MiniSat sat = model.getSolver().getSat();
+        java.util.Random rnd = new java.util.Random(0);
+        java.util.Map<Integer, Integer> ge = new java.util.HashMap<>();
+        java.util.Map<Integer, Integer> owner = new java.util.HashMap<>();
+        for (int round = 0; round < 200; round++) {
+            if (rnd.nextInt(4) == 0) {
+                model.getEnvironment().worldPush();
+                sat.pushTrailMarker();
+                int a = x.getLB() + rnd.nextInt(x.getUB() - x.getLB() + 1);
+                int b = x.getLB() + rnd.nextInt(x.getUB() - x.getLB() + 1);
+                x.updateLowerBound(Math.min(a, b), Cause.Null);
+                x.updateUpperBound(Math.max(a, b), Cause.Null);
+            } else if (rnd.nextInt(4) == 0 && model.getEnvironment().getWorldIndex() > 0) {
+                model.getEnvironment().worldPop();
+                sat.cancelUntil(sat.trailMarker() - 1);
+            }
+            for (int k = 0; k < 20; k++) {
+                int v = x.getLB() + rnd.nextInt(x.getUB() - x.getLB() + 1);
+                int lit = x.getLit(v, LR_GE);
+                if (v == x.getLB()) {
+                    Assert.assertEquals(sat.valueLit(lit), MiniSat.lTrue, "[x >= " + v + "]");
+                    continue;
+                }
+                Assert.assertEquals(sat.valueLit(lit), MiniSat.lUndef, "[x >= " + v + "]");
+                Integer prev = ge.putIfAbsent(v, lit);
+                if (prev != null) {
+                    Assert.assertEquals(lit, (int) prev, "[x >= " + v + "]");
+                } else {
+                    Integer other = owner.putIfAbsent(lit, v);
+                    Assert.assertNull(other, "[x >= " + v + "] and [x >= " + other + "]");
+                }
+                Assert.assertEquals(x.getLit(v - 1, LR_LE), MiniSat.neg(lit));
+            }
+            Assert.assertEquals(sat.valueLit(x.getLit(x.getUB(), LR_LE)), MiniSat.lTrue);
+        }
+    }
 }
