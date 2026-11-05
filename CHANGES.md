@@ -55,6 +55,9 @@ NEXT MILESTONE
 - `ParallelPortfolio`: fix an endless enumeration of the same solution on satisfaction problems. Workers now restart on each solution only when optimizing
 - `ParallelPortfolio`: each model runs on its own thread, so that all the searches start at once, even with more models than processors (#1262). The threads are reused between calls to `solve()` and the models no longer take a lock to check whether they must stop (twice as many nodes per second with 8 models). An exception thrown by a reliable model is now thrown by `solve()`, and the cuts on the objective shared between models are thread-safe
 
+#### Lazy Clause Generation
+- Performance: the watch lists of the SAT solver are stored in an array indexed by literal instead of a hash map, which speeds up unit propagation (about 6% more nodes per second on average on FlatZinc instances solved with LCG, same search tree)
+
 #### Documentation
 - The user documentation and tutorials move from the website repository to `docs/` (imported by the website as a Hugo module), with tested Java and Python examples
 - Add a developer guide (`docs/dev`), `AGENTS.md`, and refresh `CONTRIBUTING.md` and the pull request template
