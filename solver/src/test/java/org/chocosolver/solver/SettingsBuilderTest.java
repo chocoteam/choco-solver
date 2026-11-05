@@ -43,7 +43,6 @@ public class SettingsBuilderTest {
         assertTrue(builder.checkDeclaredViews(), "checkDeclaredViews should be true by default");
         assertTrue(builder.checkDeclaredMonitors(), "checkDeclaredMonitors should be true by default");
         assertFalse(builder.printAllUndeclaredConstraints(), "printAllUndeclaredConstraints should be false by default");
-        assertFalse(builder.enableIntVarLazyLitWithWeakBounds(), "intVarLazyLitWithWeakBounds should be false by default");
         assertEquals(builder.getIbexRestoreRounding(), Ibex.PRESERVE_ROUNDING, "ibexRestoreRounding should match Ibex.PRESERVE_ROUNDING");
         assertFalse(builder.isLCG(), "lcg should be false by default");
         assertTrue(builder.sortLitsOnSolution(), "sortLitsOnSolution should be true by default");
@@ -114,9 +113,6 @@ public class SettingsBuilderTest {
 
         builder.setPrintAllUndeclaredConstraints(true);
         assertTrue(builder.printAllUndeclaredConstraints(), "printAllUndeclaredConstraints should be true after setter");
-
-        builder.setIntVarLazyLitWithWeakBounds(true);
-        assertTrue(builder.enableIntVarLazyLitWithWeakBounds(), "intVarLazyLitWithWeakBounds should be true after setter");
 
         builder.setIbexRestoreRounding(true);
         assertTrue(builder.getIbexRestoreRounding(), "ibexRestoreRounding should be true after setter");
@@ -235,7 +231,6 @@ public class SettingsBuilderTest {
         props.setProperty("checkDeclaredViews", "false");
         props.setProperty("checkDeclaredMonitors", "false");
         props.setProperty("printAllUndeclaredConstraints", "true");
-        props.setProperty("intVarLazyLitWithWeakBounds", "true");
         props.setProperty("ibexRestoreRounding", "true");
         props.setProperty("lcg", "true");
         props.setProperty("sortLitsOnSolution", "false");
@@ -277,7 +272,6 @@ public class SettingsBuilderTest {
         assertFalse(builder.checkDeclaredViews());
         assertFalse(builder.checkDeclaredMonitors());
         assertTrue(builder.printAllUndeclaredConstraints());
-        assertTrue(builder.enableIntVarLazyLitWithWeakBounds());
         assertTrue(builder.getIbexRestoreRounding());
         assertTrue(builder.isLCG());
         assertFalse(builder.sortLitsOnSolution());
@@ -332,7 +326,6 @@ public class SettingsBuilderTest {
                 "--sat.nbMaxLearntClauses", "300000",
                 "--sat.reduceLearntClausesBase", "3000",
                 "--sat.reduceLearntClausesFactor", "300",
-                "--sat.intVarLazyLitWithWeakBounds", "true",
                 "--ibex.contractionRatio", "0.1",
                 "--ibex.restoreRounding", "true",
                 "-lcg",
@@ -360,7 +353,6 @@ public class SettingsBuilderTest {
         assertFalse(builder.checkDeclaredViews());
         assertFalse(builder.checkDeclaredMonitors());
         assertTrue(builder.printAllUndeclaredConstraints());
-        assertTrue(builder.enableIntVarLazyLitWithWeakBounds());
         assertTrue(builder.getIbexRestoreRounding());
         assertTrue(builder.isLCG());
         assertFalse(builder.sortLitsOnSolution());
@@ -415,7 +407,6 @@ public class SettingsBuilderTest {
                 .setNbMaxLearntClauses(500000)
                 .setReduceLearntClausesBase(5000)
                 .setReduceLearntClausesFactor(500)
-                .setIntVarLazyLitWithWeakBounds(true)
                 .setIbexContractionRatio(0.2)
                 .setIbexRestoreRounding(true)
                 .setLCG(true)
@@ -451,7 +442,6 @@ public class SettingsBuilderTest {
         assertEquals(settings.getNbMaxLearntClauses(), 500000);
         assertEquals(settings.getReduceLearntClausesBase(), 5000);
         assertEquals(settings.getReduceLearntClausesFactor(), 500);
-        assertTrue(settings.enableIntVarLazyLitWithWeakBounds());
         assertEquals(settings.getIbexContractionRatio(), 0.2, 0.0001);
         assertTrue(settings.getIbexRestoreRounding());
         assertTrue(settings.isLCG());
@@ -568,7 +558,6 @@ public class SettingsBuilderTest {
                 "-nblc", "500",
                 "-rlcb", "50",
                 "-rlcf", "5",
-                "-ivllwwb", "true",
                 "-icr", "0.02",
                 "-irr", "true",
                 "-lcg",
@@ -604,7 +593,6 @@ public class SettingsBuilderTest {
         assertEquals(builder.getNbMaxLearntClauses(), 500);
         assertEquals(builder.getReduceLearntClausesBase(), 50);
         assertEquals(builder.getReduceLearntClausesFactor(), 5);
-        assertTrue(builder.enableIntVarLazyLitWithWeakBounds());
         assertEquals(builder.getIbexContractionRatio(), 0.02, 0.0001);
         assertTrue(builder.getIbexRestoreRounding());
         assertTrue(builder.isLCG());

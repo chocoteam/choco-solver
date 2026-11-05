@@ -58,6 +58,7 @@ NEXT MILESTONE
 #### Lazy Clause Generation
 - Performance: the watch lists of the SAT solver are stored in an array indexed by literal instead of a hash map, which speeds up unit propagation (about 6% more nodes per second on average on FlatZinc instances solved with LCG, same search tree)
 - Faster lookup of the bound literals of an integer variable with lazy literals (`StrongBound`): a binary search on a sorted index replaces the walk of the chain from the lower bound, which was long on upper bound updates. The search is unchanged; about 10 % more nodes per second on some FlatZinc instances
+- **Breaking**: remove the weak chaining of the bound literals (`WeakBound`), which did not link the bound literals of a variable with each other, and the `ILazyBound` interface. The `intVarLazyLitWithWeakBounds` setting (`SettingsBuilder.setIntVarLazyLitWithWeakBounds(boolean)`, `Settings.enableIntVarLazyLitWithWeakBounds()`, options `--intVarLazyLitWithWeakBounds`, `--sat.intVarLazyLitWithWeakBounds` and `-ivllwwb`) is removed. It was off by default, so the default behaviour is unchanged
 
 #### Documentation
 - The user documentation and tutorials move from the website repository to `docs/` (imported by the website as a Hugo module), with tested Java and Python examples

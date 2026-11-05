@@ -207,16 +207,6 @@ public class SettingsBuilder {
                     "a reduction is applied (default is 100).")
     private int reduceLearntClausesFactor = 100;
 
-    public static final String INT_VAR_LAZY_LIT_WITH_WEAK_BOUNDS = "intVarLazyLitWithWeakBounds";
-    @Option(name = "--intVarLazyLitWithWeakBounds",
-            aliases = {"--sat.intVarLazyLitWithWeakBounds", "-ivllwwb"},
-            handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class,
-            usage = "when true, the IntVarLazyLit propagator uses weak bounds: when a bound is modified, the channeling is done only with the previous value. " +
-                    "It provides smaller reasons, which are faster to compute but weaker in terms of explanation generation. " +
-                    "when false, the IntVarLazyLit propagator uses strong bounds: when a bound is modified, the channeling is done with all known values between the previous and the new bound. " +
-                    "It provides stronger reasons, which are slower to compute but more informative (default is false).")
-    private boolean intVarLazyLitWithWeakBounds = false;
-
     public static final String IBEX_CONTRACTION_RATIO = "ibexContractionRatio";
     @Option(name = "--ibexContractionRatio",
             aliases = {"--ibex.contractionRatio", "-icr"},
@@ -446,9 +436,6 @@ public class SettingsBuilder {
                     break;
                 case REDUCE_LEARNT_CLAUSES_FACTOR:
                     this.setReduceLearntClausesFactor(Integer.parseInt(value));
-                    break;
-                case INT_VAR_LAZY_LIT_WITH_WEAK_BOUNDS:
-                    this.setIntVarLazyLitWithWeakBounds(Boolean.parseBoolean(value));
                     break;
                 case IBEX_CONTRACTION_RATIO:
                     this.ibexContractionRatio = Double.parseDouble(value);
@@ -1102,31 +1089,6 @@ public class SettingsBuilder {
      */
     public int getReduceLearntClausesFactor() {
         return reduceLearntClausesFactor;
-    }
-
-    /**
-     * @return <tt>true</tt> if the {@link org.chocosolver.solver.variables.impl.IntVarLazyLit} propagator uses weak bounds.
-     * @see #setIntVarLazyLitWithWeakBounds(boolean)
-     */
-    public boolean enableIntVarLazyLitWithWeakBounds() {
-        return intVarLazyLitWithWeakBounds;
-    }
-
-    /**
-     * Set to <tt>true</tt> to use a weak chaining:
-     * when a bound is modified, the channeling is done only with the previous value.
-     * It provides smaller reasons, which are faster to compute but weaker in terms of explanation generation.
-     * <p>
-     * Set to <tt>false</tt> to use a strong chaining:
-     * when a bound is modified, the channeling is done with all known values between the previous and the new bound.
-     * It provides stronger reasons, which are slower to compute but more informative.
-     *
-     * @param intVarLazyLitWithWeakBounds weak chaining or not
-     * @return the current instance
-     */
-    public SettingsBuilder setIntVarLazyLitWithWeakBounds(boolean intVarLazyLitWithWeakBounds) {
-        this.intVarLazyLitWithWeakBounds = intVarLazyLitWithWeakBounds;
-        return this;
     }
 
     /**

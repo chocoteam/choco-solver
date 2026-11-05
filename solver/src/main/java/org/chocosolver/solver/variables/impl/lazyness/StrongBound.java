@@ -16,15 +16,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * will use a strong chaining:
+ * Links a CP bounded variable to the SAT variables of its bound literals, created on demand.
+ * It uses a strong chaining:
  * when a bound is modified, the channeling is done with all known values between the previous and the new bound.
- * It provides stronger reasons, which are slower to compute but more informative.
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 13/09/2024
  */
-public class StrongBound implements ILazyBound {
+public class StrongBound {
 
     private static class Node {
         int var;
@@ -68,17 +68,28 @@ public class StrongBound implements ILazyBound {
         size = 2;
     }
 
-    @Override
+    /**
+     * @return the SAT variable that represents the current lower bound
+     */
     public int currentMinVar() {
         return ld.get(li.get()).var;
     }
 
-    @Override
+    /**
+     * @return the SAT variable that represents the current upper bound
+     */
     public int currentMaxVar() {
         return ld.get(hi.get()).var;
     }
 
-    @Override
+    /**
+     * Return or create the SAT variable that represents the value of the variable
+     *
+     * @param value the value to represent
+     * @param cvar  the CP variable to link
+     * @param sat   the SAT solver
+     * @return the SAT variable that represents the value
+     */
     public int getSATVar(int value, IntVarLazyLit cvar, MiniSat sat) {
         int ni = getNi(value);
         if (ld.get(ni).val == value) {
@@ -90,7 +101,13 @@ public class StrongBound implements ILazyBound {
         }
     }
 
-    @Override
+    /**
+     * Channel the lower bound of the variable to the SAT solver
+     *
+     * @param value the new lower bound
+     * @param sat   the SAT solver
+     * @param r     the reason why the bound has been modified
+     */
     public void channelMin(int value, MiniSat sat, Reason r) {
         int ni;
         for (ni = ld.get(li.get()).next; ld.get(ni).val < value; ni = ld.get(ni).next) {
@@ -100,7 +117,13 @@ public class StrongBound implements ILazyBound {
         li.set(ni);
     }
 
-    @Override
+    /**
+     * Channel the upper bound of the variable to the SAT solver
+     *
+     * @param value the new upper bound
+     * @param sat   the SAT solver
+     * @param r     the reason why the bound has been modified
+     */
     public void channelMax(int value, MiniSat sat, Reason r) {
         int ni;
         for (ni = ld.get(hi.get()).prev; ld.get(ni).val > value; ni = ld.get(ni).prev) {

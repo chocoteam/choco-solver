@@ -16,9 +16,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IDelta;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
-import org.chocosolver.solver.variables.impl.lazyness.ILazyBound;
 import org.chocosolver.solver.variables.impl.lazyness.StrongBound;
-import org.chocosolver.solver.variables.impl.lazyness.WeakBound;
 import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
@@ -46,7 +44,7 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar, Lit
 
     boolean channeling = true; // to communicate with the sat solver or not
 
-    private final ILazyBound bnd;
+    private final StrongBound bnd;
     int valLit;
 
     final int min0;
@@ -67,11 +65,7 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar, Lit
             throw new UnsupportedOperationException("IntVarLazyLit can only wrap bounded integer variables");
         }
         this.sat = getModel().getSolver().getSat();
-        if (getModel().getSettings().enableIntVarLazyLitWithWeakBounds()) {
-            bnd = new WeakBound(getModel());
-        } else {
-            bnd = new StrongBound(getModel(), min0, max0);
-        }
+        bnd = new StrongBound(getModel(), min0, max0);
         valLit = MiniSat.makeLiteral(sat.nVars(), true);
         sat.newVariable(new MiniSat.ChannelInfo(this, 1, 2, 0, false));
         if (var.isInstantiated()) {
