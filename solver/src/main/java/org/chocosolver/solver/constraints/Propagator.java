@@ -9,6 +9,8 @@ package org.chocosolver.solver.constraints;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TObjectIntHashMap;
+import org.chocosolver.lp.ILinearRelaxation;
 import org.chocosolver.memory.structure.IOperation;
 import org.chocosolver.sat.IReasonManager;
 import org.chocosolver.sat.IndexBasedReason;
@@ -1008,5 +1010,18 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      */
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    /**
+     * Add a linear relaxation of this propagator directly onto the given relaxation.
+     * @param lp the linear relaxation to populate, via
+     *           {@link ILinearRelaxation#addEqualityConstraint(double)} /
+     *           {@link ILinearRelaxation#addInequalityConstraint(double)}
+     * @param vmap the map between variables of this propagator and the column of the linear relaxation corresponding to these variables
+     * @return the number of rows added to the relaxation (0 if this propagator contributes no linear relaxation)
+     */
+    public int addLinearExpression(ILinearRelaxation lp,
+                                   TObjectIntHashMap<IntVar> vmap) {
+        return 0;
     }
 }
