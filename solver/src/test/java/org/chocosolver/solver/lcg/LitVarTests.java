@@ -31,7 +31,7 @@ import static org.chocosolver.solver.variables.IntVar.*;
  */
 public class LitVarTests {
 
-    @Test(groups = "{1s,lcg}")
+    @Test(groups = {"1s", "lcg"})
     public void testBoolVar0() {
         Model model = new Model("LCG testBoolVar0",
                 SettingsBuilder.init().setLCG(true)
@@ -71,7 +71,7 @@ public class LitVarTests {
         Assert.assertEquals(b.getMaxLit(), b.getLit(2, LR_GE));
     }
 
-    @Test(groups = "{1s,lcg}")
+    @Test(groups = {"1s", "lcg"})
     public void testBoolVar1() throws ContradictionException {
         Model model = new Model("LCG testBoolVar1",
                 SettingsBuilder.init().setLCG(true)
@@ -84,7 +84,7 @@ public class LitVarTests {
         Assert.assertEquals(b.getMaxLit(), b.getLit(2, LR_GE));
     }
 
-    @Test(groups = "{1s,lcg}")
+    @Test(groups = {"1s", "lcg"})
     public void testBoolVar2() throws ContradictionException {
         Model model = new Model("LCG testBoolVar2",
                 SettingsBuilder.init().setLCG(true)
@@ -97,7 +97,7 @@ public class LitVarTests {
         Assert.assertEquals(b.getMaxLit(), b.getLit(1, LR_GE));
     }
 
-    @Test(groups = "{1s,lcg}")
+    @Test(groups = {"1s", "lcg"})
     public void testBoolVar3() {
         Model model = new Model("LCG testBoolVar0",
                 SettingsBuilder.init().setLCG(true)
@@ -138,7 +138,7 @@ public class LitVarTests {
         Assert.assertEquals(b.getMaxLit(), b.getLit(2, LR_GE));
     }
 
-    @Test(groups = "{1s,lcg}")
+    @Test(groups = {"1s", "lcg"})
     public void testBoolVar4() throws ContradictionException {
         Model model = new Model("LCG testBoolVar1",
                 SettingsBuilder.init().setLCG(true)
@@ -152,7 +152,7 @@ public class LitVarTests {
         Assert.assertEquals(b.getMaxLit(), b.getLit(2, LR_GE));
     }
 
-    @Test(groups = "{1s,lcg}")
+    @Test(groups = {"1s", "lcg"})
     public void testBoolVar5() throws ContradictionException {
         Model model = new Model("LCG testBoolVar2",
                 SettingsBuilder.init().setLCG(true)
@@ -166,7 +166,7 @@ public class LitVarTests {
         Assert.assertEquals(b.getMaxLit(), b.getLit(1, LR_GE));
     }
 
-    @Test(groups = "{1s,lcg}")
+    @Test(groups = {"1s", "lcg"})
     public void testBoolVar6() {
         Model model = new Model("LCG testBoolVar0",
                 SettingsBuilder.init().setLCG(true)
@@ -187,7 +187,7 @@ public class LitVarTests {
         Assert.assertEquals(b2.getLit(1, LR_NE), 6);
     }
 
-    @Test(groups = "{1s,lcg}")
+    @Test(groups = {"1s", "lcg"})
     public void testBoolVar7() {
         Model model = new Model("LCG testBoolVar0",
                 SettingsBuilder.init().setLCG(true)
@@ -234,7 +234,7 @@ public class LitVarTests {
         };
     }
 
-    @Test(groups = "{1s,lcg}", dataProvider = "range")
+    @Test(groups = {"1s", "lcg"}, dataProvider = "range")
     public void testIntVarEL0(int l, int u) {
         Model model = new Model("LCG testIntVarEL0",
                 SettingsBuilder.init().setLCG(true)
@@ -275,7 +275,7 @@ public class LitVarTests {
         Assert.assertNotEquals(b.getLit(u + 1, LR_GE), MiniSat.neg(b.getLit(u, LR_LE)));
     }
 
-    @Test(groups = "{1s,lcg}", dataProvider = "range")
+    @Test(groups = {"1s", "lcg"}, dataProvider = "range")
     public void testIntVarEL1(int l, int u) throws ContradictionException {
         Model model = new Model("LCG testIntVarEL1",
                 SettingsBuilder.init().setLCG(true)
@@ -288,7 +288,7 @@ public class LitVarTests {
         Assert.assertEquals(b.getMaxLit(), MiniSat.neg(b.getLit(u, LR_LE)));
     }
 
-    @Test(groups = "{1s,lcg}", dataProvider = "range")
+    @Test(groups = {"1s", "lcg"}, dataProvider = "range")
     public void testIntVarEL2(int l, int u) throws ContradictionException {
         Model model = new Model("LCG testIntVarEL0",
                 SettingsBuilder.init().setLCG(true)
@@ -301,7 +301,7 @@ public class LitVarTests {
         Assert.assertEquals(b.getMaxLit(), MiniSat.neg(b.getLit(l, LR_LE)));
     }
 
-    @Test(groups = "{1s,lcg}")
+    @Test(groups = {"1s", "lcg"})
     public void testIntVarLL0() {
         Model model = new Model("LCG testIntVarEL0",
                 SettingsBuilder.init().setLCG(true)
@@ -342,7 +342,7 @@ public class LitVarTests {
         Assert.assertEquals(b.getMaxLit(), 3);
     }
 
-    @Test(groups = "{1s,lcg}")
+    @Test(groups = {"1s", "lcg"})
     public void testIntVarLL1() throws ContradictionException {
         Model model = new Model("LCG testIntVarEL1",
                 SettingsBuilder.init().setLCG(true)
@@ -357,7 +357,7 @@ public class LitVarTests {
         Assert.assertEquals(b.getMaxLit(), MiniSat.neg(b.getLit(1, LR_LE)));
     }
 
-    @Test(groups = "{1s,lcg}")
+    @Test(groups = {"1s", "lcg"})
     public void testIntVarLL2() throws ContradictionException {
         Model model = new Model("LCG testIntVarEL2",
                 SettingsBuilder.init().setLCG(true)
@@ -372,7 +372,7 @@ public class LitVarTests {
         Assert.assertEquals(b.getMaxLit(), MiniSat.neg(b.getLit(2, LR_LE)));
     }
 
-    @Test(groups = "{1s,lcg}")
+    @Test(groups = {"1s", "lcg"})
     public void testIntVarLL3() throws ContradictionException {
         Model model = new Model("LCG testIntVarEL3",
                 SettingsBuilder.init().setLCG(true)
@@ -398,7 +398,7 @@ public class LitVarTests {
         };
     }
 
-    @Test(groups = "{1s,lcg}", dataProvider = "holes")
+    @Test(groups = {"1s", "lcg"}, dataProvider = "holes")
     public void testIntVarSL0(int l, int u) {
         Model model = new Model("LCG testIntVarEL0",
                 SettingsBuilder.init().setLCG(true)
@@ -447,7 +447,7 @@ public class LitVarTests {
         Assert.assertNotEquals(b.getLit(u + 1, LR_GE), MiniSat.neg(b.getLit(u, LR_LE)));
     }
 
-    @Test(groups = "{1s,lcg}", dataProvider = "holes")
+    @Test(groups = {"1s", "lcg"}, dataProvider = "holes")
     public void testIntVarSL1(int l, int u) throws ContradictionException {
         Model model = new Model("LCG testIntVarEL0",
                 SettingsBuilder.init().setLCG(true)
@@ -460,7 +460,7 @@ public class LitVarTests {
         Assert.assertEquals(b.getMaxLit(), MiniSat.neg(b.getLit(u, LR_LE)));
     }
 
-    @Test(groups = "{1s,lcg}", dataProvider = "holes")
+    @Test(groups = {"1s", "lcg"}, dataProvider = "holes")
     public void testIntVarSL2(int l, int u) throws ContradictionException {
         Model model = new Model("LCG testIntVarEL0",
                 SettingsBuilder.init().setLCG(true)
@@ -473,7 +473,7 @@ public class LitVarTests {
         Assert.assertEquals(b.getMaxLit(), MiniSat.neg(b.getLit(l, LR_LE)));
     }
 
-    @Test(groups = "{1s,lcg}", dataProvider = "holes")
+    @Test(groups = {"1s", "lcg"}, dataProvider = "holes")
     public void testIntVarSL4(int l, int u) throws ContradictionException {
         Model model = new Model("LCG testIntVarEL0",
                 SettingsBuilder.init().setLCG(true)
@@ -486,7 +486,7 @@ public class LitVarTests {
         Assert.assertEquals(b.getMaxLit(), MiniSat.neg(b.getLit(u, LR_LE)));
     }
 
-    @Test(groups = "{1s,lcg}", dataProvider = "holes")
+    @Test(groups = {"1s", "lcg"}, dataProvider = "holes")
     public void testIntVarSL5(int l, int u) throws ContradictionException {
         Model model = new Model("LCG testIntVarEL0",
                 SettingsBuilder.init().setLCG(true)
@@ -499,7 +499,7 @@ public class LitVarTests {
         Assert.assertEquals(b.getMaxLit(), MiniSat.neg(b.getLit(l, LR_LE)));
     }
 
-    @Test(groups = "{1s,lcg}", dataProvider = "holes")
+    @Test(groups = {"1s", "lcg"}, dataProvider = "holes")
     public void testIntVarSL6(int l, int u) throws ContradictionException {
         Model model = new Model("LCG testIntVarEL0",
                 SettingsBuilder.init().setLCG(true)
@@ -512,7 +512,7 @@ public class LitVarTests {
         Assert.assertEquals(b.getMaxLit(), MiniSat.neg(b.getLit(u, LR_LE)));
     }
 
-    @Test(groups = "{1s,lcg}", dataProvider = "holes")
+    @Test(groups = {"1s", "lcg"}, dataProvider = "holes")
     public void testIntVarSL7(int l, int u) throws ContradictionException {
         Model model = new Model("LCG testIntVarEL0",
                 SettingsBuilder.init().setLCG(true)
@@ -525,7 +525,7 @@ public class LitVarTests {
         Assert.assertEquals(b.getMaxLit(), MiniSat.neg(b.getLit(l, LR_LE)));
     }
 
-    @Test(groups = "{1s,lcg}", dataProvider = "holes")
+    @Test(groups = {"1s", "lcg"}, dataProvider = "holes")
     public void testIntVarSL8(int l, int u) throws ContradictionException {
         Model model = new Model("LCG testIntVarEL0",
                 SettingsBuilder.init().setLCG(true)
@@ -534,7 +534,7 @@ public class LitVarTests {
         Assert.assertFalse(b.removeValue(l + (u - l) / 2, Cause.Null));
     }
 
-    @Test(groups = "{1s,lcg}", dataProvider = "holes")
+    @Test(groups = {"1s", "lcg"}, dataProvider = "holes")
     public void testBoolEqView0(int l, int u) throws ContradictionException {
         Model model = new Model("LCG testBoolEqView0",
                 SettingsBuilder.init().setLCG(true)
@@ -563,7 +563,7 @@ public class LitVarTests {
         Assert.assertEquals(b.getLit(2, LR_LE), 1);
     }
 
-    @Test(groups = "{1s,lcg}", dataProvider = "holes")
+    @Test(groups = {"1s", "lcg"}, dataProvider = "holes")
     public void testBoolGeqView0(int l, int u) throws ContradictionException {
         Model model = new Model("LCG testBoolLeqView0",
                 SettingsBuilder.init().setLCG(true)
@@ -592,7 +592,7 @@ public class LitVarTests {
         Assert.assertEquals(b.getLit(2, LR_LE), 1);
     }
 
-    @Test(groups = "{1s,lcg}")
+    @Test(groups = {"1s", "lcg"})
         public void testCste10() {
         Model model = new Model("LCG testCste10",
                 SettingsBuilder.init().setLCG(true)
