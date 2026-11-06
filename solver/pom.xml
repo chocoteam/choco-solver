@@ -57,6 +57,13 @@
             <version>${slf4j.nop.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.ojalgo</groupId>
+            <artifactId>ojalgo</artifactId>
+            <version>${ojalgo.version}</version>
+            <!-- only needed by the linear relaxation (-lr), which loads it reflectively -->
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
     <build>
@@ -97,4 +104,43 @@
         </plugins>
     </build>
 
+    <profiles>
+        <!-- Gurobi is not a dependency of choco-solver. Its relaxation backend is kept, with its tests, in
+             src/test-gurobi, which is only compiled and run with this profile (mvn test -Pgurobi -pl solver);
+             it needs a local installation of Gurobi (the com.gurobi:gurobi artifact) and a licence. -->
+        <profile>
+            <id>gurobi</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.gurobi</groupId>
+                    <artifactId>gurobi</artifactId>
+                    <version>13.0.1</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>add-gurobi-test-sources</id>
+                                <phase>generate-test-sources</phase>
+                                <goals>
+                                    <goal>add-test-source</goal>
+                                </goals>
+                                <configuration>
+                                    <sources>
+                                        <source>src/test-gurobi/java</source>
+                                    </sources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

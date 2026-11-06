@@ -6,8 +6,12 @@
  */
 package org.chocosolver.xscp;
 
+import org.chocosolver.lp.OjAlgoRelaxation;
+import org.chocosolver.lp.PropSimplex;
 import org.chocosolver.parser.SetUpException;
 import org.chocosolver.parser.xcsp.XCSP;
+import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.SearchState;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -121,4 +125,70 @@ public class PerformanceTest {
         logPerf(xcsp);
     }
 
+    @DataProvider()
+    public Object[][] linearInstances() {
+        List<Object[]> parameters = new ArrayList<>();
+        try (BufferedReader br = Files.newBufferedReader(
+                Paths.get(Objects.requireNonNull(this.getClass().getResource(
+                        ROOT + "linear.csv")).getPath()))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.startsWith(COMMENT))
+                    continue;
+                String[] columns = line.split(DELIMITER);
+                parameters.add(new Object[]{
+                        ROOT + columns[0] + File.separator + columns[1], // path
+                        Integer.parseInt(columns[2]), // solutions
+                        "_".equals(columns[3]) ? null : Integer.parseInt(columns[3]), // best
+                });
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return parameters.toArray(new Object[0][0]);
+    }
+
+    /**
+     * Test the linear relaxation option (-lr OJALGO) on optimization XCSP3 instances.
+     * Only checks correctness (solution count and best value), not node/fail counts,
+     * since the LP relaxation may change the search tree.
+     */
+    @Test(groups = "xcsp", dataProvider = "linearInstances", timeOut = 1200_000)
+    public void testLinearRelaxation(String path, int solutions, Integer bst) throws SetUpException {
+        String file = Objects.requireNonNull(this.getClass().getResource(path)).getFile();
+        String[] args = new String[]{
+                file,
+                "-limit", "[200s]",
+                "-lvl", "SILENT",
+                "-p", "1",
+                "-lr", "OJALGO"
+        };
+        XCSP xcsp = new XCSP();
+        xcsp.setUp(args);
+        xcsp.createSolver();
+        xcsp.buildModel();
+        xcsp.configureSearch();
+        xcsp.solve();
+        logRelaxation(path, xcsp.getModel());
+        Assert.assertEquals(xcsp.getModel().getSolver().getSearchState(), SearchState.TERMINATED, "Unexpected search state");
+        if (bst != null) {
+            Assert.assertEquals(xcsp.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), bst, "Unexpected best solution");
+        }else{
+            Assert.assertEquals(xcsp.getModel().getSolver().getSolutionCount(), solutions, "Unexpected number of solutions");
+        }
+        logPerf(xcsp);
+    }
+
+    /**
+     * Print what the linear relaxation did during the last resolution, when it was enabled.
+     */
+    private static void logRelaxation(String instance, Model model) {
+        PropSimplex simplex = PropSimplex.find(model);
+        if (simplex != null) {
+            String backend = simplex.getRelaxation() instanceof OjAlgoRelaxation
+                    ? ", ojAlgo: " + ((OjAlgoRelaxation) simplex.getRelaxation()).getDiagnostics() : "";
+            // the test listener silences System.out
+            System.err.printf("LR %s: %s%s%n", instance, simplex.getStatistics(), backend);
+        }
+    }
 }

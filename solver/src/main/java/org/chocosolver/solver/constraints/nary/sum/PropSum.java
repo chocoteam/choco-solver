@@ -6,6 +6,9 @@
  */
 package org.chocosolver.solver.constraints.nary.sum;
 
+import gnu.trove.map.hash.TIntDoubleHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
+import org.chocosolver.lp.ILinearRelaxation;
 import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Operator;
@@ -539,5 +542,39 @@ public class PropSum extends Propagator<IntVar> {
 
     protected PropSum opposite() {
         return new PropSum(vars, pos, nop(o), b + nb(o));
+    }
+
+    @Override
+    public int addLinearExpression(ILinearRelaxation lp,
+                                   TObjectIntHashMap<IntVar> vmap) {
+        if (o.equals(Operator.EQ)) {
+            ILinearRelaxation.RowMutator row = lp.addEqualityConstraint(b);
+            for (int i = 0; i < pos; i++) {
+                row.add(vmap.get(vars[i]), 1.0);
+            }
+            for (int i = pos; i < l; i++) {
+                row.add(vmap.get(vars[i]), -1.0);
+            }
+            return 1;
+        } else if (o.equals(Operator.LE)) {
+            ILinearRelaxation.RowMutator row = lp.addInequalityConstraint(b);
+            for (int i = 0; i < pos; i++) {
+                row.add(vmap.get(vars[i]), 1.0);
+            }
+            for (int i = pos; i < l; i++) {
+                row.add(vmap.get(vars[i]), -1.0);
+            }
+            return 1;
+        } else if (o.equals(Operator.GE)) {
+            ILinearRelaxation.RowMutator row = lp.addInequalityConstraint(-b);
+            for (int i = 0; i < pos; i++) {
+                row.add(vmap.get(vars[i]), -1.0);
+            }
+            for (int i = pos; i < l; i++) {
+                row.add(vmap.get(vars[i]), 1.0);
+            }
+            return 1;
+        }
+        return 0;
     }
 }

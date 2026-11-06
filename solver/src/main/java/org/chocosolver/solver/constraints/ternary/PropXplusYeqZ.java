@@ -6,6 +6,8 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
+import gnu.trove.map.hash.TObjectIntHashMap;
+import org.chocosolver.lp.ILinearRelaxation;
 import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
@@ -160,5 +162,15 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
             return ESat.FALSE;
         }
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public int addLinearExpression(ILinearRelaxation lp, TObjectIntHashMap<IntVar> vmap) {
+        // x + y = z  ⟺  x + z - z = 0
+        ILinearRelaxation.RowMutator row = lp.addEqualityConstraint(0);
+        row.add(vmap.get(vars[0]), 1);
+        row.add(vmap.get(vars[1]), 1);
+        row.add(vmap.get(vars[2]), -1);
+        return 1;
     }
 }

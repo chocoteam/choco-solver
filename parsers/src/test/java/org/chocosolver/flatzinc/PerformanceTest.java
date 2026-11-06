@@ -6,15 +6,17 @@
  */
 package org.chocosolver.flatzinc;
 
+import org.chocosolver.Providers;
+import org.chocosolver.lp.OjAlgoRelaxation;
+import org.chocosolver.lp.PropSimplex;
 import org.chocosolver.parser.Level;
-import org.chocosolver.parser.PerformanceListener;
 import org.chocosolver.parser.SetUpException;
 import org.chocosolver.parser.flatzinc.Flatzinc;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.SearchState;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Ignore;
-import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.io.BufferedReader;
@@ -23,6 +25,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -32,7 +35,7 @@ import java.util.Objects;
  * @author Charles Prud'homme
  * @since 30/09/2020
  */
-@Listeners(PerformanceListener.class)
+//@Listeners(PerformanceListener.class)
 public class PerformanceTest {
     private static final String ROOT = "/flatzinc/";
     private static final String COMMENT = "#";
@@ -302,5 +305,82 @@ public class PerformanceTest {
         Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), solutions, "Unexpected number of solutions");
         Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), nodes, "Unexpected number of nodes");
         Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), failures, "Unexpected number of failures");
+    }
+
+
+    @DataProvider()
+    public Object[][] linearInstances() {
+        List<Object[]> parameters = new ArrayList<>();
+        try (BufferedReader br = Files.newBufferedReader(
+                Paths.get(Objects.requireNonNull(this.getClass().getResource(
+                        ROOT + "linear.csv")).getPath()))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.startsWith(COMMENT))
+                    continue;
+                String[] columns = line.split(DELIMITER);
+                parameters.add(new Object[]{
+                        ROOT + columns[0] + File.separator + columns[1], // path
+                        Integer.parseInt(columns[2]), // solutions
+                        "_".equals(columns[3]) ? null : Integer.parseInt(columns[3]), // best
+                });
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return Providers.merge(parameters.toArray(new Object[0][0]),
+                new Object[][]{
+//                        {"NONE"},
+                        {"OJALGO"}
+        }
+        );
+    }
+
+    /**
+     * Test the linear relaxation option (-lr OJALGO) on optimization XCSP3 instances.
+     * Only checks correctness (solution count and best value), not node/fail counts,
+     * since the LP relaxation may change the search tree.
+     */
+    @Test(groups = "mzn", dataProvider = "linearInstances", timeOut = 60_000)
+    public void testLinearRelaxation(String path, int solutions, Integer bst, String algo) throws SetUpException {
+        String file = Objects.requireNonNull(this.getClass().getResource(path)).getFile();
+        String[] args = new String[]{
+                file,
+                "-limit", "[30s]",
+                "-lvl", "SILENT",
+                "-p", "1",
+                "-lr", algo
+        };
+        if (algo.equals("NONE")) {
+            args = Arrays.copyOf(args, args.length - 2);
+        }
+        Flatzinc fzn = new Flatzinc();
+        fzn.setUp(args);
+        fzn.createSolver();
+        fzn.buildModel();
+        fzn.configureSearch();
+        fzn.solve();
+        System.out.print(algo + ": ");
+        fzn.getModel().getSolver().printShortStatistics();
+        logRelaxation(path, fzn.getModel());
+        Assert.assertEquals(fzn.getModel().getSolver().getSearchState(), SearchState.TERMINATED, "Unexpected search state");
+        if (bst != null) {
+            Assert.assertEquals(fzn.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), bst, "Unexpected best solution");
+        } else {
+            Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), solutions, "Unexpected number of solutions");
+        }
+    }
+
+    /**
+     * Print what the linear relaxation did during the last resolution, when it was enabled.
+     */
+    private static void logRelaxation(String instance, Model model) {
+        PropSimplex simplex = PropSimplex.find(model);
+        if (simplex != null) {
+            String backend = simplex.getRelaxation() instanceof OjAlgoRelaxation
+                    ? ", ojAlgo: " + ((OjAlgoRelaxation) simplex.getRelaxation()).getDiagnostics() : "";
+            // the test listener silences System.out
+            System.err.printf("LR %s: %s%s%n", instance, simplex.getStatistics(), backend);
+        }
     }
 }

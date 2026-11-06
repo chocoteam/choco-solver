@@ -19,6 +19,8 @@ module org.chocosolver.parsers {
     requires org.antlr.antlr4.runtime;
     requires trove4j;
     requires java.management;
+    // optional in choco-solver: makes the backend of the linear relaxation available to the parsers
+    requires ojalgo;
 
     opens org.chocosolver.parser to args4j, org.testng;
     opens org.chocosolver.parser.mps to args4j;

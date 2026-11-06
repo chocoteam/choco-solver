@@ -6,6 +6,9 @@
  */
 package org.chocosolver.solver.constraints.nary.sum;
 
+import gnu.trove.map.hash.TIntDoubleHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
+import org.chocosolver.lp.ILinearRelaxation;
 import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Operator;
@@ -259,7 +262,7 @@ public class PropScalar extends PropSum {
             }
         } else if (c[w] != 0 && (b - sum) % c[w] == 0) {
             vars[w].removeValue((b - sum) / c[w], this,
-                    lcg()?this.defaultReason(vars[w]): Reason.undef());
+                    lcg() ? this.defaultReason(vars[w]) : Reason.undef());
         }
     }
 
@@ -317,4 +320,31 @@ public class PropScalar extends PropSum {
         return new PropScalar(vars, c, pos, nop(o), b + nb(o));
     }
 
+
+    @Override
+    public int addLinearExpression(ILinearRelaxation lp,
+                                   TObjectIntHashMap<IntVar> vmap) {
+        // c[i] is already signed: positive for i<pos, negative for i>=pos.
+        // The constraint is Σ c[i]·x[i] OP b.
+        if (o.equals(Operator.EQ)) {
+            ILinearRelaxation.RowMutator row = lp.addEqualityConstraint(b);
+            for (int i = 0; i < l; i++) {
+                row.add(vmap.get(vars[i]), c[i]);
+            }
+            return 1;
+        } else if (o.equals(Operator.LE)) {
+            ILinearRelaxation.RowMutator row = lp.addInequalityConstraint(b);
+            for (int i = 0; i < l; i++) {
+                row.add(vmap.get(vars[i]), c[i]);
+            }
+            return 1;
+        } else if (o.equals(Operator.GE)) {
+            ILinearRelaxation.RowMutator row = lp.addInequalityConstraint(-b);
+            for (int i = 0; i < l; i++) {
+                row.add(vmap.get(vars[i]), -c[i]);
+            }
+            return 1;
+        }
+        return 0;
+    }
 }

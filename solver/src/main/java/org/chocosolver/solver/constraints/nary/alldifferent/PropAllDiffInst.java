@@ -7,7 +7,10 @@
 package org.chocosolver.solver.constraints.nary.alldifferent;
 
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TIntDoubleHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.stack.array.TIntArrayStack;
+import org.chocosolver.lp.ILinearRelaxation;
 import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
@@ -154,5 +157,59 @@ public class PropAllDiffInst extends Propagator<IntVar> {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
+    }
+
+    /**
+     * Linear relaxation of AllDifferent based on sum bounds.
+     * <p>
+     * If x_1, x_2, ..., x_n are all different, then:
+     * <ul>
+     *   <li>Σ x_i ≥ sum of the n smallest distinct values reachable (lower bound)</li>
+     *   <li>Σ x_i ≤ sum of the n largest distinct values reachable (upper bound)</li>
+     * </ul>
+     * These are encoded as two ≤ inequalities in the LP matrix.
+     */
+    @Override
+    public int addLinearExpression(ILinearRelaxation lp, TObjectIntHashMap<IntVar> vmap) {
+        // Compute the smallest n distinct values reachable by the variables.
+        // Sort lower bounds; then greedily pick: each variable must take at least max(lb_i, prev+1).
+        int[] lbs = new int[n];
+        int[] ubs = new int[n];
+        for (int i = 0; i < n; i++) {
+            lbs[i] = vars[i].getLB();
+            ubs[i] = vars[i].getUB();
+        }
+        Arrays.sort(lbs);
+        Arrays.sort(ubs);
+
+        // Lower bound: Σ xi >= sumMin
+        // Each variable, sorted by LB ascending, takes at least max(lb_i, prev + 1)
+        long sumMin = lbs[0];
+        for (int i = 1; i < n; i++) {
+            lbs[i] = Math.max(lbs[i], lbs[i - 1] + 1);
+            sumMin += lbs[i];
+        }
+
+        // Upper bound: Σ xi <= sumMax
+        // Each variable, sorted by UB descending, takes at most min(ub_i, prev - 1)
+        long sumMax = ubs[n - 1];
+        for (int i = n - 2; i >= 0; i--) {
+            ubs[i] = Math.min(ubs[i], ubs[i + 1] - 1);
+            sumMax += ubs[i];
+        }
+
+        // Row 1:  -x_1 - x_2 - ... - x_n <= -sumMin  (i.e. Σ xi >= sumMin)
+        ILinearRelaxation.RowMutator row = lp.addInequalityConstraint((double) -sumMin);
+        for (int i = 0; i < n; i++) {
+            row.add(vmap.get(vars[i]), -1.0);
+        }
+
+        // Row 2:  x_1 + x_2 + ... + x_n <= sumMax
+        row = lp.addInequalityConstraint((double) sumMax);
+        for (int i = 0; i < n; i++) {
+            row.add(vmap.get(vars[i]), 1.0);
+        }
+
+        return 2;
     }
 }
