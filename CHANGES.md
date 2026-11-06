@@ -44,6 +44,7 @@ NEXT MILESTONE
 - `costRegular` and `knapsack`: fix solutions wrongly removed after a look-ahead of the search, for the same reason (#1163). `costRegular` removed arcs of another branch and `knapsack` used the critical item of another branch
 - `sum` and `scalar` compared to a constant, and the expressions compared to a constant (e.g. `x.eq(1)`), no longer add a variable for the constant to the model (#743)
 - An implication (`impliedBy`, `ImpliedConstraint`) is named `IMPLIEDCONSTRAINT` instead of `REIFICATIONCONSTRAINT`, and the Javadoc of `ImpliedConstraint` and `PropReif` is fixed (#1087)
+- Fix the reification and the negation of `arithm(x, op1, y, op2, c)` with `*` or `/`, e.g. `arithm(x, "*", y, "<", 2).reify()`: the boolean could be false while the relation held, because the intermediate variable of the decomposition was free under negation. A division by zero makes the relation false, so its negation holds when the divisor is 0; `arithm(x, op, y, "/", 0)` is now a false constraint
 
 #### Search & Strategies
 - Fix `TimeUtils.convertInMilliseconds` (used by `limitTime(String)`), which silently misread durations such as "50ms" (50 minutes), "1.5m" or "0.5h" (#1271): the whole string is now checked, "ms" is accepted, and an `IllegalArgumentException` is thrown when the format is not respected (e.g. decimal minutes, "2min")

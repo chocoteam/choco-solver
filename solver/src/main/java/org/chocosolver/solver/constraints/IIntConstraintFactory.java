@@ -59,6 +59,7 @@ import org.chocosolver.solver.constraints.nary.sort.PropKeysorting;
 import org.chocosolver.solver.constraints.nary.sum.IntLinCombFactory;
 import org.chocosolver.solver.constraints.nary.tree.PropAntiArborescences;
 import org.chocosolver.solver.constraints.ternary.*;
+import org.chocosolver.solver.constraints.unary.BooleanConstraint;
 import org.chocosolver.solver.constraints.unary.Member;
 import org.chocosolver.solver.constraints.unary.NotMember;
 import org.chocosolver.solver.exception.SolverException;
@@ -378,8 +379,56 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param op2  another operator
      * @param cste a constant
      */
-    @SuppressWarnings("Duplicates")
     default Constraint arithm(IntVar var1, String op1, IntVar var2, String op2, int cste) {
+        Constraint c = buildArithm(var1, op1, var2, op2, cste);
+        if (!(op1.equals("*") || op1.equals("/") || op2.equals("*") || op2.equals("/"))
+                || c instanceof BooleanConstraint) {
+            return c;
+        }
+        // The default opposite lets the intermediate variable of c take a value that violates its definition
+        // (see rule 1.2 of docs/dev/best-practices.md): the opposite is the constraint of the negated relation.
+        c.ignore();
+        return new Constraint(c.getName(), c.getPropagators()) {
+            @Override
+            protected Constraint makeOpposite() {
+                return oppositeOfTimesOrDiv(var1, op1, var2, op2, cste);
+            }
+        };
+    }
+
+    /**
+     * Creates the opposite of the constraint {@code var1 op1 var2 op2 cste} when op1 or op2 is "*" or "/".
+     * A division by zero makes the relation false, so the opposite of {@code var1 / var2 op cste}
+     * holds when {@code var2 = 0}.
+     */
+    private Constraint oppositeOfTimesOrDiv(IntVar var1, String op1, IntVar var2, String op2, int cste) {
+        if (op1.equals("*") || op1.equals("/")) {
+            String nop2 = Operator.getOpposite(Operator.get(op2)).toString();
+            if (op1.equals("/") && var2.contains(0)) {
+                // var2 = 0 or var1 / var2 nop2 cste. The quotient is computed with a divisor that is never 0
+                // (1 when var2 = 0). The posted definitions are functional and total, so they do not restrict
+                // var1 and var2 (rule 1.2 of docs/dev/best-practices.md).
+                BoolVar zero = arithm(var2, "=", 0).reify();
+                IntVar divisor = ref().intVar(Math.min(var2.getLB(), 1), Math.max(var2.getUB(), 1));
+                arithm(var2, "+", zero, "=", divisor).post();
+                int[] bounds = VariableUtils.boundsForDivision(var1, divisor);
+                IntVar quotient = ref().intVar(bounds[0], bounds[1]);
+                div(var1, divisor, quotient).post();
+                BoolVar holds = arithm(quotient, nop2, cste).reify();
+                return arithm(zero, "+", holds, ">=", 1);
+            }
+            return arithm(var1, op1, var2, nop2, cste);
+        } else {
+            return arithm(var1, Operator.getOpposite(Operator.get(op1)).toString(), var2, op2, cste);
+        }
+    }
+
+    /**
+     * Creates the constraint {@code var1 op1 var2 op2 cste}, with the default opposite
+     * (see {@link #arithm(IntVar, String, IntVar, String, int)}).
+     */
+    @SuppressWarnings("Duplicates")
+    private Constraint buildArithm(IntVar var1, String op1, IntVar var2, String op2, int cste) {
         if (op1.equals("*") || op1.equals("/") || op2.equals("*") || op2.equals("/")) {
             switch (op1) {
                 case "*": // v1 * v2 OP cste
@@ -431,6 +480,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                             }
                         case "/":
                             // v1 OP v2 / cste
+                            if (cste == 0) {
+                                // a division by zero makes the relation false
+                                return ref().falseConstraint();
+                            }
                             if (Operator.EQ.name().equals(op1)) {
                                 return div(var2, ref().intVar(cste), var1);
                             } else {
