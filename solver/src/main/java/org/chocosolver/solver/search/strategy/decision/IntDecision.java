@@ -52,9 +52,30 @@ public class IntDecision extends Decision<IntVar> {
         return value;
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * A bounded domain cannot remove a value strictly between its bounds, so a refutable "=" on such a
+     * value could not be refuted, and a refutable "!=" would have no effect (#1279): the search would loop
+     * or, with LCG, wrongly conclude that there is no solution. Such a decision is applied as a split instead:
+     * "{@code var} = {@code value}" as "{@code var} &le; {@code value}", refuted as
+     * "{@code var} &gt; {@code value}", and "{@code var} &ne; {@code value}" as
+     * "{@code var} &gt; {@code value}", refuted as "{@code var} &le; {@code value}".
+     * A decision on a bound, or a decision that is not refutable, is applied as is.
+     */
     @Override
     public void apply() throws ContradictionException {
         if (branch == 1) {
+            if (max_branching > 1
+                    && (assignment == DecisionOperatorFactory.makeIntEq() || assignment == DecisionOperatorFactory.makeIntNeq())
+                    && !var.hasEnumeratedDomain() && var.getLB() < value && value < var.getUB()) {
+                if (assignment == DecisionOperatorFactory.makeIntEq()) {
+                    assignment = DecisionOperatorFactory.makeIntSplit();
+                } else {
+                    assignment = DecisionOperatorFactory.makeIntReverseSplit();
+                    value++;
+                }
+            }
             assignment.apply(var, value, this);
         } else if (branch == 2) {
             assignment.unapply(var, value, this);
