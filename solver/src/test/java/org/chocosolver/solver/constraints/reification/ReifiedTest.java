@@ -903,4 +903,88 @@ public class ReifiedTest {
             assertEquals(found.size(), expected, (reify ? "reified" : "posted"));
         }
     }
+
+    @DataProvider(name = "arithmTimesDivVar")
+    public Object[][] arithmTimesDivVar() {
+        List<Object[]> params = new ArrayList<>();
+        String[] rels = {"=", "!=", "<", "<=", ">", ">="};
+        int[][] doms = {{-2, 2}, {1, 2}, {0, 0}};
+        for (boolean lcg : new boolean[]{false, true}) {
+            for (int[] dd : doms) {
+                for (String rel : rels) {
+                    params.add(new Object[]{"*", rel, dd[0], dd[1], lcg});
+                    params.add(new Object[]{"/", rel, dd[0], dd[1], lcg});
+                    params.add(new Object[]{rel, "*", dd[0], dd[1], lcg});
+                    params.add(new Object[]{rel, "/", dd[0], dd[1], lcg});
+                }
+            }
+        }
+        return params.toArray(new Object[0][]);
+    }
+
+    /**
+     * @return true if {@code x op1 y op2 z} holds, false when dividing by 0
+     */
+    private static boolean relationVar(int x, String op1, int y, String op2, int z) {
+        if (op1.equals("*") || op1.equals("/")) {
+            return relation(x, op1, y, op2, z);
+        } else if (op2.equals("*")) {
+            return holds(x, op1, y * z);
+        } else {
+            return z != 0 && holds(x, op1, y / z);
+        }
+    }
+
+    /**
+     * {@code arithm(x, op1, y, op2, z)} with "*" or "/", reified: the relation (false when dividing by 0)
+     * must hold if and only if the boolean is true, and each (x, y, z) must have a single value of the boolean.
+     * The divisor, y or z, takes the domain [dlb, dub].
+     * The intermediate variable of the decomposition with "/" was free under negation.
+     */
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "arithmTimesDivVar")
+    public void testReifiedArithmTimesDivVar(String op1, String op2, int dlb, int dub, boolean lcg) {
+        boolean divisorIsY = op1.equals("*") || op1.equals("/");
+        int ylb = divisorIsY ? dlb : -2;
+        int yub = divisorIsY ? dub : 2;
+        int zlb = divisorIsY ? -2 : dlb;
+        int zub = divisorIsY ? 2 : dub;
+        for (boolean reify : new boolean[]{true, false}) {
+            Model model = new Model(SettingsBuilder.init().setLCG(lcg));
+            IntVar x = model.intVar("x", -2, 2);
+            IntVar y = model.intVar("y", ylb, yub);
+            IntVar z = model.intVar("z", zlb, zub);
+            Constraint cstr = model.arithm(x, op1, y, op2, z);
+            BoolVar b = null;
+            if (reify) {
+                b = cstr.reify();
+            } else {
+                cstr.post();
+            }
+            Set<String> found = new HashSet<>();
+            while (model.getSolver().solve()) {
+                int xv = x.getValue();
+                int yv = y.getValue();
+                int zv = z.getValue();
+                boolean rel = relationVar(xv, op1, yv, op2, zv);
+                if (reify) {
+                    assertEquals(b.getValue() == 1, rel, "x=" + xv + ", y=" + yv + ", z=" + zv);
+                    found.add(xv + "," + yv + "," + zv + "," + b.getValue());
+                } else {
+                    assertTrue(rel, "x=" + xv + ", y=" + yv + ", z=" + zv);
+                    found.add(xv + "," + yv + "," + zv);
+                }
+            }
+            int expected = 0;
+            for (int xv = -2; xv <= 2; xv++) {
+                for (int yv = ylb; yv <= yub; yv++) {
+                    for (int zv = zlb; zv <= zub; zv++) {
+                        if (reify || relationVar(xv, op1, yv, op2, zv)) {
+                            expected++;
+                        }
+                    }
+                }
+            }
+            assertEquals(found.size(), expected, (reify ? "reified" : "posted"));
+        }
+    }
 }

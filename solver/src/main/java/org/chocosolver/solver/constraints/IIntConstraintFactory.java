@@ -78,6 +78,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.lang.Math.abs;
@@ -405,22 +406,35 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         if (op1.equals("*") || op1.equals("/")) {
             String nop2 = Operator.getOpposite(Operator.get(op2)).toString();
             if (op1.equals("/") && var2.contains(0)) {
-                // var2 = 0 or var1 / var2 nop2 cste. The quotient is computed with a divisor that is never 0
-                // (1 when var2 = 0). The posted definitions are functional and total, so they do not restrict
-                // var1 and var2 (rule 1.2 of docs/dev/best-practices.md).
-                BoolVar zero = arithm(var2, "=", 0).reify();
-                IntVar divisor = ref().intVar(Math.min(var2.getLB(), 1), Math.max(var2.getUB(), 1));
-                arithm(var2, "+", zero, "=", divisor).post();
-                int[] bounds = VariableUtils.boundsForDivision(var1, divisor);
-                IntVar quotient = ref().intVar(bounds[0], bounds[1]);
-                div(var1, divisor, quotient).post();
-                BoolVar holds = arithm(quotient, nop2, cste).reify();
-                return arithm(zero, "+", holds, ">=", 1);
+                return divisorIsZeroOr(var1, var2, quotient -> arithm(quotient, nop2, cste));
             }
             return arithm(var1, op1, var2, nop2, cste);
         } else {
             return arithm(var1, Operator.getOpposite(Operator.get(op1)).toString(), var2, op2, cste);
         }
+    }
+
+    /**
+     * Creates the constraint {@code divisor = 0 or relation(dividend / divisor)}, the opposite of a relation
+     * on {@code dividend / divisor}, which is false when the divisor is 0.
+     * The quotient is computed with a divisor that is never 0 (1 when {@code divisor = 0}).
+     * The posted definitions are functional and total, so they do not restrict
+     * {@code dividend} and {@code divisor} (rule 1.2 of docs/dev/best-practices.md).
+     *
+     * @param dividend the dividend
+     * @param divisor  the divisor, which may be 0
+     * @param relation the relation stated on the quotient
+     * @return the constraint {@code divisor = 0 or relation(dividend / divisor)}
+     */
+    private Constraint divisorIsZeroOr(IntVar dividend, IntVar divisor, Function<IntVar, Constraint> relation) {
+        BoolVar zero = arithm(divisor, "=", 0).reify();
+        IntVar nonZero = ref().intVar(Math.min(divisor.getLB(), 1), Math.max(divisor.getUB(), 1));
+        arithm(divisor, "+", zero, "=", nonZero).post();
+        int[] bounds = VariableUtils.boundsForDivision(dividend, nonZero);
+        IntVar quotient = ref().intVar(bounds[0], bounds[1]);
+        div(dividend, nonZero, quotient).post();
+        BoolVar holds = relation.apply(quotient).reify();
+        return arithm(zero, "+", holds, ">=", 1);
     }
 
     /**
@@ -809,6 +823,46 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     @SuppressWarnings("Duplicates")
     default Constraint arithm(IntVar var1, String op1, IntVar var2, String op2, IntVar var3) {
+        Constraint c = buildArithm(var1, op1, var2, op2, var3);
+        if (!(op1.equals("/") || op2.equals("/"))) {
+            return c;
+        }
+        // The default opposite lets the intermediate variable of c take a value that violates its definition
+        // (see rule 1.2 of docs/dev/best-practices.md): the opposite is the constraint of the negated relation.
+        c.ignore();
+        return new Constraint(c.getName(), c.getPropagators()) {
+            @Override
+            protected Constraint makeOpposite() {
+                return oppositeOfDiv(var1, op1, var2, op2, var3);
+            }
+        };
+    }
+
+    /**
+     * Creates the opposite of the constraint {@code var1 op1 var2 op2 var3} when op1 or op2 is "/".
+     * A division by zero makes the relation false, so the opposite holds when the divisor is 0.
+     */
+    private Constraint oppositeOfDiv(IntVar var1, String op1, IntVar var2, String op2, IntVar var3) {
+        if (op1.equals("/")) {
+            String nop2 = Operator.getOpposite(Operator.get(op2)).toString();
+            if (var2.contains(0)) {
+                return divisorIsZeroOr(var1, var2, quotient -> arithm(quotient, nop2, var3));
+            }
+            return arithm(var1, op1, var2, nop2, var3);
+        } else {
+            String nop1 = Operator.getOpposite(Operator.get(op1)).toString();
+            if (var3.contains(0)) {
+                return divisorIsZeroOr(var2, var3, quotient -> arithm(var1, nop1, quotient));
+            }
+            return arithm(var1, nop1, var2, op2, var3);
+        }
+    }
+
+    /**
+     * Creates the constraint {@code var1 op1 var2 op2 var3}, with the default opposite
+     * (see {@link #arithm(IntVar, String, IntVar, String, IntVar)}).
+     */
+    private Constraint buildArithm(IntVar var1, String op1, IntVar var2, String op2, IntVar var3) {
         switch (op1) {
             case "+":
                 return scalar(new IntVar[]{var1, var2}, new int[]{1, 1}, op2, var3);
