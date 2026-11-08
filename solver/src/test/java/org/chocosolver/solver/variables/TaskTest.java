@@ -416,8 +416,8 @@ public class TaskTest {
         Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
     }
 
-    @DataProvider(name = "test1")
-    public static Object[][] primeNumbers() {
+    @DataProvider(name = "testForceToBe")
+    public static Object[][] testForceToBeProvider() {
         return new Object[][] {{true, true, false}, {true, false, false}, {false, true, false}, {false, false, true}};
     }
 
@@ -471,7 +471,7 @@ public class TaskTest {
     }
 
     // This test will run 4 times since we have 5 parameters defined
-    @Test(dataProvider = "test1")
+    @Test(dataProvider = "testForceToBe")
     public void testForceToBe(boolean optional, boolean forceTo, boolean shouldFail) {
         try {
             Task t = optional ? model.taskVar(start, 10, model.boolVar()) : model.taskVar(start, 10);
