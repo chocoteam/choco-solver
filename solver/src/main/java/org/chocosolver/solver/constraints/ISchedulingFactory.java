@@ -8,13 +8,16 @@ package org.chocosolver.solver.constraints;
 
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.constraints.nary.alternative.PropAlternative;
 import org.chocosolver.solver.constraints.nary.cumulative.PropagatorCumulative;
+import org.chocosolver.solver.constraints.nary.span.PropSpan;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.search.strategy.strategy.SetTimes;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.OptionalTask;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.util.tools.ArrayUtils;
 
@@ -26,10 +29,102 @@ import java.util.function.Function;
 /**
  * Interface to make and declare everything useful for scheduling problems (Task objects, constraints, search heuristics, etc.)
  *
- * @author Arthur GODET <arth.godet@gmail.com>
+ * @author Arthur Godet <arth.godet@gmail.com>
  * @since 17/08/2021
  */
 public interface ISchedulingFactory extends ISelf<Model> {
+    /////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////// ALTERNATIVE ////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Creates a task that is the alternative over the tasks in parameters. Either : <ul>
+     *     <li>the alternative task is not performed if none of the tasks are performed</li>
+     *     <li>the alternative task is performed if exactly one task is performed and their starts and ends are the same</li>
+     * </ul>
+     *
+     * @param tasks the tasks to create an alternative over
+     * @return the alternative task
+     */
+    default Task alternative(Task[] tasks) {
+        return alternative(tasks, false);
+    }
+
+    /**
+     * Creates a task that is the alternative over the tasks in parameters. Either : <ul>
+     *     <li>the alternative task is not performed if none of the tasks are performed</li>
+     *     <li>the alternative task is performed and, for all performed tasks, their starts and ends are the same as the one of the alternative task</li>
+     * </ul>
+     *
+     * @param tasks the tasks to create an alternative over
+     * @param allowSeveralTasks whether to allow several tasks to be performed and have the same start and end as the alternative task
+     * @return the alternative task
+     */
+    default Task alternative(Task[] tasks, boolean allowSeveralTasks) {
+        int est = Integer.MAX_VALUE;
+        int lct = Integer.MIN_VALUE;
+        int minDuration = Integer.MAX_VALUE;
+        int maxDuration = Integer.MIN_VALUE;
+        boolean mustBePerformed = false;
+        for (int i = 0; i < tasks.length; ++i) {
+            if (tasks[i].mayBePerformed()) {
+                est = Math.min(est, tasks[i].getEst());
+                lct = Math.max(lct, tasks[i].getLct());
+                minDuration = Math.min(minDuration, tasks[i].getMinDuration());
+                maxDuration = Math.max(maxDuration, tasks[i].getMaxDuration());
+                mustBePerformed |= tasks[i].mustBePerformed();
+            }
+        }
+        IntVar start = ref().intVar(est, lct - maxDuration);
+        IntVar duration = ref().intVar(minDuration, maxDuration);
+        IntVar end = ref().intVar(est + minDuration, lct);
+        Task alter;
+        if (mustBePerformed) {
+            alter = new Task(start, duration, end);
+        } else {
+            alter = new OptionalTask(start, duration, end, ref().boolVar());
+        }
+        if (allowSeveralTasks) {
+            IntVar varN = ref().intVar(0, tasks.length);
+            ref().alternative(alter, tasks, varN).post();
+        } else {
+            ref().alternative(alter, tasks).post();
+        }
+        return alter;
+    }
+
+    /**
+     * Creates an alternative constraint such that alternative(alter, tasks) is true iff <ul>
+     *    <li>either alter is not performed and none of tasks are performed</li>
+     *    <li>either alter is performed and exactly one of the tasks is performed and has same start and end as alter</li>
+     *  </ul>
+     *
+     * @param alter the alternative task
+     * @param tasks the tasks
+     * @return an alternative constraint
+     */
+    default Constraint alternative(Task alter, Task[] tasks) {
+        return alternative(alter, tasks, ref().intVar(0, 1));
+    }
+
+    /**
+     * Creates an alternative constraint such that alternative(alter, tasks, varN) is true iff <ul>
+     *    <li>either alter is not performed and none of tasks are performed and varN = 0</li>
+     *    <li>either alter is performed and exactly varN elements of tasks are performed and all performed tasks have same start and end as alter</li>
+     *  </ul>
+     *
+     * @param alter the alternative task
+     * @param tasks the tasks
+     * @param varN the number of tasks that are performed when alter is performed
+     * @return an alternative constraint
+     */
+    default Constraint alternative(Task alter, Task[] tasks, IntVar varN) {
+        return new Constraint(
+            ConstraintsName.ALTERNATIVE,
+            new PropAlternative(alter, Arrays.stream(tasks).filter(Task::mayBePerformed).toArray(Task[]::new), varN)
+        );
+    }
+
     /////////////////////////////////////////////////////////////////////////////
     //////////////////////////////// CUMULATIVE /////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////
@@ -183,6 +278,10 @@ public interface ISchedulingFactory extends ISelf<Model> {
         return extractVars(tasks, Task::getEnd);
     }
 
+    static IntVar[] extractPerformedVars(final Task[] tasks) {
+        return extractVars(tasks, task -> task instanceof OptionalTask optionalTask ? optionalTask.getPerformed() : task.getModel().boolVar(true));
+    }
+
     /**
      * Search for scheduling problems described in the following paper :
      * Godard, D., Laborie, P., Nuijten, W.: Randomized large neighborhood search for cumulative scheduling. In: Biundo, S., Myers, K.L., Rajan, K. (eds.) Proceedings of the Fifteenth International Conference on Automated Planning and Scheduling(ICAPS 2005), June 5-10 2005, Monterey, California, USA. pp. 81–89. AAAI (2005),http://www.aaai.org/Library/ICAPS/2005/icaps05-009.php
@@ -252,24 +351,104 @@ public interface ISchedulingFactory extends ISelf<Model> {
     }
 
     default IntStrategy smallest(final Task[] tasks, final ArbitrationRule arbitrationRule) {
-        IntVar[] starts = extractStartVars(tasks);
+        List<IntVar> vars = new ArrayList<>();
+        for (int i = 0; i < tasks.length; ++i) {
+            if (tasks[i] instanceof OptionalTask optionalTask) {
+                vars.add(optionalTask.getPerformed());
+            }
+            vars.add(tasks[i].getStart());
+            vars.add(tasks[i].getDuration());
+            vars.add(tasks[i].getEnd());
+        }
         return Search.intVarSearch(
                 variables -> {
                     int idx = -1;
                     for (int i = 0; i < tasks.length; i++) {
-                        if (!starts[i].isInstantiated()) {
+                        if (tasks[i].mayBePerformed() && !tasks[i].isInstantiated()) {
                             if (idx == -1
-                                    || starts[i].getLB() < starts[idx].getLB()
-                                    || starts[i].getLB() == starts[idx].getLB() && before(tasks[i], tasks[idx], arbitrationRule)
+                                || tasks[i].getEst() < tasks[idx].getEst()
+                                || tasks[i].getEst() == tasks[idx].getEst() && before(tasks[i], tasks[idx], arbitrationRule)
                             ) {
                                 idx = i;
                             }
                         }
                     }
-                    return idx == -1 ? null : starts[idx];
+                    if (idx == -1) {
+                        return null;
+                    } else {
+                        return nextUninstantiatedVariable(tasks[idx]);
+                    }
                 },
                 new IntDomainMin(),
-                starts
+                vars.toArray(IntVar[]::new)
+        );
+    }
+
+    private static IntVar nextUninstantiatedVariable(Task task) {
+        if (!task.mustBePerformed()) {
+            return ((OptionalTask) task).getPerformed();
+        } else if (!task.isStartInstantiated()) {
+            return task.getStart();
+        } else if (!task.isEndInstantiated()) {
+            return task.getEnd();
+        } else if (!task.isDurationInstantiated()) {
+            return task.getDuration();
+        }
+        return null;
+    }
+
+    /////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////// SPAN ////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Creates a task that is the span over the tasks in parameters. Either : <ul>
+     *     <li>the span task is not performed if none of the tasks are performed</li>
+     *     <li>the span task is performed if at least one task is performed and the span task starts when the earliest performed task starts and the span task ends when the latest performed task ends</li>
+     * </ul>
+     *
+     * @param tasks the tasks to create a span over
+     * @return the span task
+     */
+    default Task span(Task[] tasks) {
+        int est = Integer.MAX_VALUE;
+        int lct = Integer.MIN_VALUE;
+        boolean mustBePerformed = false;
+        for (int i = 0; i < tasks.length; ++i) {
+            if (tasks[i].mayBePerformed()) {
+                est = Math.min(est, tasks[i].getEst());
+                lct = Math.max(lct, tasks[i].getLct());
+                mustBePerformed |= tasks[i].mustBePerformed();
+            }
+        }
+        IntVar start = ref().intVar(est, lct);
+        IntVar duration = ref().intVar(0, lct - est);
+        IntVar end = ref().intVar(est, lct);
+        Task span;
+        if (mustBePerformed) {
+            span = new Task(start, duration, end);
+        } else {
+            span = new OptionalTask(start, duration, end, ref().boolVar());
+        }
+        ref().span(span, tasks).post();
+        return span;
+    }
+
+
+    /**
+     * Creates a span constraint such that span(span, tasks) is true iff <ul>
+     *    <li>either span is not performed and none of tasks are performed</li>
+     *    <li>either span is performed and at least one of the tasks is performed and span starts when the earliest performed task starts and span ends when the latest performed task ends</li>
+     *  </ul>
+     *
+     * @param span the span task
+     * @param tasks the tasks
+     * @return a span constraint
+     */
+    default Constraint span(Task span, Task[] tasks) {
+        return new Constraint(
+            ConstraintsName.SPAN,
+            new PropSpan(span, Arrays.stream(tasks).filter(Task::mayBePerformed).toArray(Task[]::new))
         );
     }
 }

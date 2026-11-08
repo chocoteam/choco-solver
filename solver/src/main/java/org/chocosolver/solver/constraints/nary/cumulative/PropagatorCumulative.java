@@ -773,7 +773,7 @@ public class PropagatorCumulative extends Propagator<IntVar> {
             if (tasks[i].mustBePerformed()) {
                 tasks[i].updateDuration(0, 0, this);
             } else {
-                tasks[i].forceToBeOptional(this);
+                tasks[i].forceToBeUnperformed(this);
             }
         } else if (tasks[i].mustBePerformed() && tasks[i].getMinDuration() > 0) {
             heights[i].updateUpperBound(capacity.getUB(), this);
@@ -798,7 +798,7 @@ public class PropagatorCumulative extends Propagator<IntVar> {
                         : this.r(heights[i].getLELit(heights[i].getLB() - 1), capacity.getGELit(capacity.getUB() + 1));
                 tasks[i].updateMaxDuration(0, this, reason);
             } else {
-                tasks[i].forceToBeOptional(this, this.r(heights[i].getLELit(heights[i].getLB() - 1), capacity.getGELit(capacity.getUB() + 1)));
+                tasks[i].forceToBeUnperformed(this, this.r(heights[i].getLELit(heights[i].getLB() - 1), capacity.getGELit(capacity.getUB() + 1)));
             }
         } else if (tasks[i].mustBePerformed() && tasks[i].getMinDuration() > 0) {
             final int durationLit = tasks[i].getDuration().getEQLit(0);
