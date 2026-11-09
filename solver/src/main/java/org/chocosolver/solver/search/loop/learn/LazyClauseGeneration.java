@@ -189,11 +189,11 @@ public class LazyClauseGeneration implements Learn {
                             learnt_clause.add(var.getLit(dec.getDecisionValue() + 1, IntVar.LR_GE));
                         }
                     } else {
-                        learnt_clause.add(var.getLit(dec.getDecisionValue(), IntVar.LR_EQ));
+                        learnt_clause.add(eqLit(var, dec.getDecisionValue()));
                     }
                 } else if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntNeq())) {
                     if (dec.hasNext() || dec.getArity() == 1) {
-                        learnt_clause.add(var.getLit(dec.getDecisionValue(), IntVar.LR_EQ));
+                        learnt_clause.add(eqLit(var, dec.getDecisionValue()));
                     } else {
                         if (var.hasEnumeratedDomain()) {
                             learnt_clause.add(var.getLit(dec.getDecisionValue(), IntVar.LR_NE));
@@ -220,6 +220,23 @@ public class LazyClauseGeneration implements Learn {
             learnt_clause.add(0);
         }
 
+    }
+
+    /**
+     * Returns the negation of "{@code var} &ne; {@code value}", which holds on the current path.
+     * A bounded domain has bound literals only: "{@code var} &ne; {@code value}" then holds through a bound
+     * ({@code value} is a bound, as "=" and "!=" inside a bounded domain are applied as splits),
+     * and its negation is "{@code var} &le; {@code value}" or "{@code var} &ge; {@code value}".
+     *
+     * @param var   a variable
+     * @param value a value
+     * @return the literal stating the negation of "{@code var} &ne; {@code value}"
+     */
+    private static int eqLit(IntVar var, int value) {
+        if (var.hasEnumeratedDomain()) {
+            return var.getLit(value, IntVar.LR_EQ);
+        }
+        return var.getLB() > value ? var.getLit(value, IntVar.LR_LE) : var.getLit(value, IntVar.LR_GE);
     }
 
     private int analyze(ContradictionException cex, String message) {

@@ -313,19 +313,11 @@ public class DecisionPathTest {
         }
     }
 
-    @DataProvider
-    public Object[][] lcgAndOperatorsOnBoundedDomains() {
-        // with LCG, "!=" on a bound of a bounded domain fails when a solution is recorded
-        // (LazyClauseGeneration#extractFromDecisions asks for a "=" literal): not covered yet
-        return Arrays.stream(lcgAndOperators())
-                .filter(p -> !((boolean) p[0] && p[1] == DecisionOperatorFactory.makeIntNeq()))
-                .toArray(Object[][]::new);
-    }
-
-    @Test(groups = "1s", timeOut = 60000, dataProvider = "lcgAndOperatorsOnBoundedDomains")
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "lcgAndOperators")
     public void testQueensOnBoundedDomains(boolean lcg, DecisionOperator<IntVar> op) {
         // #1279: with "=" on the median value of bounded domains, LCG wrongly reported no solution
-        // and the search without LCG did not terminate
+        // and the search without LCG did not terminate.
+        // With LCG, "!=" on a bound of a bounded domain also failed when a solution was recorded
         int n = 8;
         Model model = new Model(SettingsBuilder.init().setLCG(lcg));
         IntVar[] q = model.intVarArray("q", n, 1, n, true);
