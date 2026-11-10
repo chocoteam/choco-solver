@@ -274,6 +274,16 @@ public interface IResolutionHelper extends ISelf<Solver> {
     }
 
     /**
+     * Resets the solver, which erases all the stop criteria, then declares anew the given ones.
+     *
+     * @param declared the stop criteria to keep over the reset
+     */
+    private void resetKeepingCriteria(List<Criterion> declared) {
+        ref().reset();
+        ref().addStopCriterion(declared.toArray(new Criterion[0]));
+    }
+
+    /**
      * Attempt to find the solution that optimizes the mono-objective problem defined by
      * a unique objective variable and an optimization criteria, then finds and stores all optimal solution.
      * Searching for all optimal solutions is only triggered if the first search is complete.
@@ -283,6 +293,8 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * <li>It resets the search and enumerates all solutions of optimal cost</li>
      * </ol>
      * Note that the returned list can be empty.
+     * The stop criteria declared before the call are kept for the second phase, but counters are reset with the solver:
+     * a limit applies to each phase.
      * <ul>
      * <li>If the method returns an empty list: </li>
      * <ul>
@@ -327,6 +339,8 @@ public interface IResolutionHelper extends ISelf<Solver> {
      */
     @SuppressWarnings("UnusedReturnValue")
     default List<Solution> findAllOptimalSolutions(IntVar objective, boolean maximize, Criterion... stop) {
+        // reset() erases the stop criteria, the ones declared by the user are restored for the second phase
+        List<Criterion> declared = ref().getStopCriteria();
         ref().addStopCriterion(stop);
         boolean defaultS = ref().getSearch() == null;// best bound (in default) is only for optim
         ref().findOptimalSolution(objective, maximize);
@@ -334,7 +348,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
                 && ref().getSolutionCount() > 0) {
             ref().removeStopCriterion(stop);
             int opt = ref().getObjectiveManager().getBestSolutionValue().intValue();
-            ref().reset();
+            resetKeepingCriteria(declared);
             ref().getModel().clearObjective();
             Constraint forceOptimal = ref().getModel().arithm(objective, "=", opt);
             forceOptimal.post();
@@ -396,6 +410,8 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * @return a list that contained the solutions found.
      */
     default Stream<Solution> streamOptimalSolutions(IntVar objective, boolean maximize, Criterion... stop) {
+        // reset() erases the stop criteria, the ones declared by the user are restored for the second phase
+        List<Criterion> declared = ref().getStopCriteria();
         ref().addStopCriterion(stop);
         boolean defaultS = ref().getSearch() == null;// best bound (in default) is only for optim
         ref().findOptimalSolution(objective, maximize);
@@ -403,7 +419,8 @@ public interface IResolutionHelper extends ISelf<Solver> {
                 && ref().getSolutionCount() > 0) {
             ref().removeStopCriterion(stop);
             int opt = ref().getObjectiveManager().getBestSolutionValue().intValue();
-            ref().reset();
+            resetKeepingCriteria(declared);
+            ref().addStopCriterion(stop);
             ref().getModel().clearObjective();
             Constraint forceOptimal = ref().getModel().arithm(objective, "=", opt);
             forceOptimal.post();
@@ -728,6 +745,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
                                            Criterion... criterion) {
         final Model model = ref().getModel();
         final Solver solver = ref();
+        final List<Criterion> declared = solver.getStopCriteria();
         final List<Solution> solutions = solver.findAllSolutions(
                 ArrayUtils.append(criterion, new Criterion[]{new SolutionCounter(model, pivot)}));
         if (solver.getSearchState() == SearchState.STOPPED && solutions.size() < pivot) // Timeout
@@ -741,7 +759,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
                 solutions.clear(); // to force entering the loop in general case
                 added.clear();
                 while (solutions.isEmpty() || solutions.size() == pivot) {
-                    solver.reset();
+                    resetKeepingCriteria(declared);
                     solver.pushTrail(); // required to make sure initial propagation can be undone
                     try {
                         solver.propagate();

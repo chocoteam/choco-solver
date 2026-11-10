@@ -338,9 +338,10 @@ Then to distinct, in the word 101, the symbols 0, 1, 10 and 101, two additional 
 
 In summary, a valid regexp for the automaton-based constraints is a combination of **digits** and Java Regexp special characters.
 Letters are not symbols: a regexp containing a letter is refused (write `<97>`, not `a`).
-A symbol is in [0,65535]; values of the variables outside this range are simply never accepted.
-`.` (any symbol) and negated classes such as `[^12]` are very slow on the whole range:
-restrict it with `new FiniteAutomaton(regexp, min, max)`.
+A symbol is in [0,65526] (the characters reserved by the regexp syntax cannot stand for an integer);
+values of the variables outside this range are simply never accepted.
+`.` (any symbol) and negated classes such as `[^12]` cover the whole range, that is 65527 symbols, hence a large automaton:
+restrict it with `new FiniteAutomaton(regexp, min, max)`, where `min` and `max` are integers (included).
 Posted on an empty array of variables, `regular` is satisfied if and only if the automaton accepts the empty word.
 
 `CostAutomaton` is an extension of `FiniteAutomaton` where costs can be declared for each transition.

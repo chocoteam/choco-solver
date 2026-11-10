@@ -220,6 +220,10 @@ public class Constraint {
      */
     public final BoolVar reify() {
         if (boolReif == null) {
+            if (propagators.length == 0) {
+                throw new SolverException("Cannot reify a constraint without propagator, "
+                        + "such as a void constraint (constraints decomposed when posted, e.g., with LCG)");
+            }
             Model model = propagators[0].getModel();
             reifyWith(model.boolVar(model.generateName("REIF_")));
         } else if (opposite == null) {

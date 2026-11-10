@@ -62,8 +62,7 @@ public class BranchingTest {
 		Assert.assertEquals(s.getSolutionCount(), 9);
 	}
 
-	/*
-	@Test(groups="1s", timeOut=60000, expectedExceptions = AssertionError.class)
+	@Test(groups="1s", timeOut=60000)
 	public void testBoundedEqMiddle(){
 		Model m = new Model();
 		IntVar x = m.intVar(1,3, true);
@@ -75,7 +74,7 @@ public class BranchingTest {
 				x, y));
 		while (s.solve());
 		Assert.assertEquals(s.getSolutionCount(), 9);
-	}*/
+	}
 
 	@Test(groups="1s", timeOut=60000)
 	public void testBoundedNeqLB(){
@@ -91,7 +90,7 @@ public class BranchingTest {
 		Assert.assertEquals(s.getSolutionCount(), 9);
 	}
 
-	@Test(groups="1s", timeOut=60000, expectedExceptions = AssertionError.class)
+	@Test(groups="1s", timeOut=60000)
 	public void testBoundedNeqMiddle(){
 		Model m = new Model();
 		IntVar x = m.intVar(1,3, true);

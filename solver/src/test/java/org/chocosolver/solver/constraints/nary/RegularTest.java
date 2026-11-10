@@ -459,4 +459,57 @@ public class RegularTest {
         return null;
     }
 
+    @Test(groups = "1s", timeOut = 20000)
+    public void testAnyCharacter() {
+        // "." covers the whole alphabet, up to Character.MAX_VALUE (#336)
+        FiniteAutomaton auto = new FiniteAutomaton(".");
+        Assert.assertEquals(auto.getNbStates(), 2);
+        Assert.assertTrue(auto.getAlphabet().contains(0));
+        Assert.assertTrue(auto.getAlphabet().contains(1000));
+        // no fake symbol for the characters reserved by the regexp syntax
+        Assert.assertFalse(auto.getAlphabet().contains(-1));
+        Assert.assertTrue(auto.getAlphabet().size() > 65000);
+        Assert.assertNotNull(auto.toDot());
+        // the copy and the transitions must also end
+        FiniteAutomaton copy = new FiniteAutomaton(auto);
+        Assert.assertEquals(copy.getNbStates(), 2);
+        Assert.assertEquals(copy.getAlphabet().size(), auto.getAlphabet().size());
+        int nbTransitions = 0;
+        for (int i = 0; i < auto.getNbStates(); i++) {
+            nbTransitions += auto.getTransitions(i).size();
+        }
+        Assert.assertEquals(nbTransitions, auto.getAlphabet().size());
+    }
+
+    @Test(groups = "1s", timeOut = 20000)
+    public void testBoundsAreIntegers() {
+        // min and max are integers, not character codes: the characters reserved by the regexp
+        // syntax ('"', '(', ')', '<', '>', '[', ']', '{', '}') must not shift them
+        int[][] bounds = {{0, 100}, {5, 40}, {50, 200}, {0, 5}, {0, 65526}, {65520, 65526}};
+        for (int[] b : bounds) {
+            FiniteAutomaton auto = new FiniteAutomaton(".", b[0], b[1]);
+            Assert.assertEquals(auto.getAlphabet().size(), b[1] - b[0] + 1, "[" + b[0] + "," + b[1] + "]");
+            for (int v = b[0]; v <= b[1]; v++) {
+                Assert.assertTrue(auto.getAlphabet().contains(v), v + " in [" + b[0] + "," + b[1] + "]");
+            }
+            int nbTransitions = 0;
+            for (int i = 0; i < auto.getNbStates(); i++) {
+                nbTransitions += auto.getTransitions(i).size();
+            }
+            Assert.assertEquals(nbTransitions, b[1] - b[0] + 1);
+        }
+        // a bound beyond the representable integers keeps the values below it
+        FiniteAutomaton all = new FiniteAutomaton(".", 0, 65535);
+        Assert.assertEquals(all.getAlphabet().size(), 65527);
+    }
+
+    @Test(groups = "1s", timeOut = 20000)
+    public void testToDotBounds() {
+        // the labels only contain the integers of [min,max], without the reserved characters
+        String dot = new FiniteAutomaton(".", 30, 45).toDot();
+        Assert.assertTrue(dot.contains("[label=\"{30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45}\"]"), dot);
+        Assert.assertFalse(dot.contains("-1"), dot);
+        Assert.assertTrue(new FiniteAutomaton("<12>").toDot().contains("[label=\"{12}\"]"));
+    }
+
 }

@@ -77,8 +77,8 @@ it may not be satisfied in solutions.
 
 ## Reifying constraints
 
-In Choco-solver, it is possible to reify any constraint. Reifying a constraint means associating it with a `BoolVar`
-to represent whether or not the constraint is satisfied :
+In Choco-solver, it is possible to reify most constraints. Reifying a constraint means associating it with a `BoolVar`
+to represent whether the constraint is satisfied :
 
 {{< tabpane langEqualsHeader=true >}}
 {{< example "modeling/Constraints" "reify" >}}
@@ -91,6 +91,17 @@ Or:
 {{< example "modeling/Constraints" "reifyWith" >}}
 {{< /tabpane >}}
 
+
+{{% alert title="Warning" color="warning" %}}
+With LCG (`Settings.setLCG(true)`), some constraints are not stored as a single constraint: they are decomposed, and
+their decomposition is posted when the constraint is created (for instance `globalCardinality`, `increasing`, `decreasing`, `element`,
+`table`, `bitsIntChanneling`, `allDifferentExceptValues`, `binPacking`, `lexChainLess`, `lexChainLessEq`, `nValues`,
+`min` and `max` on Boolean variables). Such a constraint is
+**not** reifiable: `reify()` and `reifyWith(...)` throw a `SolverException`, and the constraint holds even if it is not posted.
+To state a conditional relation, use a formulation that returns a reifiable constraint, e.g., a conjunction of `count` constraints
+instead of `globalCardinality`, or `ifThen` with other constraints.
+`mod` is a special case: when it is decomposed, it also forbids `Y = 0`, whether it is reified.
+{{% /alert %}}
 
 Reifying a constraint means that we allow the constraint not to be satisfied.
 Therefore, the reified constraint **should not** be posted.

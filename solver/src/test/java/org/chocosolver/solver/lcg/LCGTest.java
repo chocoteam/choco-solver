@@ -16,6 +16,7 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
 import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
+import org.chocosolver.solver.search.strategy.strategy.FullyRandom;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -24,7 +25,9 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 import static org.chocosolver.util.tools.ArrayUtils.flatten;
@@ -781,5 +784,26 @@ public class LCGTest {
                 DecisionOperatorFactory.makeIntEq(), x));
         Assert.assertTrue(solver.solve());
         Assert.assertNotEquals(x.getValue(), 2);
+    }
+
+    @Test(groups = "lcg", timeOut = 60000)
+    public void testFullyRandomOnBoundedDomains() {
+        // FullyRandom makes "=" and "!=" decisions on the bounds of bounded domains, which have no "=" literal:
+        // recording a solution failed with an UnsupportedOperationException
+        for (long seed = 0; seed < 10; seed++) {
+            Model model = new Model(SettingsBuilder.init().setLCG(true));
+            IntVar[] v = model.intVarArray("v", 3, 0, 4, true);
+            model.sum(v, "=", 6).post();
+            model.allDifferent(v).post();
+            Solver solver = model.getSolver();
+            solver.setSearch(new FullyRandom(v, seed));
+            Set<String> found = new HashSet<>();
+            while (solver.solve()) {
+                found.add(v[0].getValue() + "," + v[1].getValue() + "," + v[2].getValue());
+            }
+            // permutations of {0,2,4} and {1,2,3}
+            Assert.assertEquals(solver.getSolutionCount(), 12, "seed " + seed);
+            Assert.assertEquals(found.size(), 12, "seed " + seed);
+        }
     }
 }

@@ -71,14 +71,18 @@ public class FiniteAutomaton implements IAutomaton {
 
     /**
      * Create a finite automaton based on a regular expression.
-     * The regexp accepts digits  and numbers, in [0,65535].
+     * The regexp accepts digits  and numbers, in [0,65526].
+     * The 9 characters reserved by the regexp syntax ({@code "{}<>[]()}) cannot stand for an integer:
+     * the integers above 65526 are not representable, and the upper bound of 65535 used previously is an
+     * overestimate.
      * However, to distinguish a number from a suite of digits, the former must be surrounded by '<' and '>'.
      * For instance, "12<34>" stands for a '1' (digit), followed by a '2' (digit) followed by a '34' (number).
      * Letters are not symbols: a regexp containing a letter is refused.
+     * A symbol is an integer: {@code .} stands for any integer of [min,max], not for a digit.
      *
      * @param regexp the regular expression
-     * @param min    an overall minimum value for transitions
-     * @param max    an overall maximum value for transitions
+     * @param min    an overall minimum value (an integer, included) for transitions
+     * @param max    an overall maximum value (an integer, included) for transitions
      */
     public FiniteAutomaton(String regexp, int min, int max) {
         this();
@@ -91,10 +95,11 @@ public class FiniteAutomaton implements IAutomaton {
 
     /**
      * Create a finite automaton based on a regular expression.
-     * The regexp accepts digits  and numbers, in [0,65535].
+     * The regexp accepts digits  and numbers, in [0,65526] (see {@link #FiniteAutomaton(String, int, int)}).
      * However, to distinguish a number from a suite of digits, the former must be surrounded by '<' and '>'.
      * For instance, "12<34>" stands for a '1' (digit), followed by a '2' (digit) followed by a '34' (number).
      * Letters are not symbols: a regexp containing a letter is refused.
+     * A symbol is an integer: {@code .} stands for any integer of [0,65526], not for a digit.
      *
      * @param regexp the regular expression
      */
@@ -532,11 +537,13 @@ public class FiniteAutomaton implements IAutomaton {
             State s = states.get(i);
             for (Transition t : s.getTransitions()) {
                 int dest = stateToIndex.get(t.getDest());
-                char m = (char) Math.max(min, t.getMin());
-                char M = (char) Math.min(max, t.getMax());
-                for (char c = m; c <= M; c++) {
-                    int symbol = getIntFromChar(c);
-                    transitions.add(new int[]{i, dest, symbol});
+                int m = Math.max(minCode(), t.getMin());
+                int M = Math.min(maxCode(), t.getMax());
+                for (int c = m; c <= M; c++) {
+                    int symbol = getIntFromChar((char) c);
+                    if (symbol >= 0) { // reserved characters have no integer counterpart
+                        transitions.add(new int[]{i, dest, symbol});
+                    }
                 }
             }
         }
@@ -547,11 +554,13 @@ public class FiniteAutomaton implements IAutomaton {
         List<int[]> transitions = new ArrayList<>();
         for (Transition t : states.get(state).getTransitions()) {
             int dest = stateToIndex.get(t.getDest());
-            char m = (char) Math.max(min, t.getMin());
-            char M = (char) Math.min(max, t.getMax());
-            for (char c = m; c <= M; c++) {
-                int symbol = getIntFromChar(c);
-                transitions.add(new int[]{state, dest, symbol});
+            int m = Math.max(minCode(), t.getMin());
+            int M = Math.min(maxCode(), t.getMax());
+            for (int c = m; c <= M; c++) {
+                int symbol = getIntFromChar((char) c);
+                if (symbol >= 0) { // reserved characters have no integer counterpart
+                    transitions.add(new int[]{state, dest, symbol});
+                }
             }
         }
         return transitions;
@@ -584,8 +593,12 @@ public class FiniteAutomaton implements IAutomaton {
             for (Transition t : s.getTransitions()) {
                 int dest = stateToIndex.get(t.getDest());
                 if (setOfRemoved.contains(dest)) {
-                    for (char d = t.getMin(); d <= t.getMax(); d++)
-                        couple.add(new int[]{i, getIntFromChar(d)});
+                    for (int d = t.getMin(); d <= t.getMax(); d++) {
+                        int symbol = getIntFromChar((char) d);
+                        if (symbol >= 0) { // reserved characters have no integer counterpart
+                            couple.add(new int[]{i, symbol});
+                        }
+                    }
                 }
 
             }
@@ -663,6 +676,24 @@ public class FiniteAutomaton implements IAutomaton {
             }
     }
 
+    /**
+     * @return the smallest character code that stands for an integer greater than or equal to {@link #min}.
+     * The transitions of the underlying automaton are expressed in character codes, which are shifted from
+     * the integers since the reserved characters of the regexp syntax are skipped.
+     */
+    private int minCode() {
+        int code = charFromIntMap.get(min);
+        return code < 0 ? Character.MAX_VALUE + 1 : code;
+    }
+
+    /**
+     * @return the greatest character code that may stand for an integer less than or equal to {@link #max}.
+     */
+    private int maxCode() {
+        int code = charFromIntMap.get(max);
+        return code < 0 ? Character.MAX_VALUE : code;
+    }
+
     private void syncStates() {
         this.alphabet.clear();
         this.states.clear();
@@ -672,10 +703,14 @@ public class FiniteAutomaton implements IAutomaton {
             states.add(s);
             stateToIndex.put(s, idx++);
             for (Transition t : s.getTransitions()) {
-                char m = (char) Math.max(min, t.getMin());
-                char M = (char) Math.min(max, t.getMax());
-                for (char c = m; c <= M; c++) {
-                    alphabet.add(getIntFromChar(c));
+                // int counter: a char one would overflow after Character.MAX_VALUE and never end (#336)
+                int m = Math.max(minCode(), t.getMin());
+                int M = Math.min(maxCode(), t.getMax());
+                for (int c = m; c <= M; c++) {
+                    int v = getIntFromChar((char) c);
+                    if (v >= 0) { // reserved characters have no integer counterpart
+                        alphabet.add(v);
+                    }
                 }
             }
         }
@@ -687,13 +722,17 @@ public class FiniteAutomaton implements IAutomaton {
 
         b.append(" -> ").append(destIdx).append(" [label=\"");
         b.append("{");
-        b.append(getIntFromChar(t.getMin()));
-        if (t.getMin() != t.getMax()) {
-            char m = (char) (Math.max(min, t.getMin())+1);
-            char M = (char) Math.min(max, t.getMax());
-            for (char c = m; c <= M; c++) {
-                b.append(",");
-                b.append(getIntFromChar(c));
+        int m = Math.max(minCode(), t.getMin());
+        int M = Math.min(maxCode(), t.getMax());
+        boolean first = true;
+        for (int c = m; c <= M; c++) {
+            int symbol = getIntFromChar((char) c);
+            if (symbol >= 0) { // reserved characters have no integer counterpart
+                if (!first) {
+                    b.append(",");
+                }
+                b.append(symbol);
+                first = false;
             }
         }
         b.append("}");

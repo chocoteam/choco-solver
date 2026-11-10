@@ -417,6 +417,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
             searchMonitors.onContradiction(ce);
             cancelTrail();
             stop = true;
+            canBeRepaired = false;
             ok = false;
         }
         // call to HeuristicVal.update(Action.initial_propagation)
@@ -875,7 +876,9 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
             action = extend;
         } catch (ContradictionException e) {
             // trivial inconsistency is detected, due to the cut
+            engine.flush();
             stop = true;
+            canBeRepaired = false;
         }
         searchMonitors.afterRestart();
     }
@@ -1496,6 +1499,13 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
                 criteria.remove(c);
             }
         }
+    }
+
+    /**
+     * @return a copy of the stop criteria currently declared.
+     */
+    public List<Criterion> getStopCriteria() {
+        return new ArrayList<>(criteria);
     }
 
     /**

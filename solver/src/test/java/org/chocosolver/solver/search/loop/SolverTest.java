@@ -35,6 +35,7 @@ import org.testng.annotations.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -458,5 +459,47 @@ public class SolverTest {
         Assert.assertEquals(sol1.getIntVal(x), 1);
         Solution sol2 = m.getSolver().findOptimalSolution(x, false);
         Assert.assertNull(sol2);
+    }
+
+    @Test
+    public void testSolveTwice2(){
+        Model model = new Model();
+        IntVar[] x = model.intVarArray("x", 8, 0, 9);
+        IntVar y = model.intVar("y", 0, 1);
+        model.arithm(x[0], "+", y, "<=", 1).post();
+        Solver solver = model.getSolver();
+        solver.showShortStatistics();
+        solver.limitTime("0.05s");
+        List<Solution> sols = solver.findAllOptimalSolutions(y, true, new NodeCounter(model, 100_000));
+        Assert.assertTrue(solver.isStopCriterionMet());
+        System.out.println(sols.size() + " solutions, " + solver.getTimeCount() + " s");
+// 2. the 50 ms limit is not applied to the second phase, and is no longer set:
+        System.out.println(solver.findAllSolutions().size() + " solutions");
+    }
+
+    @Test
+    public void testSolveTwice3(){
+        Model model = new Model();
+        IntVar[] x = model.intVarArray("x", 8, 0, 9);
+        IntVar y = model.intVar("y", 0, 1);
+        model.arithm(x[0], "+", y, "<=", 1).post();
+        Solver solver = model.getSolver();
+        solver.showShortStatistics();
+        solver.limitTime("0.05s");
+        List<Solution> sols = solver.findAllOptimalSolutions(y, true, new NodeCounter(model, 100_000));
+        Assert.assertTrue(solver.isStopCriterionMet());
+    }
+
+    @Test
+    public void testStreamOptimalSolutionsKeepsTimeLimit() {
+        Model model = new Model();
+        IntVar[] x = model.intVarArray("x", 8, 0, 9);
+        IntVar y = model.intVar("y", 0, 1);
+        model.arithm(x[0], "+", y, "<=", 1).post();
+        Solver solver = model.getSolver();
+        solver.limitTime("0.05s");
+        long count = solver.streamOptimalSolutions(y, true, new NodeCounter(model, 100_000_000)).count();
+        Assert.assertTrue(solver.isStopCriterionMet());
+        Assert.assertTrue(count < 100_000_000);
     }
 }

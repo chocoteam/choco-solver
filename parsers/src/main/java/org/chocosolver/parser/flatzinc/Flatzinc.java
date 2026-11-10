@@ -85,7 +85,6 @@ public class Flatzinc extends RegParser {
         this(false, false, 1);
         this.setMinCardinalityForSumDecomposition(256)
                 .setNbMaxLearntClauses(100_000)
-                //.setIntVarLazyLitWithWeakBounds(false)
                 .set("adhocReification", "true")
                 .setWarnUser(false);
     }

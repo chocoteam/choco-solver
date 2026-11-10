@@ -9,7 +9,6 @@ package org.chocosolver.solver;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.ISatFactory;
 import org.chocosolver.solver.search.strategy.Search;
-import org.chocosolver.solver.variables.impl.IntVarLazyLit;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -78,8 +77,6 @@ public class Settings {
 
     private final int reduceLearntClausesFactor;
 
-    private final boolean intVarLazyLitWithWeakBounds;
-
     private final double ibexContractionRatio;
 
     private final boolean ibexRestoreRounding;
@@ -127,7 +124,6 @@ public class Settings {
         this.nbMaxLearnt = builder.getNbMaxLearntClauses();
         this.reduceLearntClausesBase = builder.getReduceLearntClausesBase();
         this.reduceLearntClausesFactor = builder.getReduceLearntClausesFactor();
-        this.intVarLazyLitWithWeakBounds = builder.enableIntVarLazyLitWithWeakBounds();
         this.ibexContractionRatio = builder.getIbexContractionRatio();
         this.ibexRestoreRounding = builder.getIbexRestoreRounding();
         this.lcg = builder.isLCG();
@@ -392,13 +388,6 @@ public class Settings {
      */
     public int getReduceLearntClausesFactor() {
         return reduceLearntClausesFactor;
-    }
-
-    /**
-     * @return <tt>true</tt> if the {@link IntVarLazyLit} propagator uses weak bounds.
-     */
-    public boolean enableIntVarLazyLitWithWeakBounds() {
-        return intVarLazyLitWithWeakBounds;
     }
 
     /**

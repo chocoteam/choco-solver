@@ -628,7 +628,8 @@ public class Model implements IModel {
     }
 
     /**
-     * Create a VOID constraint that cannot be reified --  for LCG mainly
+     * Create a VOID constraint that cannot be reified --  for LCG mainly.
+     * Calling {@link Constraint#reify()} or {@link Constraint#reifyWith(BoolVar)} on it throws a {@link SolverException}.
      * @return a void constraint
      * todo: find a more elegant way to do that
      */
@@ -982,6 +983,7 @@ public class Model implements IModel {
                 }
                 p.getConstraint().checkNewStatus(Constraint.Status.POSTED);
                 p.linkVariables();
+                p.onPost(dynAdd, p.isReified());
             }
             if (dynAdd) {
                 engine.dynamicAddition(permanent, c.getPropagators());

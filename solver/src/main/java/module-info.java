@@ -124,7 +124,7 @@ module org.chocosolver.solver {
 
     requires trove4j;
     requires org.jgrapht.core;
-    requires automaton;
+    requires dk.brics.automaton;
     requires sizeof;
     requires args4j;
 

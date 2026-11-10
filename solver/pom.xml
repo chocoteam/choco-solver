@@ -28,7 +28,7 @@
     </description>
 
     <properties>
-        <automaton.version>1.11-8</automaton.version>
+        <automaton.version>1.13-1</automaton.version>
         <jgrapht.core.version>1.5.3</jgrapht.core.version>
         <sizeof.version>0.4.4</sizeof.version>
         <slf4j.nop.version>2.0.5</slf4j.nop.version>
@@ -37,7 +37,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>dk.brics.automaton</groupId>
+            <groupId>dk.brics</groupId>
             <artifactId>automaton</artifactId>
             <version>${automaton.version}</version>
         </dependency>

@@ -327,6 +327,21 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     }
 
     /**
+     * Called by the model each time the constraint of this propagator is posted, once this propagator
+     * has been linked to its variables.
+     * It enables to perform operations that depend on the way the propagator is posted.
+     * For instance, redundant information that is valid only if the propagator holds
+     * (such as permanent clauses in the SAT solver) must not be added when {@code reified} is true,
+     * and, since it cannot be undone on backtrack, nor when {@code dynamic} is true.
+     * Does nothing by default.
+     *
+     * @param dynamic  <i>true</i> if the resolution has already begun (dynamic addition)
+     * @param reified  <i>true</i> if this propagator is reified or implied, that is, it may not hold
+     */
+    public void onPost(boolean dynamic, boolean reified) {
+    }
+
+    /**
      * Destroy links between this propagator and its variables.
      */
     public final void unlinkVariables() {

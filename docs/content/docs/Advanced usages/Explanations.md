@@ -136,7 +136,6 @@ When LCG is enabled, you can customize its behavior through the following settin
 | **SAT CC Min Mode** | `setSatCCMinMode(int)` | `0` | Conflict clause minimization: 0=none, 1=local, 2=recursive |
 | **Reason Manager** | `setReasonManager(int)` | `2` | Storage of the reasons of filtering events, to reduce garbage collection: 0=none, 1=array-based, 2=chunk-based |
 | **Sort Lits on Solution** | `setSortLitsOnSolution(boolean)` | `true` | Sort the literals of the clause generated on a solution by search-tree level, from the deepest to the shallowest |
-| **Lazy Lit with Weak Bounds** | `setIntVarLazyLitWithWeakBounds(boolean)` | `false` | Advanced option for literal creation |
 
 ### Extract from Variables vs. Decision Path
 

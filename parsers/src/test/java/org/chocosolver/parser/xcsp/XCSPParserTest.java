@@ -498,6 +498,20 @@ public class XCSPParserTest {
     }
 
     @Test(groups = "xcsp")
+    public void testElementWithoutIndexFindsEachSolutionOnce() throws Exception {
+        // #1270: no auxiliary index variable, so a solution is not found once per matching position
+        Var[] vars = {var("x0", 0, 1), var("x1", 0, 1), var("x2", 0, 1), var("x3", 0, 1), var("v", 0, 2)};
+        String l = "<list> x0 x1 x2 x3 </list>";
+        check("<element>" + l + "<value> v </value></element>", s -> Arrays.stream(s, 0, 4).anyMatch(x -> x == s[4]), vars);
+        check("<element>" + l + "<condition> (ne,v) </condition></element>", s -> Arrays.stream(s, 0, 4).anyMatch(x -> x != s[4]), vars);
+        check("<element>" + l + "<condition> (lt,v) </condition></element>", s -> Arrays.stream(s, 0, 4).anyMatch(x -> x < s[4]), vars);
+        check("<element>" + l + "<condition> (in,{0,2}) </condition></element>", s -> Arrays.stream(s, 0, 4).anyMatch(x -> x == 0 || x == 2),
+                Arrays.copyOf(vars, 4));
+        check("<element>" + l + "<condition> (notin,0..0) </condition></element>", s -> Arrays.stream(s, 0, 4).anyMatch(x -> x != 0),
+                Arrays.copyOf(vars, 4));
+    }
+
+    @Test(groups = "xcsp")
     public void testCardinalityClosedWithVariablesAsValues() throws Exception {
         // #1260
         Var[] vars = {var("x0", 0, 2), var("x1", 0, 2), var("x2", 0, 2), var("v", 0, 2), var("w", 0, 2)};
@@ -508,5 +522,55 @@ public class XCSPParserTest {
         check(String.format(c, "1 2"), s -> closed.test(s)
                 && Arrays.stream(s, 0, 3).filter(x -> x == s[3]).count() == 1
                 && Arrays.stream(s, 0, 3).filter(x -> x == s[4]).count() == 2, vars);
+    }
+
+    @Test(groups = "xcsp")
+    public void testArgExtremumRank() throws Exception {
+        // #1260
+        Var[] vars = {var("x0", 0, 2), var("x1", 0, 2), var("x2", 0, 2), var("y", 0, 2)};
+        for (String op : new String[]{"maximumArg", "minimumArg"}) {
+            boolean max = op.equals("maximumArg");
+            for (String rank : new String[]{"", " rank=\"first\"", " rank=\"last\"", " rank=\"any\""}) {
+                String c = "<" + op + rank + "><list> x0 x1 x2 </list><condition> (eq,y) </condition></" + op + ">";
+                check(c, s -> {
+                    int e = max ? Math.max(s[0], Math.max(s[1], s[2])) : Math.min(s[0], Math.min(s[1], s[2]));
+                    if (s[s[3]] != e) return false;
+                    if (rank.contains("first")) return s[0] == e ? s[3] == 0 : (s[1] == e ? s[3] == 1 : s[3] == 2);
+                    if (rank.contains("last")) return s[2] == e ? s[3] == 2 : (s[1] == e ? s[3] == 1 : s[3] == 0);
+                    return true;
+                }, vars);
+            }
+        }
+    }
+
+    @Test(groups = "xcsp")
+    public void testArgExtremumAnyWithConditionNotFixingIndex() throws Exception {
+        // #1260: the index is not a variable of the problem, so each solution must be found once
+        Var[] vars3 = {var("x0", 0, 2), var("x1", 0, 2), var("x2", 0, 2)};
+        Var[] vars4 = {var("x0", 0, 2), var("x1", 0, 2), var("x2", 0, 2), var("y", 0, 2)};
+        String[] conds = {"(ne,1)", "(in,{0,2})", "(gt,y)", "(le,y)", "(ge,1)", "(lt,y)"};
+        for (String op : new String[]{"maximumArg", "minimumArg"}) {
+            boolean max = op.equals("maximumArg");
+            for (int c = 0; c < conds.length; c++) {
+                int cc = c;
+                String x = "<" + op + " rank=\"any\"><list> x0 x1 x2 </list><condition> " + conds[c] + " </condition></" + op + ">";
+                check(x, s -> {
+                    int e = max ? Math.max(s[0], Math.max(s[1], s[2])) : Math.min(s[0], Math.min(s[1], s[2]));
+                    for (int i = 0; i < 3; i++) {
+                        boolean ok;
+                        switch (cc) {
+                            case 0: ok = i != 1; break;
+                            case 1: ok = i == 0 || i == 2; break;
+                            case 2: ok = i > s[3]; break;
+                            case 3: ok = i <= s[3]; break;
+                            case 4: ok = i >= 1; break;
+                            default: ok = i < s[3]; break;
+                        }
+                        if (ok && s[i] == e) return true;
+                    }
+                    return false;
+                }, cc == 0 || cc == 1 || cc == 4 ? vars3 : vars4);
+            }
+        }
     }
 }

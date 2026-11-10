@@ -9,9 +9,11 @@ package org.chocosolver.solver.search.strategy.decision;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMedian;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
 import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
 import org.chocosolver.solver.variables.IntVar;
@@ -21,6 +23,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -259,5 +262,81 @@ public class DecisionPathTest {
         // brute force: x in [0,4] \ {2}, y in [0,6] \ {2,3}
         Assert.assertEquals(count, 4 * 5);
         Assert.assertEquals(found.size(), 4 * 5);
+    }
+
+    @DataProvider
+    public Object[][] decisionsOnBoundedDomain() {
+        DecisionOperator<IntVar> eq = DecisionOperatorFactory.makeIntEq();
+        DecisionOperator<IntVar> neq = DecisionOperatorFactory.makeIntNeq();
+        DecisionOperator<IntVar> split = DecisionOperatorFactory.makeIntSplit();
+        DecisionOperator<IntVar> reverse = DecisionOperatorFactory.makeIntReverseSplit();
+        // x in [1,5]: operator and value given, operator, value and bounds of x expected once applied
+        return new Object[][]{
+                {eq, 3, split, 3, 1, 3}, {neq, 3, reverse, 4, 4, 5},
+                {eq, 2, split, 2, 1, 2}, {neq, 4, reverse, 5, 5, 5},
+                // on a bound, "=" and "!=" are kept
+                {eq, 1, eq, 1, 1, 1}, {neq, 1, neq, 1, 2, 5},
+                {eq, 5, eq, 5, 5, 5}, {neq, 5, neq, 5, 1, 4},
+        };
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "decisionsOnBoundedDomain")
+    public void testIntDecisionOnBoundedDomain(DecisionOperator<IntVar> op, int value,
+                                               DecisionOperator<IntVar> expectedOp, int expectedValue,
+                                               int expectedLB, int expectedUB) throws ContradictionException {
+        // #1279: a bounded domain cannot remove a value strictly between its bounds,
+        // so a refutable "=" or "!=" on such a value is applied as a split
+        Model model = new Model();
+        IntVar x = model.intVar("x", 1, 5, true);
+        DecisionPath path = model.getSolver().getDecisionPath();
+        IntDecision d = path.makeIntDecision(x, op, value);
+        d.buildNext();
+        d.apply();
+        Assert.assertEquals(d.getDecOp(), expectedOp);
+        Assert.assertEquals(d.getDecisionValue(), expectedValue);
+        Assert.assertEquals(x.getLB(), expectedLB);
+        Assert.assertEquals(x.getUB(), expectedUB);
+        // a decision on an enumerated domain, or a "=" that is not refutable, is applied as is
+        // ("!=" on a value inside a bounded domain would have no effect, and is refused by an assertion)
+        List<IntDecision> asIs = new ArrayList<>();
+        asIs.add(path.makeIntDecision(model.intVar("z", 1, 5, false), op, value));
+        if (op == DecisionOperatorFactory.makeIntEq()) {
+            IntDecision notRefutable = path.makeIntDecision(model.intVar("y", 1, 5, true), op, value);
+            notRefutable.setRefutable(false);
+            asIs.add(notRefutable);
+        }
+        for (IntDecision e : asIs) {
+            e.buildNext();
+            e.apply();
+            Assert.assertEquals(e.getDecOp(), op);
+            Assert.assertEquals(e.getDecisionValue(), value);
+        }
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "lcgAndOperators")
+    public void testQueensOnBoundedDomains(boolean lcg, DecisionOperator<IntVar> op) {
+        // #1279: with "=" on the median value of bounded domains, LCG wrongly reported no solution
+        // and the search without LCG did not terminate.
+        // With LCG, "!=" on a bound of a bounded domain also failed when a solution was recorded
+        int n = 8;
+        Model model = new Model(SettingsBuilder.init().setLCG(lcg));
+        IntVar[] q = model.intVarArray("q", n, 1, n, true);
+        IntVar[] up = new IntVar[n];
+        IntVar[] down = new IntVar[n];
+        for (int i = 0; i < n; i++) {
+            up[i] = model.offset(q[i], i);
+            down[i] = model.offset(q[i], -i);
+        }
+        model.allDifferent(q).post();
+        model.allDifferent(up).post();
+        model.allDifferent(down).post();
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.intVarSearch(new InputOrder<>(model), new IntDomainMedian(), op, q));
+        Set<String> found = new HashSet<>();
+        while (solver.solve()) {
+            found.add(Arrays.toString(Arrays.stream(q).mapToInt(IntVar::getValue).toArray()));
+        }
+        Assert.assertEquals(solver.getSolutionCount(), 92);
+        Assert.assertEquals(found.size(), 92);
     }
 }

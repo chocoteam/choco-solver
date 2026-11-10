@@ -2,6 +2,19 @@
 
 Java 17 (source and target) and Maven are required.
 
+## Initialize the submodule (CPProfiler)
+
+The profiler integration (`solver/src/main/java/cpp`, used by `CPProfiler`) is a git submodule
+([chocoteam/cpp-integration](https://github.com/chocoteam/cpp-integration)). If it is not initialized, `solver` does not
+compile (`package cpp does not exist`, `cannot find symbol Connector` in `CPProfiler.java`).
+
+```bash
+git clone --recurse-submodules https://github.com/chocoteam/choco-solver.git   # new clone
+git submodule update --init                                                     # existing clone
+```
+
+`git worktree add` does not initialize submodules: run `git submodule update --init` in each new worktree.
+
 ## Build
 
 ```bash

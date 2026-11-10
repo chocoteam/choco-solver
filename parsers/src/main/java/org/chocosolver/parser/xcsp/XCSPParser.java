@@ -1418,14 +1418,63 @@ public class XCSPParser implements XCallbacks2 {
         buildArgmin(vars(trees), rank, condition);
     }
 
-    private void buildArgmin(IntVar[] vars, Types.TypeRank rank, Condition condition) {
-        IntVar max = condToVar(condition, 0, vars.length);
-        if (rank.equals(Types.TypeRank.LAST)) {
-            ArrayUtils.reverse(vars);
-            IntVar max2 = model.intView(-1, max, vars.length);
-            model.argmin(max2, 0, vars).post();
+    /**
+     * @return true if the rank is "any" and the condition does not fix the index, i.e., is not an equality:
+     * an index variable would then be an auxiliary variable, branching on which duplicates the solutions
+     */
+    private boolean isAnyRankNotFixingIndex(Types.TypeRank rank, Condition condition) {
+        return rank.equals(Types.TypeRank.ANY)
+                && !(condition instanceof Condition.ConditionRel
+                && ((Condition.ConditionRel) condition).operator == Types.TypeConditionOperatorRel.EQ);
+    }
+
+    /** The index idx, given by the condition, is the index of any extremum of vars. */
+    private void buildArgAnyIndexed(IntVar[] vars, IntVar idx, boolean isMax) {
+        IntVar ext = extremum(vars, isMax);
+        model.element(ext, vars, idx, 0).post();
+    }
+
+    /**
+     * At least one index satisfying the condition is the index of an extremum of vars.
+     * Stated on reified expressions, without any index variable.
+     */
+    private void buildArgAny(IntVar[] vars, Condition condition, boolean isMax) {
+        IntVar ext = extremum(vars, isMax);
+        BoolVar[] bs = new BoolVar[vars.length];
+        for (int i = 0; i < vars.length; i++) {
+            bs[i] = satisfies(model.intVar(i), condition).and(vars[i].eq(ext)).boolVar();
+        }
+        model.sum(bs, ">=", 1).post();
+    }
+
+    private IntVar extremum(IntVar[] vars, boolean isMax) {
+        int lb = Arrays.stream(vars).mapToInt(IntVar::getLB).min().getAsInt();
+        int ub = Arrays.stream(vars).mapToInt(IntVar::getUB).max().getAsInt();
+        IntVar ext = model.intVar(lb, ub);
+        if (isMax) {
+            model.max(ext, vars).post();
         } else {
-            model.argmin(max, 0, vars).post();
+            model.min(ext, vars).post();
+        }
+        return ext;
+    }
+
+    private void buildArgmin(IntVar[] vars, Types.TypeRank rank, Condition condition) {
+        if (isAnyRankNotFixingIndex(rank, condition)) {
+            buildArgAny(vars, condition, false);
+            return;
+        }
+        IntVar idx = condToVar(condition, 0, vars.length);
+        if (rank.equals(Types.TypeRank.LAST)) {
+            // first index j in the reversed list is the index n - 1 - j in the original one
+            ArrayUtils.reverse(vars);
+            IntVar idx2 = model.intView(-1, idx, vars.length - 1);
+            model.argmin(idx2, 0, vars).post();
+        } else if (rank.equals(Types.TypeRank.FIRST)) {
+            model.argmin(idx, 0, vars).post();
+        } else {
+            // any, with an index fixed by the condition (idx = y)
+            buildArgAnyIndexed(vars, idx, false);
         }
     }
 
@@ -1464,10 +1513,12 @@ public class XCSPParser implements XCallbacks2 {
             model.sum(bs, ">=", 1).post();
             return;
         }
-        int min = Arrays.stream(vars).min(Comparator.comparingInt(IntVar::getLB)).get().getLB();
-        int max = Arrays.stream(vars).max(Comparator.comparingInt(IntVar::getUB)).get().getUB();
-        IntVar x = condToVar(condition, min, max);
-        model.element(x, vars(list), model.intVar(0, list.length), 0).post();
+        // other conditions (variable, interval, set): same decomposition, still without any index variable
+        BoolVar[] bs = new BoolVar[vars.length];
+        for (int i = 0; i < vars.length; i++) {
+            bs[i] = satisfies(vars[i], condition).boolVar();
+        }
+        model.sum(bs, ">=", 1).post();
     }
 
     @Override
@@ -1544,13 +1595,21 @@ public class XCSPParser implements XCallbacks2 {
     }
 
     private void buildArgmax(IntVar[] vars, Types.TypeRank rank, Condition condition) {
-        IntVar max = condToVar(condition, 0, vars.length);
+        if (isAnyRankNotFixingIndex(rank, condition)) {
+            buildArgAny(vars, condition, true);
+            return;
+        }
+        IntVar idx = condToVar(condition, 0, vars.length);
         if (rank.equals(Types.TypeRank.LAST)) {
+            // first index j in the reversed list is the index n - 1 - j in the original one
             ArrayUtils.reverse(vars);
-            IntVar max2 = model.intView(-1, max, vars.length);
-            model.argmax(max2, 0, vars).post();
+            IntVar idx2 = model.intView(-1, idx, vars.length - 1);
+            model.argmax(idx2, 0, vars).post();
+        } else if (rank.equals(Types.TypeRank.FIRST)) {
+            model.argmax(idx, 0, vars).post();
         } else {
-            model.argmax(max, 0, vars).post();
+            // any, with an index fixed by the condition (idx = y)
+            buildArgAnyIndexed(vars, idx, true);
         }
     }
 

@@ -585,5 +585,92 @@ public class ConstraintTest {
                 "\u001B[0m", warnContent.toString());
     }
 
-}
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = SolverException.class,
+            expectedExceptionsMessageRegExp = ".*without propagator.*")
+    public void testReifyVoidConstraint() {
+        Model m = new Model();
+        m.voidConstraint().reify();
+    }
 
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = SolverException.class,
+            expectedExceptionsMessageRegExp = ".*void constraint.*")
+    public void testReifyWithVoidConstraint() {
+        Model m = new Model();
+        m.voidConstraint().reifyWith(m.boolVar());
+    }
+
+    @Test(groups = "lcg", timeOut = 60000, expectedExceptions = SolverException.class)
+    public void testReifyLCGDecomposedGCC_1274() {
+        Model m = new Model(new SettingsBuilder().setLCG(true).build());
+        IntVar[] x = m.intVarArray("x", 2, 0, 1, false);
+        m.globalCardinality(x, new int[]{0, 1}, new IntVar[]{m.intVar(1), m.intVar(1)}, false).reify();
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testModDecomposedForbidsZeroDivisorWithoutPost_1274() throws ContradictionException {
+        // domains too large for a table or PropModXYZ: mod is decomposed
+        Model m = new Model();
+        IntVar x = m.intVar("x", 0, 200, true);
+        IntVar y = m.intVar("y", 0, 200, true);
+        IntVar z = m.intVar("z", 0, 200, true);
+        m.mod(x, y, z); // neither posted nor reified
+        m.getSolver().propagate();
+        Assert.assertEquals(y.getLB(), 1);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testModNotDecomposedKeepsZeroDivisorWithoutPost_1274() throws ContradictionException {
+        Model m = new Model();
+        IntVar x = m.intVar("x", 0, 5, false);
+        IntVar y = m.intVar("y", 0, 5, false);
+        IntVar z = m.intVar("z", 0, 5, false);
+        m.mod(x, y, z); // table: not posted, so no effect
+        m.getSolver().propagate();
+        Assert.assertEquals(y.getLB(), 0);
+    }
+
+    @Test(groups = "lcg", timeOut = 60000)
+    public void testModLCGForbidsZeroDivisorWithoutPost_1274() {
+        Model m = new Model(new SettingsBuilder().setLCG(true).build());
+        IntVar[] v = m.intVarArray("v", 3, 0, 2, false);
+        m.mod(v[0], v[1], v[2]); // neither posted nor reified
+        m.getSolver().setSearch(org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch(v));
+        Assert.assertEquals(m.getSolver().findAllSolutions().size(), 18);
+    }
+
+    private static int countAllDiffLCG(int ub, String mode) {
+        Model m = new Model(new SettingsBuilder().setLCG(true).build());
+        IntVar[] x = m.intVarArray("x", 3, 0, ub, false);
+        switch (mode) {
+            case "posted":
+                m.allDifferent(x).post();
+                break;
+            case "false":
+                m.arithm(m.allDifferent(x).reify(), "=", 0).post();
+                break;
+            case "implied":
+                m.allDifferent(x).impliedBy(m.boolVar("b", false));
+                break;
+            default: // unused
+                m.allDifferent(x);
+        }
+        m.getSolver().setSearch(org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch(x));
+        return m.getSolver().findAllSolutions().size();
+    }
+
+    @Test(groups = "lcg", timeOut = 60000)
+    public void testAllDiffLCGNoSpareValue_1274() {
+        Assert.assertEquals(countAllDiffLCG(2, "posted"), 6);
+        Assert.assertEquals(countAllDiffLCG(2, "false"), 21);
+        Assert.assertEquals(countAllDiffLCG(2, "unused"), 27);
+        // implied by a Boolean fixed to false: the constraint is not enforced
+        Assert.assertEquals(countAllDiffLCG(2, "implied"), 27);
+    }
+
+    @Test(groups = "lcg", timeOut = 60000)
+    public void testAllDiffLCGSpareValue_1274() {
+        Assert.assertEquals(countAllDiffLCG(3, "posted"), 24);
+        Assert.assertEquals(countAllDiffLCG(3, "false"), 40);
+        Assert.assertEquals(countAllDiffLCG(3, "unused"), 64);
+    }
+}

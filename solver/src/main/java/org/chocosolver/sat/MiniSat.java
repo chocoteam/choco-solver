@@ -8,7 +8,6 @@ package org.chocosolver.sat;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
 import org.chocosolver.solver.variables.impl.LitVar;
@@ -109,7 +108,9 @@ public class MiniSat implements SatFactory {
     final ArrayList<Clause> learnts = new ArrayList<>();
     // 'watches_[lit]' is a list of constraints watching 'lit'(will go
     // there if literal becomes true).
-    private final TIntObjectHashMap<MinimaList<Watcher>> watches_ = new TIntObjectHashMap<>();
+    // Indexed by literal; a list is created on first use, so an entry may be null.
+    @SuppressWarnings("unchecked")
+    private MinimaList<Watcher>[] watches_ = new MinimaList[16];
     // The current assignments.
     final TIntArrayList assignment_ = new TIntArrayList();
     // Assignment stack; stores all assignments made in the order they
@@ -203,6 +204,10 @@ public class MiniSat implements SatFactory {
         assignment_.add(lUndef);
         vardata.add(VD_Undef);
         cinfo.add(ci);
+        int maxLit = 2 * v + 2;
+        if (maxLit > watches_.length) {
+            watches_ = Arrays.copyOf(watches_, Math.max(maxLit, watches_.length * 3 / 2));
+        }
         return v;
     }
 
@@ -601,16 +606,8 @@ public class MiniSat implements SatFactory {
     // Attach a clause to watcher lists.
     void attachClause(ArrayClause cr) {
         assert cr.size() > 1;
-        MinimaList<Watcher> l0 = watches_.get(neg(cr._g(0)));
-        if (l0 == null) {
-            l0 = new MinimaList<>();
-            watches_.put(neg(cr._g(0)), l0);
-        }
-        MinimaList<Watcher> l1 = watches_.get(neg(cr._g(1)));
-        if (l1 == null) {
-            l1 = new MinimaList<>();
-            watches_.put(neg(cr._g(1)), l1);
-        }
+        MinimaList<Watcher> l0 = watchList(neg(cr._g(0)));
+        MinimaList<Watcher> l1 = watchList(neg(cr._g(1)));
         l0.add(new Watcher(cr, cr._g(1)));
         l1.add(new Watcher(cr, cr._g(0)));
         if (cr.learnt()) learnts_literals += cr.size();
@@ -618,14 +615,14 @@ public class MiniSat implements SatFactory {
     }
 
     void detachClause(Clause cr) {
-        MinimaList<Watcher> ws = watches_.get(neg(cr._g(0)));
+        MinimaList<Watcher> ws = watches_[neg(cr._g(0))];
         int i = ws.size() - 1;
         while (i >= 0 && ws.get(i).clause != cr) {
             i--;
         }
         assert i > -1;
         ws.remove(i);
-        ws = watches_.get(neg(cr._g(1)));
+        ws = watches_[neg(cr._g(1))];
         i = ws.size() - 1;
         while (i >= 0 && ws.get(i).clause != cr) {
             i--;
@@ -649,7 +646,7 @@ public class MiniSat implements SatFactory {
 
     private void propagateLit(int p) {
         // 'p' is enqueued fact to propagate.
-        MinimaList<Watcher> ws = watches_.get(p);
+        MinimaList<Watcher> ws = watches_[p];
 
         int i = 0;
         int j = 0;
@@ -716,12 +713,17 @@ public class MiniSat implements SatFactory {
         cr._s(1, cr._g(k));
         cr._s(k, false_lit);
         // Attach the watcher to the new position
-        MinimaList<Watcher> lw = watches_.get(neg(cr._g(1)));
-        if (lw == null) {
-            lw = new MinimaList<>();
-            watches_.put(neg(cr._g(1)), lw);
+        watchList(neg(cr._g(1))).add(w);
+    }
+
+    // Return the watch list of 'lit', creating it if needed.
+    private MinimaList<Watcher> watchList(int lit) {
+        MinimaList<Watcher> l = watches_[lit];
+        if (l == null) {
+            l = new MinimaList<>();
+            watches_[lit] = l;
         }
-        lw.add(w);
+        return l;
     }
 
     /**
