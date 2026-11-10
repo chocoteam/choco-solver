@@ -6,6 +6,8 @@
  */
 package org.chocosolver.solver.constraints.binary.element;
 
+import gnu.trove.map.hash.TObjectIntHashMap;
+import org.chocosolver.lp.ILinearRelaxation;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -146,5 +148,25 @@ public class PropElementBound extends Propagator<IntVar> {
 	@Override
 	public String toString() {
 		return "elementBound(" + this.result + " = <...> [" + this.index + "])";
+	}
+
+	/**
+	 * The convex hull of the pairs (index, value) that the current domains allow, which is valid since the LP is
+	 * built at the root node.
+	 */
+	@Override
+	public int addLinearExpression(ILinearRelaxation lp, TObjectIntHashMap<IntVar> vmap) {
+		long[] px = new long[index.getDomainSize()];
+		long[] py = new long[px.length];
+		int n = 0;
+		int ub = index.getUB();
+		for (int i = index.getLB(); i <= ub; i = index.nextValue(i)) {
+			int k = i - offset;
+			if (k >= 0 && k < table.length && result.contains(table[k])) {
+				px[n] = i;
+				py[n++] = table[k];
+			}
+		}
+		return ILinearRelaxation.addConvexHull(lp, vmap, index, result, px, py, n);
 	}
 }

@@ -121,12 +121,15 @@ module org.chocosolver.solver {
     exports org.chocosolver.util.sort;
     exports org.chocosolver.util.tools;
     exports org.chocosolver.util.bandit;
+    exports org.chocosolver.lp;
 
     requires trove4j;
     requires org.jgrapht.core;
     requires dk.brics.automaton;
     requires sizeof;
     requires args4j;
+    requires java.logging;
+    requires static ojalgo;
 
     opens org.chocosolver.memory to org.testng, sizeof;
     opens org.chocosolver.solver.constraints.unary to org.chocosolver.parsers, sizeof;

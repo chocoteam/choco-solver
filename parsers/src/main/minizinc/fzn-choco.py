@@ -64,7 +64,7 @@ parser.add_argument('-p', '--parallel', type=int, default=1,
 parser.add_argument('-t', '--time-limit', type=int, default=TIME_LIMIT,
                     help='limit the resolution time of each problem instance to TIME_LIMIT ms.')
 
-parser.add_argument('--verbose', action='store_true',
+parser.add_argument('-v', '--verbose', action='store_true',
                     help='when invoked with this option verbose solving is activated.')
 
 parser.add_argument('-s', '--stasol', action='store_true',
@@ -81,6 +81,10 @@ parser.add_argument('--cp-profiler', type=parse_id_port,
 
 parser.add_argument('-lcg', '--lazy-clause-generation',  action='store_true',
                     help='when invoked with this option the solver uses lazy clause generation.')
+
+parser.add_argument('-lr', '--linrel', type=str, default=None,
+                    help='when invoked with this option the solver uses a linear relaxation, solved with the given '
+                         'backend (OJALGO or OJALGO_EBM).')
 
 parser.add_argument('--jvm-args', type=str,
                     default=JVM_ARGS,
@@ -128,6 +132,8 @@ if args.cp_profiler:
     arguments += ' --cp-profiler ' + str(args.cp_profiler[0]) + ',' + str(args.cp_profiler[1])
 if args.lazy_clause_generation:
     arguments += ' -lcg'
+if args.linrel:
+    arguments += ' -lr ' + args.linrel
 
 cmd = f'java {args.jvm_args} -cp "{args.jar_file}" org.chocosolver.parser.flatzinc.ChocoFZN {args.fzn_file} {arguments}'
 

@@ -6,6 +6,9 @@
  */
 package org.chocosolver.solver.constraints.nary.min_max;
 
+import gnu.trove.map.hash.TIntDoubleHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
+import org.chocosolver.lp.ILinearRelaxation;
 import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
@@ -113,6 +116,17 @@ public class PropMax extends Propagator<IntVar> {
             }
         }
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public int addLinearExpression(ILinearRelaxation lp, TObjectIntHashMap<IntVar> vmap) {
+        // z = max(x_0, ..., x_{n-1})  relaxed as:  x_i - z <= 0  for each i
+        for (int i = 0; i < n; i++) {
+            ILinearRelaxation.RowMutator row = lp.addInequalityConstraint(0);
+            row.add(vmap.get(vars[i]), 1);
+            row.add(vmap.get(vars[n]), -1);
+        }
+        return n;
     }
 
     @Override
