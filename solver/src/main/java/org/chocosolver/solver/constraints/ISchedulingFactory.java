@@ -119,6 +119,14 @@ public interface ISchedulingFactory extends ISelf<Model> {
      * @return an alternative constraint
      */
     default Constraint alternative(Task alter, Task[] tasks, IntVar varN) {
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: alternative constraint is turned into clauses (due to LCG).");
+            }
+            ref().alternativeDec(alter, Arrays.stream(tasks).filter(Task::mayBePerformed).toArray(Task[]::new), varN);
+            return ref().voidConstraint();
+        }
         return new Constraint(
             ConstraintsName.ALTERNATIVE,
             new PropAlternative(alter, Arrays.stream(tasks).filter(Task::mayBePerformed).toArray(Task[]::new), varN)
@@ -446,6 +454,14 @@ public interface ISchedulingFactory extends ISelf<Model> {
      * @return a span constraint
      */
     default Constraint span(Task span, Task[] tasks) {
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: span constraint is turned into clauses (due to LCG).");
+            }
+            ref().spanDec(span, Arrays.stream(tasks).filter(Task::mayBePerformed).toArray(Task[]::new));
+            return ref().voidConstraint();
+        }
         return new Constraint(
             ConstraintsName.SPAN,
             new PropSpan(span, Arrays.stream(tasks).filter(Task::mayBePerformed).toArray(Task[]::new))

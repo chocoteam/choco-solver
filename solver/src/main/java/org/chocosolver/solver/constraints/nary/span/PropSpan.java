@@ -1,3 +1,9 @@
+/*
+ * This file is part of choco-solver, http://choco-solver.org/
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
+ * See LICENSE file in the project root for full license information.
+ */
 package org.chocosolver.solver.constraints.nary.span;
 
 import org.chocosolver.memory.IStateInt;
@@ -174,7 +180,9 @@ public class PropSpan extends Propagator<IntVar> {
                 tasks[idx].forceToBeUnperformed(this);
             }
             candidates.clear();
-            setPassive();
+            if (!isPassive()) { // updateSpan() may call this method again once span is not performed
+                setPassive();
+            }
         }
     }
 

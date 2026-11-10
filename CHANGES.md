@@ -37,6 +37,7 @@ NEXT MILESTONE
 - `costRegular` and `knapsack`: fix solutions wrongly removed after a look-ahead of the search, for the same reason (#1163). `costRegular` removed arcs of another branch and `knapsack` used the critical item of another branch
 - `sum` and `scalar` compared to a constant, and the expressions compared to a constant (e.g. `x.eq(1)`), no longer add a variable for the constant to the model (#743)
 - An implication (`impliedBy`, `ImpliedConstraint`) is named `IMPLIEDCONSTRAINT` instead of `REIFICATIONCONSTRAINT`, and the Javadoc of `ImpliedConstraint` and `PropReif` is fixed (#1087)
+- Add the scheduling constraints `alternative` and `span`, which link a (optional) task to a set of optional tasks (#1280). With LCG, they are decomposed into clauses, since their propagators do not explain their filtering
 
 #### Search & Strategies
 - Fix a wrong "no solution" with LCG, and an endless search without LCG, when an assignment ("=") or a removal ("!=") decision is made on a value that is not in the domain, e.g. with `IntDomainMiddle` (as for the MiniZinc annotation `indomain_middle`) on a domain with holes (#1210). Such a decision is now made on the closest value of the domain
@@ -55,6 +56,7 @@ NEXT MILESTONE
 ### Deprecated API (to be removed in next release):
 - `Model.setSeed(long)`: declare the seed in the settings with `SettingsBuilder.setSeed(long)`
 - `IntDomainMiddle(ToDoubleFunction, boolean)`: the function was ignored, use `IntDomainMiddle(boolean)`
+- `Task.forceToBeOptional(ICause)` and `Task.forceToBeOptional(ICause, Reason)`: use `forceToBeUnperformed`, which names what it does (#1280)
 
 ### Other closed issues and pull requests:
 See [milestone 6.0.3](https://github.com/chocoteam/choco-solver/milestone/44)

@@ -1,7 +1,14 @@
+/*
+ * This file is part of choco-solver, http://choco-solver.org/
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
+ * See LICENSE file in the project root for full license information.
+ */
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.alternative.PropAlternative;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -10,7 +17,11 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.OptionalTask;
 import org.chocosolver.solver.variables.Task;
+import org.chocosolver.solver.TestUtils;
+import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
 
 import static org.chocosolver.solver.TestUtils.testBounds;
 import static org.testng.Assert.*;
@@ -443,6 +454,41 @@ public class AlternativeTest {
             }
         } catch (ContradictionException ex) {
             fail();
+        }
+    }
+
+    private static boolean isAlternativeFeasible(boolean lcg, int[][] assignment, int maxN) {
+        Model model = lcg ? new Model(SettingsBuilder.dev().setLCG(true)) : new Model();
+        int nbTasks = assignment.length - 1;
+        OptionalTask[] tasks = new OptionalTask[nbTasks];
+        for (int i = 0; i < nbTasks; i++) {
+            tasks[i] = new OptionalTask(model.intVar("s" + i, 0, 2), model.intVar("d" + i, 1, 2),
+                    model.intVar("e" + i, 1, 4), model.boolVar("p" + i));
+            tasks[i].post();
+            TestUtils.fixTask(model, tasks[i], assignment[i]);
+        }
+        OptionalTask alter = new OptionalTask(model.intVar("as", 0, 2), model.intVar("ad", 1, 2),
+                model.intVar("ae", 1, 4), model.boolVar("ap"));
+        alter.post();
+        TestUtils.fixTask(model, alter, assignment[nbTasks]);
+        model.alternative(alter, tasks, model.intVar("n", 0, maxN)).post();
+        return model.getSolver().solve();
+    }
+
+    /**
+     * Under LCG, alternative is turned into clauses: for each way to assign the tasks and the alternative,
+     * it must be feasible if and only if it is for the propagator.
+     */
+    @Test(groups = "1s", timeOut = 60000)
+    public void testLcgDecompositionSameSolutions() {
+        for (int n = 1; n <= 2; n++) {
+            for (int maxN : new int[]{1, n}) {
+                for (int[][] assignment : TestUtils.taskAssignments(n + 1)) {
+                    Assert.assertEquals(isAlternativeFeasible(true, assignment, maxN),
+                            isAlternativeFeasible(false, assignment, maxN),
+                            Arrays.deepToString(assignment) + ", maxN = " + maxN);
+                }
+            }
         }
     }
 }

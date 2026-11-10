@@ -17,6 +17,7 @@ import org.chocosolver.solver.constraints.nary.flow.PropMinCostMaxFlow;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.OptionalTask;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -707,4 +708,83 @@ public interface IDecompositionFactory extends ISelf<Model> {
         }
     }
 
+    /**
+     * Creates and <b>posts</b> a decomposition of an alternative constraint, see {@link ISchedulingFactory#alternative(Task, Task[], IntVar)}.
+     * It is used when explanations are required (LCG), since the propagator does not explain its filtering.
+     * Posts the following constraints, where {@code p} denotes the performed variable of a task:
+     * <ul>
+     *     <li>{@code sum(p(tasks[i])) = varN}</li>
+     *     <li>{@code p(alter) <=> varN >= 1}</li>
+     *     <li>{@code p(tasks[i]) => start, duration and end of tasks[i] are the ones of alter}</li>
+     * </ul>
+     *
+     * @param alter the alternative task
+     * @param tasks the tasks
+     * @param varN  the number of tasks that are performed when alter is performed
+     */
+    default void alternativeDec(Task alter, Task[] tasks, IntVar varN) {
+        BoolVar[] p = extractPerformedBoolVars(tasks);
+        BoolVar pAlter = extractPerformedBoolVars(new Task[]{alter})[0];
+        if (tasks.length == 0) {
+            pAlter.eq(0).post();
+            varN.eq(0).post();
+            return;
+        }
+        ref().sum(p, "=", varN).post();
+        pAlter.iff(varN.ge(1)).post();
+        for (int i = 0; i < tasks.length; i++) {
+            p[i].imp(tasks[i].getStart().eq(alter.getStart())).post();
+            p[i].imp(tasks[i].getDuration().eq(alter.getDuration())).post();
+            p[i].imp(tasks[i].getEnd().eq(alter.getEnd())).post();
+        }
+    }
+
+    /**
+     * Creates and <b>posts</b> a decomposition of a span constraint, see {@link ISchedulingFactory#span(Task, Task[])}.
+     * It is used when explanations are required (LCG), since the propagator does not explain its filtering.
+     * Posts the following constraints, where {@code p} denotes the performed variable of a task:
+     * <ul>
+     *     <li>{@code p(tasks[i]) => p(span)}, and {@code p(span) => or(p(tasks[i]))}</li>
+     *     <li>{@code p(tasks[i]) => span.start <= tasks[i].start and tasks[i].end <= span.end}</li>
+     *     <li>{@code p(span) =>} some performed task starts when span starts, and some performed task ends when span ends</li>
+     * </ul>
+     *
+     * @param span  the span task
+     * @param tasks the tasks
+     */
+    default void spanDec(Task span, Task[] tasks) {
+        BoolVar[] p = extractPerformedBoolVars(tasks);
+        BoolVar pSpan = extractPerformedBoolVars(new Task[]{span})[0];
+        if (tasks.length == 0) {
+            pSpan.eq(0).post();
+            return;
+        }
+        BoolVar[] starts = new BoolVar[tasks.length + 1];
+        BoolVar[] ends = new BoolVar[tasks.length + 1];
+        BoolVar[] anyPerformed = new BoolVar[tasks.length + 1];
+        for (int i = 0; i < tasks.length; i++) {
+            ref().or(p[i].not(), pSpan).post();
+            p[i].imp(span.getStart().le(tasks[i].getStart())).post();
+            p[i].imp(tasks[i].getEnd().le(span.getEnd())).post();
+            starts[i] = p[i].and(tasks[i].getStart().eq(span.getStart())).boolVar();
+            ends[i] = p[i].and(tasks[i].getEnd().eq(span.getEnd())).boolVar();
+            anyPerformed[i] = p[i];
+        }
+        starts[tasks.length] = pSpan.not();
+        ends[tasks.length] = pSpan.not();
+        anyPerformed[tasks.length] = pSpan.not();
+        ref().or(anyPerformed).post();
+        ref().or(starts).post();
+        ref().or(ends).post();
+    }
+
+    private static BoolVar[] extractPerformedBoolVars(final Task[] tasks) {
+        BoolVar[] performed = new BoolVar[tasks.length];
+        for (int i = 0; i < tasks.length; i++) {
+            performed[i] = tasks[i] instanceof OptionalTask optionalTask
+                    ? optionalTask.getPerformed()
+                    : tasks[i].getModel().boolVar(true);
+        }
+        return performed;
+    }
 }

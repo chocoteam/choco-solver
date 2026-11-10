@@ -1,3 +1,9 @@
+/*
+ * This file is part of choco-solver, http://choco-solver.org/
+ * Copyright (c) 1999, IMT Atlantique.
+ * SPDX-License-Identifier: BSD-3-Clause.
+ * See LICENSE file in the project root for full license information.
+ */
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Cause;
@@ -10,8 +16,12 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.OptionalTask;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.util.tools.ArrayUtils;
+import org.chocosolver.solver.SettingsBuilder;
+import org.chocosolver.solver.TestUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
 
 import static org.chocosolver.solver.TestUtils.testBounds;
 import static org.testng.Assert.fail;
@@ -370,5 +380,46 @@ public class SpanTest {
         // Therefore, there are 5*7 + 4*12 + 3*18 + 2*24 + 1*30 = 215 solutions where span is performed.
         // So we have 216 solutions when considering the one where span is not performed in addition.
         Assert.assertEquals(model.getSolver().getSolutionCount(), 216);
+    }
+
+    private static boolean isSpanFeasible(boolean lcg, int[][] assignment) {
+        Model model = lcg ? new Model(SettingsBuilder.dev().setLCG(true)) : new Model();
+        int nbTasks = assignment.length - 1;
+        OptionalTask[] tasks = new OptionalTask[nbTasks];
+        for (int i = 0; i < nbTasks; i++) {
+            tasks[i] = new OptionalTask(model.intVar("s" + i, 0, 2), model.intVar("d" + i, 1, 2),
+                    model.intVar("e" + i, 1, 4), model.boolVar("p" + i));
+            tasks[i].post();
+            TestUtils.fixTask(model, tasks[i], assignment[i]);
+        }
+        OptionalTask span = new OptionalTask(model.intVar("ss", 0, 2), model.intVar("sd", 0, 4),
+                model.intVar("se", 0, 4), model.boolVar("sp"));
+        span.post();
+        TestUtils.fixTask(model, span, assignment[nbTasks]);
+        model.span(span, tasks).post();
+        return model.getSolver().solve();
+    }
+
+    /**
+     * Under LCG, span is turned into clauses: for each way to assign the tasks and the span,
+     * it must be feasible if and only if it is for the propagator.
+     */
+    @Test(groups = "1s", timeOut = 60000)
+    public void testLcgDecompositionSameSolutions() {
+        for (int n = 1; n <= 2; n++) {
+            for (int[][] assignment : TestUtils.taskAssignments(n + 1)) {
+                Assert.assertEquals(isSpanFeasible(true, assignment), isSpanFeasible(false, assignment),
+                        Arrays.deepToString(assignment));
+            }
+        }
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testLcgDecompositionNoTask() {
+        Model model = new Model(SettingsBuilder.dev().setLCG(true));
+        OptionalTask span = model.taskVar(model.intVar(0, 3), 1, model.boolVar());
+        model.span(span, new Task[0]).post();
+        Assert.assertTrue(model.getSolver().solve());
+        Assert.assertFalse(span.mayBePerformed() && span.mustBePerformed());
     }
 }
