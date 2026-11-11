@@ -17,7 +17,6 @@ import org.chocosolver.solver.constraints.nary.flow.PropMinCostMaxFlow;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.OptionalTask;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -710,7 +709,6 @@ public interface IDecompositionFactory extends ISelf<Model> {
 
     /**
      * Creates and <b>posts</b> a decomposition of an alternative constraint, see {@link ISchedulingFactory#alternative(Task, Task[], IntVar)}.
-     * It is used when explanations are required (LCG), since the propagator does not explain its filtering.
      * Posts the following constraints, where {@code p} denotes the performed variable of a task:
      * <ul>
      *     <li>{@code sum(p(tasks[i])) = varN}</li>
@@ -723,25 +721,24 @@ public interface IDecompositionFactory extends ISelf<Model> {
      * @param varN  the number of tasks that are performed when alter is performed
      */
     default void alternativeDec(Task alter, Task[] tasks, IntVar varN) {
-        BoolVar[] p = extractPerformedBoolVars(tasks);
-        BoolVar pAlter = extractPerformedBoolVars(new Task[]{alter})[0];
+        BoolVar pAlter = alter.getPerformed();
         if (tasks.length == 0) {
             pAlter.eq(0).post();
             varN.eq(0).post();
             return;
         }
-        ref().sum(p, "=", varN).post();
+        BoolVar[] perfVars = ISchedulingFactory.extractPerformedVars(tasks);
+        ref().sum(perfVars, "=", varN).post();
         pAlter.iff(varN.ge(1)).post();
         for (int i = 0; i < tasks.length; i++) {
-            p[i].imp(tasks[i].getStart().eq(alter.getStart())).post();
-            p[i].imp(tasks[i].getDuration().eq(alter.getDuration())).post();
-            p[i].imp(tasks[i].getEnd().eq(alter.getEnd())).post();
+            perfVars[i].imp(tasks[i].getStart().eq(alter.getStart())).post();
+            perfVars[i].imp(tasks[i].getDuration().eq(alter.getDuration())).post();
+            perfVars[i].imp(tasks[i].getEnd().eq(alter.getEnd())).post();
         }
     }
 
     /**
      * Creates and <b>posts</b> a decomposition of a span constraint, see {@link ISchedulingFactory#span(Task, Task[])}.
-     * It is used when explanations are required (LCG), since the propagator does not explain its filtering.
      * Posts the following constraints, where {@code p} denotes the performed variable of a task:
      * <ul>
      *     <li>{@code p(tasks[i]) => p(span)}, and {@code p(span) => or(p(tasks[i]))}</li>
@@ -753,22 +750,22 @@ public interface IDecompositionFactory extends ISelf<Model> {
      * @param tasks the tasks
      */
     default void spanDec(Task span, Task[] tasks) {
-        BoolVar[] p = extractPerformedBoolVars(tasks);
-        BoolVar pSpan = extractPerformedBoolVars(new Task[]{span})[0];
+        BoolVar pSpan = span.getPerformed();
         if (tasks.length == 0) {
             pSpan.eq(0).post();
             return;
         }
+        BoolVar[] perfVars = ISchedulingFactory.extractPerformedVars(tasks);
         BoolVar[] starts = new BoolVar[tasks.length + 1];
         BoolVar[] ends = new BoolVar[tasks.length + 1];
         BoolVar[] anyPerformed = new BoolVar[tasks.length + 1];
         for (int i = 0; i < tasks.length; i++) {
-            ref().or(p[i].not(), pSpan).post();
-            p[i].imp(span.getStart().le(tasks[i].getStart())).post();
-            p[i].imp(tasks[i].getEnd().le(span.getEnd())).post();
-            starts[i] = p[i].and(tasks[i].getStart().eq(span.getStart())).boolVar();
-            ends[i] = p[i].and(tasks[i].getEnd().eq(span.getEnd())).boolVar();
-            anyPerformed[i] = p[i];
+            ref().or(perfVars[i].not(), pSpan).post();
+            perfVars[i].imp(span.getStart().le(tasks[i].getStart())).post();
+            perfVars[i].imp(tasks[i].getEnd().le(span.getEnd())).post();
+            starts[i] = perfVars[i].and(tasks[i].getStart().eq(span.getStart())).boolVar();
+            ends[i] = perfVars[i].and(tasks[i].getEnd().eq(span.getEnd())).boolVar();
+            anyPerformed[i] = perfVars[i];
         }
         starts[tasks.length] = pSpan.not();
         ends[tasks.length] = pSpan.not();
@@ -776,15 +773,5 @@ public interface IDecompositionFactory extends ISelf<Model> {
         ref().or(anyPerformed).post();
         ref().or(starts).post();
         ref().or(ends).post();
-    }
-
-    private static BoolVar[] extractPerformedBoolVars(final Task[] tasks) {
-        BoolVar[] performed = new BoolVar[tasks.length];
-        for (int i = 0; i < tasks.length; i++) {
-            performed[i] = tasks[i] instanceof OptionalTask optionalTask
-                    ? optionalTask.getPerformed()
-                    : tasks[i].getModel().boolVar(true);
-        }
-        return performed;
     }
 }

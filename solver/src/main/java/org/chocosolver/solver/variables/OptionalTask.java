@@ -62,6 +62,7 @@ public class OptionalTask extends Task {
     public OptionalTask(Model model, int est, int lst, int d, int ect, int lct, BoolVar performed) {
         super(model, est, lst, d, ect, lct);
         this.performed = performed;
+        setState();
     }
 
     /**
@@ -86,6 +87,7 @@ public class OptionalTask extends Task {
     public OptionalTask(IntVar s, int d, BoolVar performed) {
         super(s, d);
         this.performed = performed;
+        setState();
     }
 
     /**
@@ -110,6 +112,7 @@ public class OptionalTask extends Task {
     public OptionalTask(IntVar s, IntVar d, BoolVar performed) {
         super(s, d);
         this.performed = performed;
+        setState();
     }
 
     /**
@@ -136,6 +139,7 @@ public class OptionalTask extends Task {
     public OptionalTask(IntVar s, int d, IntVar e, BoolVar performed) {
         super(s, d, e);
         this.performed = performed;
+        setState();
     }
 
     /**
@@ -162,6 +166,16 @@ public class OptionalTask extends Task {
     public OptionalTask(IntVar s, IntVar d, IntVar e, BoolVar performed) {
         super(s, d, e);
         this.performed = performed;
+        setState();
+    }
+
+    private void setState() {
+        if (performed.getUB() == 0 && (isStateLess() || !isPassive())) {
+            if (isStateLess()) {
+                setActive();
+            }
+            setPassive();
+        }
     }
 
     //***********************************************************************************
@@ -178,6 +192,7 @@ public class OptionalTask extends Task {
         return performed.getLB() == 1;
     }
 
+    @Override
     public BoolVar getPerformed() {
         return this.performed;
     }

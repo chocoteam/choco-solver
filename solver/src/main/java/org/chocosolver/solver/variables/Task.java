@@ -171,6 +171,10 @@ public class Task extends Propagator<IntVar> {
         return end;
     }
 
+    public BoolVar getPerformed() {
+        return model.boolVar(true);
+    }
+
     public int getEst() {
         return start.getLB();
     }

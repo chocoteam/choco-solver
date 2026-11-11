@@ -9,15 +9,14 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.SettingsBuilder;
-import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.nary.alternative.PropAlternative;
+import org.chocosolver.solver.TestUtils;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.OptionalTask;
 import org.chocosolver.solver.variables.Task;
-import org.chocosolver.solver.TestUtils;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -45,7 +44,7 @@ public class AlternativeTest {
         BoolVar performed = model.boolVar("performed_alter");
         allPerformedTasks[n] = performed;
         OptionalTask alter = model.taskVar(s, duration, performed);
-        model.post(new Constraint("ALTERNATIVE", new PropAlternative(alter, tasks, model.intVar("N", 0, 1))));
+        model.alternative(alter, tasks).post();
         model.getSolver().setSearch(Search.randomSearch(allPerformedTasks, 0));
         while (model.getSolver().solve())
             ;
@@ -67,7 +66,7 @@ public class AlternativeTest {
         IntVar start = model.intVar("start_alter", est, lst);
         BoolVar performed = model.boolVar("performed_alter");
         OptionalTask alter = model.taskVar(start, duration, performed);
-        model.post(new Constraint("ALTERNATIVE", new PropAlternative(alter, tasks, model.intVar("N", 0, 1))));
+        model.alternative(alter, tasks).post();
 
         try {
             model.getSolver().propagate();
@@ -230,7 +229,7 @@ public class AlternativeTest {
         BoolVar performed = model.boolVar("performed_alter");
         OptionalTask alter = model.taskVar(start, duration, performed);
         IntVar varN = model.intVar("varN", 0, 7);
-        model.post(new Constraint("ALTERNATIVE", new PropAlternative(alter, tasks, varN)));
+        model.alternative(alter, tasks, varN).post();
 
         try {
             // Expected filtering : varN = [2..7] as tasks[0] and tasks[5] are performed, and alter is performed
@@ -341,7 +340,7 @@ public class AlternativeTest {
         BoolVar performed = model.boolVar("performed_alter");
         OptionalTask alter = model.taskVar(start, duration, performed);
         IntVar varN = model.intVar("varN", 5, 7);
-        model.post(new Constraint("ALTERNATIVE", new PropAlternative(alter, tasks, varN)));
+        model.alternative(alter, tasks, varN).post();
 
         try {
             tasks[0].updateEst(2, Cause.Null);
@@ -406,7 +405,7 @@ public class AlternativeTest {
             final BoolVar performed = model.boolVar("performed_alter[" + j + "]");
             final IntVar duration = model.intVar("duration[" + j + "]", 1, 10, j == 2);
             alters[j] = model.taskVar(start, duration, performed);
-            model.post(new Constraint("ALTERNATIVE", new PropAlternative(alters[j], tasks[j], model.intVar(1))));
+            model.alternative(alters[j], tasks[j], model.intVar(1)).post();
             model.arithm(alters[j].getDuration(), "!=", 7).post();
         }
 
@@ -457,6 +456,56 @@ public class AlternativeTest {
         }
     }
 
+    @Test(groups = "1s", timeOut = 60000)
+    public void testAlternativeSolve() {
+        Model model = new Model();
+        Task[] tasks = new Task[10];
+        for (int i = 0; i < tasks.length; i++) {
+            IntVar start = model.intVar("start[" + i + "]", i, i);
+            BoolVar performed = model.boolVar("performed[" + i + "]");
+            tasks[i] = model.taskVar(start, 10, performed);
+        }
+        Task alter = model.taskVar(model.intVar("alter_start", -10, 20), model.intVar("alter_duration", 0, 30), model.boolVar("alter_performed"));
+        model.alternative(alter, tasks).post();
+        model.getSolver().setSearch(model.smallest(ArrayUtils.append(tasks, new Task[]{alter})));
+        while (model.getSolver().solve()) {
+            for (int i = 0; i < tasks.length; ++i) {
+                if (alter.mustBePerformed() && tasks[i].mayBePerformed()) {
+                    testBounds(tasks[i], alter.getEst(), alter.getLst(), alter.getEct(), alter.getLct());
+                } else {
+                    Assert.assertFalse(tasks[i].mayBePerformed());
+                }
+            }
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 11);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testAlternativeSolve2() {
+        Model model = new Model();
+        Task[] tasks = new Task[10];
+        for (int i = 0; i < tasks.length; i++) {
+            IntVar start = model.intVar("start[" + i + "]", 1, 10);
+            IntVar duration = model.intVar("duration[" + i + "]", 1, 10);
+            BoolVar performed = model.boolVar("performed[" + i + "]");
+            tasks[i] = model.taskVar(start, duration, performed);
+        }
+        Task alter = model.taskVar(model.intVar("alter_start", -10, 20), model.intVar("alter_duration", 0, 30), model.boolVar("alter_performed"));
+        model.alternative(alter, tasks).post();
+        model.getSolver().setSearch(model.smallest(ArrayUtils.append(tasks, new Task[]{alter})));
+        while (model.getSolver().solve()) {
+            for (int i = 0; i < tasks.length; ++i) {
+                if (alter.mustBePerformed() && tasks[i].mayBePerformed()) {
+                    testBounds(tasks[i], alter.getEst(), alter.getLst(), alter.getEct(), alter.getLct());
+                } else {
+                    Assert.assertFalse(tasks[i].mayBePerformed());
+                }
+            }
+        }
+        // 1001 solutions : 1 for not-performed, and 10 starts x 10 durations x 10 performed possibilities
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 1001);
+    }
+
     private static boolean isAlternativeFeasible(boolean lcg, int[][] assignment, int maxN) {
         Model model = lcg ? new Model(SettingsBuilder.dev().setLCG(true)) : new Model();
         int nbTasks = assignment.length - 1;
@@ -464,12 +513,10 @@ public class AlternativeTest {
         for (int i = 0; i < nbTasks; i++) {
             tasks[i] = new OptionalTask(model.intVar("s" + i, 0, 2), model.intVar("d" + i, 1, 2),
                     model.intVar("e" + i, 1, 4), model.boolVar("p" + i));
-            tasks[i].post();
             TestUtils.fixTask(model, tasks[i], assignment[i]);
         }
         OptionalTask alter = new OptionalTask(model.intVar("as", 0, 2), model.intVar("ad", 1, 2),
                 model.intVar("ae", 1, 4), model.boolVar("ap"));
-        alter.post();
         TestUtils.fixTask(model, alter, assignment[nbTasks]);
         model.alternative(alter, tasks, model.intVar("n", 0, maxN)).post();
         return model.getSolver().solve();
@@ -489,6 +536,27 @@ public class AlternativeTest {
                             Arrays.deepToString(assignment) + ", maxN = " + maxN);
                 }
             }
+        }
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testUnperformedAlternativeCreators() {
+        Model model = new Model();
+        Task[] tasks = new Task[10];
+        for (int i = 0; i < tasks.length; ++i) {
+            tasks[i] = model.taskVar(model.intVar(i), model.intVar(i), model.boolVar(false));
+        }
+
+        Task[] alters = new Task[]{
+            model.alternative(new Task[0]),
+            model.alternative(tasks, false),
+            model.alternative(tasks, true)
+        };
+        for (int i = 0; i < alters.length; ++i) {
+            Assert.assertNotNull(alters[i]);
+            Assert.assertFalse(alters[i].mayBePerformed());
+            Assert.assertFalse(alters[i].mustBePerformed());
+            Assert.assertTrue(alters[i].isPassive());
         }
     }
 }

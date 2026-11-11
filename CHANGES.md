@@ -87,6 +87,7 @@ See [milestone 6.0.3](https://github.com/chocoteam/choco-solver/milestone/44)
 #### Contributors to this release:
 - Charles Prud'homme <charles.prudhomme@imt-atlantique.fr>
 - Jaehong Park <105151063+PHJ2000@users.noreply.github.com>
+- Arthur Godet <arth.godet@gmail.com>
 
 
 **Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v6.0.2...v6.0.3

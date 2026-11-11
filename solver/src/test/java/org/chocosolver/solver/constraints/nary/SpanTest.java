@@ -8,16 +8,14 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.nary.span.PropSpan;
+import org.chocosolver.solver.SettingsBuilder;
+import org.chocosolver.solver.TestUtils;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.OptionalTask;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.util.tools.ArrayUtils;
-import org.chocosolver.solver.SettingsBuilder;
-import org.chocosolver.solver.TestUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -43,7 +41,7 @@ public class SpanTest {
         IntVar dur = model.intVar("duration_span", duration, lst + duration - est);
         BoolVar performed = model.boolVar("performed_span");
         OptionalTask span = model.taskVar(start, dur, performed);
-        model.post(new Constraint("SPAN", new PropSpan(span, tasks)));
+        model.span(span, tasks).post();
 
         try {
             // Expected filtering : None
@@ -157,7 +155,7 @@ public class SpanTest {
         IntVar dur = model.intVar("duration_span", duration, lst + duration - est);
         BoolVar performed = model.boolVar("performed_span");
         OptionalTask span = model.taskVar(start, dur, performed);
-        model.post(new Constraint("SPAN", new PropSpan(span, tasks)));
+        model.span(span, tasks).post();
 
         try {
             // Expected filtering : span is performed as tasks[0] and tasks[5] are performed
@@ -241,7 +239,7 @@ public class SpanTest {
         IntVar dur = model.intVar("duration_span", duration, lst + duration - est);
         BoolVar performed = model.boolVar("performed_span");
         OptionalTask span = model.taskVar(start, dur, performed);
-        model.post(new Constraint("SPAN", new PropSpan(span, tasks)));
+        model.span(span, tasks).post();
 
         try {
             // Expected filtering : None
@@ -304,16 +302,15 @@ public class SpanTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testSpanSolve() {
+        int n = 10;
         Model model = new Model();
-        Task[] tasks = new Task[10];
+        Task[] tasks = new Task[n];
         for (int i = 0; i < tasks.length; i++) {
             IntVar start = model.intVar("start[" + i + "]", i, i);
             BoolVar performed = model.boolVar("performed[" + i + "]");
             tasks[i] = model.taskVar(start, 10, performed);
-            tasks[i].post();
         }
         Task span = model.taskVar(model.intVar("span_start", -10, 20), model.intVar("span_duration", 0, 30), model.boolVar("span_performed"));
-        span.post();
         model.span(span, tasks).post();
         model.getSolver().setSearch(model.smallest(ArrayUtils.append(tasks, new Task[]{span})));
         while (model.getSolver().solve()) {
@@ -332,7 +329,7 @@ public class SpanTest {
                 testBounds(span, minEst, minEst, maxLct, maxLct);
             }
         }
-        Assert.assertEquals(model.getSolver().getSolutionCount(), 1024);
+        Assert.assertEquals(model.getSolver().getSolutionCount(), (int) Math.pow(2, n));
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -343,10 +340,8 @@ public class SpanTest {
             IntVar start = model.intVar("start[" + i + "]", 1, 5);
             BoolVar performed = model.boolVar("performed[" + i + "]");
             tasks[i] = model.taskVar(start, 10, performed);
-            tasks[i].post();
         }
         Task span = model.taskVar(model.intVar("span_start", -10, 20), model.intVar("span_duration", 0, 30), model.boolVar("span_performed"));
-        span.post();
         model.span(span, tasks).post();
         model.getSolver().setSearch(model.smallest(ArrayUtils.append(tasks, new Task[]{span})));
         while (model.getSolver().solve()) {
@@ -389,12 +384,10 @@ public class SpanTest {
         for (int i = 0; i < nbTasks; i++) {
             tasks[i] = new OptionalTask(model.intVar("s" + i, 0, 2), model.intVar("d" + i, 1, 2),
                     model.intVar("e" + i, 1, 4), model.boolVar("p" + i));
-            tasks[i].post();
             TestUtils.fixTask(model, tasks[i], assignment[i]);
         }
         OptionalTask span = new OptionalTask(model.intVar("ss", 0, 2), model.intVar("sd", 0, 4),
                 model.intVar("se", 0, 4), model.boolVar("sp"));
-        span.post();
         TestUtils.fixTask(model, span, assignment[nbTasks]);
         model.span(span, tasks).post();
         return model.getSolver().solve();
@@ -421,5 +414,25 @@ public class SpanTest {
         model.span(span, new Task[0]).post();
         Assert.assertTrue(model.getSolver().solve());
         Assert.assertFalse(span.mayBePerformed() && span.mustBePerformed());
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testUnperformedSpanCreators() {
+        Model model = new Model();
+        Task[] tasks = new Task[10];
+        for (int i = 0; i < tasks.length; ++i) {
+            tasks[i] = model.taskVar(model.intVar(i), model.intVar(i), model.boolVar(false));
+        }
+
+        Task[] spans = new Task[]{
+            model.span(new Task[0]),
+            model.span(tasks)
+        };
+        for (int i = 0; i < spans.length; ++i) {
+            Assert.assertNotNull(spans[i]);
+            Assert.assertFalse(spans[i].mayBePerformed());
+            Assert.assertFalse(spans[i].mustBePerformed());
+            Assert.assertTrue(spans[i].isPassive());
+        }
     }
 }

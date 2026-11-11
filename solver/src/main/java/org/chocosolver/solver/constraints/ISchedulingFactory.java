@@ -16,6 +16,7 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.search.strategy.strategy.SetTimes;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.OptionalTask;
 import org.chocosolver.solver.variables.Task;
@@ -33,6 +34,14 @@ import java.util.function.Function;
  * @since 17/08/2021
  */
 public interface ISchedulingFactory extends ISelf<Model> {
+    static Propagator<IntVar>[] tasksToBePosted(Task[] tasks) {
+        return Arrays.stream(tasks).filter(p -> !p.isPassive()).toArray(Propagator[]::new);
+    }
+
+    static Propagator<IntVar>[] tasksToBePosted(Task[] tasks, Task task) {
+        return tasksToBePosted(ArrayUtils.append(tasks, new Task[]{task}));
+    }
+
     /////////////////////////////////////////////////////////////////////////////
     //////////////////////////////// ALTERNATIVE ////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////
@@ -74,6 +83,9 @@ public interface ISchedulingFactory extends ISelf<Model> {
                 maxDuration = Math.max(maxDuration, tasks[i].getMaxDuration());
                 mustBePerformed |= tasks[i].mustBePerformed();
             }
+        }
+        if (est == Integer.MAX_VALUE) { // either tasks.length == 0 or none of tasks may be performed
+            return ref().taskVar(ref().intVar(0), ref().intVar(0), ref().boolVar(false));
         }
         IntVar start = ref().intVar(est, lct - maxDuration);
         IntVar duration = ref().intVar(minDuration, maxDuration);
@@ -129,7 +141,10 @@ public interface ISchedulingFactory extends ISelf<Model> {
         }
         return new Constraint(
             ConstraintsName.ALTERNATIVE,
-            new PropAlternative(alter, Arrays.stream(tasks).filter(Task::mayBePerformed).toArray(Task[]::new), varN)
+            ArrayUtils.append(
+                tasksToBePosted(tasks, alter),
+                new Propagator[]{new PropAlternative(alter, Arrays.stream(tasks).filter(Task::mayBePerformed).toArray(Task[]::new), varN)}
+            )
         );
     }
 
@@ -228,7 +243,7 @@ public interface ISchedulingFactory extends ISelf<Model> {
         return new Constraint(
             ConstraintsName.CUMULATIVE,
             ArrayUtils.append(
-                Arrays.stream(tasks).filter(p -> !p.isPassive()).toArray(Propagator[]::new),
+                tasksToBePosted(tasks),
                 new Propagator[]{prop}
             )
         );
@@ -286,8 +301,8 @@ public interface ISchedulingFactory extends ISelf<Model> {
         return extractVars(tasks, Task::getEnd);
     }
 
-    static IntVar[] extractPerformedVars(final Task[] tasks) {
-        return extractVars(tasks, task -> task instanceof OptionalTask optionalTask ? optionalTask.getPerformed() : task.getModel().boolVar(true));
+    static BoolVar[] extractPerformedVars(final Task[] tasks) {
+        return Arrays.stream(tasks).map(Task::getPerformed).toArray(BoolVar[]::new);
     }
 
     /**
@@ -394,7 +409,7 @@ public interface ISchedulingFactory extends ISelf<Model> {
 
     private static IntVar nextUninstantiatedVariable(Task task) {
         if (!task.mustBePerformed()) {
-            return ((OptionalTask) task).getPerformed();
+            return task.getPerformed();
         } else if (!task.isStartInstantiated()) {
             return task.getStart();
         } else if (!task.isEndInstantiated()) {
@@ -428,6 +443,9 @@ public interface ISchedulingFactory extends ISelf<Model> {
                 lct = Math.max(lct, tasks[i].getLct());
                 mustBePerformed |= tasks[i].mustBePerformed();
             }
+        }
+        if (est == Integer.MAX_VALUE) { // either tasks.length == 0 or none of tasks may be performed
+            return ref().taskVar(ref().intVar(0), ref().intVar(0), ref().boolVar(false));
         }
         IntVar start = ref().intVar(est, lct);
         IntVar duration = ref().intVar(0, lct - est);
@@ -464,7 +482,10 @@ public interface ISchedulingFactory extends ISelf<Model> {
         }
         return new Constraint(
             ConstraintsName.SPAN,
-            new PropSpan(span, Arrays.stream(tasks).filter(Task::mayBePerformed).toArray(Task[]::new))
+            ArrayUtils.append(
+                tasksToBePosted(tasks, span),
+                new Propagator[]{new PropSpan(span, Arrays.stream(tasks).filter(Task::mayBePerformed).toArray(Task[]::new))}
+            )
         );
     }
 }
