@@ -741,6 +741,8 @@ public interface IDecompositionFactory extends ISelf<Model> {
      * Creates and <b>posts</b> a decomposition of a span constraint, see {@link ISchedulingFactory#span(Task, Task[])}.
      * Posts the following constraints, where {@code p} denotes the performed variable of a task:
      * <ul>
+     *     <li>{@code sum(p(tasks[i])) = varN}</li>
+     *     <li>{@code p(span) <=> varN >= 1}</li>
      *     <li>{@code p(tasks[i]) => p(span)}, and {@code p(span) => or(p(tasks[i]))}</li>
      *     <li>{@code p(tasks[i]) => span.start <= tasks[i].start and tasks[i].end <= span.end}</li>
      *     <li>{@code p(span) =>} some performed task starts when span starts, and some performed task ends when span ends</li>
@@ -749,13 +751,15 @@ public interface IDecompositionFactory extends ISelf<Model> {
      * @param span  the span task
      * @param tasks the tasks
      */
-    default void spanDec(Task span, Task[] tasks) {
+    default void spanDec(Task span, Task[] tasks, IntVar varN) {
         BoolVar pSpan = span.getPerformed();
         if (tasks.length == 0) {
             pSpan.eq(0).post();
             return;
         }
         BoolVar[] perfVars = ISchedulingFactory.extractPerformedVars(tasks);
+        ref().sum(perfVars, "=", varN).post();
+        pSpan.iff(varN.ge(1)).post();
         BoolVar[] starts = new BoolVar[tasks.length + 1];
         BoolVar[] ends = new BoolVar[tasks.length + 1];
         BoolVar[] anyPerformed = new BoolVar[tasks.length + 1];

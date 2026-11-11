@@ -42,6 +42,10 @@ public interface ISchedulingFactory extends ISelf<Model> {
         return tasksToBePosted(ArrayUtils.append(tasks, new Task[]{task}));
     }
 
+    static Task[] tasksForConstraint(Task[] tasks) {
+        return Arrays.stream(tasks).filter(Task::mayBePerformed).toArray(Task[]::new);
+    }
+
     /////////////////////////////////////////////////////////////////////////////
     //////////////////////////////// ALTERNATIVE ////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////
@@ -131,19 +135,20 @@ public interface ISchedulingFactory extends ISelf<Model> {
      * @return an alternative constraint
      */
     default Constraint alternative(Task alter, Task[] tasks, IntVar varN) {
+        Task[] tasksForConstraint = tasksForConstraint(tasks);
         if (ref().getSolver().isLCG()) {
             if (ref().getSettings().warnUser()) {
                 ref().getSolver().log().white().println(
                         "Warning: alternative constraint is turned into clauses (due to LCG).");
             }
-            ref().alternativeDec(alter, Arrays.stream(tasks).filter(Task::mayBePerformed).toArray(Task[]::new), varN);
+            ref().alternativeDec(alter, tasksForConstraint, varN);
             return ref().voidConstraint();
         }
         return new Constraint(
             ConstraintsName.ALTERNATIVE,
             ArrayUtils.append(
                 tasksToBePosted(tasks, alter),
-                new Propagator[]{new PropAlternative(alter, Arrays.stream(tasks).filter(Task::mayBePerformed).toArray(Task[]::new), varN)}
+                new Propagator[]{new PropAlternative(alter, tasksForConstraint, varN)}
             )
         );
     }
@@ -460,11 +465,10 @@ public interface ISchedulingFactory extends ISelf<Model> {
         return span;
     }
 
-
     /**
      * Creates a span constraint such that span(span, tasks) is true iff <ul>
      *    <li>either span is not performed and none of tasks are performed</li>
-     *    <li>either span is performed and at least one of the tasks is performed and span starts when the earliest performed task starts and span ends when the latest performed task ends</li>
+     *    <li>either span is performed and at least one of tasks is performed and span starts when the earliest performed task starts and span ends when the latest performed task ends</li>
      *  </ul>
      *
      * @param span the span task
@@ -472,19 +476,36 @@ public interface ISchedulingFactory extends ISelf<Model> {
      * @return a span constraint
      */
     default Constraint span(Task span, Task[] tasks) {
+        Task[] tasksConstraint = Arrays.stream(tasks).filter(Task::mayBePerformed).toArray(Task[]::new);
+        return span(span, tasksConstraint, ref().intVar(0, tasksConstraint.length));
+    }
+
+    /**
+     * Creates a span constraint such that span(span, tasks, varN) is true iff <ul>
+     *    <li>either span is not performed and none of tasks are performed and varN = 0</li>
+     *    <li>either span is performed and span starts when the earliest performed task starts and span ends when the latest performed task ends and exactly varN tasks are performed</li>
+     *  </ul>
+     *
+     * @param span the span task
+     * @param tasks the tasks
+     * @param varN the number of tasks that are performed when span is performed
+     * @return a span constraint
+     */
+    default Constraint span(Task span, Task[] tasks, IntVar varN) {
+        Task[] tasksForConstraint = tasksForConstraint(tasks);
         if (ref().getSolver().isLCG()) {
             if (ref().getSettings().warnUser()) {
                 ref().getSolver().log().white().println(
                         "Warning: span constraint is turned into clauses (due to LCG).");
             }
-            ref().spanDec(span, Arrays.stream(tasks).filter(Task::mayBePerformed).toArray(Task[]::new));
+            ref().spanDec(span, tasksForConstraint, varN);
             return ref().voidConstraint();
         }
         return new Constraint(
             ConstraintsName.SPAN,
             ArrayUtils.append(
                 tasksToBePosted(tasks, span),
-                new Propagator[]{new PropSpan(span, Arrays.stream(tasks).filter(Task::mayBePerformed).toArray(Task[]::new))}
+                new Propagator[]{new PropSpan(span, tasksForConstraint, varN)}
             )
         );
     }

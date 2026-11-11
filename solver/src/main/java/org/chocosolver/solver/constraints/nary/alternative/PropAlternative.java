@@ -256,7 +256,9 @@ public class PropAlternative extends Propagator<IntVar> {
                 tasks[idx].forceToBeUnperformed(this);
             }
             candidates.clear();
-            setPassive();
+            if (!isPassive()) { // updateSpan() may call this method again once span is not performed
+                setPassive();
+            }
         }
     }
 

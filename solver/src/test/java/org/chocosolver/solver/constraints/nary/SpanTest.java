@@ -11,6 +11,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.SettingsBuilder;
 import org.chocosolver.solver.TestUtils;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.OptionalTask;
@@ -375,6 +376,77 @@ public class SpanTest {
         // Therefore, there are 5*7 + 4*12 + 3*18 + 2*24 + 1*30 = 215 solutions where span is performed.
         // So we have 216 solutions when considering the one where span is not performed in addition.
         Assert.assertEquals(model.getSolver().getSolutionCount(), 216);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testSpanSolve3() {
+        int n = 10;
+        Model model = new Model();
+        Task[] tasks = new Task[n];
+        for (int i = 0; i < tasks.length; i++) {
+            IntVar start = model.intVar("start[" + i + "]", i, i);
+            BoolVar performed = model.boolVar("performed[" + i + "]");
+            tasks[i] = model.taskVar(start, 10, performed);
+        }
+        Task span = model.taskVar(model.intVar("span_start", -10, 20), model.intVar("span_duration", 0, 30), model.boolVar("span_performed"));
+        IntVar varN = model.intVar("varN", 0, 3);
+        model.span(span, tasks, varN).post();
+        model.getSolver().setSearch(model.smallest(ArrayUtils.append(tasks, new Task[]{span})));
+        while (model.getSolver().solve()) {
+            int minEst = Integer.MAX_VALUE;
+            int maxLct = Integer.MIN_VALUE;
+            for (int i = 0; i < tasks.length; ++i) {
+                if (tasks[i].mustBePerformed()) {
+                    minEst = Math.min(minEst, tasks[i].getEst());
+                    maxLct = Math.max(maxLct, tasks[i].getLct());
+                }
+            }
+            if (minEst > maxLct) {
+                Assert.assertFalse(span.mayBePerformed());
+            } else {
+                Assert.assertTrue(span.mustBePerformed());
+                testBounds(span, minEst, minEst, maxLct, maxLct);
+            }
+        }
+        // Nb solutions = 176 = 1 (unperformed) + (1 among 10) + (2 among 10) + (3 among 10)
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 176);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testSpanSolveReification() {
+        for (int n = 1; n < 10; ++n) {
+            Model model = new Model();
+            Task[] tasks = new Task[n];
+            for (int i = 0; i < tasks.length; i++) {
+                IntVar start = model.intVar("start[" + i + "]", i, i);
+                BoolVar performed = model.boolVar("performed[" + i + "]");
+                tasks[i] = model.taskVar(start, 10, performed);
+            }
+            Task span = model.taskVar(model.intVar("span_start", -2, 10), model.intVar("span_duration", 0, 20), model.boolVar("span_performed"));
+            BoolVar reified = model.span(span, tasks).reify();
+            model.getSolver().setSearch(model.smallest(ArrayUtils.append(tasks, new Task[]{span})), Search.inputOrderLBSearch(reified));
+            while (model.getSolver().solve()) {
+                if (reified.getValue() == 1) {
+                    int minEst = Integer.MAX_VALUE;
+                    int maxLct = Integer.MIN_VALUE;
+                    for (int i = 0; i < tasks.length; ++i) {
+                        if (tasks[i].mustBePerformed()) {
+                            minEst = Math.min(minEst, tasks[i].getEst());
+                            maxLct = Math.max(maxLct, tasks[i].getLct());
+                        }
+                    }
+                    if (minEst > maxLct) {
+                        Assert.assertFalse(span.mayBePerformed());
+                    } else {
+                        Assert.assertTrue(span.mustBePerformed());
+                        testBounds(span, minEst, minEst, maxLct, maxLct);
+                    }
+                }
+            }
+            // 2^n solutions when reified = true
+            // XXXXX solutions when reified = false : (|dom(alter_start)| x |dom(alter_duration)| x |dom(alter_end)| + 1) x |dom(performed[0])| x ... x |dom(performed[n-1])|
+            Assert.assertEquals(model.getSolver().getSolutionCount(), 9010L * ((int) Math.pow(2, n)) + ((int) Math.pow(2, n)));
+        }
     }
 
     private static boolean isSpanFeasible(boolean lcg, int[][] assignment) {
