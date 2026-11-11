@@ -214,6 +214,7 @@ public class PropagatorCumulative extends Propagator<IntVar> {
             if (!isActive(idxTask)) {
                 activeTasks.clear(idxTask);
             }
+            forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
         } else {
             final int idxTask = varIdx / 4;
             if (!isActive(idxTask)) {

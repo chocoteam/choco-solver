@@ -144,12 +144,17 @@ public interface ISchedulingFactory extends ISelf<Model> {
             ref().alternativeDec(alter, tasksForConstraint, varN);
             return ref().voidConstraint();
         }
-        return new Constraint(
+        return Constraint.merge(
             ConstraintsName.ALTERNATIVE,
-            ArrayUtils.append(
-                tasksToBePosted(tasks, alter),
-                new Propagator[]{new PropAlternative(alter, tasksForConstraint, varN)}
-            )
+            new Constraint(
+                ConstraintsName.ALTERNATIVE,
+                ArrayUtils.append(
+                    tasksToBePosted(tasks, alter),
+                    new Propagator[]{new PropAlternative(alter, tasksForConstraint, varN)}
+                )
+            ),
+            ref().sum(Arrays.stream(tasksForConstraint).map(Task::getPerformed).toArray(BoolVar[]::new), "=", varN),
+            ref().sum(Arrays.stream(tasksForConstraint).map(Task::getPerformed).toArray(BoolVar[]::new), ">=", alter.getPerformed())
         );
     }
 
@@ -501,12 +506,17 @@ public interface ISchedulingFactory extends ISelf<Model> {
             ref().spanDec(span, tasksForConstraint, varN);
             return ref().voidConstraint();
         }
-        return new Constraint(
+        return Constraint.merge(
             ConstraintsName.SPAN,
-            ArrayUtils.append(
-                tasksToBePosted(tasks, span),
-                new Propagator[]{new PropSpan(span, tasksForConstraint, varN)}
-            )
+            new Constraint(
+                ConstraintsName.SPAN,
+                ArrayUtils.append(
+                    tasksToBePosted(tasks, span),
+                    new Propagator[]{new PropSpan(span, tasksForConstraint, varN)}
+                )
+            ),
+            ref().sum(Arrays.stream(tasksForConstraint).map(Task::getPerformed).toArray(BoolVar[]::new), "=", varN),
+            ref().sum(Arrays.stream(tasksForConstraint).map(Task::getPerformed).toArray(BoolVar[]::new), ">=", span.getPerformed())
         );
     }
 }
