@@ -506,6 +506,36 @@ public class AlternativeTest {
         Assert.assertEquals(model.getSolver().getSolutionCount(), 1001);
     }
 
+    @Test(groups = "1s", timeOut = 60000)
+    public void testAlternativeSolveReification() {
+        for (int n = 1; n < 10; ++n) {
+            Model model = new Model();
+            Task[] tasks = new Task[n];
+            for (int i = 0; i < tasks.length; i++) {
+                IntVar start = model.intVar("start[" + i + "]", i, i);
+                BoolVar performed = model.boolVar("performed[" + i + "]");
+                tasks[i] = model.taskVar(start, 10, performed);
+            }
+            Task alter = model.taskVar(model.intVar("alter_start", -2, 10), model.intVar("alter_duration", 0, 11), model.boolVar("alter_performed"));
+            BoolVar reified = model.alternative(alter, tasks).reify();
+            model.getSolver().setSearch(model.smallest(ArrayUtils.append(tasks, new Task[]{alter})), Search.inputOrderLBSearch(reified));
+            while (model.getSolver().solve()) {
+                if (reified.getValue() == 1) {
+                    for (int i = 0; i < tasks.length; ++i) {
+                        if (alter.mustBePerformed() && tasks[i].mayBePerformed()) {
+                            testBounds(tasks[i], alter.getEst(), alter.getLst(), alter.getEct(), alter.getLct());
+                        } else {
+                            Assert.assertFalse(tasks[i].mayBePerformed());
+                        }
+                    }
+                }
+            }
+            // n+1 solutions when reified = true
+            // XXXXX solutions when reified = false : (|dom(alter_start)| x |dom(alter_duration)| x |dom(alter_end)| + 1) x |dom(performed[0])| x ... x |dom(performed[n-1])|
+            Assert.assertEquals(model.getSolver().getSolutionCount(), 3745L * ((int) Math.pow(2, n)) + (n + 1));
+        }
+    }
+
     private static boolean isAlternativeFeasible(boolean lcg, int[][] assignment, int maxN) {
         Model model = lcg ? new Model(SettingsBuilder.dev().setLCG(true)) : new Model();
         int nbTasks = assignment.length - 1;
