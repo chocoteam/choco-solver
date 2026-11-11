@@ -12,6 +12,7 @@ import org.chocosolver.solver.constraints.extension.hybrid.HybridTuples;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.OptionalTask;
 import org.chocosolver.solver.variables.Task;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -219,6 +220,54 @@ public class IntConstraintsExamples {
                         || tasks[j].getEnd().getValue() <= tasks[i].getStart().getValue());
             }
         }
+    }
+
+    @Test(groups = "1s")
+    public void alternative() {
+        Model model = new Model();
+        // tag::alternative[]
+        // an operation can be performed on one of three machines, each of them with its own duration
+        OptionalTask[] modes = new OptionalTask[3];
+        for (int i = 0; i < modes.length; i++) {
+            modes[i] = model.taskVar(model.intVar("start" + i, 0, 20), 2 + i, model.boolVar("mode" + i));
+        }
+        // the operation starts and ends with the mode that is selected
+        OptionalTask operation = (OptionalTask) model.alternative(modes);
+        // the operation has to be performed
+        model.arithm(operation.getPerformed(), "=", 1).post();
+        // end::alternative[]
+        Assert.assertTrue(model.getSolver().solve());
+        int performed = 0;
+        for (OptionalTask mode : modes) {
+            if (mode.mustBePerformed()) {
+                performed++;
+                Assert.assertEquals(mode.getStart().getValue(), operation.getStart().getValue());
+                Assert.assertEquals(mode.getEnd().getValue(), operation.getEnd().getValue());
+            }
+        }
+        Assert.assertEquals(performed, 1);
+    }
+
+    @Test(groups = "1s")
+    public void span() {
+        Model model = new Model();
+        // tag::span[]
+        Task[] steps = new Task[3];
+        for (int i = 0; i < steps.length; i++) {
+            steps[i] = model.taskVar(model.intVar("start" + i, 0, 10), 3);
+        }
+        // the project starts with its first step and ends with its last one
+        Task project = model.span(steps);
+        // end::span[]
+        Assert.assertTrue(model.getSolver().solve());
+        int first = Integer.MAX_VALUE;
+        int last = Integer.MIN_VALUE;
+        for (Task step : steps) {
+            first = Math.min(first, step.getStart().getValue());
+            last = Math.max(last, step.getEnd().getValue());
+        }
+        Assert.assertEquals(project.getStart().getValue(), first);
+        Assert.assertEquals(project.getEnd().getValue(), last);
     }
 
     @Test(groups = "1s")

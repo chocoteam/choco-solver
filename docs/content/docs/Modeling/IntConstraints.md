@@ -146,9 +146,10 @@ You can also use an array of variables as the second argument.
 
 ## Scheduling constraints
 
-Scheduling problems can be modelled using Task variables and the cumulative constraint.  
+Scheduling problems can be modelled using Task variables and scheduling constraints, such as cumulative, alternative and span.  
 A task represents the entity that should be scheduled, where it is unknown when the task starts and optionally how long it lasts.  
 The cumulative constraint limits the number of concurrent tasks.  
+The alternative and span constraints link a task to a set of optional tasks.  
 
 ### `Task` variables
 
@@ -200,6 +201,42 @@ Solving this will result in the 4 tasks not overlapping: for any two tasks $i$ a
 $start[i] + duration[i] \leq start[j]$ or $start[j] + duration[j] \leq start[i]$.
 
 The cumulative constraint does not enforce a specific order of tasks. Define additional constraints between the variables for this if needed.
+
+
+### `Alternative` constraint
+
+The alternative constraint links a task to a set of optional tasks, which are alternative ways of performing it.  
+Let alter be a `Task` and tasks an array of `Task`. `model.alternative(alter, tasks)` ensures that either
+
+- `alter` is not performed, and none of the `tasks` is performed, or
+- `alter` is performed, and exactly one of the `tasks` is performed, with the same start and the same end as `alter`.
+
+`model.alternative(alter, tasks, varN)` gives the number of `tasks` that are performed to an `IntVar` `varN`, which is $\geq 1$ if and only if `alter` is performed.
+`model.alternative(tasks)` creates and returns the task `alter`.
+With `model.alternative(tasks, true)`, several tasks can be performed, provided that they all start and end with `alter`.
+
+{{< tabpane langEqualsHeader=true >}}
+{{< example "modeling/IntConstraints" "alternative" >}}
+{{< /tabpane >}}
+
+### `Span` constraint
+
+The span constraint links a task to a set of optional tasks that it covers.  
+Let span be a `Task` and tasks an array of `Task`. `model.span(span, tasks)` ensures that either
+
+- `span` is not performed, and none of the `tasks` is performed, or
+- `span` is performed, at least one of the `tasks` is performed, `span` starts when the earliest performed task starts, and ends when the latest performed task ends.
+
+`model.span(span, tasks, varN)` gives the number of `tasks` that are performed to an `IntVar` `varN`, which is $\geq 1$ if and only if `span` is performed.
+`model.span(tasks)` creates and returns the task `span`.
+
+{{< tabpane langEqualsHeader=true >}}
+{{< example "modeling/IntConstraints" "span" >}}
+{{< /tabpane >}}
+
+{{% alert title="Info" color="primary" %}}
+With Lazy Clause Generation (LCG), `alternative` and `span` are decomposed into clauses, because their propagators do not explain their filtering.
+{{% /alert %}}
 
 
 ## Table constraints

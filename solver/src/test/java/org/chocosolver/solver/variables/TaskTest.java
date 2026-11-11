@@ -9,14 +9,17 @@ package org.chocosolver.solver.variables;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.TestUtils;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.solver.variables.impl.BitsetIntVarImpl;
 import org.chocosolver.solver.variables.view.integer.IntAffineView;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -71,7 +74,6 @@ public class TaskTest {
     @Test(groups = "1s", timeOut = 60000)
     public void testBadDomainFilteringOK() throws ContradictionException {
         Task task = new Task(end, duration, start);
-        System.out.println(task);
         task.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
         checkVariable(duration, 0, 0);
         checkVariable(start, 5, 5);
@@ -111,8 +113,6 @@ public class TaskTest {
         IntVar duration = model.intVar(-5);
         Task task = new Task(start, duration, end);
         task.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
-        // TODO: 21/03/2016 is it possible ?
-        System.out.println("odd behaviour: " + task);
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -414,5 +414,108 @@ public class TaskTest {
         task.post();
         model.getSolver().solve();
         Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
+    }
+
+    @DataProvider(name = "testForceToBe")
+    public static Object[][] testForceToBeProvider() {
+        return new Object[][] {{true, true, false}, {true, false, false}, {false, true, false}, {false, false, true}};
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testRemoveAllDurationsBut() {
+        Task task1 = model.taskVar(model.intVar(0, 10), model.intVar(1, 10, true));
+        Task task2 = model.taskVar(model.intVar(0, 10), model.intVar(1, 10, false));
+
+        IntIterableBitSet durationDomain = new IntIterableBitSet();
+        durationDomain.addAll(2, 4, 6, 8);
+        try {
+            task1.removeAllDurationsBut(durationDomain, Cause.Null);
+            task2.removeAllDurationsBut(durationDomain, Cause.Null);
+
+            Assert.assertEquals(TestUtils.getDomain(task1.getDuration()), new int[]{2, 3, 4, 5, 6, 7, 8});
+            Assert.assertEquals(TestUtils.getDomain(task2.getDuration()), new int[]{2, 4, 6, 8});
+        } catch(ContradictionException ex) {
+            fail();
+        }
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testOptionalRemoveAllDurationsBut() {
+        OptionalTask task1 = model.taskVar(model.intVar(0, 10), model.intVar(1, 10, true), model.boolVar());
+        OptionalTask task2 = model.taskVar(model.intVar(0, 10), model.intVar(1, 10, false), model.boolVar());
+        OptionalTask task3 = model.taskVar(model.intVar(0, 10), 10, model.boolVar());
+        OptionalTask task4 = model.taskVar(model.intVar(0, 10), model.intVar(new int[]{3, 5, 6, 7, 9}), model.boolVar());
+        OptionalTask task5 = model.taskVar(model.intVar(0, 10), model.intVar(new int[]{3, 5, 7, 9}), model.boolVar());
+
+        IntIterableBitSet durationDomain = new IntIterableBitSet();
+        durationDomain.addAll(2, 4, 6, 8);
+        try {
+            task1.removeAllDurationsBut(durationDomain, Cause.Null);
+            task2.removeAllDurationsBut(durationDomain, Cause.Null);
+            task3.removeAllDurationsBut(durationDomain, Cause.Null);
+            task4.removeAllDurationsBut(durationDomain, Cause.Null);
+            task5.removeAllDurationsBut(durationDomain, Cause.Null);
+
+            Assert.assertEquals(TestUtils.getDomain(task1.getDuration()), new int[]{2, 3, 4, 5, 6, 7, 8});
+            Assert.assertEquals(TestUtils.getDomain(task2.getDuration()), new int[]{2, 4, 6, 8});
+            Assert.assertEquals(TestUtils.getDomain(task4.getDuration()), new int[]{6});
+
+            Assert.assertTrue(task1.mayBePerformed());
+            Assert.assertTrue(task2.mayBePerformed());
+            Assert.assertFalse(task3.mayBePerformed());
+            Assert.assertTrue(task4.mayBePerformed());
+            Assert.assertFalse(task5.mayBePerformed());
+        } catch(ContradictionException ex) {
+            fail();
+        }
+    }
+
+    // This test will run 4 times since we have 5 parameters defined
+    @Test(dataProvider = "testForceToBe")
+    public void testForceToBe(boolean optional, boolean forceTo, boolean shouldFail) {
+        try {
+            Task t = optional ? model.taskVar(start, 10, model.boolVar()) : model.taskVar(start, 10);
+            t.forceToBe(forceTo, Cause.Null);
+            Assert.assertFalse(shouldFail);
+            Assert.assertEquals(forceTo, t.mayBePerformed());
+            Assert.assertEquals(forceTo, t.mustBePerformed());
+        } catch (ContradictionException ex) {
+            Assert.assertTrue(shouldFail);
+        }
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testTasksAsPropagatorCanBeInSeveralConstraints() {
+        int nbR = 3;
+        int nbT = 25;
+        int opt = 27;
+        IntVar[] starts = new IntVar[nbT];
+        IntVar[] durations = new IntVar[nbT];
+        IntVar[] ends = new IntVar[nbT];
+        IntVar[] resource = new IntVar[nbT];
+        Task[] tasks = new Task[nbT];
+        Model helper = new Model();
+        for (int t = 0; t < nbT; t++) {
+            starts[t] = helper.intVar("start_" + t, 0, 100);
+            durations[t] = helper.intVar("duration_" + t, 3);
+            ends[t] = starts[t].add(durations[t]).intVar();
+            resource[t] = helper.intVar("resource_" + t, 0, nbR - 1);
+            tasks[t] = new Task(starts[t], durations[t], ends[t]);
+        }
+        for (int r = 0; r < nbR; r++) {
+            BoolVar[] isPresent = new BoolVar[nbT];
+            for (int t = 0; t < nbT; t++) {
+                isPresent[t] = helper.arithm(resource[t], "=", r).reify();
+            }
+            helper.cumulative(tasks, isPresent, helper.intVar(1)).post();
+        }
+        IntVar makespan = helper.max("makespan", ends);
+        helper.setObjective(Model.MINIMIZE, makespan);
+        helper.getSolver().limitTime("3s");
+
+        while (helper.getSolver().solve()) {
+        }
+        Assert.assertTrue(helper.getSolver().getSolutionCount() > 0);
+        Assert.assertEquals(helper.getSolver().getBestSolutionValue().intValue(), opt);
     }
 }

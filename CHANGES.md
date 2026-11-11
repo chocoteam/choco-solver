@@ -49,6 +49,7 @@ NEXT MILESTONE
 - `costRegular` and `knapsack`: fix solutions wrongly removed after a look-ahead of the search, for the same reason (#1163). `costRegular` removed arcs of another branch and `knapsack` used the critical item of another branch
 - `sum` and `scalar` compared to a constant, and the expressions compared to a constant (e.g. `x.eq(1)`), no longer add a variable for the constant to the model (#743)
 - An implication (`impliedBy`, `ImpliedConstraint`) is named `IMPLIEDCONSTRAINT` instead of `REIFICATIONCONSTRAINT`, and the Javadoc of `ImpliedConstraint` and `PropReif` is fixed (#1087)
+- Add the scheduling constraints `alternative` and `span`, which link a (optional) task to a set of optional tasks (#1280). With LCG, they are decomposed into clauses, since their propagators do not explain their filtering
 - Fix the reification and the negation of `arithm(x, op1, y, op2, c)` with `*` or `/`, e.g. `arithm(x, "*", y, "<", 2).reify()`: the boolean could be false while the relation held, because the intermediate variable of the decomposition was free under negation. Same fix for `arithm(x, op1, y, op2, z)` with `/` and three variables, e.g. `arithm(x, "/", y, "!=", z).reify()`. A division by zero makes the relation false, so its negation holds when the divisor is 0; `arithm(x, op, y, "/", 0)` is now a false constraint
 
 #### Search & Strategies
@@ -78,6 +79,7 @@ NEXT MILESTONE
 ### Deprecated API (to be removed in next release):
 - `Model.setSeed(long)`: declare the seed in the settings with `SettingsBuilder.setSeed(long)`
 - `IntDomainMiddle(ToDoubleFunction, boolean)`: the function was ignored, use `IntDomainMiddle(boolean)`
+- `Task.forceToBeOptional(ICause)` and `Task.forceToBeOptional(ICause, Reason)`: use `forceToBeUnperformed`, which names what it does (#1280)
 
 ### Other closed issues and pull requests:
 See [milestone 6.0.3](https://github.com/chocoteam/choco-solver/milestone/44)
@@ -85,6 +87,7 @@ See [milestone 6.0.3](https://github.com/chocoteam/choco-solver/milestone/44)
 #### Contributors to this release:
 - Charles Prud'homme <charles.prudhomme@imt-atlantique.fr>
 - Jaehong Park <105151063+PHJ2000@users.noreply.github.com>
+- Arthur Godet <arth.godet@gmail.com>
 
 
 **Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v6.0.2...v6.0.3

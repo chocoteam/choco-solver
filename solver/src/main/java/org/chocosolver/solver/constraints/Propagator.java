@@ -361,7 +361,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * @param c the constraint containing this propagator
      * @throws SolverException if the propagator is declared in more than one constraint
      */
-    void defineIn(Constraint c) throws SolverException {
+    protected void defineIn(Constraint c) throws SolverException {
         if ((constraint != null && constraint.getStatus() != Constraint.Status.FREE)
                 || (c.getStatus() != Constraint.Status.FREE)) {
             throw new SolverException("This propagator is already defined in a constraint. " +
