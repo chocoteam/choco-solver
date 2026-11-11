@@ -483,4 +483,39 @@ public class TaskTest {
             Assert.assertTrue(shouldFail);
         }
     }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testTasksAsPropagatorCanBeInSeveralConstraints() {
+        int nbR = 3;
+        int nbT = 25;
+        int opt = 27;
+        IntVar[] starts = new IntVar[nbT];
+        IntVar[] durations = new IntVar[nbT];
+        IntVar[] ends = new IntVar[nbT];
+        IntVar[] resource = new IntVar[nbT];
+        Task[] tasks = new Task[nbT];
+        Model helper = new Model();
+        for (int t = 0; t < nbT; t++) {
+            starts[t] = helper.intVar("start_" + t, 0, 100);
+            durations[t] = helper.intVar("duration_" + t, 3);
+            ends[t] = starts[t].add(durations[t]).intVar();
+            resource[t] = helper.intVar("resource_" + t, 0, nbR - 1);
+            tasks[t] = new Task(starts[t], durations[t], ends[t]);
+        }
+        for (int r = 0; r < nbR; r++) {
+            BoolVar[] isPresent = new BoolVar[nbT];
+            for (int t = 0; t < nbT; t++) {
+                isPresent[t] = helper.arithm(resource[t], "=", r).reify();
+            }
+            helper.cumulative(tasks, isPresent, helper.intVar(1)).post();
+        }
+        IntVar makespan = helper.max("makespan", ends);
+        helper.setObjective(Model.MINIMIZE, makespan);
+        helper.getSolver().limitTime("3s");
+
+        while (helper.getSolver().solve()) {
+        }
+        Assert.assertTrue(helper.getSolver().getSolutionCount() > 0);
+        Assert.assertEquals(helper.getSolver().getBestSolutionValue().intValue(), opt);
+    }
 }

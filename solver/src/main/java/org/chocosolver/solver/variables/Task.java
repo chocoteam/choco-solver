@@ -14,6 +14,7 @@ import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.solver.variables.view.integer.IntAffineView;
 import org.chocosolver.util.ESat;
@@ -542,6 +543,13 @@ public class Task extends Propagator<IntVar> {
     private void propagate() throws ContradictionException {
         if (!insidePropagation) {
             propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
+        }
+    }
+
+    @Override
+    protected void defineIn(Constraint c) throws SolverException {
+        if (getConstraint() == null) {
+            this.constraint = model.voidConstraint();
         }
     }
 }
