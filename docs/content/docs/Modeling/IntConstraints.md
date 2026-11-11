@@ -227,6 +227,7 @@ Let span be a `Task` and tasks an array of `Task`. `model.span(span, tasks)` ens
 - `span` is not performed, and none of the `tasks` is performed, or
 - `span` is performed, at least one of the `tasks` is performed, `span` starts when the earliest performed task starts, and ends when the latest performed task ends.
 
+`model.span(span, tasks, varN)` gives the number of `tasks` that are performed to an `IntVar` `varN`, which is $\geq 1$ if and only if `span` is performed.
 `model.span(tasks)` creates and returns the task `span`.
 
 {{< tabpane langEqualsHeader=true >}}
