@@ -7,6 +7,7 @@
 package org.chocosolver.parser;
 
 import gnu.trove.set.hash.THashSet;
+import org.chocosolver.lp.PropSimplex;
 import org.chocosolver.parser.handlers.LimitHandler;
 import org.chocosolver.parser.handlers.RestartHandler;
 import org.chocosolver.parser.handlers.ValSelHandler;
@@ -36,6 +37,16 @@ import java.util.Comparator;
  * Project: choco-parsers.
  */
 public abstract class RegParser extends SettingsBuilder implements IParser {
+
+    /**
+     * @param model a model
+     * @return the statistics of its linear relaxation as a JSON entry to append after the {@code exit} object of the
+     *         JSON output ({@code , "lp":{...}}), or an empty string when the relaxation is not enabled
+     */
+    public static String lpStatisticsAsJson(Model model) {
+        PropSimplex simplex = PropSimplex.find(model);
+        return simplex == null ? "" : ",\n\t\"lp\":" + simplex.getStatisticsAsJson();
+    }
     /**
      * Name of the parser
      */

@@ -238,12 +238,13 @@ public class DIMACS extends RegParser {
         }
         if (level.is(Level.JSON)) {
             solver.log().printf(Locale.US, "\n\t],\n\t\"exit\":{\"time\":%.1f, " +
-                            "\"nodes\":%d, \"failures\":%d, \"restarts\":%d, \"status\":\"%s\"}\n}",
+                            "\"nodes\":%d, \"failures\":%d, \"restarts\":%d, \"status\":\"%s\"}%s\n}",
                     solver.getTimeCount(),
                     solver.getNodeCount(),
                     solver.getFailCount(),
                     solver.getRestartCount(),
-                    solver.getSearchState()
+                    solver.getSearchState(),
+                    lpStatisticsAsJson(solver.getModel())
             );
         }
         if (level.is(Level.IRACE)) {

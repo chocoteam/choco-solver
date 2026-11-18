@@ -86,4 +86,20 @@ public class RegressionTest {
             Assert.assertEquals(fzn.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), bst, "Unexpected best solution");
         }
     }
+
+    /**
+     * On an optimisation problem, the free search selects values with respect to the objective and the last
+     * solution found, which requires the solver to record that solution.
+     */
+    @Test(groups = "1s")
+    public void testFreeSearchOnOptimisationProblem() throws SetUpException {
+        String file = this.getClass().getResource("/flatzinc/basics/basic2+test_basic2+small.fzn").getFile();
+        Flatzinc fzn = new Flatzinc();
+        fzn.setUp(file, "-f", "-lvl", "SILENT", "-p", "1");
+        fzn.createSolver();
+        fzn.buildModel();
+        Assert.assertFalse(fzn.getModel().getSolver().defaultSolutionExists());
+        fzn.configureSearch();
+        Assert.assertTrue(fzn.getModel().getSolver().defaultSolutionExists());
+    }
 }

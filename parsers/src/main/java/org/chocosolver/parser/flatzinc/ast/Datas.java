@@ -9,6 +9,7 @@ package org.chocosolver.parser.flatzinc.ast;
 import gnu.trove.map.hash.THashMap;
 import org.chocosolver.parser.Exit;
 import org.chocosolver.parser.Level;
+import org.chocosolver.parser.RegParser;
 import org.chocosolver.parser.flatzinc.ast.declaration.DArray;
 import org.chocosolver.parser.flatzinc.ast.declaration.Declaration;
 import org.chocosolver.parser.flatzinc.ast.expression.EArray;
@@ -278,7 +279,7 @@ public class Datas {
         }
         if (level.is(Level.JSON)) {
             solver.log().printf(Locale.US, "\n\t],\n\t\"exit\":{\"time\":%.1f, " +
-                            "\"bound\":%d, \"nodes\":%d, \"failures\":%d, \"restarts\":%d, \"status\":\"%s\"}\n}",
+                            "\"bound\":%d, \"nodes\":%d, \"failures\":%d, \"restarts\":%d, \"status\":\"%s\"}%s\n}",
                     solver.getTimeCount(),
                     solver.getObjectiveManager().isOptimization() ?
                             solver.getObjectiveManager().getBestSolutionValue().intValue() :
@@ -286,7 +287,8 @@ public class Datas {
                     solver.getNodeCount(),
                     solver.getFailCount(),
                     solver.getRestartCount(),
-                    solver.getSearchState()
+                    solver.getSearchState(),
+                    RegParser.lpStatisticsAsJson(model)
             );
         }
         if (level.is(Level.IRACE)) {

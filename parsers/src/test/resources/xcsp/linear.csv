@@ -1,0 +1,72 @@
+#dir;name;solutions;best;nodes;fails
+#
+# Known failures with -lr OJALGO (as of 2026-05-21), both reproduced with the rc
+# filter disabled inside PropSimplex.propagate (so neither is caused by the
+# reduced-cost loop or the obj-bound update):
+#
+# - Mapping-full2x2_mp3 (basics): search terminates at the root with 0 Nodes /
+#   1 Fail / 0 Solutions. PropSimplex's LP relaxation returns INFEASIBLE on the
+#   first call, before any filter math runs. Bug is upstream in the LP build —
+#   either a constraint's addLinearExpression emits a wrong-sign / wrong-RHS row,
+#   or the variable bounds pushed in via range() exclude the feasible region.
+#   Reported best=10001 is just obj's initial UB sentinel from the objective
+#   manager (no solution was ever found).
+#
+# - CoinsGrid-12-06_c22 (linear): 20s timeout (STOPPED, not a wrong answer).
+#   Pruning is too weak for this instance at the current LP-filter strength;
+#   not blocking correctness.
+#
+linear;CoinsGrid-08-04_c22.xml.lzma;52;80;8334;6206
+linear;CoinsGrid-12-06_c22.xml.lzma;135;420;0;0
+linear;CoinsGrid-16-08_c22.xml.lzma;201;1344;0;0
+linear;CoinsGrid-22-10_c22.xml.lzma;0;3532;0;0
+linear;Fortress1-03_c25.xml.lzma;0;459518;0;0
+linear;Fortress1-04_c25.xml.lzma;0;649400;0;0
+linear;Fortress1-05_c25.xml.lzma;0;1079078;0;0
+linear;Fortress1-06_c25.xml.lzma;0;1059124;0;0
+linear;HCPizza-10-10-2-6-00_c23.xml.lzma;35;100;0;0
+linear;HCPizza-12-12-2-6-00_c23.xml.lzma;0;141;0;0
+linear;HCPizza-12-12-2-6-01_c23.xml.lzma;0;144;0;0
+linear;HCPizza-12-12-2-6-02_c23.xml.lzma;0;144;0;0
+linear;Cargo-01-0s-1913_c24.xml.lzma;158;0;0;0
+linear;Cargo-02-0s-1139_c24.xml.lzma;194;25;0;0
+linear;Cargo-04-1s-626_c24.xml.lzma;140;714;0;0
+linear;Cargo-05-1s-954_c24.xml.lzma;0;2883;0;0
+linear;ClockTriplet-03-12_c22.xml.lzma;0;21;0;0
+linear;ClockTriplet-05-15_c22.xml.lzma;0;41;0;0
+linear;ClockTriplet-07-15_c22.xml.lzma;0;60;0;0
+linear;ClockTriplet-07-20_c22.xml.lzma;0;77;0;0
+#basics;Auction-cnt-example_c18.xml.lzma;3;54;9;4
+#basics;Auction-sum-example_c18.xml.lzma;3;54;9;4
+#basics;BusScheduling-cnt-t1.xml.lzma;1;7;185;174
+#basics;ChessboardColoration-07-07.xml.lzma;26;2;8434;7256
+#basics;CrosswordDesign-03-4-rom_c18.xml.lzma;5;12;66;56
+#basics;Cutstock-small.xml.lzma;2;4;21;18
+#basics;Fapp-m2s-ex2_c18.xml.lzma;16;13871;282;180
+#basics;Filters-dct_2_3.xml.lzma;19;16;2051;1100
+#basics;FlexibleJobshop-easy01.xml.lzma;31;253;262;171
+#basics;Furniture.xml.lzma;1;603;33;32
+#basics;GraphColoring-3-fullins-4.xml.lzma;11;6;101587;76903
+#basics;GraphColoring-qwhdec-o5-h10-1.xml.lzma;1;4;1;0
+#basics;Knapsack-30-100-00.xml.lzma;39;709;46790;38340
+#basics;Mapping-full2x2_mp3.xml.lzma;1;1100;1345;1203
+#basics;Mario-easy-4.xml.lzma;16;545;9345;8664
+#basics;MSPSP-easy_01.xml.lzma;14;26;1816;800
+#basics;NFC-12_2_10.xml.lzma;31;848;173;108
+#basics;NFC-12_2_5.xml.lzma;14;1074;76;49
+#basics;Opd-07-007-003.xml.lzma;3;1;92;76
+#basics;Pb-gr-05.xml.lzma;3;11;232;212
+#basics;PeacableArmies-m1-05_c18.xml.lzma;5;4;6482;5148
+#basics;Rcpsp-j30-01-01_c18.xml.lzma;7;43;204;175
+#basics;Rlfap-graph-04-opt_c18.xml.lzma;5;394;1492;801
+#basics;SteelMillSlab-m1-simple_c18.xml.lzma;5;0;190;161
+#basics;StillLife-03-06.xml.lzma;5;10;424;381
+#basics;StillLife-wastage-03.xml.lzma;3;6;23;18
+#basics;Tal-01_c18.xml.lzma;2;6;11;8
+#basics;TeamAssignment-data1_4_6.xml.lzma;20;2948;11657;10545
+#basics;TemplateDesign-m1-1_c18.xml.lzma;2;2;133;129
+#basics;TemplateDesign-m1s-1_c18.xml.lzma;1;2;10;9
+#basics;testObjective1.xml.lzma;2;11;8;5
+#basics;Tpp-3-3-20-1.xml.lzma;9;126;264;216
+#basics;TravelingTournament-a3-galaxy04_c18.xml.lzma;9;416;3843;3502
+#basics;Warehouse-opl.xml.lzma;19;383;128;86

@@ -514,4 +514,26 @@ public class VariableUtils {
     public static boolean isReal(Variable var) {
         return (var.getTypeAndKind() & Variable.REAL) != 0;
     }
+
+    /**
+     * Computes a hash that depends solely on the current domains of the given variables.
+     * Two calls with variables having identical domains (in the same order) produce the same value.
+     *
+     * @param vars array of integer variables
+     * @return a long hash of the domains
+     */
+    public static long domainHash(IntVar... vars) {
+        long h = 1;
+        for (IntVar var : vars) {
+            int v = var.getLB();
+            int ub = var.getUB();
+            while (v <= ub) {
+                h = h * 31 + v;
+                v = var.nextValue(v);
+                if (v == Integer.MAX_VALUE) break;
+            }
+            h = h * 31 + 0x1F1F1F; // separator between variables
+        }
+        return h;
+    }
 }

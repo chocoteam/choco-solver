@@ -6,6 +6,8 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
+import gnu.trove.map.hash.TObjectIntHashMap;
+import org.chocosolver.lp.ILinearRelaxation;
 import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
@@ -134,4 +136,31 @@ public class PropTimesNaive extends Propagator<IntVar> {
         return Reason.undef();
     }
 
+    /**
+     * The McCormick envelope of {@code z = x * y} on the box given by the current bounds of {@code x} and
+     * {@code y}, which is valid since the LP is built at the root node:
+     * <pre>
+     * z >= xl * y + yl * x - xl * yl        z <= xu * y + yl * x - xu * yl
+     * z >= xu * y + yu * x - xu * yu        z <= xl * y + yu * x - xl * yu
+     * </pre>
+     */
+    @Override
+    public int addLinearExpression(ILinearRelaxation lp, TObjectIntHashMap<IntVar> vmap) {
+        long xl = v0.getLB(), xu = v0.getUB(), yl = v1.getLB(), yu = v1.getUB();
+        // x * ya + y * xa - z <= xa * ya, for the lower envelope; z - x * ya - y * xa <= -xa * ya, for the upper one
+        addRow(lp, vmap, yl, xl, true);
+        addRow(lp, vmap, yu, xu, true);
+        addRow(lp, vmap, yl, xu, false);
+        addRow(lp, vmap, yu, xl, false);
+        return 4;
+    }
+
+    private void addRow(ILinearRelaxation lp, TObjectIntHashMap<IntVar> vmap, long ya, long xa, boolean below) {
+        // below: z >= xa * y + ya * x - xa * ya; otherwise: z <= xa * y + ya * x - xa * ya
+        int sign = below ? 1 : -1;
+        ILinearRelaxation.RowMutator row = lp.addInequalityConstraint(sign * (double) (xa * ya));
+        row.add(vmap.get(v0), sign * (double) ya);
+        row.add(vmap.get(v1), sign * (double) xa);
+        row.add(vmap.get(v2), -sign);
+    }
 }

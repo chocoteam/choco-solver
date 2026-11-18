@@ -6,6 +6,8 @@
  */
 package org.chocosolver.solver.constraints.reification;
 
+import gnu.trove.map.hash.TObjectIntHashMap;
+import org.chocosolver.lp.ILinearRelaxation;
 import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
@@ -156,5 +158,18 @@ public class PropXinSHalfReif extends Propagator<IntVar> {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public int addLinearExpression(ILinearRelaxation lp, TObjectIntHashMap<IntVar> vmap) {
+        // b => x in S, relaxed as b => min(S) <= x <= max(S), with a big-M taken from the bounds of the variables
+        if (set.isEmpty()) {
+            // b => false
+            ILinearRelaxation.RowMutator row = lp.addInequalityConstraint(0);
+            row.add(vmap.get(b), 1);
+            return 1;
+        }
+        return ILinearRelaxation.addImpliedInequality(lp, vmap, b, new IntVar[]{var}, new int[]{1}, set.max())
+                + ILinearRelaxation.addImpliedInequality(lp, vmap, b, new IntVar[]{var}, new int[]{-1}, -set.min());
     }
 }

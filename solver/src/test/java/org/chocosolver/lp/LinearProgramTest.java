@@ -6,6 +6,8 @@
  */
 package org.chocosolver.lp;
 
+import org.ojalgo.optimisation.*;
+import org.ojalgo.optimisation.linear.LinearSolver;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.NoInjection;
@@ -245,10 +247,14 @@ public class LinearProgramTest {
         double[][] A = {
                 {1, -1},
                 {-1, -1},
-                {-1, 4}
+                {-1, 4},
+                {1, 0},
+                {-1, 0},
+                {0, 1},
+                {0, -1}
         };
-        double[] b = {8, -3, 2};
-        LinearProgram lp = new LinearProgram(A, b, c);
+        double[] b = {8, -3, 2, 12, 0, 4, 0};
+        LinearProgram lp = new LinearProgram(A, b, c, true);
         Assert.assertEquals(lp.simplex(), LinearProgram.Status.FEASIBLE);
         Assert.assertEquals(lp.value(0), 11.333333333333334, 1e-8);
         Assert.assertEquals(lp.value(1), 3.3333333333333335, 1e-8);
@@ -509,11 +515,75 @@ public class LinearProgramTest {
         }
     }
 
+    public static void testojAlgo(double[][] A, double[] b, double[] c, double optimal) {
+        ExpressionsBasedModel lpModel = new ExpressionsBasedModel(
+                //        new Optimisation.Options().linear(new LinearSolver.Configuration().primal())
+        );
+        lpModel.options.debug(Optimisation.Solver.class);
+        Variable[] vars = new Variable[c.length];
+        for (int i = 0; i < c.length; i++) {
+            vars[i] = lpModel.addVariable("x" + i).lower(0.);
+        }
+        for (int i = 0; i < A.length; i++) {
+            Expression exp = lpModel.addExpression("c" + i);
+            for (int j = 0; j < c.length; j++) {
+                exp.set(vars[j], A[i][j]);
+            }
+            exp.upper(b[i]);
+        }
+        for (int j = 0; j < c.length; j++) {
+            vars[j].weight(c[j]);
+        }
+        Optimisation.Result result = lpModel.maximise();
+        System.out.println("value = " + result.getValue());
+        if (!Double.isNaN(optimal)) {
+            Assert.assertTrue(result.getState().isFeasible());
+            Assert.assertEquals(result.getValue(), optimal, 1e-8);
+            for (int i = 0; i < vars.length; i++)
+                System.out.println("x[" + i + "] = " + result.get(i).doubleValue());
+        } else {
+            Assert.assertTrue(result.getState().isFailure());
+        }
+    }
+
+    /**
+     * The same LP, solved with the dual simplex of a {@link LinearSolver} built directly, as {@link OjAlgoRelaxation}
+     * does.
+     */
+    public static void testojAlgo2(double[][] A, double[] b, double[] c, double optimal) {
+        // the builder minimises: maximise c.x by minimising -c.x
+        double[] negated = new double[c.length];
+        for (int j = 0; j < c.length; j++) {
+            negated[j] = -c[j];
+        }
+        LinearSolver.Builder builder = LinearSolver.newBuilder(negated);
+        for (int i = 0; i < A.length; i++) {
+            org.ojalgo.structure.Mutate1D row = builder.inequality(b[i]);
+            for (int j = 0; j < c.length; j++) {
+                row.set(j, A[i][j]);
+            }
+        }
+        for (int j = 0; j < c.length; j++) {
+            builder.range(j, 0., Double.POSITIVE_INFINITY);
+        }
+        Optimisation.Options options = new Optimisation.Options();
+        options.linear().dual();
+        Optimisation.Result result = builder.build(options).solve();
+        if (!Double.isNaN(optimal)) {
+            Assert.assertTrue(result.getState().isFeasible());
+            Assert.assertEquals(-result.getValue(), optimal, 1e-8);
+        } else {
+            Assert.assertTrue(result.getState().isFailure());
+        }
+    }
+
     @DataProvider
     public Object[][] algo() throws NoSuchMethodException {
         return new Object[][]{
                 {LinearProgramTest.class.getDeclaredMethod("testTwoPhaseSimplex", double[][].class, double[].class, double[].class, double.class)},
-                {LinearProgramTest.class.getDeclaredMethod("testSimplex", double[][].class, double[].class, double[].class, double.class)}
+                {LinearProgramTest.class.getDeclaredMethod("testSimplex", double[][].class, double[].class, double[].class, double.class)},
+                {LinearProgramTest.class.getDeclaredMethod("testojAlgo", double[][].class, double[].class, double[].class, double.class)},
+                {LinearProgramTest.class.getDeclaredMethod("testojAlgo2", double[][].class, double[].class, double[].class, double.class)}
         };
     }
 
@@ -917,4 +987,107 @@ public class LinearProgramTest {
         method.invoke(null, lp.getA(), lp.getB(), lp.getC(), v);
     }
 
+    @Test(groups = "1s", dataProvider = "algo")
+    public void test9(@NoInjection Method method) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException {
+        String strLp = "Maximize obj: +0.0 x1 +0.0 x2 +0.0 x3 +0.0 x4 +0.0 x5 +0.0 x6 +0.0 x7 +0.0 x8 +0.0 x9 +1.0 x10\n" +
+                "Subject to\n" +
+                " c1: -1.0 x1 +0.0 x2 +0.0 x3 +0.0 x4 +0.0 x5 +0.0 x6 +0.0 x7 +0.0 x8 +0.0 x9 +0.0 x10 <= 0.0\n" +
+                " c2: 1.0 x1 +0.0 x2 +0.0 x3 +0.0 x4 +0.0 x5 +0.0 x6 +0.0 x7 +0.0 x8 +0.0 x9 +0.0 x10 <= 1.0\n" +
+                " c3: 0.0 x1 -1.0 x2 +0.0 x3 +0.0 x4 +0.0 x5 +0.0 x6 +0.0 x7 +0.0 x8 +0.0 x9 +0.0 x10 <= 0.0\n" +
+                " c4: 0.0 x1 +1.0 x2 +0.0 x3 +0.0 x4 +0.0 x5 +0.0 x6 +0.0 x7 +0.0 x8 +0.0 x9 +0.0 x10 <= 1.0\n" +
+                " c5: 0.0 x1 +0.0 x2 -1.0 x3 +0.0 x4 +0.0 x5 +0.0 x6 +0.0 x7 +0.0 x8 +0.0 x9 +0.0 x10 <= 0.0\n" +
+                " c6: 0.0 x1 +0.0 x2 +1.0 x3 +0.0 x4 +0.0 x5 +0.0 x6 +0.0 x7 +0.0 x8 +0.0 x9 +0.0 x10 <= 1.0\n" +
+                " c7: 0.0 x1 +0.0 x2 +0.0 x3 -1.0 x4 +0.0 x5 +0.0 x6 +0.0 x7 +0.0 x8 +0.0 x9 +0.0 x10 <= 0.0\n" +
+                " c8: 0.0 x1 +0.0 x2 +0.0 x3 +1.0 x4 +0.0 x5 +0.0 x6 +0.0 x7 +0.0 x8 +0.0 x9 +0.0 x10 <= 1.0\n" +
+                " c9: 0.0 x1 +0.0 x2 +0.0 x3 +0.0 x4 -1.0 x5 +0.0 x6 +0.0 x7 +0.0 x8 +0.0 x9 +0.0 x10 <= 0.0\n" +
+                " c10: 0.0 x1 +0.0 x2 +0.0 x3 +0.0 x4 +1.0 x5 +0.0 x6 +0.0 x7 +0.0 x8 +0.0 x9 +0.0 x10 <= 1.0\n" +
+                " c11: 0.0 x1 +0.0 x2 +0.0 x3 +0.0 x4 +0.0 x5 -1.0 x6 +0.0 x7 +0.0 x8 +0.0 x9 +0.0 x10 <= 0.0\n" +
+                " c12: 0.0 x1 +0.0 x2 +0.0 x3 +0.0 x4 +0.0 x5 +1.0 x6 +0.0 x7 +0.0 x8 +0.0 x9 +0.0 x10 <= 1.0\n" +
+                " c13: 0.0 x1 +0.0 x2 +0.0 x3 +0.0 x4 +0.0 x5 +0.0 x6 -1.0 x7 +0.0 x8 +0.0 x9 +0.0 x10 <= 0.0\n" +
+                " c14: 0.0 x1 +0.0 x2 +0.0 x3 +0.0 x4 +0.0 x5 +0.0 x6 +1.0 x7 +0.0 x8 +0.0 x9 +0.0 x10 <= 0.0\n" +
+                " c15: 0.0 x1 +0.0 x2 +0.0 x3 +0.0 x4 +0.0 x5 +0.0 x6 +0.0 x7 -1.0 x8 +0.0 x9 +0.0 x10 <= 0.0\n" +
+                " c16: 0.0 x1 +0.0 x2 +0.0 x3 +0.0 x4 +0.0 x5 +0.0 x6 +0.0 x7 +1.0 x8 +0.0 x9 +0.0 x10 <= 0.0\n" +
+                " c17: 0.0 x1 +0.0 x2 +0.0 x3 +0.0 x4 +0.0 x5 +0.0 x6 +0.0 x7 +0.0 x8 -1.0 x9 +0.0 x10 <= 0.0\n" +
+                " c18: 0.0 x1 +0.0 x2 +0.0 x3 +0.0 x4 +0.0 x5 +0.0 x6 +0.0 x7 +0.0 x8 +1.0 x9 +0.0 x10 <= 0.0\n" +
+                " c19: 0.0 x1 +0.0 x2 +0.0 x3 +0.0 x4 +0.0 x5 +0.0 x6 +0.0 x7 +0.0 x8 +0.0 x9 -1.0 x10 <= -1.0\n" +
+                " c20: 0.0 x1 +0.0 x2 +0.0 x3 +0.0 x4 +0.0 x5 +0.0 x6 +0.0 x7 +0.0 x8 +0.0 x9 +1.0 x10 <= 6.0\n" +
+                " c21: 1.0 x1 +1.0 x2 +1.0 x3 +0.0 x4 +0.0 x5 +0.0 x6 +0.0 x7 +0.0 x8 +0.0 x9 +0.0 x10 <= 2.0\n" +
+                " c22: 0.0 x1 +0.0 x2 +1.0 x3 +1.0 x4 +1.0 x5 +0.0 x6 +0.0 x7 +0.0 x8 +0.0 x9 +0.0 x10 <= 2.0\n" +
+                " c23: 1.0 x1 +1.0 x2 +0.0 x3 +0.0 x4 +0.0 x5 +1.0 x6 +0.0 x7 +0.0 x8 +0.0 x9 +0.0 x10 <= 2.0\n" +
+                " c24: 0.0 x1 +1.0 x2 +0.0 x3 +0.0 x4 +1.0 x5 +1.0 x6 +0.0 x7 +0.0 x8 +0.0 x9 +0.0 x10 <= 2.0\n" +
+                " c25: 1.0 x1 +0.0 x2 +0.0 x3 +1.0 x4 +0.0 x5 +1.0 x6 +0.0 x7 +0.0 x8 +0.0 x9 +0.0 x10 <= 2.0\n" +
+                " c26: -1.0 x1 -1.0 x2 -1.0 x3 -1.0 x4 -1.0 x5 -1.0 x6 +0.0 x7 +0.0 x8 +0.0 x9 +1.0 x10 <= 0.0\n" +
+                " c27: 0.0 x1 +0.0 x2 +0.0 x3 +0.0 x4 +0.0 x5 +0.0 x6 +0.0 x7 +0.0 x8 +0.0 x9 +0.0 x10 <= 0.0\n" +
+                "End";
+        double v = 4.;
+        LinearProgram lp = LinearProgram.parseLPFromString(strLp);
+        method.invoke(null, lp.getA(), lp.getB(), lp.getC(), v);
+    }
+
+
+    @Test(groups = "1s")
+    public void testDynamicBoundsUpdate() {
+        ExpressionsBasedModel model = new ExpressionsBasedModel();
+        // 1. Definition: Maximise x + y
+        Variable x = model.addVariable("x").weight(1.0).lower(0.0);
+        Variable y = model.addVariable("y").weight(1.0).lower(0.0);
+
+        // Constraint: x + y <= 10
+        Expression c1 = model.addExpression("c1").upper(10.0);
+        c1.set(x, 1.0).set(y, 1.0);
+
+        // First run: x + y <= 10, so max = 10
+        Optimisation.Result result0 = model.maximise();
+        System.out.println(result0);
+        Assert.assertEquals(result0.getValue(), 10.0, 1e-8);
+        Assert.assertEquals(result0.getValue(), 10.0, 1e-8);
+
+        // Check individual values
+        Assert.assertEquals(result0.get(0).doubleValue(), 0.0, 1e-8); // x
+        Assert.assertEquals(result0.get(1).doubleValue(), 10.0, 1e-8); // y
+
+        // 2. DYNAMIC MODIFICATION
+        // Add an upper bound on x: x <= 3
+        // New max should be: x=3, y=7 => 10 (no change in objective)
+        ExpressionsBasedModel m2 = model.copy();
+        m2.getVariable(0).upper(3.0);
+        Optimisation.Result result1 = m2.maximise();
+        System.out.println("Value after bounds modification: " + result1.getValue());
+        Assert.assertEquals(result1.getValue(), 10.0, 1e-8);
+
+        // Check individual values
+        Assert.assertEquals(result1.get(0).doubleValue(), 0.0, 1e-8); // x
+        Assert.assertEquals(result1.get(1).doubleValue(), 10.0, 1e-8); // y
+
+        // 3. SECOND MODIFICATION
+        // Restrict y: y <= 4
+        // New max should be: x=3, y=4 => 7
+        ExpressionsBasedModel m3 = m2.copy();
+        m3.getVariable(1).upper(4.0);
+        Optimisation.Result result2 = m3.maximise();
+        System.out.println(result2);
+
+        System.out.println("Value after bounds modification: " + result2.getValue());
+        Assert.assertEquals(result2.getValue(), 7.0, 1e-8);
+
+        // Check individual values
+        Assert.assertEquals(result2.get(0).doubleValue(), 3.0, 1e-8); // x
+        Assert.assertEquals(result2.get(1).doubleValue(), 4.0, 1e-8); // y
+
+        // 4. THIRD MODIFICATION
+        // Relax y: y <= 10
+        // New max should be: x=3, y=7 => 10
+        ExpressionsBasedModel m4 = m2.copy();
+        m4.getVariable(1).upper(100.0);
+        model.relax();
+        Optimisation.Result result4 = m4.maximise();
+        System.out.println(result4);
+
+        System.out.println("Value after bounds modification: " + result4.getValue());
+        Assert.assertEquals(result4.getValue(), 10.0, 1e-8);
+
+        // Check individual values
+        Assert.assertEquals(result4.get(0).doubleValue(), 0.0, 1e-8); // x
+        Assert.assertEquals(result4.get(1).doubleValue(), 10.0, 1e-8); // y
+    }
 }

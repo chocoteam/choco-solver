@@ -9,6 +9,17 @@ NEXT MILESTONE
 
 ### Major features:
 
+#### Linear relaxation
+- New option `-lr OJALGO` (`SettingsBuilder#setLinearRelaxation`, also offered by the MiniZinc launcher, off by default): a global propagator, `PropSimplex`, solves a linear relaxation of the model with [ojAlgo](https://github.com/optimatika/ojAlgo). An infeasible LP fails, its optimal value bounds the objective, and its reduced costs filter the bounds of the other variables. `OJALGO_EBM` uses ojAlgo's modelling API instead, slower but easier to inspect
+- Constraints give their linear form through `Propagator#addLinearExpression`. Linearised so far: `arithm`, `sum` and `scalar`, `min` and `max`, `allDifferent` (bounds on the sum), `times` (McCormick envelope), `element` on constants (convex hull), half-reified `x op c`, `x op y` and `x in S` (big-M). Reified constraints are left out
+- The LP is built once per resolution, at the root node. Constraints posted during the search are ignored; if a constraint is unposted during the search, the LP is left aside until the next resolution (`Model#getNbUnpostedCstrs()`)
+- By default, the LP is solved less and less often while it deduces nothing (exponential backoff, `choco.lp.frequency=backoff|always`, `choco.lp.backoffMax`)
+- With lazy clause generation, every deduction is explained: by the dual solution for the objective bound and the filtered bounds, by the Farkas certificate of ojAlgo (checked before use) for an infeasible LP
+- The JSON output of the parsers ends with the statistics of the relaxation (`"lp"` entry)
+- Fine-tuning of the ojAlgo backend through system properties: `choco.lp.ojalgo.solveTimeLimit`, `solveIterationFactor`, `sparse`, `certificate`, `confirmInfeasible`, `diagnose`
+- ojAlgo (57.6.2) is an **optional** dependency of choco-solver: to use `-lr` from the library, add `org.ojalgo:ojalgo` to the classpath (with modules, to the module path with `--add-modules ojalgo`). choco-parsers and its jars include it
+- Another LP backend can be plugged with `new PropSimplex(model, factory)`
+
 #### Backtrackable memory
 - Fix the bounds of one-word bit sets (#934): 32-bit range operations accept the exclusive end `32`, and 64-bit writes reject indices and ranges beyond the word instead of modifying unrelated bits
 

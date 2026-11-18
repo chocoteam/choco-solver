@@ -6,6 +6,8 @@
  */
 package org.chocosolver.solver.constraints.binary.element;
 
+import gnu.trove.map.hash.TObjectIntHashMap;
+import org.chocosolver.lp.ILinearRelaxation;
 import org.chocosolver.memory.IStateBool;
 import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
@@ -273,5 +275,29 @@ public class PropElementIn extends Propagator<IntVar> {
 	@Override
 	public String toString() {
 		return "elementIn(" + this.result + " = <{},{}...> [" + this.index + "])";
+	}
+
+	/**
+	 * The convex hull of the pairs (index, value) that the current domains allow, which is valid since the LP is
+	 * built at the root node.
+	 */
+	@Override
+	public int addLinearExpression(ILinearRelaxation lp, TObjectIntHashMap<IntVar> vmap) {
+		gnu.trove.list.array.TLongArrayList xs = new gnu.trove.list.array.TLongArrayList();
+		gnu.trove.list.array.TLongArrayList ys = new gnu.trove.list.array.TLongArrayList();
+		int ub = index.getUB();
+		for (int i = index.getLB(); i <= ub; i = index.nextValue(i)) {
+			if (i < 0 || i >= values.length) {
+				continue;
+			}
+			IntIterableSet set = values[i];
+			for (int v = set.nextValue(Integer.MIN_VALUE); v < Integer.MAX_VALUE; v = set.nextValue(v)) {
+				if (result.contains(v)) {
+					xs.add(i);
+					ys.add(v);
+				}
+			}
+		}
+		return ILinearRelaxation.addConvexHull(lp, vmap, index, result, xs.toArray(), ys.toArray(), xs.size());
 	}
 }

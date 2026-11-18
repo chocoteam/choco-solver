@@ -6,6 +6,7 @@
  */
 package org.chocosolver.solver;
 
+import org.chocosolver.lp.ILinearRelaxation;
 import org.chocosolver.memory.EnvironmentBuilder;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.ISatFactory;
@@ -258,6 +259,15 @@ public class SettingsBuilder {
                     "When set to 2, recursive minimization is applied (default is 0).")
     private int satCCMinMode = 0;
 
+    public static final String LINEAR_RELAXATION = "linearRelaxation";
+    @Option(name = "--linearRelaxation",
+            aliases = {"--model.linearRelaxation", "-lr"},
+            usage = "Enable linear relaxation of the model. " +
+                    "When set to 'OJALGO', the ojAlgo library is used as the LP solver. " +
+                    "When set to 'OJALGO_EBM', ojAlgo is used through its modelling API, which is slower but easier to inspect. " +
+                    "When not set, linear relaxation is disabled (default is disabled).")
+    private ILinearRelaxation.Solver linearRelaxation = null;
+
     public static final String LCG_EXTRACT_FROM_VARIABLES_ON_SOLUTION = "lcgExtractFromVariablesOnSolution";
     @Option(name = "--lcgExtractFromVariablesOnSolution",
             handler = org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler.class,
@@ -454,6 +464,9 @@ public class SettingsBuilder {
                     break;
                 case SAT_CC_MIN_MODE:
                     this.setSatCCMinMode(Integer.parseInt(value));
+                    break;
+                case LINEAR_RELAXATION:
+                    this.setLinearRelaxation(ILinearRelaxation.Solver.valueOf(value));
                     break;
                 case LCG_EXTRACT_FROM_VARIABLES_ON_SOLUTION:
                     this.setLcgExtractFromVariablesOnSolution(Boolean.parseBoolean(value));
@@ -1143,6 +1156,26 @@ public class SettingsBuilder {
      */
     public boolean getIbexRestoreRounding() {
         return ibexRestoreRounding;
+    }
+
+    /**
+     * @return the linear relaxation solver to use, or {@code null} if linear relaxation is disabled.
+     */
+    public ILinearRelaxation.Solver getLinearRelaxation() {
+        return linearRelaxation;
+    }
+
+    /**
+     * Set the linear relaxation solver to use.
+     * When set to a non-null value, a linear relaxation propagator ({@link org.chocosolver.lp.PropSimplex})
+     * will be automatically posted on the model.
+     *
+     * @param linearRelaxation the LP solver to use, or {@code null} to disable linear relaxation
+     * @return the current instance
+     */
+    public SettingsBuilder setLinearRelaxation(ILinearRelaxation.Solver linearRelaxation) {
+        this.linearRelaxation = linearRelaxation;
+        return this;
     }
 
     /**

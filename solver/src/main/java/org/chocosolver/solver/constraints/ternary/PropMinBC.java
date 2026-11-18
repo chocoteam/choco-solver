@@ -6,6 +6,8 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
+import gnu.trove.map.hash.TObjectIntHashMap;
+import org.chocosolver.lp.ILinearRelaxation;
 import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
@@ -96,4 +98,14 @@ public class PropMinBC extends Propagator<IntVar> {
         return BST.toString() + ".MIN(" + v1.toString() + "," + v2.toString() + ")";
     }
 
+    @Override
+    public int addLinearExpression(ILinearRelaxation lp, TObjectIntHashMap<IntVar> vmap) {
+        // x = min(y, z)  relaxed as:  x - y <= 0  and  x - z <= 0
+        for (int i = 1; i < 3; i++) {
+            ILinearRelaxation.RowMutator row = lp.addInequalityConstraint(0);
+            row.add(vmap.get(vars[0]), 1);
+            row.add(vmap.get(vars[i]), -1);
+        }
+        return 2;
+    }
 }

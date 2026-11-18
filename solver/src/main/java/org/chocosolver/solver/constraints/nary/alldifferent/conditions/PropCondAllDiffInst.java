@@ -6,6 +6,9 @@
  */
 package org.chocosolver.solver.constraints.nary.alldifferent.conditions;
 
+import gnu.trove.map.hash.TIntDoubleHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
+import org.chocosolver.lp.ILinearRelaxation;
 import org.chocosolver.solver.constraints.nary.alldifferent.PropAllDiffInst;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -86,5 +89,10 @@ public class PropCondAllDiffInst extends PropAllDiffInst {
 			return ESat.TRUE;
 		}
 		return ESat.UNDEFINED;
+    }
+
+    @Override
+    public int addLinearExpression(ILinearRelaxation lp, TObjectIntHashMap<IntVar> vmap) {
+        return 0;
     }
 }

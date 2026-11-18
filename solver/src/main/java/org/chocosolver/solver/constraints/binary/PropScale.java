@@ -6,6 +6,9 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
+import gnu.trove.map.hash.TIntDoubleHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
+import org.chocosolver.lp.ILinearRelaxation;
 import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
@@ -78,6 +81,15 @@ public class PropScale extends Propagator<IntVar> {
                 propagate(evtmask);
             }
         }
+    }
+
+    @Override
+    public int addLinearExpression(ILinearRelaxation lp, TObjectIntHashMap<IntVar> vmap) {
+        // x * Y = z  ⟺  Y·x - z == 0
+        ILinearRelaxation.RowMutator row = lp.addEqualityConstraint(0);
+        row.add(vmap.get(vars[0]), Y);
+        row.add(vmap.get(vars[1]), -1);
+        return 1;
     }
 
     @Override

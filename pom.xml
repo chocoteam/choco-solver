@@ -28,6 +28,7 @@
     </licenses>
 
     <properties>
+        <ojalgo.version>57.6.2</ojalgo.version>
         <argLine>-Djava.library.path=/usr/local/lib:/usr/local/lib/ibex/3rd</argLine>
         <java.version>17</java.version>
         <main_dir>./</main_dir>

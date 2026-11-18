@@ -6,6 +6,9 @@
  */
 package org.chocosolver.solver.constraints.unary;
 
+import gnu.trove.map.hash.TIntDoubleHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
+import org.chocosolver.lp.ILinearRelaxation;
 import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
@@ -54,4 +57,12 @@ public class PropEqualXC extends Propagator<IntVar> {
         return vars[0].getName() + " = " + constant;
     }
 
+
+    @Override
+    public int addLinearExpression(ILinearRelaxation lp, TObjectIntHashMap<IntVar> vmap) {
+        // x == c
+        ILinearRelaxation.RowMutator row = lp.addEqualityConstraint(constant);
+        row.add(vmap.get(vars[0]), 1);
+        return 1;
+    }
 }
