@@ -106,7 +106,10 @@ public class XCSPParser implements XCallbacks2 {
                 .filter(v -> v.degree != 0)
                 .map(x -> mvars.get(x))
                 .toArray(IntVar[]::new);
-        model.addAsGroup(a.id, array);
+        // an empty group would hide the other variables from the round-robin search (#1270)
+        if (array.length > 0) {
+            model.addAsGroup(a.id, array);
+        }
     }
 
     /**

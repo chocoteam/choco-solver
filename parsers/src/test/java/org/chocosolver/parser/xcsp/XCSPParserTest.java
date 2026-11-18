@@ -9,6 +9,8 @@ package org.chocosolver.parser.xcsp;
 import org.chocosolver.parser.ParserException;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -572,5 +574,30 @@ public class XCSPParserTest {
                 }, cc == 0 || cc == 1 || cc == 4 ? vars3 : vars4);
             }
         }
+    }
+
+    @Test(groups = "xcsp")
+    public void testArrayInNoConstraintWithRoundRobinSearch() throws Exception {
+        // #1270: an array involved in no constraint must not stop the search before v is instantiated
+        String xml = "<instance format=\"XCSP3\" type=\"CSP\">\n<variables>\n"
+                + "<array id=\"x\" size=\"[2]\"> 0 1 </array>\n<var id=\"v\"> 0..2 </var>\n"
+                + "</variables>\n<constraints>\n<intension> lt(v,2) </intension>\n</constraints>\n</instance>\n";
+        File file = File.createTempFile("xcsp", ".xml");
+        file.deleteOnExit();
+        Files.writeString(file.toPath(), xml);
+        Model model = new Model();
+        new XCSPParser().model(model, file.getAbsolutePath());
+        // the default search of the XCSP3 command line
+        BlackBoxConfigurator.init().setIntVarStrategy(Search::roundRobinSearch).make(model);
+        Solver solver = model.getSolver();
+        Set<Integer> found = new HashSet<>();
+        while (solver.solve()) {
+            for (IntVar iv : model.retrieveIntVars(true)) {
+                Assert.assertTrue(iv.isInstantiated(), iv.getName() + " is not instantiated");
+            }
+            found.add(model.retrieveIntVars(true)[0].getValue());
+        }
+        Assert.assertEquals(found, Set.of(0, 1));
+        Assert.assertEquals(solver.getSolutionCount(), 2);
     }
 }
