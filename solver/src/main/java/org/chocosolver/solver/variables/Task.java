@@ -14,9 +14,12 @@ import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.solver.variables.view.integer.IntAffineView;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
 
 import java.util.function.Consumer;
 
@@ -127,7 +130,9 @@ public class Task extends Propagator<IntVar> {
     }
 
     public void post() {
-        this.getModel().post(new Constraint("Task relation", this));
+        if (!isPassive()) {
+            this.getModel().post(new Constraint("Task relation", this));
+        }
     }
 
     private Task(IntVar[] vars) {
@@ -167,6 +172,10 @@ public class Task extends Propagator<IntVar> {
         return end;
     }
 
+    public BoolVar getPerformed() {
+        return model.boolVar(true);
+    }
+
     public int getEst() {
         return start.getLB();
     }
@@ -199,8 +208,32 @@ public class Task extends Propagator<IntVar> {
         return start.isInstantiated();
     }
 
+    public boolean isDurationInstantiated() {
+        return duration.isInstantiated();
+    }
+
     public boolean isEndInstantiated() {
         return end.isInstantiated();
+    }
+
+    public boolean isInstantiated() {
+        return isStartInstantiated() && isDurationInstantiated() && isEndInstantiated();
+    }
+
+    public boolean isStartInstantiatedTo(int t) {
+        return start.isInstantiatedTo(t);
+    }
+
+    public boolean isDurationInstantiated(int t) {
+        return duration.isInstantiatedTo(t);
+    }
+
+    public boolean isEndInstantiatedTo(int t) {
+        return end.isInstantiatedTo(t);
+    }
+
+    public boolean isInstantiatedTo(int s, int e) {
+        return isStartInstantiatedTo(s) && isEndInstantiatedTo(e);
     }
 
     public boolean updateEst(int est, ICause cause) throws ContradictionException {
@@ -308,12 +341,31 @@ public class Task extends Propagator<IntVar> {
     }
 
     public boolean updateDuration(int minDuration, int maxDuration, ICause cause, Reason reason) throws ContradictionException {
-        if (duration.updateLowerBound(minDuration, cause, reason)
-            || duration.updateUpperBound(maxDuration, cause, reason)) {
+        boolean updated = duration.updateLowerBound(minDuration, cause, reason);
+        updated |= duration.updateUpperBound(maxDuration, cause, reason);
+        if (updated) {
             propagate();
             return true;
         }
         return false;
+    }
+
+    public boolean removeAllDurationsBut(IntIterableBitSet durationDomain, ICause cause) throws ContradictionException {
+        if (duration.hasEnumeratedDomain() && duration.removeAllValuesBut(durationDomain, cause)) {
+            propagate();
+            return true;
+        } else {
+            int minDuration = Integer.MAX_VALUE;
+            int maxDuration = Integer.MIN_VALUE;
+            ISetIterator iter = durationDomain.iterator();
+            iter.reset();
+            while (iter.hasNext()) {
+                int v = iter.nextInt();
+                minDuration = Math.min(minDuration, v);
+                maxDuration = Math.max(maxDuration, v);
+            }
+            return updateDuration(minDuration, maxDuration, cause);
+        }
     }
 
     public boolean instantiateStartAt(int t, ICause cause) throws ContradictionException {
@@ -356,6 +408,14 @@ public class Task extends Propagator<IntVar> {
         return true;
     }
 
+    public boolean forceToBe(boolean performed, ICause cause) throws ContradictionException {
+        if (performed) {
+            return forceToBePerformed(cause);
+        } else {
+            return forceToBeUnperformed(cause);
+        }
+    }
+
     public boolean forceToBePerformed(ICause cause) throws ContradictionException {
         return false;
     }
@@ -364,13 +424,23 @@ public class Task extends Propagator<IntVar> {
         return false;
     }
 
+    @Deprecated
     public boolean forceToBeOptional(ICause cause) throws ContradictionException {
+        return forceToBeUnperformed(cause);
+    }
+
+    @Deprecated
+    public boolean forceToBeOptional(ICause cause, Reason reason) throws ContradictionException {
+        return forceToBeUnperformed(cause, reason);
+    }
+
+    public boolean forceToBeUnperformed(ICause cause) throws ContradictionException {
         ContradictionException ex = new ContradictionException();
         ex.set(cause, null, "forcing Task to be optional");
         throw ex;
     }
 
-    public boolean forceToBeOptional(ICause cause, Reason reason) throws ContradictionException {
+    public boolean forceToBeUnperformed(ICause cause, Reason reason) throws ContradictionException {
         ContradictionException ex = new ContradictionException();
         ex.set(cause, null, "forcing Task to be optional");
         throw ex;
@@ -399,8 +469,7 @@ public class Task extends Propagator<IntVar> {
                         hasFiltered = updateEst(
                                 end.getLB() - duration.getUB(),
                                 this,
-//                            Reason.r(end.getMinLit(), duration.getMaxLit())
-                                this.r(end.getLELit(end.getLB() - 1), duration.getGELit(duration.getUB() + 1))
+                                this.r(end.getMinLit(), duration.getMaxLit())
                         );
                         hasFiltered |= updateLst(
                                 end.getUB() - duration.getLB(),
@@ -439,18 +508,17 @@ public class Task extends Propagator<IntVar> {
                         hasFiltered |= updateMinDuration(end.getLB() - start.getUB(), this);
                         hasFiltered |= updateMaxDuration(end.getUB() - start.getLB(), this);
                     }
-                    // TODO : add filtering for enumerated domains
                 }
             } while (hasFiltered);
-        }finally {
+        } finally {
             insidePropagation = false;
         }
     }
 
     @Override
     public ESat isEntailed() {
-        if (start.isInstantiated() && duration.isInstantiated() && end.isInstantiated()) {
-            return ESat.eval(start.getValue() + duration.getValue() == end.getValue());
+        if (isInstantiated()) {
+            return ESat.eval(!mayBePerformed() || start.getValue() + duration.getValue() == end.getValue());
         } else {
             return ESat.UNDEFINED;
         }
@@ -475,6 +543,13 @@ public class Task extends Propagator<IntVar> {
     private void propagate() throws ContradictionException {
         if (!insidePropagation) {
             propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
+        }
+    }
+
+    @Override
+    protected void defineIn(Constraint c) throws SolverException {
+        if (getConstraint() == null) {
+            this.constraint = model.voidConstraint();
         }
     }
 }

@@ -43,7 +43,7 @@ public interface IntVar extends ICause, Variable, ArExpression {
     int MIN_INT_BOUND = Integer.MIN_VALUE / 100;
 
     /**
-     * Provide a minimum value for integer variable lower bound.
+     * Provide a maximum value for integer variable upper bound.
      * Do not prevent from overflow, but may avoid it, somehow.
      */
     int MAX_INT_BOUND = Integer.MAX_VALUE / 100;

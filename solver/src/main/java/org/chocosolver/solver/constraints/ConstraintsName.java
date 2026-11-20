@@ -184,4 +184,7 @@ public class ConstraintsName {
 
     public static final String CONDITION = "CONDITION";
 
+    public static final String ALTERNATIVE = "ALTERNATIVE";
+
+    public static final String SPAN = "SPAN";
 }

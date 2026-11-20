@@ -57,7 +57,7 @@ public class SchedulingUtils {
             return height.updateUpperBound(0, cause);
         } else if (isOpt) {
             // if the task is optional and can be set as such
-            return task.forceToBeOptional(cause);
+            return task.forceToBeUnperformed(cause);
         } else {
             ContradictionException ex = new ContradictionException();
             ex.set(cause, task.getStart(), "Task " + task + " should be set optional but it cannot be");

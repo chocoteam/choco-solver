@@ -552,6 +552,36 @@ public interface IVariableFactory extends ISelf<Model> {
     //*************************************************************************************
 
     /**
+     * Creates a task variable, based on an earliest starting time <i>est</i> and a latest completion time <i>lct</i>.
+     *
+     * @param est earliest starting time
+     * @param lct latest completion time
+     * @return a task variable.
+     */
+    default Task taskVar(int est, int lct) {
+        return taskVar(est, lct, false);
+    }
+
+    /**
+     * Creates a task variable, based on an earliest starting time <i>est</i> and a latest completion time <i>lct</i>.
+     *
+     * @param est earliest starting time
+     * @param lct latest completion time
+     * @param optional whether to create an OptionalTask or a Task
+     * @return a task variable.
+     */
+    default Task taskVar(int est, int lct, boolean optional) {
+        IntVar start = ref().intVar(est, lct);
+        IntVar duration = ref().intVar(0, lct - est);
+        IntVar end = ref().intVar(est, lct);
+        if (optional) {
+            return new OptionalTask(start, duration, end, ref().boolVar());
+        } else {
+            return new Task(start, duration, end);
+        }
+    }
+
+    /**
      * Creates a task variable, based on an earliest starting time <i>est</i>, a latest completion time <i>lst</i>,
      * a duration <i>d</i>, an earliest completion time <i>ect</i> and a latest completion time <i>lct</i>
      * such that: start + duration = end.

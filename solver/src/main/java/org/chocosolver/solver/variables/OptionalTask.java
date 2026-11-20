@@ -10,6 +10,8 @@ import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
 
 /**
  * Container representing an optional task:
@@ -60,6 +62,7 @@ public class OptionalTask extends Task {
     public OptionalTask(Model model, int est, int lst, int d, int ect, int lct, BoolVar performed) {
         super(model, est, lst, d, ect, lct);
         this.performed = performed;
+        setState();
     }
 
     /**
@@ -84,6 +87,7 @@ public class OptionalTask extends Task {
     public OptionalTask(IntVar s, int d, BoolVar performed) {
         super(s, d);
         this.performed = performed;
+        setState();
     }
 
     /**
@@ -108,6 +112,7 @@ public class OptionalTask extends Task {
     public OptionalTask(IntVar s, IntVar d, BoolVar performed) {
         super(s, d);
         this.performed = performed;
+        setState();
     }
 
     /**
@@ -134,6 +139,7 @@ public class OptionalTask extends Task {
     public OptionalTask(IntVar s, int d, IntVar e, BoolVar performed) {
         super(s, d, e);
         this.performed = performed;
+        setState();
     }
 
     /**
@@ -160,6 +166,16 @@ public class OptionalTask extends Task {
     public OptionalTask(IntVar s, IntVar d, IntVar e, BoolVar performed) {
         super(s, d, e);
         this.performed = performed;
+        setState();
+    }
+
+    private void setState() {
+        if (performed.getUB() == 0 && (isStateLess() || !isPassive())) {
+            if (isStateLess()) {
+                setActive();
+            }
+            setPassive();
+        }
     }
 
     //***********************************************************************************
@@ -176,6 +192,7 @@ public class OptionalTask extends Task {
         return performed.getLB() == 1;
     }
 
+    @Override
     public BoolVar getPerformed() {
         return this.performed;
     }
@@ -235,6 +252,11 @@ public class OptionalTask extends Task {
     }
 
     @Override
+    public boolean isInstantiated() {
+        return performed.isInstantiated() && (performed.getValue() == 0 || super.isInstantiated());
+    }
+
+    @Override
     public boolean forceToBePerformed(ICause cause) throws ContradictionException {
         return performed.updateLowerBound(1, cause);
     }
@@ -245,12 +267,24 @@ public class OptionalTask extends Task {
     }
 
     @Override
+    @Deprecated
     public boolean forceToBeOptional(ICause cause) throws ContradictionException {
+        return forceToBeUnperformed(cause);
+    }
+
+    @Override
+    @Deprecated
+    public boolean forceToBeOptional(ICause cause, Reason reason) throws ContradictionException {
+        return forceToBeUnperformed(cause, reason);
+    }
+
+    @Override
+    public boolean forceToBeUnperformed(ICause cause) throws ContradictionException {
         return performed.updateUpperBound(0, cause);
     }
 
     @Override
-    public boolean forceToBeOptional(ICause cause, Reason reason) throws ContradictionException {
+    public boolean forceToBeUnperformed(ICause cause, Reason reason) throws ContradictionException {
         return performed.updateUpperBound(0, cause, reason);
     }
 
@@ -333,6 +367,27 @@ public class OptionalTask extends Task {
                 return super.updateDuration(minDuration, maxDuration, cause);
             } else {
                 performed.updateUpperBound(0, cause);
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean removeAllDurationsBut(IntIterableBitSet durationDomain, ICause cause) throws ContradictionException {
+        if (mayBePerformed()) {
+            ISetIterator iter = durationDomain.iterator();
+            iter.reset();
+            int valuesNotInDomain = 0;
+            while (iter.hasNext() && valuesNotInDomain < durationDomain.size()) {
+                int v = iter.nextInt();
+                if (!duration.contains(v)) {
+                    valuesNotInDomain++;
+                }
+            }
+            if (valuesNotInDomain >= durationDomain.size()) {
+                performed.updateUpperBound(0, cause);
+            } else {
+                return super.removeAllDurationsBut(durationDomain, cause);
             }
         }
         return false;
